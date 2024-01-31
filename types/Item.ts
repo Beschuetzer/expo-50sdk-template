@@ -11,8 +11,13 @@ export type Item = {
   frequency?: number;
 };
 
-export type ItemLocation = {
+export type ItemInGroceryList = {
   aisle: string;
+  quantity: number;
+  /**
+   *Something like 'box', 'kg', or 'bottle'
+   **/
+  unit: string;
 } & Item;
 
 

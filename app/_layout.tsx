@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { persistor, store } from '@/state/store'
 import { PersistGate } from 'redux-persist/integration/react';
 import { Text } from '@/components/Themed'
+import { NativeBaseProvider } from "native-base";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -47,7 +48,6 @@ export default function RootLayout() {
 
   return <RootLayoutNav />;
 }
-
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
@@ -55,10 +55,12 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Provider store={store}>
         <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-          </Stack>
+          <NativeBaseProvider>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            </Stack>
+          </NativeBaseProvider>
         </PersistGate>
       </Provider>
     </ThemeProvider>

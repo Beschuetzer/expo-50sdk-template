@@ -7,7 +7,7 @@ import {
   increment,
 } from "@/state/slices/counterSlice";
 import { Text } from "@/components/Themed";
-import { Button } from "./Button";
+import { Button } from "native-base";
 
 export function Counter() {
   const count = useSelector(counterValueSelector);
@@ -15,8 +15,8 @@ export function Counter() {
 
   return (
     <View>
-      <Button onPress={() => dispatch(increment())} title="incrment" />
-      <Button onPress={() => dispatch(decrement())} title="decrement" />
+      <Button onPress={() => dispatch(increment())}>Increment"</Button>
+      <Button onPress={() => dispatch(decrement())}>Decrement"</Button>
       <Text>The count is: {count}</Text>
     </View>
   );

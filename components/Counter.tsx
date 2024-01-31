@@ -15,8 +15,8 @@ export function Counter() {
 
   return (
     <View>
-      <Button onPress={() => dispatch(increment())}>Increment"</Button>
-      <Button onPress={() => dispatch(decrement())}>Decrement"</Button>
+      <Button onPress={() => dispatch(increment())}>Increment</Button>
+      <Button onPress={() => dispatch(decrement())}>Decrement</Button>
       <Text>The count is: {count}</Text>
     </View>
   );

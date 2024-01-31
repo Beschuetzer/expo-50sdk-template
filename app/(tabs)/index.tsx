@@ -1,11 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { View } from '@/components/Themed';
 import { Counter } from '@/components/Counter';
+import { Playground } from '@/components/Playground';
 
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
       <Counter />
+      <Playground />
     </View>
   );
 }

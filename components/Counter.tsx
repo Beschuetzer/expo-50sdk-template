@@ -1,12 +1,12 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { TouchableOpacity, View, Text } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import {
   counterValueSelector,
   decrement,
   increment,
 } from "@/state/slices/counterSlice";
-import type { RootState } from "@/state/store";
+import { Text } from "@/components/Themed";
 
 export function Counter() {
   const count = useSelector(counterValueSelector);
@@ -15,7 +15,7 @@ export function Counter() {
   return (
     <View>
       <TouchableOpacity onPress={() => dispatch(increment())}>
-        <Text>Increment</Text>
+        <Text >Increment</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => dispatch(decrement())}>
         <Text>Decrement</Text>

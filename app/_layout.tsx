@@ -1,25 +1,32 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 
-import { useColorScheme } from '@/components/useColorScheme';
-import { Provider } from 'react-redux';
-import { persistor, store } from '@/state/store'
-import { PersistGate } from 'redux-persist/integration/react';
-import { Text } from '@/components/Themed'
+import { useColorScheme } from "@/components/useColorScheme";
+import { Provider } from "react-redux";
+import { persistor, store } from "@/state/store";
+import { PersistGate } from "redux-persist/integration/react";
+import { Text } from "@/components/Themed";
 import { NativeBaseProvider } from "native-base";
+import { UpcDetailsSheet } from "@/components/UpcDetailsSheet";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
-} from 'expo-router';
+} from "expo-router";
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
+  initialRouteName: "(tabs)",
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -27,7 +34,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
@@ -52,14 +59,24 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Provider store={store}>
         <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
           <NativeBaseProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-            </Stack>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <BottomSheetModalProvider>
+                <Stack>
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="modal"
+                    options={{ presentation: "modal" }}
+                  />
+                </Stack>
+              </BottomSheetModalProvider>
+            </GestureHandlerRootView>
           </NativeBaseProvider>
         </PersistGate>
       </Provider>

@@ -2,12 +2,14 @@ import { StyleSheet } from 'react-native';
 import { View } from '@/components/Themed';
 import { Counter } from '@/components/Counter';
 import { Playground } from '@/components/Playground';
+import { UpcDetailsSheet } from '@/components/UpcDetailsSheet';
 
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
       <Counter />
       <Playground />
+      <UpcDetailsSheet />
     </View>
   );
 }

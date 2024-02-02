@@ -1,7 +1,7 @@
 ## Small Picture
 -setup call to https://world.openfoodfacts.org/api/v0/product/072273487253 and display results in gorham bottom sheet:
---add option to manually enter upc
---add hook to return cached value if present otherwise make call and cache it
+    --finish hook useUpcData
+    --have scanning 
 -add lib react native picker
 -add options drawer (auto save and a backup button which can email a .json file of the items added)
 

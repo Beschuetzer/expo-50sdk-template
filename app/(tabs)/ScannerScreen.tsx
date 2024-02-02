@@ -6,6 +6,8 @@ import { useRequestCameraPermissions } from "@/components/hooks/useRequestCamera
 import { FullscreenSpinner } from "@/components/FullscreenSpinner";
 import { useFocusEffect } from "expo-router";
 import { ManualUpcInput } from "@/components/ManualUpcInput";
+import { useDispatch } from "react-redux";
+import { setLastUpcScanned } from "@/state/slices/generalSlice";
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
@@ -13,11 +15,12 @@ const BarcodeScannerScreen = () => {
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
+  const dispatch = useDispatch();
 
   const handleBarCodeScanned = useCallback((scannedObj: any) => {
     const { data } = scannedObj;
     setScanned(true);
-    alert(`Bar code '${data}' has been scanned!`);
+    dispatch(setLastUpcScanned(data));
   }, []);
 
   const onSwitchCameraPress = useCallback(() => {

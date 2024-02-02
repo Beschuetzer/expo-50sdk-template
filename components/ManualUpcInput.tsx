@@ -1,3 +1,4 @@
+import { setLastUpcScanned } from "@/state/slices/generalSlice";
 import { FontAwesome } from "@expo/vector-icons";
 import {
   Button,
@@ -11,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   GestureResponderEvent,
 } from "react-native";
+import { useDispatch } from "react-redux";
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -28,11 +30,12 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
   const [isValid, setIsValid] = useState(IS_VALID_INITIAL);
   const [value, setValue] = useState<string>(VALUE_INITIAL);
   const theme = useTheme();
+    const dispatch = useDispatch();
 
   const onSearchPress = useCallback((e: GestureResponderEvent) => {
     e.preventDefault();
-    alert("Need to implement this in ManualUpcInput");
-  }, []);
+    dispatch(setLastUpcScanned(value));
+  }, [value]);
 
   const handleSetIsValid = useCallback((value: string) => {
     clearTimeout(timeoutRef.current);
@@ -83,6 +86,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         <Text pl={3} color={isValid ? "black" : "red.900"}>Must be 13 numbers (currently {value.length} chars)</Text>
     </Row>
       <Button
+        isDisabled={!isValid}
         backgroundColor={"secondary.900"}
         borderRadius={0}
         onPress={onSearchPress}

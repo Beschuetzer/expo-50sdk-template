@@ -1,5 +1,5 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import counterReducer from '@/state/slices/counterSlice'
+import counterReducer from "@/state/slices/generalSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
@@ -11,15 +11,15 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   counter: persistReducer(persistConfig, counterReducer),
-})
+});
 
 export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware({
       serializableCheck: false,
-    })
-  }
+    });
+  },
 });
 
 export const persistor = persistStore(store);

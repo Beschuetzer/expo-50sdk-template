@@ -1,6 +1,8 @@
 ## Small Picture
--add libs for gorham bottom sheet and react native picker
--setup call to https://world.openfoodfacts.org/api/v0/product/072273487253 and display results in gorham bottom sheet.
+-setup call to https://world.openfoodfacts.org/api/v0/product/072273487253 and display results in gorham bottom sheet:
+--add option to manually enter upc
+--add hook to return cached value if present otherwise make call and cache it
+-add lib react native picker
 -add options drawer (auto save and a backup button which can email a .json file of the items added)
 
 ## Big Picture

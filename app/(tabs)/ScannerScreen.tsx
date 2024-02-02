@@ -1,16 +1,24 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Camera, CameraType } from "expo-camera";
-import { Button } from "native-base";
+import { Button, Input, View, Row, Text } from "native-base";
 import { useRequestCameraPermissions } from "@/components/hooks/useRequestCameraPermissions";
 import { FullscreenSpinner } from "@/components/FullscreenSpinner";
 import { useFocusEffect } from "expo-router";
+import { ManualUpcInput } from "@/components/ManualUpcInput";
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
   const [scanned, setScanned] = useState(false);
+  const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
+
+  const handleBarCodeScanned = useCallback((scannedObj: any) => {
+    const { data } = scannedObj;
+    setScanned(true);
+    alert(`Bar code '${data}' has been scanned!`);
+  }, []);
 
   const onSwitchCameraPress = useCallback(() => {
     setType((current) =>
@@ -18,10 +26,8 @@ const BarcodeScannerScreen = () => {
     );
   }, []);
 
-  const handleBarCodeScanned = useCallback((scannedObj: any) => {
-    const { data } = scannedObj;
-    setScanned(true);
-    alert(`Bar code '${data}' has been scanned!`);
+  const onManuallyEnter = useCallback(() => {
+    setIsManuallyEntering((current) => !current);
   }, []);
 
   useFocusEffect(
@@ -43,6 +49,15 @@ const BarcodeScannerScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Row space={1}>
+        <Button flex={1} borderRadius={0} onPress={onSwitchCameraPress}>
+          Switch Camera
+        </Button>
+        <Button flex={1} borderRadius={0} onPress={onManuallyEnter}>
+          {isManuallyEntering ? 'Close' : 'Enter 13 digit Upc'}
+        </Button>
+      </Row>
+      <ManualUpcInput isVisible={isManuallyEntering}/>
       {shouldRenderCamera ? (
         <Camera
           style={styles.camera}
@@ -58,7 +73,6 @@ const BarcodeScannerScreen = () => {
           <Text style={styles.scanAgainText}>Tap to Scan Again</Text>
         </TouchableOpacity>
       ) : null}
-      <Button onPress={onSwitchCameraPress}>Switch Camera</Button>
     </View>
   );
 };

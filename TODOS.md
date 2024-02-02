@@ -1,8 +1,9 @@
 ## Small Picture
--add redux persist
 -add options drawer (auto save and a backup button which can email a .json file of the items added)
+-add libs for gorham bottom sheet, barcode scanner, and react native picker
 
 ## Big Picture
+-ability to scan bar codes to add items (if they have already been added; use this api: https://world.openfoodfacts.org/api/v0/product/072273487253)
 -ability to add a "frequency" field which guesses the time before expected next purchase date for each item.  When pulling up a store, the date each item was last in the basket is used to provide recommendaitons for what may be needed this trip (add ability to sort on the date items were last in basket)
 -ability to remove all items
 -gps detection of store you're at when opening the app

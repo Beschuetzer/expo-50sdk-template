@@ -1,7 +1,7 @@
 /**
-*There are many more fields, just using the relevant ones for now.
-*See {@link https://world.openfoodfacts.org/api/v0/product/072273487253 this}.
-**/
+ *There are many more fields, just using the relevant ones for now.
+ *See {@link https://world.openfoodfacts.org/api/v0/product/072273487253 this}.
+ **/
 export type UpcResponse = {
   code: number;
   product: UpcProduct;
@@ -10,6 +10,7 @@ export type UpcResponse = {
 };
 
 export type UpcProduct = {
+  _id: string;
   image_front_small_url?: string;
   image_front_thumb_url?: string;
   image_front_url?: string;

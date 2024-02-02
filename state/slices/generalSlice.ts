@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
-export interface GeneralState {
+export type GeneralState = {
   lastUpcScanned: string;
 }
 
@@ -13,7 +13,7 @@ const initialState: GeneralState = {
 };
 
 export const generalSlice = createSlice({
-  name: "counter",
+  name: "general",
   initialState,
   reducers: {
     resetLastUpcScanned: (state: GeneralState) => {

@@ -1,0 +1,55 @@
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import { RootState } from "../store";
+import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
+
+type Upc = string;
+type UpcProducts = { [key: Upc]: UpcProduct };
+export type ScannerState = {
+  upcProducts: UpcProducts;
+};
+
+const UPC_PRODUCTS_INITIAL = {} as UpcProducts;
+
+const initialState: ScannerState = {
+  upcProducts: UPC_PRODUCTS_INITIAL,
+};
+
+export const scannerSlice = createSlice({
+  name: "scanner",
+  initialState,
+  reducers: {
+    addUpcProduct: (state: ScannerState, action: PayloadAction<UpcProduct>) => {
+      if (!action?.payload || !action.payload._id) {
+        alert(
+          `Unable to add UpcProduct for ${JSON.stringify(
+            action.payload,
+            null,
+            2
+          )}`
+        );
+        return;
+      }
+      state.upcProducts[action.payload._id] = action.payload;
+    },
+    deleteUpcProduct: (state: ScannerState, action: PayloadAction<Upc>) => {
+      if (!action?.payload) {
+        alert(`Unable to dete UpcProduct for ${action.payload}`);
+        return;
+      }
+      delete state.upcProducts[action.payload];
+    },
+    resetUpcProducts: (state: ScannerState) => {
+      state.upcProducts = UPC_PRODUCTS_INITIAL;
+    },
+  },
+});
+
+// Action creators are generated for each case reducer function
+export const { addUpcProduct, deleteUpcProduct, resetUpcProducts } =
+  scannerSlice.actions;
+
+export default scannerSlice.reducer;
+
+export const upcProductsSelector = (state: RootState) =>
+  (state[scannerSlice.name] as ScannerState).upcProducts;

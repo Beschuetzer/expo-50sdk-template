@@ -19,7 +19,8 @@ type ManualUpcInputProps = {
 };
 
 const DEBOUNCE_TIMEOUT = 500;
-const UPC_REGEX = /^\s*\d{13}\s*$/i;
+const REQUIRED_CHAR_LENGTH = 12;
+const UPC_REGEX = new RegExp(`^\\s*\\d{${REQUIRED_CHAR_LENGTH}}\\s*$`, 'i');
 const VALUE_INITIAL = "";
 const IS_VALID_INITIAL = true;
 
@@ -40,13 +41,13 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
   const handleSetIsValid = useCallback((value: string) => {
     clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setIsValid(!!value.match(UPC_REGEX));
+      setIsValid(!!UPC_REGEX.test(value));
     }, DEBOUNCE_TIMEOUT);
   }, []);
 
   const onValueChange = useCallback(
     (text: string) => {
-      const newValue = text;
+      const newValue = text.trim();
       setValue(newValue);
       handleSetIsValid(newValue);
     },
@@ -83,7 +84,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         name="warning"
         color={theme.colors.red[900]}
         />
-        <Text pl={3} color={isValid ? "black" : "red.900"}>Must be 13 numbers (currently {value.length} chars)</Text>
+        <Text pl={3} color={isValid ? "black" : "red.900"}>Must be {REQUIRED_CHAR_LENGTH} numbers (currently {value.length} chars)</Text>
     </Row>
       <Button
         isDisabled={!isValid}

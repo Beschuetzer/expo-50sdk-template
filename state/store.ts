@@ -1,5 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import counterReducer from "@/state/slices/generalSlice";
+import generalReducer from "@/state/slices/generalSlice";
+import scannerReducer from "@/state/slices/scannerSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
@@ -10,7 +11,8 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  counter: persistReducer(persistConfig, counterReducer),
+  general: persistReducer(persistConfig, generalReducer),
+  scanner: persistReducer(persistConfig, scannerReducer),
 });
 
 export const store = configureStore({

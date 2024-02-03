@@ -18,20 +18,14 @@ export function useUpcData() {
 
   const fetchUpcData = useCallback(
     async (upcToFetch: string) => {
+      const url = `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`;
       try {
         alert(
-          `fetching data for https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`
+          `fetching data for ${url}`
         );
-        const response = await fetch(
-          `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`
-        );
+        const response = await fetch(url);
         if (response.ok) {
           const data = (await response.json()) as UpcResponse;
-          alert(
-            `result for https://world.openfoodfacts.org/api/v0/product/${upcToFetch} is: ${JSON.stringify(
-              data.code
-            )}`
-          );
           dispatch(addUpcProduct(data.product));
           setData(data.product);
         } else {
@@ -54,15 +48,14 @@ export function useUpcData() {
       upcProductId: upcProduct?.id,
     });
     if (upcProduct) {
-      alert("using cached data");
       dispatch(resetLastUpcScanned());
       setData(upcProduct);
     } else if (lastUpcScanned) {
-      // fetchUpcData(lastUpcScanned);
-      handleMockResponse(lastUpcScanned, dispatch);
+      fetchUpcData(lastUpcScanned);
+      // handleMockResponse(lastUpcScanned, dispatch);
     }
   });
-
+  
   return data;
 }
 

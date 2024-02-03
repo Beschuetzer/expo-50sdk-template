@@ -1,23 +1,33 @@
-export type Item = {
+import { XOR } from "ts-xor";
+
+/**
+*This represents something that can be added to any store
+**/
+export type Item = XOR<
+  {
+    name: string;
+    upc?: string;
+  },
+  {
+    name?: string;
+    upc: string;
+  }
+> & {
   image?: string;
-  name: string;
-  /**
-   *This is a unix timestamp in milliseconds
-   **/
-  lastPurchaseDate?: number;
   /**
    *This is in milliseconds
    **/
   frequency?: number;
 };
 
-export type ItemInGroceryList = {
+/**
+*This is an item when it is in the shoppingList (and has a store associated with it)
+**/
+export type ShoppingItem = {
   aisle: string;
   quantity: number;
   /**
    *Something like 'box', 'kg', or 'bottle'
    **/
-  unit: string;
+  unit?: string;
 } & Item;
-
-

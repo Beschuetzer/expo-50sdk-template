@@ -2,6 +2,8 @@
 -setup call to https://world.openfoodfacts.org/api/v0/product/072273487253 and display results in gorham bottom sheet:
     --finish hook useUpcData
     --have scanning 
+-create ImagePicker, which displays the images in a row and allows you to select one (acheive this by passing in a setPickedImage useState setter where it is being used)
+-figure out how to save thumbnails to android storage for caching purposes
 -add lib react native picker
 -use react-native-swipe-list-view to render items in the list (option to delete from list)
 -use swipe list view to add items to grocery list from items not in the list (left to delete, right to add to grocery list)?

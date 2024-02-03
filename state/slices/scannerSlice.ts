@@ -4,7 +4,10 @@ import { RootState } from "../store";
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
 
 type Upc = string;
-type UpcProducts = { [key: Upc]: UpcProduct };
+export type TimeStamp = {
+  timestamp: number;
+}
+type UpcProducts = { [key: Upc]: UpcProduct & TimeStamp };
 export type ScannerState = {
   upcProducts: UpcProducts;
 };
@@ -30,7 +33,10 @@ export const scannerSlice = createSlice({
         );
         return;
       }
-      state.upcProducts[action.payload._id] = action.payload;
+      state.upcProducts[action.payload._id] = {
+        ...action.payload,
+        timestamp: Date.now(),
+      };
     },
     deleteUpcProduct: (state: ScannerState, action: PayloadAction<Upc>) => {
       if (!action?.payload) {

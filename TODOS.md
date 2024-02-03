@@ -1,7 +1,7 @@
 ## Work on Next
 
 -UpcDetails rendering:
-    --Finish listsSlice.ts
+    --Finish listsSlice.ts?
     --The user will be presented will two different set of options depending on whether  item is already in the itemsList (add to items list if not otherwise the ability to modify the item and add it to the shopping list) .
     --it should be a form with a save and clear button
     --any data from the API will pre-populate the fields

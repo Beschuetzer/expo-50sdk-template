@@ -82,6 +82,49 @@ export const listsSlice = createSlice({
       }
       state.storesList[keyToUse] = action.payload;
     },
+    removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
+      const keyToUse = getKeyToUse(action);
+      if (!keyToUse) {
+        alert(
+          "A key must be provided in order to remove an item from the itemsList."
+        );
+        return;
+      }
+      delete state.itemsList[keyToUse];
+    },
+    removeLastPurchasedList: (
+      state: ListsState,
+      action: PayloadAction<Key>
+    ) => {
+      const keyToUse = getKeyToUse(action);
+      if (!keyToUse) {
+        alert(
+          "A key must be provided in order to remove an item from the lastPurchasedList."
+        );
+        return;
+      }
+      delete state.lastPurchasedList[keyToUse];
+    },
+    removeShoppingListItem: (state: ListsState, action: PayloadAction<Key>) => {
+      const keyToUse = getKeyToUse(action);
+      if (!keyToUse) {
+        alert(
+          "A key must be provided in order to remove an item from the shoppingList."
+        );
+        return;
+      }
+      delete state.shoppingList[keyToUse];
+    },
+    removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
+      const keyToUse = getKeyToUse(action);
+      if (!keyToUse) {
+        alert(
+          "A key must be provided in order to remove an item from the storesList."
+        );
+        return;
+      }
+      delete state.storesList[keyToUse];
+    },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyObject();
     },
@@ -103,6 +146,10 @@ export const {
   addLastPurchasedList,
   addShoppingListItem,
   addStoresListItem,
+  removeItemsListItem,
+  removeLastPurchasedList,
+  removeShoppingListItem,
+  removeStoresListItem,
   resetItemsList,
   resetLastPurchasedList,
   resetShoppingList,

@@ -24,6 +24,10 @@ const UPC_REGEX = new RegExp(`^\\s*\\d{${REQUIRED_CHAR_LENGTH}}\\s*$`, 'i');
 const VALUE_INITIAL = "";
 const IS_VALID_INITIAL = true;
 
+function getIsValidValue(value: string) {
+    return !!UPC_REGEX.test(value);
+}
+
 export function ManualUpcInput(props: ManualUpcInputProps) {
   const { isVisible = true } = props;
   const timeoutRef = useRef<any>(null)
@@ -35,13 +39,15 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
 
   const onSearchPress = useCallback((e: GestureResponderEvent) => {
     e.preventDefault();
-    dispatch(setLastUpcScanned(value));
+    if (getIsValidValue(value)) {
+        dispatch(setLastUpcScanned(value));
+    } 
   }, [value]);
 
   const handleSetIsValid = useCallback((value: string) => {
     clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setIsValid(!!UPC_REGEX.test(value));
+      setIsValid(getIsValidValue(value));
     }, DEBOUNCE_TIMEOUT);
   }, []);
 

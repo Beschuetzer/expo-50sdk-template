@@ -69,20 +69,60 @@ export function useUpcData() {
     //   return;
     // }
     // lastUpcProductRef.current = stringified;
-    alert(lastUpcScanned)
+    alert(lastUpcScanned);
     console.log({
       lastUpcScanned,
-      upcProductId: upcProduct?._id,
+      upcProductId: upcProduct?.id,
     });
     if (upcProduct) {
       alert("using cached data");
       setData(upcProduct);
     } else if (lastUpcScanned) {
-      fetchUpcData(lastUpcScanned);
+      // fetchUpcData(lastUpcScanned);
+      handleMockResponse(dispatch);
     } else {
-        setLastUpcScanned("");
+      setLastUpcScanned("");
     }
   }, [lastUpcScanned, upcProduct]);
 
   return data;
+}
+
+function handleMockResponse(dispatch: any) {
+  alert('using mock data...');
+  const data = {
+    code: "096619107698",
+    status: 1,
+    status_verbose: "worked",
+    product: {
+      code: "096619107698",
+      id: "0096619107698",
+      image_front_small_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg",
+      image_front_thumb_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg",
+      image_front_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg",
+      image_ingredients_small_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.200.jpg",
+      image_ingredients_thumb_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.100.jpg",
+      image_ingredients_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.400.jpg",
+      image_nutrition_small_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.200.jpg",
+      image_nutrition_thumb_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.100.jpg",
+      image_nutrition_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.400.jpg",
+      image_small_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg",
+      image_thumb_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg",
+      image_url:
+        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg",
+      product_name: "Shelled Pistachios",
+    } as UpcProduct,
+  } as unknown as UpcResponse;
+  dispatch(addUpcProduct(data.product));
 }

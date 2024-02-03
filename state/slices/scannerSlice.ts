@@ -23,7 +23,10 @@ export const scannerSlice = createSlice({
   initialState,
   reducers: {
     addUpcProduct: (state: ScannerState, action: PayloadAction<UpcProduct>) => {
-      if (!action?.payload || !action.payload._id) {
+      const idToUse = action.payload.id || action.payload.code;
+      console.log({idToUse});
+      
+      if (!action?.payload || !idToUse) {
         alert(
           `Unable to add UpcProduct for ${JSON.stringify(
             action.payload,
@@ -33,7 +36,7 @@ export const scannerSlice = createSlice({
         );
         return;
       }
-      state.upcProducts[action.payload._id] = {
+      state.upcProducts[idToUse] = {
         ...action.payload,
         timestamp: Date.now(),
       };

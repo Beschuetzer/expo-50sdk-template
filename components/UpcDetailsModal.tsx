@@ -11,7 +11,8 @@ type UpcDetailsSheetProps = {};
 
 const snapPointPercents = [25, 50, 75, 100];
 const defaultSnappoint = snapPointPercents.length - 2;
-export function UpcDetailsSheet(props: UpcDetailsSheetProps) {
+
+export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const windowDimensions = Dimensions.get("window");
   const { upcProduct, isLoading } = useUpcProduct();
   const theme = useTheme();
@@ -38,7 +39,7 @@ export function UpcDetailsSheet(props: UpcDetailsSheetProps) {
   }, []);
 
   useEffect(() => {
-    if (!upcProduct) return;
+    if (!upcProduct && !isLoading) return;
     openModal();
   }, [lastUpcScanned]);
 

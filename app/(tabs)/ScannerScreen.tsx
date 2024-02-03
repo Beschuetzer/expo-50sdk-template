@@ -8,7 +8,7 @@ import { useFocusEffect } from "expo-router";
 import { ManualUpcInput } from "@/components/ManualUpcInput";
 import { useDispatch } from "react-redux";
 import { setLastUpcScanned } from "@/state/slices/generalSlice";
-import { UpcDetailsSheet } from "@/components/UpcDetailsSheet";
+import { UpcDetailsModal } from "@/components/UpcDetailsModal";
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
@@ -78,7 +78,7 @@ const BarcodeScannerScreen = () => {
           <Text style={styles.scanAgainText}>Tap to Scan Again</Text>
         </TouchableOpacity>
       ) : null}
-      <UpcDetailsSheet />
+      <UpcDetailsModal />
     </View>
   );
 };

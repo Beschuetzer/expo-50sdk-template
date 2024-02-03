@@ -22,7 +22,7 @@ export function useUpcProduct() {
 
       // alert(`fetching data for ${url}`);
       // const response = await fetch(url);
-      
+
       const response = await handleMockResponse(upcToFetch);
       if (response.ok) {
         const data = (await response.json()) as UpcResponse;
@@ -138,6 +138,7 @@ async function handleMockResponse(upc: string) {
       product: {
         code: "0072273487253",
         id: "0072273487253",
+        product_name: 'Beans',
         image_front_small_url:
           "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.200.jpg",
         image_front_thumb_url:

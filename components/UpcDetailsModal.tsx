@@ -46,12 +46,6 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   //#region Rendering
   function renderContent() {
     if (isLoading) {
-      console.log({
-        windowDimensionsHeight: windowDimensions.height,
-        factor: snapPointPercents[currentSnapPointRef.current] / 100,
-        currentSnapPointRef: currentSnapPointRef.current,
-      });
-
       return (
         <Center
           width={windowDimensions.width}
@@ -61,6 +55,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
             100
           }
         >
+          <Text>Checking for UPC data...</Text>
           <ActivityIndicator size={"large"} color={theme.colors.black} />
         </Center>
       );

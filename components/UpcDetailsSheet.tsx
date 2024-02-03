@@ -1,6 +1,7 @@
-import BottomSheet, { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRef, useMemo, useCallback } from "react";
-import { View, StyleSheet, Text, Button } from "react-native";
+import { StyleSheet } from "react-native";
+import { UpcDetails } from "./UpcDetails";
 
 export function UpcDetailsSheet() {
   // ref
@@ -19,23 +20,14 @@ export function UpcDetailsSheet() {
 
   // renders
   return (
-      <View>
-        <Button
-          onPress={handlePresentModalPress}
-          title="Present Modal"
-          color="black"
-        />
-        <BottomSheetModal
-          ref={bottomSheetModalRef}
-          index={1}
-          snapPoints={snapPoints}
-          onChange={handleSheetChanges}
-        >
-          <View style={styles.contentContainer}>
-            <Text>Awesome 🎉</Text>
-          </View>
-        </BottomSheetModal>
-      </View>
+    <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={1}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
+    >
+        <UpcDetails upcProduct={{} as any}/>
+    </BottomSheetModal> 
   );
 }
 

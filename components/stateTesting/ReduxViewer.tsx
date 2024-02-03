@@ -5,7 +5,13 @@ import {
   resetLastUpcScanned,
   setLastUpcScanned,
 } from "@/state/slices/generalSlice";
-import { Button, FlatList, Heading, Text, View } from "native-base";
+import {
+  Button,
+  FlatList,
+  Heading,
+  Text,
+  View,
+} from "native-base";
 import {
   resetUpcProducts,
   upcProductsSelector,
@@ -41,7 +47,10 @@ export function ReduxViewer() {
               "Fetched At",
               new Date(item.timestamp).toLocaleString()
             )}
-            {renderFieldAndText("Selected Image", selectedUrl)}
+            {renderFieldAndText(
+              "Selected Image",
+              selectedUrl,
+            )}
             <ThumbnailPicker
               upcProduct={item}
               setSelectedUrl={setSelectedUrl}
@@ -52,14 +61,16 @@ export function ReduxViewer() {
       }}
       ListHeaderComponent={
         <>
-          <Button
-            onPress={() => {
-              dispatch(resetUpcProducts());
-              dispatch(resetLastUpcScanned());
-            }}
-          >
+          <Button onPress={() => dispatch(setLastUpcScanned("test"))}>
+            Set to 'test'
+          </Button>
+          <Button onPress={() => dispatch(resetLastUpcScanned())}>
+            Reset lastUpcScanned
+          </Button>
+          <Button onPress={() => dispatch(resetUpcProducts())}>
             Reset upcProducts
           </Button>
+          <Text>The lastUpcScanned is: {lastUpcScanned}</Text>
         </>
       }
     />

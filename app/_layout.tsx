@@ -15,7 +15,6 @@ import { persistor, store } from "@/state/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { Text } from "@/components/Themed";
 import { NativeBaseProvider } from "native-base";
-import { UpcDetailsSheet } from "@/components/UpcDetailsSheet";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 

@@ -9,6 +9,7 @@ import { ManualUpcInput } from "@/components/ManualUpcInput";
 import { useDispatch } from "react-redux";
 import { setLastUpcScanned } from "@/state/slices/generalSlice";
 import { useUpcData } from "@/components/useUpcData";
+import { UpcDetailsSheet } from "@/components/UpcDetailsSheet";
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
@@ -23,7 +24,6 @@ const BarcodeScannerScreen = () => {
     const { data } = scannedObj;
     const dataToUse = data.length === 12 ? `0${data}` : data;
     setScanned(true);
-    alert(`setting last scanned to ${dataToUse}`)
     dispatch(setLastUpcScanned(dataToUse));
   }, []);
 
@@ -61,10 +61,10 @@ const BarcodeScannerScreen = () => {
           Switch Camera
         </Button>
         <Button flex={1} borderRadius={0} onPress={onManuallyEnter}>
-          {isManuallyEntering ? 'Close' : 'Enter 13 digit Upc'}
+          {isManuallyEntering ? "Close" : "Enter 13 digit Upc"}
         </Button>
       </Row>
-      <ManualUpcInput isVisible={isManuallyEntering}/>
+      <ManualUpcInput isVisible={isManuallyEntering} />
       {shouldRenderCamera ? (
         <Camera
           style={styles.camera}
@@ -80,6 +80,7 @@ const BarcodeScannerScreen = () => {
           <Text style={styles.scanAgainText}>Tap to Scan Again</Text>
         </TouchableOpacity>
       ) : null}
+      <UpcDetailsSheet />
     </View>
   );
 };

@@ -4,7 +4,7 @@ import { RootState } from "../store";
 
 export type GeneralState = {
   lastUpcScanned: string;
-}
+};
 
 const LAST_UPC_SCANNED_INITIAL = "";
 
@@ -22,7 +22,7 @@ export const generalSlice = createSlice({
     setLastUpcScanned: (state: GeneralState, action: PayloadAction<string>) => {
       if (!action?.payload) return;
       state.lastUpcScanned = action.payload;
-    }
+    },
   },
 });
 
@@ -31,4 +31,5 @@ export const { resetLastUpcScanned, setLastUpcScanned } = generalSlice.actions;
 
 export default generalSlice.reducer;
 
-export const lastUpcScannedSelector = (state: RootState) => (state[generalSlice.name] as GeneralState).lastUpcScanned?.trim();
+export const lastUpcScannedSelector = (state: RootState) =>
+  (state[generalSlice.name] as GeneralState).lastUpcScanned?.trim();

@@ -1,22 +1,17 @@
 import {
   lastUpcScannedSelector,
   resetLastUpcScanned,
-  setLastUpcScanned,
 } from "@/state/slices/generalSlice";
 import {
   addUpcProduct,
   upcProductSelector,
-  upcProductsSelector,
 } from "@/state/slices/scannerSlice";
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-const LAST_UPC_PRODUCT_REF_INITIAL = JSON.stringify({});
-
 export function useUpcData() {
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
-  const lastUpcProductRef = useRef(LAST_UPC_PRODUCT_REF_INITIAL);
   const upcProduct = useSelector(upcProductSelector(lastUpcScanned));
   const [data, setData] = useState<UpcProduct | null>(null);
   const dispatch = useDispatch();
@@ -46,83 +41,106 @@ export function useUpcData() {
       } catch (error) {
         alert(`Error fetching data for '${lastUpcScanned}': ${error}`);
         setData(null);
+      } finally {
+        dispatch(resetLastUpcScanned());
       }
-
-      dispatch(resetLastUpcScanned());
-      return () => {
-        lastUpcProductRef.current = LAST_UPC_PRODUCT_REF_INITIAL;
-      };
     },
-    [lastUpcProductRef]
+    []
   );
 
   useEffect(() => {
-    if (!lastUpcScanned && !upcProduct) {
-      lastUpcProductRef.current = LAST_UPC_PRODUCT_REF_INITIAL;
-    }
-  }, [lastUpcScanned]);
-
-  useEffect(() => {
-    // const stringified = JSON.stringify(upcProduct);
-    // if (!lastUpcScanned || lastUpcProductRef.current === stringified) {
-    //   console.log("skipping scanning in useEffect of for useUpcData");
-    //   return;
-    // }
-    // lastUpcProductRef.current = stringified;
-    alert(lastUpcScanned);
     console.log({
       lastUpcScanned,
       upcProductId: upcProduct?.id,
     });
     if (upcProduct) {
       alert("using cached data");
+      dispatch(resetLastUpcScanned());
       setData(upcProduct);
     } else if (lastUpcScanned) {
       // fetchUpcData(lastUpcScanned);
-      handleMockResponse(dispatch);
-    } else {
-      setLastUpcScanned("");
+      handleMockResponse(lastUpcScanned, dispatch);
     }
-  }, [lastUpcScanned, upcProduct]);
+  });
 
   return data;
 }
 
-function handleMockResponse(dispatch: any) {
-  alert('using mock data...');
-  const data = {
-    code: "096619107698",
-    status: 1,
-    status_verbose: "worked",
-    product: {
-      code: "096619107698",
-      id: "0096619107698",
-      image_front_small_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg",
-      image_front_thumb_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg",
-      image_front_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg",
-      image_ingredients_small_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.200.jpg",
-      image_ingredients_thumb_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.100.jpg",
-      image_ingredients_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.400.jpg",
-      image_nutrition_small_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.200.jpg",
-      image_nutrition_thumb_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.100.jpg",
-      image_nutrition_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.400.jpg",
-      image_small_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg",
-      image_thumb_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg",
-      image_url:
-        "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg",
-      product_name: "Shelled Pistachios",
-    } as UpcProduct,
-  } as unknown as UpcResponse;
-  dispatch(addUpcProduct(data.product));
+function handleMockResponse(upc:string, dispatch: any) {
+  alert("using mock data...");
+  console.log("using mock data...");
+
+  const MOCKS = {
+    "0096619107698": {
+      code: "0096619107698",
+      status: 1,
+      status_verbose: "worked",
+      product: {
+        code: "0096619107698",
+        id: "0096619107698",
+        image_front_small_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg",
+        image_front_thumb_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg",
+        image_front_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg",
+        image_ingredients_small_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.200.jpg",
+        image_ingredients_thumb_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.100.jpg",
+        image_ingredients_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.400.jpg",
+        image_nutrition_small_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.200.jpg",
+        image_nutrition_thumb_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.100.jpg",
+        image_nutrition_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.400.jpg",
+        image_small_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg",
+        image_thumb_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg",
+        image_url:
+          "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg",
+        product_name: "Shelled Pistachios",
+      } as UpcProduct,
+    },
+    "0043000054017": {
+      code: "0043000054017",
+      status: 1,
+      status_verbose: "worked",
+      product: {
+        code: "0043000054017",
+        id: "0043000054017",
+        image_front_small_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.200.jpg",
+        image_front_thumb_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
+        image_front_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.400.jpg",
+        image_ingredients_small_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/ingredients_en.35.200.jpg",
+        image_ingredients_thumb_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/ingredients_en.35.100.jpg",
+        image_ingredients_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/ingredients_en.35.400.jpg",
+        image_nutrition_small_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/nutrition_en.22.200.jpg",
+        image_nutrition_thumb_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/nutrition_en.22.100.jpg",
+        image_nutrition_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/nutrition_en.22.400.jpg",
+        image_small_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.200.jpg",
+        image_thumb_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
+        image_url:
+          "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.400.jpg",
+        product_name: "Chocolate",
+      } as UpcProduct,
+    },
+  } as unknown as {[key: string]: UpcResponse};
+
+  dispatch(addUpcProduct(MOCKS[upc].product));
+  dispatch(resetLastUpcScanned());
 }

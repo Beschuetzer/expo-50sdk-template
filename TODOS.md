@@ -3,6 +3,8 @@
     --finish hook useUpcData
     --have scanning 
 -add lib react native picker
+-use react-native-swipe-list-view to render items in the list (option to delete from list)
+-use swipe list view to add items to grocery list from items not in the list (left to delete, right to add to grocery list)?
 -add options drawer (auto save and a backup button which can email a .json file of the items added)
 
 ## Big Picture

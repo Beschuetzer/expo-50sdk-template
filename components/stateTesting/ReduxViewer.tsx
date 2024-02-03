@@ -7,10 +7,9 @@ import {
   setLastUpcScanned,
 } from "@/state/slices/generalSlice";
 import { Text } from "@/components/Themed";
-import { Button } from "native-base";
+import { Button, FlatList } from "native-base";
 import ObjectRenderer from "../ObjectRenderer";
 import { upcProductsSelector } from "@/state/slices/scannerSlice";
-import { ScrollView } from "react-native-gesture-handler";
 
 export function ReduxViewer() {
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
@@ -18,13 +17,21 @@ export function ReduxViewer() {
   const dispatch = useDispatch();
 
   return (
-    <ScrollView>
-      <Button onPress={() => dispatch(setLastUpcScanned("test"))}>
-        Set to 'test'
-      </Button>
-      <Button onPress={() => dispatch(resetLastUpcScanned())}>Reset</Button>
-      <Text>The lastUpcScanned is: {lastUpcScanned}</Text>
-      <ObjectRenderer object={upcProducts}/>
-    </ScrollView>
+    <FlatList
+      data={Object.values(upcProducts || {})}
+      renderItem={(data) => {
+        console.log({ data });
+        return <ObjectRenderer object={data.item} />;
+      }}
+      ListHeaderComponent={
+        <>
+          <Button onPress={() => dispatch(setLastUpcScanned("test"))}>
+            Set to 'test'
+          </Button>
+          <Button onPress={() => dispatch(resetLastUpcScanned())}>Reset</Button>
+          <Text>The lastUpcScanned is: {lastUpcScanned}</Text>
+        </>
+      }
+    />
   );
 }

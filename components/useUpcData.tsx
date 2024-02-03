@@ -35,7 +35,7 @@ export function useUpcData() {
         const cachedData = upcProducts?.[lastUpcScanned];
         if (cachedData) {
             setData(cachedData);
-        } else {
+        } else if (lastUpcScanned){
             fetchUpcData();
         }
     }, [lastUpcScanned])

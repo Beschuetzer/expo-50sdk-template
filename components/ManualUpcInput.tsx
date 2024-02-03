@@ -13,6 +13,7 @@ import {
   GestureResponderEvent,
 } from "react-native";
 import { useDispatch } from "react-redux";
+import { MOCKS_UPCS } from "./useUpcData";
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -83,15 +84,35 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         value={value}
         focusOutlineColor={isValid ? "primary.100" : "red.200"}
       />
-    <Row display={!isValid ? 'block' : 'none'} justifyContent={"flex-start"} alignItems={"center"} pb={3} px={3}>
+      <Row
+        display={!isValid ? "block" : "none"}
+        justifyContent={"flex-start"}
+        alignItems={"center"}
+        pb={3}
+        px={3}
+      >
         <FontAwesome
-        size={10}
-        pb={0}
-        name="warning"
-        color={theme.colors.red[900]}
+          size={10}
+          pb={0}
+          name="warning"
+          color={theme.colors.red[900]}
         />
-        <Text pl={3} color={isValid ? "black" : "red.900"}>Must be {REQUIRED_CHAR_LENGTH} numbers (currently {value.length} chars)</Text>
-    </Row>
+        <Text pl={3} color={isValid ? "black" : "red.900"}>
+          Must be {REQUIRED_CHAR_LENGTH} numbers (currently {value.length}{" "}
+          chars)
+        </Text>
+      </Row>
+      <Row>
+        <Button onPress={() => setValue(MOCKS_UPCS[0])}>
+          Mock {MOCKS_UPCS[0]}
+        </Button>
+        <Button onPress={() => setValue(MOCKS_UPCS[1])}>
+          Mock {MOCKS_UPCS[1]}
+        </Button>
+        <Button onPress={() => setValue(MOCKS_UPCS[2])}>
+          Mock {MOCKS_UPCS[2]}
+        </Button>
+      </Row>
       <Button
         isDisabled={!isValid}
         backgroundColor={"secondary.900"}

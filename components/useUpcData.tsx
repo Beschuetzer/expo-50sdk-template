@@ -60,16 +60,17 @@ export function useUpcProduct() {
   };
 }
 
+export const MOCKS_UPCS = ["096619107698", "043000054017", "072273487253"];
 async function handleMockResponse(upc: string) {
   await delay(1000);
-  const MOCKS = {
-    "0096619107698": {
-      code: "0096619107698",
+    const MOCKS = {
+    [MOCKS_UPCS[0]]: {
+      code: MOCKS_UPCS[0],
       status: 1,
       status_verbose: "worked",
       product: {
-        code: "0096619107698",
-        id: "0096619107698",
+        code: MOCKS_UPCS[0],
+        id: MOCKS_UPCS[0],
         image_front_small_url:
           "https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg",
         image_front_thumb_url:
@@ -97,13 +98,13 @@ async function handleMockResponse(upc: string) {
         product_name: "Shelled Pistachios",
       } as UpcProduct,
     },
-    "0043000054017": {
-      code: "0043000054017",
+    [MOCKS_UPCS[1]]: {
+      code: MOCKS_UPCS[1],
       status: 1,
       status_verbose: "worked",
       product: {
-        code: "0043000054017",
-        id: "0043000054017",
+        code: MOCKS_UPCS[1],
+        id: MOCKS_UPCS[1],
         image_front_small_url:
           "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.200.jpg",
         image_front_thumb_url:
@@ -131,13 +132,13 @@ async function handleMockResponse(upc: string) {
         product_name: "Chocolate",
       } as UpcProduct,
     },
-    "0072273487253": {
-      code: "0072273487253",
+    [MOCKS_UPCS[2]]: {
+      code: MOCKS_UPCS[2],
       status: 1,
       status_verbose: "worked",
       product: {
-        code: "0072273487253",
-        id: "0072273487253",
+        code: MOCKS_UPCS[2],
+        id: MOCKS_UPCS[2],
         product_name: 'Beans',
         image_front_small_url:
           "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.200.jpg",

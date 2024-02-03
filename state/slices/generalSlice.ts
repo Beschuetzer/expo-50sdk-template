@@ -31,4 +31,4 @@ export const { resetLastUpcScanned, setLastUpcScanned } = generalSlice.actions;
 
 export default generalSlice.reducer;
 
-export const lastUpcScannedSelector = (state: RootState) => (state[generalSlice.name] as GeneralState).lastUpcScanned;
+export const lastUpcScannedSelector = (state: RootState) => (state[generalSlice.name] as GeneralState).lastUpcScanned?.trim();

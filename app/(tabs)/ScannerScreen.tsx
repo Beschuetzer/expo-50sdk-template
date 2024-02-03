@@ -18,7 +18,8 @@ const BarcodeScannerScreen = () => {
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
   const dispatch = useDispatch();
   const data = useUpcData();
-
+  console.log({ data });
+  
   const handleBarCodeScanned = useCallback((scannedObj: any) => {
     const { data } = scannedObj;
     setScanned(true);

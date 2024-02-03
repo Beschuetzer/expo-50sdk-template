@@ -36,10 +36,9 @@ export function ReduxViewer() {
     <FlatList
       data={Object.values(upcProducts || {})}
       renderItem={(data) => {
-        const { item } = data;
-        console.log({ data });
+        const { item, index } = data;
         return (
-          <View>
+          <View key={index}>
             <Heading size={"sm"} mt={3}>
               '{item._id}' details:
             </Heading>
@@ -62,16 +61,12 @@ export function ReduxViewer() {
       }}
       ListHeaderComponent={
         <>
-          <Button onPress={() => dispatch(setLastUpcScanned("test"))}>
-            Set to 'test'
-          </Button>
-          <Button onPress={() => dispatch(resetLastUpcScanned())}>
-            Reset lastUpcScanned
-          </Button>
-          <Button onPress={() => dispatch(resetUpcProducts())}>
+          <Button onPress={() => {
+            dispatch(resetUpcProducts())
+            dispatch(resetLastUpcScanned());
+          }}>
             Reset upcProducts
           </Button>
-          <Text>The lastUpcScanned is: {lastUpcScanned}</Text>
         </>
       }
     />

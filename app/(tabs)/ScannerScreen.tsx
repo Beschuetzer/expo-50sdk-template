@@ -18,12 +18,13 @@ const BarcodeScannerScreen = () => {
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
   const dispatch = useDispatch();
   const data = useUpcData();
-  console.log({ data });
   
-  const handleBarCodeScanned = useCallback((scannedObj: any) => {
+  const handleBarCodeScanned = useCallback((scannedObj: { data: string }) => {
     const { data } = scannedObj;
+    const dataToUse = data.length === 12 ? `0${data}` : data;
     setScanned(true);
-    dispatch(setLastUpcScanned(data));
+    alert(`setting last scanned to ${dataToUse}`)
+    dispatch(setLastUpcScanned(dataToUse));
   }, []);
 
   const onSwitchCameraPress = useCallback(() => {

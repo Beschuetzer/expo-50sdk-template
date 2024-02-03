@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
@@ -6,7 +6,7 @@ import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
 type Upc = string;
 export type TimeStamp = {
   timestamp: number;
-}
+};
 type UpcProducts = { [key: Upc]: UpcProduct & TimeStamp };
 export type ScannerState = {
   upcProducts: UpcProducts;
@@ -59,3 +59,15 @@ export default scannerSlice.reducer;
 
 export const upcProductsSelector = (state: RootState) =>
   (state[scannerSlice.name] as ScannerState).upcProducts;
+
+export const upcProductSelector = (id: string) =>
+  createSelector(
+    [
+      (state: RootState) =>
+        (state[scannerSlice.name] as ScannerState).upcProducts,
+    ],
+    (upcProducts) => {
+      const value = (upcProducts as any)?.[id];
+      return value as UpcProduct;
+    }
+  );

@@ -15,12 +15,12 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   const { upcProduct, selectedUrl, setSelectedUrl } = props;
 
   const imagesToRender = useMemo(
-    () => [
+    () => new Set([
       upcProduct.image_front_thumb_url,
       upcProduct.image_ingredients_thumb_url,
       upcProduct.image_thumb_url,
       upcProduct.image_nutrition_url,
-    ],
+    ]),
     [upcProduct]
   );
 
@@ -31,12 +31,11 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
 
   return (
     <Row>
-      {imagesToRender.map((imageUrl) => {
+      {Array.from(imagesToRender).map((imageUrl) => {
         const isSelected = imageUrl === selectedUrl;
-        console.log({imageUrl, selectedUrl, isSelected});
         
         return (
-          <View borderWidth={isSelected ? 2 : 0} borderColor={isSelected ? 'tertiary.900' : 'primary.900'}>
+          <View key={imageUrl} borderWidth={isSelected ? 2 : 0} borderColor={isSelected ? 'tertiary.900' : 'primary.900'}>
             <TouchableOpacity onPress={() => handleSelect(imageUrl)}>
               <AspectRatio
                 ratio={{

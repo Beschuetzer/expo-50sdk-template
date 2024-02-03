@@ -2,45 +2,44 @@ import {
   lastUpcScannedSelector,
   resetLastUpcScanned,
 } from "@/state/slices/generalSlice";
-import {
-  addUpcProduct,
-  upcProductSelector,
-} from "@/state/slices/scannerSlice";
+import { addUpcProduct, upcProductSelector } from "@/state/slices/scannerSlice";
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { delay } from "@/utils/helpers";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-export function useUpcData() {
+export function useUpcProduct() {
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
   const upcProduct = useSelector(upcProductSelector(lastUpcScanned));
-  const [data, setData] = useState<UpcProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(false)
+  const [product, setProduct] = useState<UpcProduct | null>(null);
   const dispatch = useDispatch();
 
-  const fetchUpcData = useCallback(
-    async (upcToFetch: string) => {
-      const url = `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`;
-      try {
-        alert(
-          `fetching data for ${url}`
-        );
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = (await response.json()) as UpcResponse;
-          dispatch(addUpcProduct(data.product));
-          setData(data.product);
-        } else {
-          alert(`Unable to fetch data for '${upcToFetch}'`);
-          setData(null);
-        }
-      } catch (error) {
-        alert(`Error fetching data for '${lastUpcScanned}': ${error}`);
-        setData(null);
-      } finally {
-        dispatch(resetLastUpcScanned());
+  const fetchUpcData = useCallback(async (upcToFetch: string) => {
+    const url = `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`;
+    try {
+      setIsLoading(true);
+
+      // alert(`fetching data for ${url}`);
+      // const response = await fetch(url);
+      
+      const response = await handleMockResponse(upcToFetch);
+      if (response.ok) {
+        const data = (await response.json()) as UpcResponse;
+        dispatch(addUpcProduct(data.product));
+        setProduct(data.product);
+      } else {
+        alert(`Unable to fetch data for '${upcToFetch}'`);
+        setProduct(null);
       }
-    },
-    []
-  );
+    } catch (error) {
+      alert(`Error fetching data for '${lastUpcScanned}': ${error}`);
+      setProduct(null);
+    } finally {
+      setIsLoading(false);
+      dispatch(resetLastUpcScanned());
+    }
+  }, []);
 
   useEffect(() => {
     console.log({
@@ -49,20 +48,20 @@ export function useUpcData() {
     });
     if (upcProduct) {
       dispatch(resetLastUpcScanned());
-      setData(upcProduct);
+      setProduct(upcProduct);
     } else if (lastUpcScanned) {
       fetchUpcData(lastUpcScanned);
-      // handleMockResponse(lastUpcScanned, dispatch);
     }
   });
-  
-  return data;
+
+  return { 
+    upcProduct: product,
+    isLoading,
+  };
 }
 
-function handleMockResponse(upc:string, dispatch: any) {
-  alert("using mock data...");
-  console.log("using mock data...");
-
+async function handleMockResponse(upc: string) {
+  await delay(1000);
   const MOCKS = {
     "0096619107698": {
       code: "0096619107698",
@@ -132,8 +131,42 @@ function handleMockResponse(upc:string, dispatch: any) {
         product_name: "Chocolate",
       } as UpcProduct,
     },
-  } as unknown as {[key: string]: UpcResponse};
-
-  dispatch(addUpcProduct(MOCKS[upc].product));
-  dispatch(resetLastUpcScanned());
+    "0072273487253": {
+      code: "0072273487253",
+      status: 1,
+      status_verbose: "worked",
+      product: {
+        code: "0072273487253",
+        id: "0072273487253",
+        image_front_small_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.200.jpg",
+        image_front_thumb_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.100.jpg",
+        image_front_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.400.jpg",
+        image_ingredients_small_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/ingredients_en.9.200.jpg",
+        image_ingredients_thumb_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/ingredients_en.9.100.jpg",
+        image_ingredients_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/ingredients_en.9.400.jpg",
+        image_nutrition_small_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/nutrition_en.10.200.jpg",
+        image_nutrition_thumb_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/nutrition_en.10.100.jpg",
+        image_nutrition_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/nutrition_en.10.400.jpg",
+        image_small_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.200.jpg",
+        image_thumb_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.100.jpg",
+        image_url:
+          "https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.400.jpg",
+      },
+    },
+  } as unknown as { [key: string]: UpcResponse };
+  const toReturn = MOCKS[upc];
+  console.log({toReturn, upc});
+  
+  return new Response(JSON.stringify(toReturn));
 }

@@ -8,7 +8,6 @@ import { useFocusEffect } from "expo-router";
 import { ManualUpcInput } from "@/components/ManualUpcInput";
 import { useDispatch } from "react-redux";
 import { setLastUpcScanned } from "@/state/slices/generalSlice";
-import { useUpcData } from "@/components/useUpcData";
 import { UpcDetailsSheet } from "@/components/UpcDetailsSheet";
 
 const BarcodeScannerScreen = () => {
@@ -18,8 +17,7 @@ const BarcodeScannerScreen = () => {
   const hasPermission = useRequestCameraPermissions();
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
   const dispatch = useDispatch();
-  const data = useUpcData();
-  
+
   const handleBarCodeScanned = useCallback((scannedObj: { data: string }) => {
     const { data } = scannedObj;
     const dataToUse = data.length === 12 ? `0${data}` : data;

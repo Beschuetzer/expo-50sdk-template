@@ -61,9 +61,6 @@ export function ReduxViewer() {
       }}
       ListHeaderComponent={
         <>
-          <Button onPress={() => dispatch(setLastUpcScanned("test"))}>
-            Set to 'test'
-          </Button>
           <Button onPress={() => dispatch(resetLastUpcScanned())}>
             Reset lastUpcScanned
           </Button>

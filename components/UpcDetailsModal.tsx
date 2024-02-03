@@ -3,7 +3,7 @@ import { useRef, useMemo, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, StyleSheet } from "react-native";
 import { UpcDetails } from "./UpcDetails";
 import { useUpcProduct } from "./useUpcData";
-import { Text, useTheme, Container, View, Center } from "native-base";
+import { Text, useTheme, Container, View, Center, Heading } from "native-base";
 import { useSelector } from "react-redux";
 import { lastUpcScannedSelector } from "@/state/slices/generalSlice";
 
@@ -14,7 +14,7 @@ const defaultSnappoint = snapPointPercents.length - 2;
 
 export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const windowDimensions = Dimensions.get("window");
-  const { upcProduct, isLoading } = useUpcProduct();
+  const { upcProduct, isLoading, errorMsg } = useUpcProduct();
   const theme = useTheme();
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
 
@@ -45,16 +45,15 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
 
   //#region Rendering
   function renderContent() {
+    const width = windowDimensions.width;
+    const height =
+      (windowDimensions.height *
+        snapPointPercents[currentSnapPointRef.current]) /
+      100;
+
     if (isLoading) {
       return (
-        <Center
-          width={windowDimensions.width}
-          height={
-            (windowDimensions.height *
-              snapPointPercents[currentSnapPointRef.current]) /
-            100
-          }
-        >
+        <Center width={width} height={height}>
           <Text>Checking for UPC data...</Text>
           <ActivityIndicator size={"large"} color={theme.colors.black} />
         </Center>
@@ -62,6 +61,14 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
     }
     if (upcProduct) {
       return <UpcDetails upcProduct={upcProduct} />;
+    }
+    if (errorMsg) {
+      return (
+        <Center width={width} height={height}>
+          <Heading>Error Fetching Data</Heading>
+          <Text>{errorMsg}</Text>
+        </Center>
+      );
     }
     return (
       <Container size={"full"}>

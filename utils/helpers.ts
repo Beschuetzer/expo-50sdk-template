@@ -6,3 +6,11 @@ export async function delay(ms: number) {
         }, ms)
     })
 }
+
+export function getEmptyArray<T>() {
+    return [] as T;
+}
+
+export function getEmptyObject<T>() {
+  return {} as T;
+}

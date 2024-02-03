@@ -12,6 +12,7 @@ export function useUpcProduct() {
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
   const upcProduct = useSelector(upcProductSelector(lastUpcScanned));
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [product, setProduct] = useState<UpcProduct | null>(null);
   const dispatch = useDispatch();
 
@@ -19,7 +20,7 @@ export function useUpcProduct() {
     const url = `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`;
     try {
       setIsLoading(true);
-
+      setErrorMsg(null);
       // alert(`fetching data for ${url}`);
       // const response = await fetch(url);
 
@@ -29,11 +30,11 @@ export function useUpcProduct() {
         dispatch(addUpcProduct(data.product));
         setProduct(data.product);
       } else {
-        alert(`Unable to fetch data for '${upcToFetch}'`);
+        setErrorMsg(`Invalid resopnse from service for '${upcToFetch}'.  Make sure you have a data connection and try again in a few seconds.`);
         setProduct(null);
       }
     } catch (error) {
-      alert(`Error fetching data for '${lastUpcScanned}': ${error}`);
+      setErrorMsg(`Error fetching data for '${lastUpcScanned}': ${error}.`);
       setProduct(null);
     } finally {
       setIsLoading(false);
@@ -57,6 +58,7 @@ export function useUpcProduct() {
   return { 
     upcProduct: product,
     isLoading,
+    errorMsg,
   };
 }
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   lastUpcScannedSelector,
@@ -6,22 +6,20 @@ import {
   setLastUpcScanned,
 } from "@/state/slices/generalSlice";
 import {
-  AspectRatio,
   Button,
   FlatList,
   Heading,
   Text,
   View,
-  Image,
-  Row,
 } from "native-base";
 import {
   resetUpcProducts,
   upcProductsSelector,
 } from "@/state/slices/scannerSlice";
-import { UpcProduct } from "@/types/UpcResponse";
+import { ThumbnailPicker } from "../ThumbnailPicker";
 
 export function ReduxViewer() {
+  const [selectedUrl, setSelectedUrl] = useState("");
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
   const upcProducts = useSelector(upcProductsSelector);
   const dispatch = useDispatch();
@@ -31,42 +29,6 @@ export function ReduxViewer() {
       <Text fontWeight={"bold"}>
         {key}: <Text fontWeight={"normal"}>{value}</Text>
       </Text>
-    );
-  }
-
-  function renderImages(upcProduct: UpcProduct) {
-    const imagesToRender = [
-      upcProduct.image_front_thumb_url,
-      upcProduct.image_ingredients_thumb_url,
-      upcProduct.image_thumb_url,
-      upcProduct.image_nutrition_url,
-    ];
-
-    return (
-      <Row>
-        {imagesToRender.map((imageUrl) => {
-          return (
-            <AspectRatio
-              ratio={{
-                base: 3 / 4,
-                md: 9 / 10,
-              }}
-              height={{
-                base: 100,
-                md: 75,
-              }}
-            >
-              <Image
-                resizeMode="cover"
-                source={{
-                  uri: imageUrl,
-                }}
-                alt="Thumbnail"
-              />
-            </AspectRatio>
-          );
-        })}
-      </Row>
     );
   }
 
@@ -86,7 +48,15 @@ export function ReduxViewer() {
               "Fetched At",
               new Date(item.timestamp).toLocaleString()
             )}
-            {renderImages(item)}
+            {renderFieldAndText(
+              "Selected Image",
+              selectedUrl,
+            )}
+            <ThumbnailPicker
+              upcProduct={item}
+              setSelectedUrl={setSelectedUrl}
+              selectedUrl={selectedUrl}
+            />
           </View>
         );
       }}

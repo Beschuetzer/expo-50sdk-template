@@ -1,10 +1,7 @@
 import { XOR } from "ts-xor";
 import { Store } from "./Store";
 
-/**
-*This represents something that can be added to any store
-**/
-export type Item = XOR<
+export type Key = XOR<
   {
     name: string;
     upc?: string;
@@ -13,7 +10,12 @@ export type Item = XOR<
     name?: string;
     upc: string;
   }
-> & {
+>
+
+/**
+*This represents something that can be added to any store
+**/
+export type Item = Key & {
   image?: string;
   /**
    *This is in milliseconds
@@ -33,8 +35,12 @@ export type ShoppingItem = {
   unit?: string;
 } & Item;
 
+export type LastPurchasedItem = Key & {
+  lastPurchaseDate: number;
+}
+
 type UpcOrName = string;
 export type ItemsList = { [upcOrName: UpcOrName]: Item };
 export type ShoppingList = { [upcOrName: UpcOrName]: ShoppingItem };
-export type LastPurchasedList = { [upcOrName: UpcOrName]: number };
+export type LastPurchasedList = { [upcOrName: UpcOrName]: LastPurchasedItem };
 export type StoreList = { [name: string]: Store };

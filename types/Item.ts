@@ -1,4 +1,5 @@
 import { XOR } from "ts-xor";
+import { Store } from "./Store";
 
 /**
 *This represents something that can be added to any store
@@ -31,3 +32,9 @@ export type ShoppingItem = {
    **/
   unit?: string;
 } & Item;
+
+type UpcOrName = string;
+export type ItemsList = { [upcOrName: UpcOrName]: Item };
+export type ShoppingList = { [upcOrName: UpcOrName]: ShoppingItem };
+export type LastPurchasedList = { [upcOrName: UpcOrName]: number };
+export type StoreList = { [name: string]: Store };

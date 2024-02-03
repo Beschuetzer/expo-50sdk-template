@@ -1,7 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction, Store } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import { Item, ShoppingItem } from "@/types/Item";
+import {
+  Item,
+  ItemsList,
+  LastPurchasedList,
+  ShoppingItem,
+  ShoppingList,
+  StoreList,
+} from "@/types/Item";
 import { getEmptyArray, getEmptyObject } from "@/utils/helpers";
 
 /**
@@ -11,48 +18,54 @@ import { getEmptyArray, getEmptyObject } from "@/utils/helpers";
  * {@link ListsState.stores stores} is a list of the stores created
  **/
 export type ListsState = {
-  itemsList: Item[];
-  lastPurchasedList: { [upcCode: string]: number };
-  shoppingList: ShoppingItem[];
-  storesList: Store[];
+  itemsList: ItemsList;
+  lastPurchasedList: LastPurchasedList;
+  shoppingList: ShoppingList;
+  storesList: StoreList;
 };
 
-const EMPTY_ARRAY = Object.freeze([]);
-const EMPTY_OBJECT = Object.freeze({});
-
 const initialState: ListsState = {
-  itemsList: getEmptyArray(),
+  itemsList: getEmptyObject(),
   lastPurchasedList: getEmptyObject(),
-  shoppingList: getEmptyArray(),
-  storesList: getEmptyArray(),
+  shoppingList: getEmptyObject(),
+  storesList: getEmptyObject(),
 };
 
 export const listsSlice = createSlice({
   name: "lists",
   initialState,
   reducers: {
+    addItemsListItem: (state: ListsState, action: PayloadAction<Item>) => {
+      const keyToUse = action?.payload?.upc || action?.payload?.name;
+      if (!keyToUse) {
+        alert("Unable to add an item with no name and no upc.");
+        return;
+      }
+      state.itemsList[keyToUse] = action.payload;
+    },
     resetItemsList: (state: ListsState) => {
-      state.itemsList = getEmptyArray();
+      state.itemsList = getEmptyObject();
     },
     resetLastPurchasedList: (state: ListsState) => {
       state.lastPurchasedList = getEmptyObject();
     },
     resetShoppingList: (state: ListsState) => {
-      state.shoppingList = getEmptyArray();
+      state.shoppingList = getEmptyObject();
     },
     resetStoresList: (state: ListsState) => {
-      state.storesList = getEmptyArray();
+      state.storesList = getEmptyObject();
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { 
-    resetItemsList,
-    resetLastPurchasedList,
-    resetShoppingList,
-    resetStoresList
- } = listsSlice.actions;
+export const {
+  addItemsListItem,
+  resetItemsList,
+  resetLastPurchasedList,
+  resetShoppingList,
+  resetStoresList,
+} = listsSlice.actions;
 
 export default listsSlice.reducer;
 

@@ -34,18 +34,7 @@ export function getKeyToUse(key: Key) {
 export async function saveImageLocally(key: Key, uri: string) {
   const keyToUse = getKeyToUse(key);
   try {
-    const response = await RNFS.downloadFile({
-      fromUrl: uri,
-      toFile: `${RNFS.DocumentDirectoryPath}/${keyToUse}.jpg`,
-    });
-
-    if ((await response.promise).statusCode === 200) {
-      console.log("Image saved locally");
-      return `${RNFS.DocumentDirectoryPath}/${keyToUse}.jpg`;
-    } else {
-      console.error("Failed to save image locally");
-      return null;
-    }
+    alert('need to implement with expo package')
   } catch (error) {
     console.error("Error saving image locally", error);
     return null;

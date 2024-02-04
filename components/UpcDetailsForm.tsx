@@ -25,7 +25,7 @@ type UpcDetailsFormProps = UpcProductProp;
 const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
 const FREQUENCY_INITIAL = Object.freeze({
   number: 1,
-  timeSpan: "week",
+  timeSpan: "Week",
 } as Frequency);
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const { upcProduct } = props;
@@ -44,6 +44,10 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const isUpcValid = useMemo(
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue]
+  );
+  const frequencyInMs = useMemo(
+    () => TIME_SPAN_TO_MILLISECONDS_MAPPING?.[frequency.timeSpan],
+    [frequency]
   );
 
   //todo: figure out how to do validation for upc and code (one must be given)
@@ -133,19 +137,19 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
                       <Picker.Item
                         key={timespan}
                         label={timespan}
-                        value={
-                          TIME_SPAN_TO_MILLISECONDS_MAPPING[
-                            timespan as TimeSpan
-                          ]
-                        }
+                        value={timespan}
                       />
                     )
                   )}
-                  {frequency.number *
-                    TIME_SPAN_TO_MILLISECONDS_MAPPING?.[frequency?.timeSpan]}
                 </Picker>
               </View>
             </Row>
+            {frequency ? (
+              <>
+                <Text>Miliseconds: {frequency.number * frequencyInMs}ms</Text>
+                <Text>{new Date(Date.now() + frequency.number * frequencyInMs).toLocaleString()}</Text>
+              </>
+            ) : null}
           </Stack>
         </Column>
       </Stack>

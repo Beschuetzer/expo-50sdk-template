@@ -1,6 +1,6 @@
 import { Key } from "@/types/Item";
-import RNFS from "react-native-fs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import FileSystem from 'expo-file-system';
 
 export async function delay(ms: number) {
     if (ms <= 0) return;
@@ -30,11 +30,33 @@ export function getKeyToUse(key: Key) {
   return toReturn;
 }
 
+export async function retrieveImagePathFromAsyncStorage (key: Key) {
+  try {
+    const keyToUse = getKeyToUse(key);
+    return await AsyncStorage.getItem(keyToUse);
+  } catch (error) {
+    console.error("Error retrieving image path in AsyncStorage", error);
+    return null;
+  }
+};
 
 export async function saveImageLocally(key: Key, uri: string) {
   const keyToUse = getKeyToUse(key);
+  const saveLocation = `${FileSystem.documentDirectory}${keyToUse}`;
+
+  alert(JSON.stringify({
+    saveLocation,
+    uri,
+  }))
   try {
-    alert('need to implement with expo package')
+    const downloadResumable = FileSystem.createDownloadResumable(uri, saveLocation);
+      const response = await downloadResumable.downloadAsync();
+      if (response?.status && response.status <= 300) {
+        alert(`Finished downloading to ${response?.uri}`);
+        await saveImagePathToAsyncStorage(key, uri);
+      } else {
+        alert(`Unable to save image ${response?.uri}`);
+      }
   } catch (error) {
     console.error("Error saving image locally", error);
     return null;

@@ -72,6 +72,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
       <Input
         ref={inputRef}
         m={3}
+        keyboardType="numeric"
         placeholder="UPC Number"
         onChangeText={onValueChange}
         value={value}

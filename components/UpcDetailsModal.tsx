@@ -10,7 +10,7 @@ import { lastUpcScannedSelector } from "@/state/slices/generalSlice";
 type UpcDetailsSheetProps = {};
 
 const snapPointPercents = [25, 50, 75, 100];
-const defaultSnappoint = snapPointPercents.length - 2;
+const defaultSnappoint = snapPointPercents.length - 1;
 
 export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const windowDimensions = Dimensions.get("window");

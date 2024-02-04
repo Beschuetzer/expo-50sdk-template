@@ -16,7 +16,7 @@ export type Key = XOR<
 *This represents something that can be added to any store
 **/
 export type Item = Key & {
-  image?: ItemImage;
+  imageUri?: ItemImage;
   /**
    *This is in milliseconds
    **/

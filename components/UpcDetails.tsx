@@ -1,14 +1,14 @@
 import { UpcProduct } from "@/types/UpcResponse";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { UpcDetailsForm } from "./UpcDetailsForm";
 
 type UpcDetailsProps = {
+  onClose: () => void;
   upcProduct?: UpcProduct;
 };
 
 export function UpcDetails(props: UpcDetailsProps) {
-  const { upcProduct } = props;
+  const { onClose, upcProduct } = props;
 
   if (!upcProduct) return null;
-  return <UpcDetailsForm upcProduct={upcProduct}/>
+  return <UpcDetailsForm onClose={onClose} upcProduct={upcProduct}/>
 }

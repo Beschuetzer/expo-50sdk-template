@@ -25,9 +25,13 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const currentSnapPointRef = useRef(defaultSnappoint);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
+ const closeModal = useCallback(() => {
+   bottomSheetModalRef.current?.close();
+ }, [bottomSheetModalRef]);
+
   const openModal = useCallback(() => {
     bottomSheetModalRef.current?.present();
-  }, []);
+  }, [bottomSheetModalRef]);
 
   const onSheetChange = useCallback((index: number) => {
     if (index < 0) {
@@ -60,7 +64,9 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
       );
     }
     if (upcProduct) {
-      return <UpcDetails upcProduct={upcProduct} />;
+      return (
+        <UpcDetails onClose={closeModal} upcProduct={upcProduct} />
+      );
     }
     if (errorMsg) {
       return (

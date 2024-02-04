@@ -8,23 +8,28 @@ import {
   Text,
   Column,
   Center,
+  Button,
 } from "native-base";
 import { Checkbox } from "expo-checkbox";
 import { UpcProductProp } from "@/types/general";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ThumbnailPicker } from "./ThumbnailPicker";
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
 import { EMPTY_STRING } from "@/constants/general";
 import { InputValidationMessage } from "./InputValidationMessage";
 import { FrequencyInput } from "./FrequencyInput";
 import { maxWidthCentered } from "@/constants/styles";
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { saveImageLocally } from "@/utils/helpers";
 
-type UpcDetailsFormProps = UpcProductProp;
+type UpcDetailsFormProps = {
+  onClose: () => void;
+} & UpcProductProp;
 
 const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
 
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
-  const { upcProduct } = props;
+  const { upcProduct, onClose } = props;
   const theme = useTheme();
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
   const [upcValue, setUpcValue] = useState(upcProduct.code || EMPTY_STRING);
@@ -39,6 +44,30 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue]
   );
+
+  const onSavePress = useCallback(async () => {
+    let imageUriOnDevice = "";
+    alert(JSON.stringify({shouldSaveToDevice}, null, 2))
+    if (shouldSaveToDevice) {
+      try {
+          imageUriOnDevice = await saveImageLocally(
+            {
+              name: productNameValue,
+              upc: upcValue,
+            },
+            selectedUrl
+          );
+      } catch (error) {
+        console.log({error});
+      }
+    }
+
+    const imageUriToUse = imageUriOnDevice || selectedUrl;
+    alert(JSON.stringify({
+      imageUriOnDevice,
+      imageUriToUse
+    }, null, 2));
+  }, [shouldSaveToDevice, selectedUrl]);
 
   //todo: figure out how to do validation for upc and code (one must be given)
   //todo: figure out how to save the image ()
@@ -106,6 +135,14 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
             }}
             headingTag={FormControl.Label}
           />
+          <Row space={1}>
+            <Button flex={1} onPress={onSavePress}>
+              Save
+            </Button>
+            <Button flex={1} onPress={() => onClose && onClose()}>
+              Close
+            </Button>
+          </Row>
         </Column>
       </Stack>
     </FormControl>

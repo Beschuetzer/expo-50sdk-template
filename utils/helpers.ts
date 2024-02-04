@@ -1,18 +1,18 @@
 import { Key } from "@/types/Item";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import FileSystem from 'expo-file-system';
+import * as FileSystem from "expo-file-system";
 
 export async function delay(ms: number) {
-    if (ms <= 0) return;
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(null);
-        }, ms)
-    })
+  if (ms <= 0) return;
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(null);
+    }, ms);
+  });
 }
 
 export function getEmptyArray<T>() {
-    return [] as T;
+  return [] as T;
 }
 
 export function getEmptyObject<T>() {
@@ -23,14 +23,16 @@ export function getKeyToUse(key: Key) {
   const toReturn = key?.upc || key?.name || "";
 
   if (!toReturn) {
-    alert('No key given.  Please delete the item in question and ensure there is either a upc or name given.')
+    alert(
+      "No key given.  Please delete the item in question and ensure there is either a upc or name given."
+    );
     return toReturn;
   }
 
   return toReturn;
 }
 
-export async function retrieveImagePathFromAsyncStorage (key: Key) {
+export async function retrieveImagePathFromAsyncStorage(key: Key) {
   try {
     const keyToUse = getKeyToUse(key);
     return await AsyncStorage.getItem(keyToUse);
@@ -38,32 +40,35 @@ export async function retrieveImagePathFromAsyncStorage (key: Key) {
     console.error("Error retrieving image path in AsyncStorage", error);
     return null;
   }
-};
+}
 
+/**
+ *@param key the key to use
+ *@param uri the link to the image (web)
+ **/
 export async function saveImageLocally(key: Key, uri: string) {
-  const keyToUse = getKeyToUse(key);
-  const saveLocation = `${FileSystem.documentDirectory}${keyToUse}`;
-
-  alert(JSON.stringify({
-    saveLocation,
-    uri,
-  }))
   try {
-    const downloadResumable = FileSystem.createDownloadResumable(uri, saveLocation);
-      const response = await downloadResumable.downloadAsync();
-      if (response?.status && response.status <= 300) {
-        alert(`Finished downloading to ${response?.uri}`);
-        await saveImagePathToAsyncStorage(key, uri);
-      } else {
-        alert(`Unable to save image ${response?.uri}`);
-      }
+    const keyToUse = getKeyToUse(key);
+    const imagePath = `${FileSystem.documentDirectory}${keyToUse}`;
+    const downloadResumable = FileSystem.createDownloadResumable(
+      uri,
+      imagePath
+    );
+    const response = await downloadResumable.downloadAsync();
+    if (response?.status && response.status <= 300) {
+      await saveImagePathToAsyncStorage(key, imagePath);
+      return imagePath;
+    } else {
+      console.error(`Unable to save image ${response?.uri}`);
+      return "";
+    }
   } catch (error) {
     console.error("Error saving image locally", error);
-    return null;
+    return "";
   }
-};
+}
 
-export async function saveImagePathToAsyncStorage (key: Key, imagePath: string) {
+export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
   try {
     const keyToUse = getKeyToUse(key);
     await AsyncStorage.setItem(keyToUse, imagePath);
@@ -71,4 +76,4 @@ export async function saveImagePathToAsyncStorage (key: Key, imagePath: string) 
   } catch (error) {
     console.error("Error storing image path in AsyncStorage", error);
   }
-};
+}

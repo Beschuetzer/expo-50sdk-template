@@ -1,13 +1,13 @@
 import { COLORS } from "@/constants/Colors";
 import { FONT_SIZES } from "@/constants/Sizes";
-import { Style } from "@/types/general";
+import { StyleProp } from "@/types/general";
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 
 type ButtonProps = {
   onPress: () => void;
   title: string;
-} & Style;
+} & StyleProp;
 
 export function Button(props: ButtonProps) {
   const { onPress, style = {}, title } = props;

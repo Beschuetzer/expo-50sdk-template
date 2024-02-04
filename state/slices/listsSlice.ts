@@ -39,7 +39,7 @@ export const listsSlice = createSlice({
   initialState,
   reducers: {
     addItemsListItem: (state: ListsState, action: PayloadAction<Item>) => {
-      const keyToUse = getKeyToUse(action);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(
           "Unable to add an item with no name and no upc to the itemsList."
@@ -52,7 +52,7 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<LastPurchasedItem>
     ) => {
-      const keyToUse = getKeyToUse(action);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(
           "Unable to add an item with no name and no upc to the lastPurchasedList."
@@ -65,7 +65,7 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<ShoppingItem>
     ) => {
-      const keyToUse = getKeyToUse(action);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(
           "Unable to add an item with no name and no upc to the shoppingList."
@@ -75,7 +75,7 @@ export const listsSlice = createSlice({
       state.shoppingList[keyToUse] = action.payload;
     },
     addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
-      const keyToUse = getKeyToUse(action as PayloadAction<Key>);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert("Unable to add an item with no name to the storesList.");
         return;
@@ -83,7 +83,7 @@ export const listsSlice = createSlice({
       state.storesList[keyToUse] = action.payload;
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(
           "A key must be provided in order to remove an item from the itemsList."
@@ -96,7 +96,7 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<Key>
     ) => {
-      const keyToUse = getKeyToUse(action);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(
           "A key must be provided in order to remove an item from the lastPurchasedList."
@@ -106,7 +106,7 @@ export const listsSlice = createSlice({
       delete state.lastPurchasedList[keyToUse];
     },
     removeShoppingListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(
           "A key must be provided in order to remove an item from the shoppingList."
@@ -116,7 +116,7 @@ export const listsSlice = createSlice({
       delete state.shoppingList[keyToUse];
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action);
+      const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(
           "A key must be provided in order to remove an item from the storesList."

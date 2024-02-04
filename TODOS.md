@@ -7,6 +7,7 @@
     --any data from the API will pre-populate the fields
     --use a default thumbnail with the option to press a button to select the another if desired
     --the fields will be the fields in the type Item
+-for the scanner screen, add a checkbox to enter "Add to Shopping List mode", where scanning checks for the item in the itemsList and add it if found, otherwise it grabs fetchs the upc data and adds it automatically; the default mode is to just populate the form?;  add an option to change default behavior (e.g. "Auto-save new Upcs scanned")?
 -create ImagePicker, which displays the images in a row and allows you to select one (acheive this by passing in a setPickedImage useState setter where it is being used)
 -figure out how to save thumbnails to android storage for caching purposes
 -add lib react native picker

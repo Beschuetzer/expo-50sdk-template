@@ -1,14 +1,32 @@
-import { StyleSheet } from "react-native";
-import { View } from "@/components/Themed";
+import { Dimensions, StyleSheet } from "react-native";
 import { ReduxViewer } from "@/components/stateTesting/ReduxViewer";
 import { Playground } from "@/components/Playground";
+import { AsyncStorageViewer } from "@/components/stateTesting/AsyncStorageViewer";
+import { Center, ScrollView } from "native-base";
+import { FlashList } from "@shopify/flash-list";
 
 export default function TabOneScreen() {
+  const windowDimensions = Dimensions.get('window');
+
   return (
-    <View style={styles.container}>
-      <ReduxViewer />
-      <Playground />
-    </View>
+    <FlashList
+      estimatedItemSize={windowDimensions.height / 2}
+      data={[
+        {
+          jsx: (
+            <Center>
+              <ReduxViewer />
+              <AsyncStorageViewer />
+              <Playground />
+            </Center>
+          ),
+          key: 1,
+        } as { jsx: any },
+      ]}
+      renderItem={(info) => {
+        return info.item.jsx;
+      }}
+    />
   );
 }
 

@@ -1,19 +1,23 @@
-import { COLORS } from "@/constants/Colors";
-import { ActivityIndicator, ActivityIndicatorProps, View, Text, Dimensions, useWindowDimensions } from "react-native";
+import { COLORS } from "@/constants/colors";
+import {
+  ActivityIndicator,
+  ActivityIndicatorProps,
+  View,
+  Text,
+  Dimensions,
+  useWindowDimensions,
+} from "react-native";
 import { useBottomTabHeight } from "./hooks/useBottomTabHeight";
 
 type FullscreenSpinnerProps = {
-    activityIndicatorProps?: ActivityIndicatorProps
-    text?: string;
-}
+  activityIndicatorProps?: ActivityIndicatorProps;
+  text?: string;
+};
 
 export function FullscreenSpinner(props: FullscreenSpinnerProps) {
-    const {
-        activityIndicatorProps,
-        text,
-    } = props;
-   const dimensions = useWindowDimensions();
-   
+  const { activityIndicatorProps, text } = props;
+  const dimensions = useWindowDimensions();
+
   return (
     <View
       style={{

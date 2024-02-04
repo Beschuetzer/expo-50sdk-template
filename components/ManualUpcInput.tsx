@@ -1,49 +1,42 @@
 import { setLastUpcScanned } from "@/state/slices/generalSlice";
-import { FontAwesome } from "@expo/vector-icons";
-import {
-  Button,
-  Input,
-  View,
-  Text,
-  useTheme,
-  Row,
-} from "native-base";
+import { Button, Input, View, Text, useTheme, Row } from "native-base";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  GestureResponderEvent,
-} from "react-native";
+import { GestureResponderEvent } from "react-native";
 import { useDispatch } from "react-redux";
 import { MOCKS_UPCS } from "./useUpcData";
+import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
+import { InputValidationMessage } from "./InputValidationMessage";
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
 };
 
 const DEBOUNCE_TIMEOUT = 500;
-const REQUIRED_CHAR_LENGTH = 12;
-const UPC_REGEX = new RegExp(`^\\s*\\d{${REQUIRED_CHAR_LENGTH}}\\s*$`, 'i');
 const VALUE_INITIAL = "";
 const IS_VALID_INITIAL = true;
 
 function getIsValidValue(value: string) {
-    return !!UPC_REGEX.test(value);
+  return !!UPC_REGEX.test(value);
 }
 
 export function ManualUpcInput(props: ManualUpcInputProps) {
   const { isVisible = true } = props;
-  const timeoutRef = useRef<any>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const timeoutRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [isValid, setIsValid] = useState(IS_VALID_INITIAL);
   const [value, setValue] = useState<string>(VALUE_INITIAL);
   const theme = useTheme();
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-  const onSearchPress = useCallback((e: GestureResponderEvent) => {
-    e.preventDefault();
-    if (getIsValidValue(value)) {
+  const onSearchPress = useCallback(
+    (e: GestureResponderEvent) => {
+      e.preventDefault();
+      if (getIsValidValue(value)) {
         dispatch(setLastUpcScanned(value));
-    } 
-  }, [value]);
+      }
+    },
+    [value]
+  );
 
   const handleSetIsValid = useCallback((value: string) => {
     clearTimeout(timeoutRef.current);
@@ -63,12 +56,12 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
 
   useEffect(() => {
     setValue(VALUE_INITIAL);
-    setIsValid(IS_VALID_INITIAL)
+    setIsValid(IS_VALID_INITIAL);
 
     if (inputRef.current) {
-        inputRef.current.focus();
+      inputRef.current.focus();
     }
-  }, [isVisible])
+  }, [isVisible]);
 
   if (!isVisible) return null;
   return (
@@ -84,32 +77,22 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         value={value}
         focusOutlineColor={isValid ? "primary.100" : "red.200"}
       />
-      <Row
-        display={!isValid ? "block" : "none"}
-        justifyContent={"flex-start"}
-        alignItems={"center"}
-        pb={3}
-        px={3}
-      >
-        <FontAwesome
-          size={10}
-          pb={0}
-          name="warning"
-          color={theme.colors.red[900]}
-        />
-        <Text pl={3} color={isValid ? "black" : "red.900"}>
-          Must be {REQUIRED_CHAR_LENGTH} numbers (currently {value.length}{" "}
-          chars)
-        </Text>
-      </Row>
+      <InputValidationMessage
+        style={{
+          margin: theme.sizes[3],
+          marginTop: 0,
+        }}
+        isValid={isValid}
+        message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${value.length} chars)`}
+      />
       <Row>
-        <Button onPress={() => setValue(MOCKS_UPCS[0])}>
+        <Button onPress={() => onValueChange(MOCKS_UPCS[0])}>
           Mock {MOCKS_UPCS[0]}
         </Button>
-        <Button onPress={() => setValue(MOCKS_UPCS[1])}>
+        <Button onPress={() => onValueChange(MOCKS_UPCS[1])}>
           Mock {MOCKS_UPCS[1]}
         </Button>
-        <Button onPress={() => setValue(MOCKS_UPCS[2])}>
+        <Button onPress={() => onValueChange(MOCKS_UPCS[2])}>
           Mock {MOCKS_UPCS[2]}
         </Button>
       </Row>

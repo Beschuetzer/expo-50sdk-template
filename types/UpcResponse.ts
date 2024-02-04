@@ -10,6 +10,7 @@ export type UpcResponse = {
 };
 
 export type UpcProduct = {
+  brands?: string;
   code?: string;
   id?: string;
   image_front_small_url?: string;

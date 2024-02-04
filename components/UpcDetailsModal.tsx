@@ -1,4 +1,4 @@
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useRef, useMemo, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, StyleSheet } from "react-native";
 import { UpcDetails } from "./UpcDetails";
@@ -84,7 +84,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
       snapPoints={snapPoints}
       onChange={onSheetChange}
     >
-      {renderContent()}
+      <BottomSheetScrollView>{renderContent()}</BottomSheetScrollView>
     </BottomSheetModal>
   );
   //#endregion

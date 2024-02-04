@@ -3,16 +3,17 @@ import { Row, AspectRatio, Image, View } from "native-base";
 import { useCallback, useEffect, useMemo } from "react";
 import { TouchableOpacity } from "react-native";
 import { useIsDarkMode } from "./hooks/useIsDarkTheme";
+import { StyleProp } from "@/types/general";
 
 type ThumbnailPickerProps = {
   upcProduct: UpcProduct;
   selectedUrl: string;
   setSelectedUrl: React.Dispatch<React.SetStateAction<string>>;
-};
+} & StyleProp;
 
 const DEFAULT_SELECTION_INDEX = 0;
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
-  const { upcProduct, selectedUrl, setSelectedUrl } = props;
+  const { upcProduct, selectedUrl, setSelectedUrl, style } = props;
   const isDarkMode = useIsDarkMode();
 
   const imagesToRender = useMemo(
@@ -36,7 +37,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   }, []);
 
   return (
-    <Row space={1}>
+    <Row space={1} style={style}>
       {Array.from(imagesToRender).map((imageUrl) => {
         const isSelected = imageUrl === selectedUrl;
 
@@ -44,7 +45,6 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
           <View
             key={imageUrl}
             borderWidth={2}
-            mt={2}
             borderColor={isSelected ? "tertiary.900" : isDarkMode ? "black" : "white"}
           >
             <TouchableOpacity onPress={() => handleSelect(imageUrl)}>

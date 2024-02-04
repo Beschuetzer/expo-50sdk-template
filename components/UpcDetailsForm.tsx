@@ -7,33 +7,26 @@ import {
   useTheme,
   Text,
   Column,
+  Center,
 } from "native-base";
 import { Checkbox } from "expo-checkbox";
-import { Frequency, TimeSpan, UpcProductProp } from "@/types/general";
-import { useMemo, useState } from "react";
+import { UpcProductProp } from "@/types/general";
+import { useMemo, useRef, useState } from "react";
 import { ThumbnailPicker } from "./ThumbnailPicker";
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
-import {
-  EMPTY_STRING,
-  TIME_SPAN_TO_MILLISECONDS_MAPPING,
-} from "@/constants/general";
+import { EMPTY_STRING } from "@/constants/general";
 import { InputValidationMessage } from "./InputValidationMessage";
-import { Picker } from "@react-native-picker/picker";
+import { FrequencyInput } from "./FrequencyInput";
+import { maxWidthCentered } from "@/constants/styles";
 
 type UpcDetailsFormProps = UpcProductProp;
 
 const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
-const FREQUENCY_INITIAL = Object.freeze({
-  number: 1,
-  timeSpan: "Week",
-} as Frequency);
+
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const { upcProduct } = props;
   const theme = useTheme();
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
-  const [frequency, setFrequency] = useState<Frequency>({
-    ...FREQUENCY_INITIAL,
-  });
   const [upcValue, setUpcValue] = useState(upcProduct.code || EMPTY_STRING);
   const [productNameValue, setProductNameValue] = useState(
     `${upcProduct.brands} - ${upcProduct.product_name}` || EMPTY_STRING
@@ -41,19 +34,16 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const [shouldSaveToDevice, setShouldSaveToDevice] = useState(
     SHOULD_SAVE_TO_DEVICE_INITIAL
   );
+  const frequencyInMsRef = useRef<number>(-1);
   const isUpcValid = useMemo(
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue]
-  );
-  const frequencyInMs = useMemo(
-    () => TIME_SPAN_TO_MILLISECONDS_MAPPING?.[frequency.timeSpan],
-    [frequency]
   );
 
   //todo: figure out how to do validation for upc and code (one must be given)
   //todo: figure out how to save the image ()
   return (
-    <FormControl>
+    <FormControl {...maxWidthCentered}>
       <Stack>
         <Column space={theme.space[1]} m={theme.space[1]}>
           <Stack flex={1}>
@@ -92,7 +82,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
               value={selectedUrl}
             />
             <Row
-              space={theme.space[2]}
+              space={theme.space[1]}
               alignItems={"center"}
               onTouchStart={() => setShouldSaveToDevice((current) => !current)}
             >
@@ -102,7 +92,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
                   shouldSaveToDevice ? theme.colors.primary[900] : undefined
                 }
               />
-              <Text>Save thumbnail to Cache?</Text>
+              <Text>Save thumbnail to device?</Text>
             </Row>
             <ThumbnailPicker
               selectedUrl={selectedUrl}
@@ -110,47 +100,12 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
               upcProduct={upcProduct}
             />
           </Stack>
-          <Stack>
-            <FormControl.Label>Frequency</FormControl.Label>
-            <Row>
-              <Input
-                keyboardType="numeric"
-                variant="outline"
-                p={theme.space[1]}
-                placeholder="Number"
-                value={frequency.number.toString()}
-                onChangeText={(newText) =>
-                  setFrequency({ ...frequency, number: Number(newText) })
-                }
-                isInvalid={frequency.number <= 0}
-                flex={1}
-              />
-              <View flex={4}>
-                <Picker
-                  selectedValue={frequency.timeSpan}
-                  onValueChange={(itemValue) =>
-                    setFrequency({ ...frequency, timeSpan: itemValue })
-                  }
-                >
-                  {Object.keys(TIME_SPAN_TO_MILLISECONDS_MAPPING).map(
-                    (timespan) => (
-                      <Picker.Item
-                        key={timespan}
-                        label={timespan}
-                        value={timespan}
-                      />
-                    )
-                  )}
-                </Picker>
-              </View>
-            </Row>
-            {frequency ? (
-              <>
-                <Text>Miliseconds: {frequency.number * frequencyInMs}ms</Text>
-                <Text>{new Date(Date.now() + frequency.number * frequencyInMs).toLocaleString()}</Text>
-              </>
-            ) : null}
-          </Stack>
+          <FrequencyInput
+            onValueChange={(frequencyInMs) => {
+              frequencyInMsRef.current = frequencyInMs;
+            }}
+            headingTag={FormControl.Label}
+          />
         </Column>
       </Stack>
     </FormControl>

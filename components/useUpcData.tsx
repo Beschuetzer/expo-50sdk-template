@@ -8,10 +8,15 @@ import { delay } from "@/utils/helpers";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-export function useUpcProduct() {
+type UseUpcProductProps = {
+  onSuccessfulFetch?: (upcProduct: UpcProduct) => void;
+}
+
+export function useUpcProduct(props?: UseUpcProductProps) {
+  const { onSuccessfulFetch } = props || {};
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
   const upcProduct = useSelector(upcProductSelector(lastUpcScanned));
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [product, setProduct] = useState<UpcProduct | null>(null);
   const dispatch = useDispatch();
@@ -29,8 +34,11 @@ export function useUpcProduct() {
         const data = (await response.json()) as UpcResponse;
         dispatch(addUpcProduct(data.product));
         setProduct(data.product);
+        onSuccessfulFetch && onSuccessfulFetch(data.product);
       } else {
-        setErrorMsg(`Invalid resopnse from service for '${upcToFetch}'.  Make sure you have a data connection and try again in a few seconds.`);
+        setErrorMsg(
+          `Invalid resopnse from service for '${upcToFetch}'.  Make sure you have a data connection and try again in a few seconds.`
+        );
         setProduct(null);
       }
     } catch (error) {
@@ -50,12 +58,13 @@ export function useUpcProduct() {
     if (upcProduct) {
       dispatch(resetLastUpcScanned());
       setProduct(upcProduct);
+      onSuccessfulFetch && onSuccessfulFetch(upcProduct);
     } else if (lastUpcScanned) {
       fetchUpcData(lastUpcScanned);
     }
   });
 
-  return { 
+  return {
     upcProduct: product,
     isLoading,
     errorMsg,

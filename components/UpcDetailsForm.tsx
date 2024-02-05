@@ -11,7 +11,6 @@ import {
   Button,
 } from "native-base";
 import { Checkbox } from "expo-checkbox";
-import { UpcProductProp } from "@/types/general";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { ThumbnailPicker } from "./ThumbnailPicker";
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
@@ -21,15 +20,18 @@ import { FrequencyInput } from "./FrequencyInput";
 import { maxWidthCentered } from "@/constants/styles";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { saveImageLocally } from "@/utils/helpers";
+import { useSelector } from "react-redux";
+import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
 
 type UpcDetailsFormProps = {
   onClose: () => void;
-} & UpcProductProp;
+};
 
 const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
 
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
-  const { upcProduct, onClose } = props;
+  const upcProduct = useSelector(upcProductToDisplaySelector);
+  const { onClose } = props;
   const theme = useTheme();
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
   const [upcValue, setUpcValue] = useState(upcProduct.code || EMPTY_STRING);
@@ -47,26 +49,32 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
 
   const onSavePress = useCallback(async () => {
     let imageUriOnDevice = "";
-    alert(JSON.stringify({shouldSaveToDevice}, null, 2))
+    alert(JSON.stringify({ shouldSaveToDevice }, null, 2));
     if (shouldSaveToDevice) {
       try {
-          imageUriOnDevice = await saveImageLocally(
-            {
-              name: productNameValue,
-              upc: upcValue,
-            },
-            selectedUrl
-          );
+        imageUriOnDevice = await saveImageLocally(
+          {
+            name: productNameValue,
+            upc: upcValue,
+          },
+          selectedUrl
+        );
       } catch (error) {
-        console.log({error});
+        console.log({ error });
       }
     }
 
     const imageUriToUse = imageUriOnDevice || selectedUrl;
-    alert(JSON.stringify({
-      imageUriOnDevice,
-      imageUriToUse
-    }, null, 2));
+    alert(
+      JSON.stringify(
+        {
+          imageUriOnDevice,
+          imageUriToUse,
+        },
+        null,
+        2
+      )
+    );
   }, [shouldSaveToDevice, selectedUrl]);
 
   //todo: figure out how to do validation for upc and code (one must be given)

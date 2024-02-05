@@ -1,11 +1,15 @@
 import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { useRef, useMemo, useCallback, useEffect, useState } from "react";
+import { useRef, useMemo, useCallback, useEffect } from "react";
 import { ActivityIndicator, Dimensions, StyleSheet } from "react-native";
 import { UpcDetails } from "./UpcDetails";
 import { useUpcProduct } from "./useUpcData";
 import { Text, useTheme, Container, View, Center, Heading } from "native-base";
-import { useSelector } from "react-redux";
-import { lastUpcScannedSelector } from "@/state/slices/generalSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  lastUpcScannedSelector,
+  setUpcProductToDisplay,
+} from "@/state/slices/generalSlice";
+import { UpcProduct } from "@/types/UpcResponse";
 
 type UpcDetailsSheetProps = {};
 
@@ -13,8 +17,15 @@ const snapPointPercents = [25, 50, 75, 100];
 const defaultSnappoint = snapPointPercents.length - 1;
 
 export function UpcDetailsModal(props: UpcDetailsSheetProps) {
+  const dispatch = useDispatch();
   const windowDimensions = Dimensions.get("window");
-  const { upcProduct, isLoading, errorMsg } = useUpcProduct();
+  const { upcProduct, isLoading, errorMsg } = useUpcProduct({
+    onSuccessfulFetch: async () => {
+      dispatch(
+        setUpcProductToDisplay(upcProduct || {} as UpcProduct)
+      );
+    },
+  });
   const theme = useTheme();
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
 
@@ -25,9 +36,9 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const currentSnapPointRef = useRef(defaultSnappoint);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
- const closeModal = useCallback(() => {
-   bottomSheetModalRef.current?.close();
- }, [bottomSheetModalRef]);
+  const closeModal = useCallback(() => {
+    bottomSheetModalRef.current?.close();
+  }, [bottomSheetModalRef]);
 
   const openModal = useCallback(() => {
     bottomSheetModalRef.current?.present();
@@ -64,9 +75,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
       );
     }
     if (upcProduct) {
-      return (
-        <UpcDetails onClose={closeModal} upcProduct={upcProduct} />
-      );
+      return <UpcDetails onClose={closeModal} />;
     }
     if (errorMsg) {
       return (

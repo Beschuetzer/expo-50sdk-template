@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { MOCKS_UPCS } from "./useUpcData";
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
 import { InputValidationMessage } from "./InputValidationMessage";
+import { ButtonWithLoadingSpinner } from "./ButtonWithLoadingSpinner";
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -97,14 +98,14 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
           Mock {MOCKS_UPCS[2]}
         </Button>
       </Row>
-      <Button
+      <ButtonWithLoadingSpinner
         isDisabled={!isValid}
         backgroundColor={"secondary.900"}
         borderRadius={0}
         onPress={onSearchPress}
       >
         Search
-      </Button>
+      </ButtonWithLoadingSpinner>
     </View>
   );
 }

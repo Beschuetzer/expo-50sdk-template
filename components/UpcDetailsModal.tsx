@@ -28,7 +28,6 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   });
   const theme = useTheme();
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
-
   const snapPoints = useMemo(
     () => snapPointPercents.map((snapPointPercent) => `${snapPointPercent}%`),
     [snapPointPercents]

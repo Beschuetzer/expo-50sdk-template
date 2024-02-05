@@ -11,7 +11,7 @@ import {
   Button,
 } from "native-base";
 import { Checkbox } from "expo-checkbox";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ThumbnailPicker } from "./ThumbnailPicker";
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
 import { EMPTY_STRING } from "@/constants/general";
@@ -22,22 +22,32 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { saveImageLocally } from "@/utils/helpers";
 import { useSelector } from "react-redux";
 import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
+import { UpcProduct } from "@/types/UpcResponse";
 
 type UpcDetailsFormProps = {
   onClose: () => void;
 };
 
+function getProductNameValue(upcProduct: UpcProduct) {
+  return `${upcProduct.brands} - ${upcProduct.product_name}` || EMPTY_STRING;
+}
+
+function getUpcValue(upcProduct: UpcProduct){
+  return upcProduct.code || upcProduct.id || EMPTY_STRING;
+}
+
 const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
 
+/**
+*NOTE: Be sure to update and new POS in the useEffect below
+**/
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const upcProduct = useSelector(upcProductToDisplaySelector);
   const { onClose } = props;
   const theme = useTheme();
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
-  const [upcValue, setUpcValue] = useState(upcProduct.code || EMPTY_STRING);
-  const [productNameValue, setProductNameValue] = useState(
-    `${upcProduct.brands} - ${upcProduct.product_name}` || EMPTY_STRING
-  );
+  const [upcValue, setUpcValue] = useState(getUpcValue(upcProduct));
+  const [productNameValue, setProductNameValue] = useState(getProductNameValue(upcProduct));
   const [shouldSaveToDevice, setShouldSaveToDevice] = useState(
     SHOULD_SAVE_TO_DEVICE_INITIAL
   );
@@ -77,8 +87,14 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     );
   }, [shouldSaveToDevice, selectedUrl]);
 
-  //todo: figure out how to do validation for upc and code (one must be given)
-  //todo: figure out how to save the image ()
+  /**
+  *Need to load the new values when upcProduct changes
+  **/
+  useEffect(() => {
+    setProductNameValue(getProductNameValue(upcProduct));
+    setUpcValue(getUpcValue(upcProduct));
+  }, [upcProduct])
+
   return (
     <FormControl {...maxWidthCentered}>
       <Stack>

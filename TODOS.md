@@ -1,5 +1,6 @@
 ## Work on Next
--fix bug where pressing search on a cached upc when the modal is open, doesn't load the new upc correctly (name and upc not right)
+  //todo: figure out how to do validation for upc and code (one must be given)
+  //todo: figure out how to save the image (check that it works)
 -UpcDetails rendering:
     --use PagerView to render the thumbnails 
     --figure out adding own image button

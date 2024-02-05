@@ -20,7 +20,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const dispatch = useDispatch();
   const windowDimensions = Dimensions.get("window");
   const { upcProduct, isLoading, errorMsg } = useUpcProduct({
-    onSuccessfulFetch: async () => {
+    onSuccessfulFetch: () => {
       dispatch(
         setUpcProductToDisplay(upcProduct || {} as UpcProduct)
       );

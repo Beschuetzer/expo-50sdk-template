@@ -11,6 +11,10 @@ export async function delay(ms: number) {
   });
 }
 
+export function displayAlert(object: object) {
+  alert(JSON.stringify(object, null, 2));
+}
+
 export function getEmptyArray<T>() {
   return [] as T;
 }

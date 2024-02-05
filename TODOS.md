@@ -1,6 +1,7 @@
 ## Work on Next
 
   //todo: figure out how to save the image (check that it works)
+  //todo: add eslint for expo
 -UpcDetails rendering:
     --use PagerView to render the thumbnails 
     --figure out adding own image button

@@ -23,7 +23,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
 import { UpcProduct } from "@/types/UpcResponse";
 import { upcProductSelector } from "@/state/slices/scannerSlice";
-import { addItemsListItem, itemsListItemSelector } from "@/state/slices/listsSlice";
+import {
+  addItemsListItem,
+  itemsListItemSelector,
+} from "@/state/slices/listsSlice";
 
 type UpcDetailsFormValdation = {
   isValid: boolean;
@@ -49,7 +52,6 @@ const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
  *NOTE: Be sure to update and new POS in the useEffect below
  **/
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
-  const dispatch = useDispatch();
   const upcProduct = useSelector(upcProductToDisplaySelector);
   const { onClose } = props;
   const theme = useTheme();
@@ -79,11 +81,12 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     () => getKeyToUse({ name: productNameValue, upc: upcValue }, false),
     [productNameValue, upcValue]
   );
+  const dispatch = useDispatch();
   const itemInList = useSelector(itemsListItemSelector(keyToUse));
 
-  const onSavePress = useCallback(async () => {
+  async function onSavePress() {
     let imageUriOnDevice = "";
-    alert(JSON.stringify({ shouldSaveToDevice }, null, 2));
+    // alert(JSON.stringify({ shouldSaveToDevice }, null, 2));
     if (shouldSaveToDevice) {
       try {
         imageUriOnDevice = await saveImageLocally(
@@ -98,30 +101,18 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
       }
     }
 
-    const imageUriToUse = imageUriOnDevice || selectedUrl;
-    alert(
-      JSON.stringify(
-        {
-          imageUriOnDevice,
-          imageUriToUse,
-        },
-        null,
-        2
-      )
-    );
-
-    // dispatch(
-    //   addItemsListItem({
-    //     frequency: frequencyInMsRef.current,
-    //     imageUri: {
-    //       location: imageUriOnDevice,
-    //       url: selectedUrl || EMPTY_STRING,
-    //     },
-    //     name: productNameValue,
-    //     upc: upcValue,
-    //   })
-    // );
-  }, [shouldSaveToDevice, selectedUrl, frequencyInMsRef, productNameValue, upcValue]);
+    const itemToSave = {
+      frequency: frequencyInMsRef.current,
+      imageUri: {
+        location: imageUriOnDevice,
+        url: selectedUrl || EMPTY_STRING,
+      },
+      name: productNameValue,
+      upc: upcValue,
+    };
+    alert(JSON.stringify(itemToSave, null, 2));
+    dispatch(addItemsListItem(itemToSave));
+  }
 
   /**
    *Need to load the new values when upcProduct changes

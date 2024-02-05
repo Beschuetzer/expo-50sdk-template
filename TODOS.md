@@ -1,5 +1,5 @@
 ## Work on Next
-  //todo: figure out how to add a message that mentions whether an item for the given key (name or upc) is already present in the UpcDetailsForm
+
   //todo: figure out how to save the image (check that it works)
 -UpcDetails rendering:
     --use PagerView to render the thumbnails 

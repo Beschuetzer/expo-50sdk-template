@@ -18,41 +18,43 @@ import { EMPTY_STRING } from "@/constants/general";
 import { InputValidationMessage } from "./InputValidationMessage";
 import { FrequencyInput } from "./FrequencyInput";
 import { maxWidthCentered } from "@/constants/styles";
-import { saveImageLocally } from "@/utils/helpers";
+import { getKeyToUse, saveImageLocally } from "@/utils/helpers";
 import { useSelector } from "react-redux";
 import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
 import { UpcProduct } from "@/types/UpcResponse";
+import { upcProductSelector } from "@/state/slices/scannerSlice";
 
 type UpcDetailsFormValdation = {
   isValid: boolean;
   message: string;
-}
+};
 
 type UpcDetailsFormProps = {
   onClose: () => void;
 };
 
-
 function getProductNameValue(upcProduct: UpcProduct) {
   return `${upcProduct.brands} - ${upcProduct.product_name}` || EMPTY_STRING;
 }
 
-function getUpcValue(upcProduct: UpcProduct){
+function getUpcValue(upcProduct: UpcProduct) {
   return upcProduct.code || upcProduct.id || EMPTY_STRING;
 }
 
 const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
 
 /**
-*NOTE: Be sure to update and new POS in the useEffect below
-**/
+ *NOTE: Be sure to update and new POS in the useEffect below
+ **/
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const upcProduct = useSelector(upcProductToDisplaySelector);
   const { onClose } = props;
   const theme = useTheme();
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
   const [upcValue, setUpcValue] = useState(getUpcValue(upcProduct));
-  const [productNameValue, setProductNameValue] = useState(getProductNameValue(upcProduct));
+  const [productNameValue, setProductNameValue] = useState(
+    getProductNameValue(upcProduct)
+  );
   const [shouldSaveToDevice, setShouldSaveToDevice] = useState(
     SHOULD_SAVE_TO_DEVICE_INITIAL
   );
@@ -65,9 +67,16 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     const isValid = (isUpcValid && upcValue.length > 0) || !!productNameValue;
     return {
       isValid,
-      message: isValid ? "" : "Either a Upc or a Name must be given for each item.",
-    }
-  },[isUpcValid, productNameValue])
+      message: isValid
+        ? ""
+        : "Either a Upc or a Name must be given for each item.",
+    };
+  }, [isUpcValid, productNameValue]);
+  const keyToUse = useMemo(
+    () => getKeyToUse({ name: productNameValue, upc: upcValue }, false),
+    [productNameValue, upcValue]
+  );
+  const upcProductInList = useSelector(upcProductSelector(keyToUse));
 
   const onSavePress = useCallback(async () => {
     let imageUriOnDevice = "";
@@ -100,12 +109,12 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   }, [shouldSaveToDevice, selectedUrl]);
 
   /**
-  *Need to load the new values when upcProduct changes
-  **/
+   *Need to load the new values when upcProduct changes
+   **/
   useEffect(() => {
     setProductNameValue(getProductNameValue(upcProduct));
     setUpcValue(getUpcValue(upcProduct));
-  }, [upcProduct])
+  }, [upcProduct]);
 
   return (
     <FormControl {...maxWidthCentered}>
@@ -120,7 +129,11 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
               placeholder="UPC Code"
               value={upcValue}
               onChangeText={(newText) => setUpcValue(newText)}
-              isInvalid={!UPC_REGEX.test(upcValue || EMPTY_STRING)}
+              isInvalid={
+                (!UPC_REGEX.test(upcValue || EMPTY_STRING) &&
+                  upcValue.length !== 0) ||
+                productNameValue.length === 0
+              }
             />
             <InputValidationMessage
               isValid={isUpcValid}
@@ -172,16 +185,24 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
             headingTag={FormControl.Label}
           />
           <Row space={1}>
-            <Button isDisabled={!formValidation.isValid} flex={1} onPress={onSavePress}>
+            <Button
+              isDisabled={!formValidation.isValid}
+              flex={1}
+              onPress={onSavePress}
+            >
               Save
             </Button>
             <Button flex={1} onPress={() => onClose && onClose()}>
               Close
             </Button>
           </Row>
-          <InputValidationMessage 
+          <InputValidationMessage
             isValid={formValidation.isValid}
             message={formValidation.message}
+          />
+          <InputValidationMessage
+            isValid={!upcProductInList}
+            message={`An item with the key of '${keyToUse}' is already in the list and will be overriden.`}
           />
         </Column>
       </Stack>

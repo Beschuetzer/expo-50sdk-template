@@ -1,3 +1,4 @@
+import { EMPTY_STRING } from "@/constants/general";
 import { Key } from "@/types/Item";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
@@ -23,14 +24,13 @@ export function getEmptyObject<T>() {
   return {} as T;
 }
 
-export function getKeyToUse(key: Key) {
-  const toReturn = key?.upc || key?.name || "";
+export function getKeyToUse(key: Key, displayAlert = true) {
+  const toReturn = key?.upc || key?.name || EMPTY_STRING;
 
-  if (!toReturn) {
+  if (!toReturn && displayAlert) {
     alert(
       "No key given.  Please delete the item in question and ensure there is either a upc or name given."
     );
-    return toReturn;
   }
 
   return toReturn;

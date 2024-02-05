@@ -20,7 +20,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const dispatch = useDispatch();
   const windowDimensions = Dimensions.get("window");
   const { upcProduct, isLoading, errorMsg } = useUpcProduct({
-    onSuccessfulFetch: () => {
+    onSuccessfulFetch: (upcProduct: UpcProduct) => {
       dispatch(
         setUpcProductToDisplay(upcProduct || {} as UpcProduct)
       );
@@ -42,6 +42,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
 
   const openModal = useCallback(() => {
     bottomSheetModalRef.current?.present();
+    bottomSheetModalRef.current?.snapToIndex(snapPoints.length - 1);
   }, [bottomSheetModalRef]);
 
   const onSheetChange = useCallback((index: number) => {
@@ -54,7 +55,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   }, []);
 
   useEffect(() => {
-    if (!upcProduct && !isLoading) return;
+    if ((!upcProduct && !isLoading)) return;
     openModal();
   }, [lastUpcScanned]);
 

@@ -1,8 +1,8 @@
-import { setLastUpcScanned } from "@/state/slices/generalSlice";
+import { lastUpcScannedSelector, setLastUpcScanned } from "@/state/slices/generalSlice";
 import { Button, Input, View, Text, useTheme, Row } from "native-base";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GestureResponderEvent } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { MOCKS_UPCS } from "./useUpcData";
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
 import { InputValidationMessage } from "./InputValidationMessage";
@@ -28,6 +28,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
   const [value, setValue] = useState<string>(VALUE_INITIAL);
   const theme = useTheme();
   const dispatch = useDispatch();
+  const lastUpcScanned = useSelector(lastUpcScannedSelector);
 
   const onSearchPress = useCallback(
     (e: GestureResponderEvent) => {
@@ -98,14 +99,14 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
           Mock {MOCKS_UPCS[2]}
         </Button>
       </Row>
-      <ButtonWithLoadingSpinner
-        isDisabled={!isValid}
+      <Button
+        isDisabled={!isValid || !!lastUpcScanned}
         backgroundColor={"secondary.900"}
         borderRadius={0}
         onPress={onSearchPress}
       >
         Search
-      </ButtonWithLoadingSpinner>
+      </Button>
     </View>
   );
 }

@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
 import { UpcProduct } from "@/types/UpcResponse";
 import { upcProductSelector } from "@/state/slices/scannerSlice";
-import { addItemsListItem } from "@/state/slices/listsSlice";
+import { addItemsListItem, itemsListItemSelector } from "@/state/slices/listsSlice";
 
 type UpcDetailsFormValdation = {
   isValid: boolean;
@@ -79,7 +79,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     () => getKeyToUse({ name: productNameValue, upc: upcValue }, false),
     [productNameValue, upcValue]
   );
-  const upcProductInList = useSelector(upcProductSelector(keyToUse));
+  const itemInList = useSelector(itemsListItemSelector(keyToUse));
 
   const onSavePress = useCallback(async () => {
     let imageUriOnDevice = "";
@@ -110,17 +110,17 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
       )
     );
 
-    dispatch(
-      addItemsListItem({
-        frequency: frequencyInMsRef.current,
-        imageUri: {
-          location: imageUriOnDevice,
-          url: selectedUrl || EMPTY_STRING,
-        },
-        name: productNameValue,
-        upc: upcValue,
-      })
-    );
+    // dispatch(
+    //   addItemsListItem({
+    //     frequency: frequencyInMsRef.current,
+    //     imageUri: {
+    //       location: imageUriOnDevice,
+    //       url: selectedUrl || EMPTY_STRING,
+    //     },
+    //     name: productNameValue,
+    //     upc: upcValue,
+    //   })
+    // );
   }, [shouldSaveToDevice, selectedUrl, frequencyInMsRef, productNameValue, upcValue]);
 
   /**
@@ -216,7 +216,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
             message={formValidation.message}
           />
           <InputValidationMessage
-            isValid={!upcProductInList}
+            isValid={!itemInList}
             message={`An item with the key of '${keyToUse}' is already in the list and will be overriden.`}
           />
         </Column>

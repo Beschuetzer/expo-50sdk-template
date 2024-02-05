@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { Store } from "@/types/Store";
@@ -157,6 +157,16 @@ export const {
 } = listsSlice.actions;
 
 export default listsSlice.reducer;
+
+
+export const itemsListItemSelector = (id: string) =>
+  createSelector(
+    [(state: RootState) => (state[listsSlice.name] as ListsState).itemsList],
+    (itemsList) => {
+      const value = (itemsList as any)?.[id];
+      return (value || null) as (Item | null);
+    }
+  );
 
 export const itemsListSelector = (state: RootState) =>
   (state[listsSlice.name] as ListsState).itemsList;

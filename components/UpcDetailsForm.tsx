@@ -18,15 +18,20 @@ import { EMPTY_STRING } from "@/constants/general";
 import { InputValidationMessage } from "./InputValidationMessage";
 import { FrequencyInput } from "./FrequencyInput";
 import { maxWidthCentered } from "@/constants/styles";
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { saveImageLocally } from "@/utils/helpers";
 import { useSelector } from "react-redux";
 import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
 import { UpcProduct } from "@/types/UpcResponse";
 
+type UpcDetailsFormValdation = {
+  isValid: boolean;
+  message: string;
+}
+
 type UpcDetailsFormProps = {
   onClose: () => void;
 };
+
 
 function getProductNameValue(upcProduct: UpcProduct) {
   return `${upcProduct.brands} - ${upcProduct.product_name}` || EMPTY_STRING;
@@ -56,6 +61,13 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue]
   );
+  const formValidation: UpcDetailsFormValdation = useMemo(() => {
+    const isValid = (isUpcValid && upcValue.length > 0) || !!productNameValue;
+    return {
+      isValid,
+      message: isValid ? "" : "Either a Upc or a Name must be given for each item.",
+    }
+  },[isUpcValid, productNameValue])
 
   const onSavePress = useCallback(async () => {
     let imageUriOnDevice = "";
@@ -160,13 +172,17 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
             headingTag={FormControl.Label}
           />
           <Row space={1}>
-            <Button flex={1} onPress={onSavePress}>
+            <Button isDisabled={!formValidation.isValid} flex={1} onPress={onSavePress}>
               Save
             </Button>
             <Button flex={1} onPress={() => onClose && onClose()}>
               Close
             </Button>
           </Row>
+          <InputValidationMessage 
+            isValid={formValidation.isValid}
+            message={formValidation.message}
+          />
         </Column>
       </Stack>
     </FormControl>

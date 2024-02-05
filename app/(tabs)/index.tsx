@@ -2,11 +2,12 @@ import { Dimensions, StyleSheet } from "react-native";
 import { ReduxViewer } from "@/components/stateTesting/ReduxViewer";
 import { Playground } from "@/components/Playground";
 import { AsyncStorageViewer } from "@/components/stateTesting/AsyncStorageViewer";
-import { Center, ScrollView } from "native-base";
+import { Center } from "native-base";
 import { FlashList } from "@shopify/flash-list";
+import { ItemsList } from "@/components/lists/ItemsList";
 
 export default function TabOneScreen() {
-  const windowDimensions = Dimensions.get('window');
+  const windowDimensions = Dimensions.get("window");
 
   return (
     <FlashList
@@ -17,6 +18,7 @@ export default function TabOneScreen() {
             <Center>
               <ReduxViewer />
               <AsyncStorageViewer />
+              <ItemsList />
               <Playground />
             </Center>
           ),

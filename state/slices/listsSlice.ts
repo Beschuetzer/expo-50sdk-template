@@ -160,3 +160,6 @@ export default listsSlice.reducer;
 
 export const itemsListSelector = (state: RootState) =>
   (state[listsSlice.name] as ListsState).itemsList;
+
+export const itemsListArraySelector = (state: RootState) =>
+    Object.values((state[listsSlice.name] as ListsState).itemsList || {});

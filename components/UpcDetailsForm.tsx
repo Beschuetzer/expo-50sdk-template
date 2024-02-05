@@ -19,10 +19,11 @@ import { InputValidationMessage } from "./InputValidationMessage";
 import { FrequencyInput } from "./FrequencyInput";
 import { maxWidthCentered } from "@/constants/styles";
 import { getKeyToUse, saveImageLocally } from "@/utils/helpers";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
 import { UpcProduct } from "@/types/UpcResponse";
 import { upcProductSelector } from "@/state/slices/scannerSlice";
+import { addItemsListItem } from "@/state/slices/listsSlice";
 
 type UpcDetailsFormValdation = {
   isValid: boolean;
@@ -48,6 +49,7 @@ const SHOULD_SAVE_TO_DEVICE_INITIAL = true;
  *NOTE: Be sure to update and new POS in the useEffect below
  **/
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
+  const dispatch = useDispatch();
   const upcProduct = useSelector(upcProductToDisplaySelector);
   const { onClose } = props;
   const theme = useTheme();
@@ -107,7 +109,19 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
         2
       )
     );
-  }, [shouldSaveToDevice, selectedUrl]);
+
+    dispatch(
+      addItemsListItem({
+        frequency: frequencyInMsRef.current,
+        imageUri: {
+          location: imageUriOnDevice,
+          url: selectedUrl || EMPTY_STRING,
+        },
+        name: productNameValue,
+        upc: upcValue,
+      })
+    );
+  }, [shouldSaveToDevice, selectedUrl, frequencyInMsRef, productNameValue, upcValue]);
 
   /**
    *Need to load the new values when upcProduct changes

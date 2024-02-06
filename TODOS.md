@@ -1,7 +1,5 @@
 ## Work on Next
 
-  //todo: close the keyboard when the UpcDetailsForm modal opens
-  //todo: add prop to set the starting selected image for THumbnailPicker
 -UpcDetails rendering:
     --use PagerView to render the thumbnails 
     --figure out adding own image button

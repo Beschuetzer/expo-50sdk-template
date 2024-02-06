@@ -9,7 +9,7 @@ import {
   Column,
   Button,
 } from 'native-base'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { FrequencyInput } from './FrequencyInput'
@@ -26,6 +26,7 @@ import {
 } from '@/state/slices/listsSlice'
 import { UpcProduct } from '@/types/UpcResponse'
 import { getKeyToUse, saveImageLocally } from '@/utils/helpers'
+import { Keyboard } from 'react-native'
 
 type UpcDetailsFormValdation = {
   isValid: boolean
@@ -90,6 +91,10 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     dispatch(addItemsListItem(itemToSave))
     onClose && onClose()
   }
+
+  useLayoutEffect(() => {
+    Keyboard.dismiss();
+  }, [upcProduct, itemInList])
 
   /**
    *Need to load the new values when upcProduct changes

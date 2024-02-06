@@ -99,9 +99,11 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
       snapPoints={snapPoints}
       onChange={onSheetChange}
     >
-      <BottomSheetScrollView>{renderContent()}</BottomSheetScrollView>
+      <BottomSheetScrollView keyboardShouldPersistTaps="always">
+        {renderContent()}
+      </BottomSheetScrollView>
     </BottomSheetModal>
-  );
+  )
   //#endregion
 }
 
@@ -117,3 +119,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+

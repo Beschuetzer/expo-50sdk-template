@@ -17,7 +17,7 @@ export type Key = XOR<
  *This represents something that can be added to any store
  **/
 export type Item = Key & {
-  imageUri?: ItemImage;
+  imageUri?: string;
   /**
    *This is in milliseconds
    **/
@@ -39,21 +39,6 @@ export type ShoppingItem = {
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;
 };
-
-/**
- *{@link ItemImage.url url} is the url of an external image
- *{@link ItemImage.location location} is the location on the device for the image
- **/
-export type ItemImage = XOR<
-  {
-    url: string;
-    location?: string;
-  },
-  {
-    location: string;
-    url?: string;
-  }
->;
 
 type UpcOrName = string;
 export type ItemsList = { [upcOrName: UpcOrName]: Item };

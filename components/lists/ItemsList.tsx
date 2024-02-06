@@ -11,15 +11,14 @@ export function ItemsList() {
 
   function renderItem(value: ListRenderItemInfo<Item>) {
     const { index, item } = value
-
     return <ItemsListItem index={index} item={item} />
   }
-
+  
   return (
     <View>
       <Heading>Items List</Heading>
       <FlashList
-        data={Object.values(itemsList)}
+        data={itemsList}
         renderItem={renderItem}
         estimatedItemSize={60} //todo: caculate this approriately
       />

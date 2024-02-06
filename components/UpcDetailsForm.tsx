@@ -1,6 +1,5 @@
 import { Checkbox } from 'expo-checkbox'
 import {
-  View,
   Stack,
   FormControl,
   Input,
@@ -8,7 +7,6 @@ import {
   useTheme,
   Text,
   Column,
-  Center,
   Button,
 } from 'native-base'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -83,28 +81,9 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   }, [isUpcValid, productNameValue])
 
   async function onSavePress() {
-    let imageUriOnDevice = ''
-    // alert(JSON.stringify({ shouldSaveToDevice }, null, 2));
-    if (shouldSaveToDevice) {
-      try {
-        imageUriOnDevice = await saveImageLocally(
-          {
-            name: productNameValue,
-            upc: upcValue,
-          },
-          selectedUrl,
-        )
-      } catch (error) {
-        console.log({ error })
-      }
-    }
-
     const itemToSave = {
       frequency: frequencyInMsRef.current,
-      imageUri: {
-        location: imageUriOnDevice,
-        url: selectedUrl || EMPTY_STRING,
-      },
+      imageUri: selectedUrl || EMPTY_STRING,
       name: productNameValue,
       upc: upcValue,
     }
@@ -123,7 +102,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   useEffect(() => {
     setUpcValue(itemInList?.upc || upcFromUpcProduct)
     setProductNameValue(itemInList?.name || nameFromUpcProduct)
-    setSelectedUrl(itemInList?.imageUri?.url || EMPTY_STRING)
+    setSelectedUrl(itemInList?.imageUri || EMPTY_STRING)
   }, [itemInList])
 
   return (

@@ -68,10 +68,7 @@ export function ReduxViewer() {
               dispatch(
                 addItemsListItem({
                   frequency: 10000,
-                  imageUri: {
-                    location: "test",
-                    url: "test.com",
-                  },
+                  imageUri: 'test.com',
                   name: "test",
                   upc: "00999348348",
                 }),

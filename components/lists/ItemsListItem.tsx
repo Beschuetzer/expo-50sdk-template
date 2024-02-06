@@ -11,7 +11,6 @@ type ItemsListItemProps = {
 
 export function ItemsListItem(props: ItemsListItemProps) {
   const { index, item } = props;
-  
 
   return (
     <View key={index} borderColor={theme.colors.black} borderWidth={2}>
@@ -19,14 +18,8 @@ export function ItemsListItem(props: ItemsListItemProps) {
       <Text>item.upc: {item.upc}</Text>
       <Text>item.frequency: {item.frequency}</Text>
       <Row>
-        <Text>Cached Image:</Text>
-        <ImageRenderer source={item.imageUri?.location} />
-        <Text>{item.imageUri?.location}</Text>
-      </Row>
-      <Row>
-        <Text>Web Image:</Text>
-        <ImageRenderer source={item.imageUri?.url} />
-        <Text>{item.imageUri?.url}</Text>
+        <ImageRenderer source={item.imageUri} />
+        <Text>{item.imageUri}</Text>
       </Row>
     </View>
   )

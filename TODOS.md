@@ -1,6 +1,5 @@
 ## Work on Next
 
-  //todo: figure out how to save the image (check that it works)
   //todo: close the keyboard when the UpcDetailsForm modal opens
   //todo make sure to load the item in itemsList in UpcDetailsForm if that is given and then upcProduct in upcProducts otherwise
 -UpcDetails rendering:

@@ -1,10 +1,11 @@
-import { Image } from "expo-image";
+import { Image, ImageProps } from "expo-image";
 import { AspectRatio } from "native-base";
 
-type ImageRendererProps = { imageUri?: string };
+type ImageRendererProps = ImageProps;
+
 export function ImageRenderer(props: ImageRendererProps) {
-  const { imageUri } = props;
-  if (!imageUri) return null;
+  const { source, cachePolicy = 'disk' } = props;
+  if (!source) return null;
   return (
     <AspectRatio
       ratio={{
@@ -16,7 +17,7 @@ export function ImageRenderer(props: ImageRendererProps) {
         md: 75,
       }}
     >
-      <Image source={imageUri} contentFit="cover" transition={1000} />
+      <Image cachePolicy={cachePolicy} {...props} />
     </AspectRatio>
-  );
+  )
 }

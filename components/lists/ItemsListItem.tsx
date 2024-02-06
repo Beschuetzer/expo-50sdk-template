@@ -20,12 +20,12 @@ export function ItemsListItem(props: ItemsListItemProps) {
       <Text>item.frequency: {item.frequency}</Text>
       <Row>
         <Text>Cached Image:</Text>
-        <ImageRenderer imageUri={item.imageUri?.location} />
+        <ImageRenderer source={item.imageUri?.location} />
         <Text>{item.imageUri?.location}</Text>
       </Row>
       <Row>
         <Text>Web Image:</Text>
-        <ImageRenderer imageUri={item.imageUri?.url} />
+        <ImageRenderer source={item.imageUri?.url} />
         <Text>{item.imageUri?.url}</Text>
       </Row>
     </View>

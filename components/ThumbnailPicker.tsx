@@ -1,8 +1,8 @@
-import { Row, AspectRatio, View } from "native-base";
+import { Row, View } from "native-base";
 import { useCallback, useEffect, useMemo } from "react";
 import { TouchableOpacity } from "react-native";
-import { Image } from "expo-image";
 
+import { ImageRenderer } from "./ImageRenderer";
 import { useIsDarkMode } from "./hooks/useIsDarkTheme";
 
 import { UpcProduct } from "@/types/UpcResponse";
@@ -49,27 +49,20 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
             key={imageUrl}
             borderWidth={2}
             borderColor={
-              isSelected ? 'tertiary.900' : isDarkMode ? 'black' : 'white'
+              isSelected ? "tertiary.900" : isDarkMode ? "black" : "white"
             }
           >
             <TouchableOpacity onPress={() => handleSelect(imageUrl)}>
-              <AspectRatio
-                ratio={{
-                  base: 3 / 4,
-                  md: 9 / 10,
-                }}
-                height={{
-                  base: 100,
-                  md: 75,
-                }}
-              >
-                <Image source={imageUrl} contentFit="cover" transition={1000} />
-              </AspectRatio>
+              <ImageRenderer
+                source={imageUrl}
+                contentFit="cover"
+                transition={1000}
+                cachePolicy="memory"
+              />
             </TouchableOpacity>
           </View>
-        )
+        );
       })}
     </Row>
   );
 }
-

@@ -52,10 +52,6 @@ export function useUpcProduct(props?: UseUpcProductProps) {
   }, []);
 
   useEffect(() => {
-    console.log({
-      lastUpcScanned,
-      upcProductId: upcProduct?.id,
-    });
     if (upcProduct) {
       dispatch(resetLastUpcScanned());
       setProduct(upcProduct);

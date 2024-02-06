@@ -77,7 +77,6 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
   try {
     const keyToUse = getKeyToUse(key);
     await AsyncStorage.setItem(keyToUse, imagePath);
-    console.log("Image path stored in AsyncStorage");
   } catch (error) {
     console.error("Error storing image path in AsyncStorage", error);
   }

@@ -26,7 +26,6 @@ export const scannerSlice = createSlice({
   reducers: {
     addUpcProduct: (state: ScannerState, action: PayloadAction<UpcProduct>) => {
       const idToUse = action.payload.id || action.payload.code;
-      console.log({ idToUse });
 
       if (!action?.payload || !idToUse) {
         alert(

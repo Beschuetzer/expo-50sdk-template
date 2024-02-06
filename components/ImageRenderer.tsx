@@ -1,6 +1,7 @@
-import { AspectRatio, Image } from 'native-base'
+import { Image } from "expo-image";
+import { AspectRatio } from "native-base";
 
-type ImageRendererProps = { imageUri?: string }
+type ImageRendererProps = { imageUri?: string };
 export function ImageRenderer(props: ImageRendererProps) {
   const { imageUri } = props;
   if (!imageUri) return null;
@@ -15,13 +16,7 @@ export function ImageRenderer(props: ImageRendererProps) {
         md: 75,
       }}
     >
-      <Image
-        resizeMode="cover"
-        source={{
-          uri: imageUri,
-        }}
-        alt="Thumbnail"
-      />
+      <Image source={imageUri} contentFit="cover" transition={1000} />
     </AspectRatio>
-  )
+  );
 }

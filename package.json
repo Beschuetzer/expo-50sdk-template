@@ -27,6 +27,7 @@
     "expo-checkbox": "~2.7.0",
     "expo-file-system": "~16.0.5",
     "expo-font": "~11.10.2",
+    "expo-image": "~1.10.6",
     "expo-linking": "~6.2.2",
     "expo-router": "~3.4.6",
     "expo-splash-screen": "~0.26.4",

@@ -123,6 +123,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   useEffect(() => {
     setUpcValue(itemInList?.upc || upcFromUpcProduct)
     setProductNameValue(itemInList?.name || nameFromUpcProduct)
+    setSelectedUrl(itemInList?.imageUri?.url || EMPTY_STRING)
   }, [itemInList])
 
   return (

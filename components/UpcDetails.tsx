@@ -6,5 +6,5 @@ type UpcDetailsProps = {
 
 export function UpcDetails(props: UpcDetailsProps) {
   const { onClose } = props;
-  return <UpcDetailsForm onClose={onClose} />
+  return <UpcDetailsForm onClose={onClose} />;
 }

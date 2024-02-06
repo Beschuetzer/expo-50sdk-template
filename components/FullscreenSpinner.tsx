@@ -1,4 +1,3 @@
-import { COLORS } from "@/constants/colors";
 import {
   ActivityIndicator,
   ActivityIndicatorProps,
@@ -7,7 +6,10 @@ import {
   Dimensions,
   useWindowDimensions,
 } from "react-native";
+
 import { useBottomTabHeight } from "./hooks/useBottomTabHeight";
+
+import { COLORS } from "@/constants/colors";
 
 type FullscreenSpinnerProps = {
   activityIndicatorProps?: ActivityIndicatorProps;

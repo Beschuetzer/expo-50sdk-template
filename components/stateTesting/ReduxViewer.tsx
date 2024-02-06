@@ -1,16 +1,18 @@
+import { Button, FlatList, Heading, Text, View } from "native-base";
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+
+import { ThumbnailPicker } from "../ThumbnailPicker";
+
 import {
   lastUpcScannedSelector,
   resetLastUpcScanned,
 } from "@/state/slices/generalSlice";
-import { Button, FlatList, Heading, Text, View } from "native-base";
+import { addItemsListItem, resetItemsList } from "@/state/slices/listsSlice";
 import {
   resetUpcProducts,
   upcProductsSelector,
 } from "@/state/slices/scannerSlice";
-import { ThumbnailPicker } from "../ThumbnailPicker";
-import { addItemsListItem, resetItemsList } from "@/state/slices/listsSlice";
 
 export function ReduxViewer() {
   const [selectedUrl, setSelectedUrl] = useState("");
@@ -20,8 +22,8 @@ export function ReduxViewer() {
 
   function renderFieldAndText(key: string, value: any) {
     return (
-      <Text fontWeight={"bold"}>
-        {key}: <Text fontWeight={"normal"}>{value}</Text>
+      <Text fontWeight="bold">
+        {key}: <Text fontWeight="normal">{value}</Text>
       </Text>
     );
   }
@@ -33,13 +35,13 @@ export function ReduxViewer() {
         const { item, index } = data;
         return (
           <View key={index}>
-            <Heading size={"sm"} mt={3}>
+            <Heading size="sm" mt={3}>
               '{item.id}' details:
             </Heading>
             {renderFieldAndText("Name", item.product_name)}
             {renderFieldAndText(
               "Fetched At",
-              new Date(item.timestamp).toLocaleString()
+              new Date(item.timestamp).toLocaleString(),
             )}
             {renderFieldAndText("Selected Image", selectedUrl)}
             <ThumbnailPicker
@@ -72,7 +74,7 @@ export function ReduxViewer() {
                   },
                   name: "test",
                   upc: "00999348348",
-                })
+                }),
               )
             }
           >

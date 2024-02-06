@@ -1,4 +1,5 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import {
   DarkTheme,
   DefaultTheme,
@@ -7,16 +8,15 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-
-import { useColorScheme } from "@/components/useColorScheme";
-import { Provider } from "react-redux";
-import { persistor, store } from "@/state/store";
-import { PersistGate } from "redux-persist/integration/react";
-import { Text } from "@/components/Themed";
 import { NativeBaseProvider } from "native-base";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+
+import { Text } from "@/components/Themed";
+import { useColorScheme } from "@/components/useColorScheme";
+import { persistor, store } from "@/state/store";
 
 export {
   // Catch any errors thrown by the Layout component.

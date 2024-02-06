@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 export const useRequestCameraPermissions = () => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
 
-    useEffect(() => {
-        (async () => {
-            const { status } = await Camera.requestCameraPermissionsAsync();
-            setHasPermission(status === "granted");
-        })();
-    }, []);
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === "granted");
+    })();
+  }, []);
 
-    return hasPermission;
-}
+  return hasPermission;
+};

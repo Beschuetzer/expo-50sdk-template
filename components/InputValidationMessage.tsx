@@ -1,11 +1,12 @@
-import { StyleProp } from "@/types/general";
 import { FontAwesome } from "@expo/vector-icons";
 import { Row, Text, useTheme } from "native-base";
+
+import { StyleProp } from "@/types/general";
 
 type InputValidationMessageProps = {
   isValid: boolean;
   message: string;
-} & StyleProp
+} & StyleProp;
 export function InputValidationMessage(props: InputValidationMessageProps) {
   const { isValid, message, style } = props;
   const theme = useTheme();
@@ -13,9 +14,9 @@ export function InputValidationMessage(props: InputValidationMessageProps) {
   return (
     <Row
       display={!isValid ? "block" : "none"}
-      justifyContent={"flex-start"}
+      justifyContent="flex-start"
       style={style}
-      alignItems={"center"}
+      alignItems="center"
     >
       <FontAwesome
         size={10}
@@ -23,7 +24,11 @@ export function InputValidationMessage(props: InputValidationMessageProps) {
         name="warning"
         color={theme.colors.red[900]}
       />
-      <Text fontSize={theme.fontSizes.xs} pl={3} color={isValid ? "black" : "red.900"}>
+      <Text
+        fontSize={theme.fontSizes.xs}
+        pl={3}
+        color={isValid ? "black" : "red.900"}
+      >
         {message}
       </Text>
     </Row>

@@ -1,12 +1,17 @@
-import { lastUpcScannedSelector, setLastUpcScanned } from "@/state/slices/generalSlice";
 import { Button, Input, View, Text, useTheme, Row } from "native-base";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GestureResponderEvent } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { MOCKS_UPCS } from "./useUpcData";
-import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
-import { InputValidationMessage } from "./InputValidationMessage";
+
 import { ButtonWithLoadingSpinner } from "./ButtonWithLoadingSpinner";
+import { InputValidationMessage } from "./InputValidationMessage";
+import { MOCKS_UPCS } from "./useUpcData";
+
+import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
+import {
+  lastUpcScannedSelector,
+  setLastUpcScanned,
+} from "@/state/slices/generalSlice";
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -37,7 +42,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         dispatch(setLastUpcScanned(value));
       }
     },
-    [value]
+    [value],
   );
 
   const handleSetIsValid = useCallback((value: string) => {
@@ -53,7 +58,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
       setValue(newValue);
       handleSetIsValid(newValue);
     },
-    [setIsValid, setValue]
+    [setIsValid, setValue],
   );
 
   useEffect(() => {
@@ -104,7 +109,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
       </Row>
       <Button
         isDisabled={!isValid || !!lastUpcScanned}
-        backgroundColor={"secondary.900"}
+        backgroundColor="secondary.900"
         borderRadius={0}
         onPress={onSearchPress}
       >

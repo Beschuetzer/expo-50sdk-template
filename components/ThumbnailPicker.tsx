@@ -1,8 +1,10 @@
-import { UpcProduct } from "@/types/UpcResponse";
 import { Row, AspectRatio, Image, View } from "native-base";
 import { useCallback, useEffect, useMemo } from "react";
 import { TouchableOpacity } from "react-native";
+
 import { useIsDarkMode } from "./hooks/useIsDarkTheme";
+
+import { UpcProduct } from "@/types/UpcResponse";
 import { StyleProp } from "@/types/general";
 
 type ThumbnailPickerProps = {
@@ -24,7 +26,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         upcProduct?.image_thumb_url || "",
         upcProduct?.image_nutrition_url || "",
       ]),
-    [upcProduct]
+    [upcProduct],
   );
 
   const handleSelect = useCallback((imageUrl?: string) => {
@@ -45,7 +47,9 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
           <View
             key={imageUrl}
             borderWidth={2}
-            borderColor={isSelected ? "tertiary.900" : isDarkMode ? "black" : "white"}
+            borderColor={
+              isSelected ? "tertiary.900" : isDarkMode ? "black" : "white"
+            }
           >
             <TouchableOpacity onPress={() => handleSelect(imageUrl)}>
               <AspectRatio

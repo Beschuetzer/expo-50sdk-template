@@ -1,16 +1,9 @@
+import { Picker } from "@react-native-picker/picker";
+import { Row, Input, theme, View, Stack, Heading, Text } from "native-base";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { TIME_SPAN_TO_MILLISECONDS_MAPPING } from "@/constants/general";
 import { Frequency, TimeSpan } from "@/types/general";
-import { Picker } from "@react-native-picker/picker";
-import {
-  Row,
-  Input,
-  theme,
-  View,
-  Stack,
-  Heading,
-  Text,
-} from "native-base";
-import { useCallback, useEffect, useMemo, useState } from "react";
 
 const FREQUENCY_INITIAL = Object.freeze({
   number: 1,
@@ -30,17 +23,25 @@ export function FrequencyInput(props: FrequencyInputProps) {
     ...FREQUENCY_INITIAL,
   });
   const frequencyInMs = useMemo(
-    () => frequency.number * TIME_SPAN_TO_MILLISECONDS_MAPPING?.[frequency.timeSpan],
-    [frequency]
+    () =>
+      frequency.number *
+      TIME_SPAN_TO_MILLISECONDS_MAPPING?.[frequency.timeSpan],
+    [frequency],
   );
 
-  const onChangeFrequencyNumber = useCallback((newText: string) => {
-    setFrequency({ ...frequency, number: Number(newText) });
-  }, [frequency]);
+  const onChangeFrequencyNumber = useCallback(
+    (newText: string) => {
+      setFrequency({ ...frequency, number: Number(newText) });
+    },
+    [frequency],
+  );
 
-  const onChangeFrequencyTimespan = useCallback((itemValue: TimeSpan) => {
-    setFrequency({ ...frequency, timeSpan: itemValue });
-  }, [frequency]);
+  const onChangeFrequencyTimespan = useCallback(
+    (itemValue: TimeSpan) => {
+      setFrequency({ ...frequency, timeSpan: itemValue });
+    },
+    [frequency],
+  );
 
   useEffect(() => {
     onValueChange && onValueChange(frequencyInMs);
@@ -66,7 +67,11 @@ export function FrequencyInput(props: FrequencyInputProps) {
             onValueChange={onChangeFrequencyTimespan}
           >
             {Object.keys(TIME_SPAN_TO_MILLISECONDS_MAPPING).map((timespan) => (
-              <Picker.Item key={timespan} label={`${timespan}${frequency?.number > 1 ? 's' : ''}`} value={timespan} />
+              <Picker.Item
+                key={timespan}
+                label={`${timespan}${frequency?.number > 1 ? "s" : ""}`}
+                value={timespan}
+              />
             ))}
           </Picker>
         </View>
@@ -74,7 +79,9 @@ export function FrequencyInput(props: FrequencyInputProps) {
       {frequencyInMs ? (
         <Text fontSize={theme.sizes[3]}>
           Next expected purchase time:&nbsp;
-          <Text fontWeight={"bold"}>{new Date(Date.now() + frequencyInMs).toLocaleString()}</Text>
+          <Text fontWeight="bold">
+            {new Date(Date.now() + frequencyInMs).toLocaleString()}
+          </Text>
         </Text>
       ) : null}
     </Stack>

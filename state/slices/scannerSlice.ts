@@ -1,6 +1,8 @@
 import { createSelector, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+
 import { RootState } from "../store";
+
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
 
 type Upc = string;
@@ -24,15 +26,15 @@ export const scannerSlice = createSlice({
   reducers: {
     addUpcProduct: (state: ScannerState, action: PayloadAction<UpcProduct>) => {
       const idToUse = action.payload.id || action.payload.code;
-      console.log({idToUse});
-      
+      console.log({ idToUse });
+
       if (!action?.payload || !idToUse) {
         alert(
           `Unable to add UpcProduct for ${JSON.stringify(
             action.payload,
             null,
-            2
-          )}`
+            2,
+          )}`,
         );
         return;
       }
@@ -72,5 +74,5 @@ export const upcProductSelector = (id: string) =>
     (upcProducts) => {
       const value = (upcProducts as any)?.[id];
       return value as UpcProduct;
-    }
+    },
   );

@@ -37,7 +37,7 @@ export function ButtonWithLoadingSpinner(props: ButtonWithLoadingSpinnerProps) {
       }}
     >
       {isLoading ? (
-        <ActivityIndicator size={"small"} color={loadingSpinnerColor} />
+        <ActivityIndicator size="small" color={loadingSpinnerColor} />
       ) : (
         children
       )}

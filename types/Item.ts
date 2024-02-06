@@ -1,4 +1,5 @@
 import { XOR } from "ts-xor";
+
 import { Store } from "./Store";
 
 export type Key = XOR<
@@ -10,11 +11,11 @@ export type Key = XOR<
     name?: string;
     upc: string;
   }
->
+>;
 
 /**
-*This represents something that can be added to any store
-**/
+ *This represents something that can be added to any store
+ **/
 export type Item = Key & {
   imageUri?: ItemImage;
   /**
@@ -24,8 +25,8 @@ export type Item = Key & {
 };
 
 /**
-*This is an item when it is in the shoppingList (and has a store associated with it)
-**/
+ *This is an item when it is in the shoppingList (and has a store associated with it)
+ **/
 export type ShoppingItem = {
   aisle: string;
   quantity: number;
@@ -37,19 +38,22 @@ export type ShoppingItem = {
 
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;
-}
+};
 
 /**
-*{@link ItemImage.url url} is the url of an external image
-*{@link ItemImage.location location} is the location on the device for the image
-**/
-export type ItemImage = XOR<{
-  url: string;
-  location?: string;
-}, {
-  location: string;
-  url?: string;
-}>
+ *{@link ItemImage.url url} is the url of an external image
+ *{@link ItemImage.location location} is the location on the device for the image
+ **/
+export type ItemImage = XOR<
+  {
+    url: string;
+    location?: string;
+  },
+  {
+    location: string;
+    url?: string;
+  }
+>;
 
 type UpcOrName = string;
 export type ItemsList = { [upcOrName: UpcOrName]: Item };

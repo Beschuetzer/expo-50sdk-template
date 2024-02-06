@@ -1,14 +1,15 @@
+import { Camera, CameraType } from "expo-camera";
+import { useFocusEffect } from "expo-router";
+import { Button, Input, View, Row, Text } from "native-base";
 import React, { useState, useCallback } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { Camera, CameraType } from "expo-camera";
-import { Button, Input, View, Row, Text } from "native-base";
-import { useRequestCameraPermissions } from "@/components/hooks/useRequestCameraPermissions";
-import { FullscreenSpinner } from "@/components/FullscreenSpinner";
-import { useFocusEffect } from "expo-router";
-import { ManualUpcInput } from "@/components/ManualUpcInput";
 import { useDispatch } from "react-redux";
-import { setLastUpcScanned } from "@/state/slices/generalSlice";
+
+import { FullscreenSpinner } from "@/components/FullscreenSpinner";
+import { ManualUpcInput } from "@/components/ManualUpcInput";
 import { UpcDetailsModal } from "@/components/UpcDetailsModal";
+import { useRequestCameraPermissions } from "@/components/hooks/useRequestCameraPermissions";
+import { setLastUpcScanned } from "@/state/slices/generalSlice";
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
@@ -27,7 +28,7 @@ const BarcodeScannerScreen = () => {
 
   const onSwitchCameraPress = useCallback(() => {
     setType((current) =>
-      current === CameraType.back ? CameraType.front : CameraType.back
+      current === CameraType.back ? CameraType.front : CameraType.back,
     );
   }, []);
 
@@ -42,7 +43,7 @@ const BarcodeScannerScreen = () => {
         setScanned(false);
         setShouldRenderCamera(false);
       };
-    }, [])
+    }, []),
   );
 
   if (hasPermission === null) {

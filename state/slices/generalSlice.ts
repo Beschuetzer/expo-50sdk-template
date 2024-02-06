@@ -1,8 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+
 import { RootState } from "../store";
-import { getEmptyObject } from "@/utils/helpers";
+
 import { UpcProduct } from "@/types/UpcResponse";
+import { getEmptyObject } from "@/utils/helpers";
 
 export type GeneralState = {
   lastUpcScanned: string;
@@ -28,7 +30,7 @@ export const generalSlice = createSlice({
     },
     setUpcProductToDisplay: (
       state: GeneralState,
-      action: PayloadAction<UpcProduct>
+      action: PayloadAction<UpcProduct>,
     ) => {
       if (!action?.payload) return;
       state.upcProductToDisplay = action.payload;

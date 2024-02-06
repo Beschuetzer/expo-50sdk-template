@@ -1,7 +1,8 @@
-import { EMPTY_STRING } from "@/constants/general";
-import { Key } from "@/types/Item";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
+
+import { EMPTY_STRING } from "@/constants/general";
+import { Key } from "@/types/Item";
 
 export async function delay(ms: number) {
   if (ms <= 0) return;
@@ -29,7 +30,7 @@ export function getKeyToUse(key: Key, displayAlert = true) {
 
   if (!toReturn && displayAlert) {
     alert(
-      "No key given.  Please delete the item in question and ensure there is either a upc or name given."
+      "No key given.  Please delete the item in question and ensure there is either a upc or name given.",
     );
   }
 
@@ -56,7 +57,7 @@ export async function saveImageLocally(key: Key, uri: string) {
     const imagePath = `${FileSystem.documentDirectory}${keyToUse}`;
     const downloadResumable = FileSystem.createDownloadResumable(
       uri,
-      imagePath
+      imagePath,
     );
     const response = await downloadResumable.downloadAsync();
     if (response?.status && response.status <= 300) {

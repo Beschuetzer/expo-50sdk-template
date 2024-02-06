@@ -1,9 +1,10 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import listsReducer, { listsSlice } from "@/state/slices/listsSlice";
+
 import generalReducer, { generalSlice } from "@/state/slices/generalSlice";
+import listsReducer, { listsSlice } from "@/state/slices/listsSlice";
 import scannerReducer, { scannerSlice } from "@/state/slices/scannerSlice";
 
 const persistConfig = {

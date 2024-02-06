@@ -1,7 +1,8 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { EMPTY_STRING } from "@/constants/general";
 import { Item } from "@/types/Item";
 import { UpcProduct } from "@/types/UpcResponse";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export async function getItem(input: UpcProduct): Promise<Item> {
   return {

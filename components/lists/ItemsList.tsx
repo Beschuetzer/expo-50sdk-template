@@ -1,13 +1,14 @@
-import { itemsListArraySelector } from "@/state/slices/listsSlice";
-import { Item } from "@/types/Item";
 import { FlashList, ListRenderItemInfo } from "@shopify/flash-list";
 import { View, Text, useTheme, Heading, FlatList } from "native-base";
 import { useSelector } from "react-redux";
 
+import { itemsListArraySelector } from "@/state/slices/listsSlice";
+import { Item } from "@/types/Item";
+
 export function ItemsList() {
   const itemsList = useSelector(itemsListArraySelector);
   const theme = useTheme();
-  
+
   function renderItem(value: ListRenderItemInfo<Item>) {
     const { index, item } = value;
 

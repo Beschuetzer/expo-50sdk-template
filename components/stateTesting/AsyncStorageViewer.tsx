@@ -4,7 +4,6 @@ export function AsyncStorageViewer() {
   return (
     <View>
       <Heading>AsyncStorageViewer</Heading>
-      
     </View>
   );
 }

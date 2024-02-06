@@ -1,17 +1,19 @@
 import { BottomSheetModal, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { Text, useTheme, Container, View, Center, Heading } from "native-base";
 import { useRef, useMemo, useCallback, useEffect } from "react";
 import { ActivityIndicator, Dimensions, StyleSheet } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+
 import { UpcDetails } from "./UpcDetails";
 import { useUpcProduct } from "./useUpcData";
-import { Text, useTheme, Container, View, Center, Heading } from "native-base";
-import { useDispatch, useSelector } from "react-redux";
+
 import {
   lastUpcScannedSelector,
   setUpcProductToDisplay,
 } from "@/state/slices/generalSlice";
 import { UpcProduct } from "@/types/UpcResponse";
 
-type UpcDetailsSheetProps = {};
+type UpcDetailsSheetProps = object;
 
 const snapPointPercents = [25, 50, 75, 100];
 const defaultSnappoint = snapPointPercents.length - 1;
@@ -21,16 +23,14 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const windowDimensions = Dimensions.get("window");
   const { upcProduct, isLoading, errorMsg } = useUpcProduct({
     onSuccessfulFetch: (upcProduct: UpcProduct) => {
-      dispatch(
-        setUpcProductToDisplay(upcProduct || {} as UpcProduct)
-      );
+      dispatch(setUpcProductToDisplay(upcProduct || ({} as UpcProduct)));
     },
   });
   const theme = useTheme();
   const lastUpcScanned = useSelector(lastUpcScannedSelector);
   const snapPoints = useMemo(
     () => snapPointPercents.map((snapPointPercent) => `${snapPointPercent}%`),
-    [snapPointPercents]
+    [snapPointPercents],
   );
   const currentSnapPointRef = useRef(defaultSnappoint);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -54,7 +54,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   }, []);
 
   useEffect(() => {
-    if ((!upcProduct && !isLoading)) return;
+    if (!upcProduct && !isLoading) return;
     openModal();
   }, [lastUpcScanned]);
 
@@ -70,7 +70,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
       return (
         <Center width={width} height={height}>
           <Text>Checking for UPC data...</Text>
-          <ActivityIndicator size={"large"} color={theme.colors.black} />
+          <ActivityIndicator size="large" color={theme.colors.black} />
         </Center>
       );
     }
@@ -86,7 +86,7 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
       );
     }
     return (
-      <Container size={"full"}>
+      <Container size="full">
         <Text>Unable to retreive data for '{lastUpcScanned}'</Text>
       </Container>
     );

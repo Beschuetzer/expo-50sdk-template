@@ -1,3 +1,4 @@
+import { Checkbox } from "expo-checkbox";
 import {
   View,
   Stack,
@@ -10,23 +11,24 @@ import {
   Center,
   Button,
 } from "native-base";
-import { Checkbox } from "expo-checkbox";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ThumbnailPicker } from "./ThumbnailPicker";
-import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
-import { EMPTY_STRING } from "@/constants/general";
-import { InputValidationMessage } from "./InputValidationMessage";
-import { FrequencyInput } from "./FrequencyInput";
-import { maxWidthCentered } from "@/constants/styles";
-import { getKeyToUse, saveImageLocally } from "@/utils/helpers";
 import { useDispatch, useSelector } from "react-redux";
+
+import { FrequencyInput } from "./FrequencyInput";
+import { InputValidationMessage } from "./InputValidationMessage";
+import { ThumbnailPicker } from "./ThumbnailPicker";
+
+import { EMPTY_STRING } from "@/constants/general";
+import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
+import { maxWidthCentered } from "@/constants/styles";
 import { upcProductToDisplaySelector } from "@/state/slices/generalSlice";
-import { UpcProduct } from "@/types/UpcResponse";
-import { upcProductSelector } from "@/state/slices/scannerSlice";
 import {
   addItemsListItem,
   itemsListItemSelector,
 } from "@/state/slices/listsSlice";
+import { upcProductSelector } from "@/state/slices/scannerSlice";
+import { UpcProduct } from "@/types/UpcResponse";
+import { getKeyToUse, saveImageLocally } from "@/utils/helpers";
 
 type UpcDetailsFormValdation = {
   isValid: boolean;
@@ -58,15 +60,15 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
   const [upcValue, setUpcValue] = useState(getUpcValue(upcProduct));
   const [productNameValue, setProductNameValue] = useState(
-    getProductNameValue(upcProduct)
+    getProductNameValue(upcProduct),
   );
   const [shouldSaveToDevice, setShouldSaveToDevice] = useState(
-    SHOULD_SAVE_TO_DEVICE_INITIAL
+    SHOULD_SAVE_TO_DEVICE_INITIAL,
   );
   const frequencyInMsRef = useRef<number>(-1);
   const isUpcValid = useMemo(
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
-    [upcValue]
+    [upcValue],
   );
   const formValidation: UpcDetailsFormValdation = useMemo(() => {
     const isValid = (isUpcValid && upcValue.length > 0) || !!productNameValue;
@@ -79,7 +81,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   }, [isUpcValid, productNameValue]);
   const keyToUse = useMemo(
     () => getKeyToUse({ name: productNameValue, upc: upcValue }, false),
-    [productNameValue, upcValue]
+    [productNameValue, upcValue],
   );
   const dispatch = useDispatch();
   const itemInList = useSelector(itemsListItemSelector(keyToUse));
@@ -94,7 +96,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
             name: productNameValue,
             upc: upcValue,
           },
-          selectedUrl
+          selectedUrl,
         );
       } catch (error) {
         console.log({ error });
@@ -168,7 +170,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
             />
             <Row
               space={theme.space[1]}
-              alignItems={"center"}
+              alignItems="center"
               onTouchStart={() => setShouldSaveToDevice((current) => !current)}
             >
               <Checkbox

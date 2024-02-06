@@ -36,8 +36,8 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   }, []);
 
   useEffect(() => {
-    setSelectedUrl(Array.from(imagesToRender)?.[DEFAULT_SELECTION_INDEX]);
-  }, [upcProduct]);
+    setSelectedUrl(Array.from(imagesToRender)?.[DEFAULT_SELECTION_INDEX])
+  }, [upcProduct, imagesToRender])
 
   return (
     <Row space={1} style={style}>
@@ -66,3 +66,4 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     </Row>
   );
 }
+

@@ -112,6 +112,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     };
     alert(JSON.stringify(itemToSave, null, 2));
     dispatch(addItemsListItem(itemToSave));
+    onClose && onClose();
   }
 
   /**

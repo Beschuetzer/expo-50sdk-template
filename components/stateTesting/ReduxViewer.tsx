@@ -3,20 +3,14 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   lastUpcScannedSelector,
   resetLastUpcScanned,
-  setLastUpcScanned,
 } from "@/state/slices/generalSlice";
-import {
-  Button,
-  FlatList,
-  Heading,
-  Text,
-  View,
-} from "native-base";
+import { Button, FlatList, Heading, Text, View } from "native-base";
 import {
   resetUpcProducts,
   upcProductsSelector,
 } from "@/state/slices/scannerSlice";
 import { ThumbnailPicker } from "../ThumbnailPicker";
+import { addItemsListItem, resetItemsList } from "@/state/slices/listsSlice";
 
 export function ReduxViewer() {
   const [selectedUrl, setSelectedUrl] = useState("");
@@ -47,10 +41,7 @@ export function ReduxViewer() {
               "Fetched At",
               new Date(item.timestamp).toLocaleString()
             )}
-            {renderFieldAndText(
-              "Selected Image",
-              selectedUrl,
-            )}
+            {renderFieldAndText("Selected Image", selectedUrl)}
             <ThumbnailPicker
               upcProduct={item}
               setSelectedUrl={setSelectedUrl}
@@ -66,6 +57,26 @@ export function ReduxViewer() {
           </Button>
           <Button onPress={() => dispatch(resetUpcProducts())}>
             Reset upcProducts
+          </Button>
+          <Button onPress={() => dispatch(resetItemsList())}>
+            Reset Items
+          </Button>
+          <Button
+            onPress={() =>
+              dispatch(
+                addItemsListItem({
+                  frequency: 10000,
+                  imageUri: {
+                    location: "test",
+                    url: "test.com",
+                  },
+                  name: "test",
+                  upc: "00999348348",
+                })
+              )
+            }
+          >
+            Save Item
           </Button>
           <Text>The lastUpcScanned is: {lastUpcScanned}</Text>
         </>

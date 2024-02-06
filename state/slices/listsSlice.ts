@@ -40,13 +40,17 @@ export const listsSlice = createSlice({
   reducers: {
     addItemsListItem: (state: ListsState, action: PayloadAction<Item>) => {
       const keyToUse = getKeyToUse(action.payload);
+      
       if (!keyToUse) {
         alert(
           "Unable to add an item with no name and no upc to the itemsList."
         );
         return;
       }
-      state.itemsList[keyToUse] = action.payload;
+      state.itemsList = {
+        ...state.itemsList,
+        [keyToUse]: action.payload,
+      };
     },
     addLastPurchasedList: (
       state: ListsState,
@@ -59,7 +63,10 @@ export const listsSlice = createSlice({
         );
         return;
       }
-      state.lastPurchasedList[keyToUse] = action.payload;
+       state.lastPurchasedList = {
+         ...state.lastPurchasedList,
+         [keyToUse]: action.payload,
+       };
     },
     addShoppingListItem: (
       state: ListsState,
@@ -72,7 +79,10 @@ export const listsSlice = createSlice({
         );
         return;
       }
-      state.shoppingList[keyToUse] = action.payload;
+       state.shoppingList = {
+         ...state.shoppingList,
+         [keyToUse]: action.payload,
+       };
     },
     addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -80,7 +90,10 @@ export const listsSlice = createSlice({
         alert("Unable to add an item with no name to the storesList.");
         return;
       }
-      state.storesList[keyToUse] = action.payload;
+       state.storesList = {
+         ...state.storesList,
+         [keyToUse]: action.payload,
+       };
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);

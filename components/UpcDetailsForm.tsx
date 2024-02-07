@@ -60,12 +60,13 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const nameFromUpcProduct = useMemo(() => getProductNameValue(upcProduct), [upcProduct])
   const keyToUse = useMemo(() => getKeyToUse({ name: nameFromUpcProduct, upc: upcFromUpcProduct }, false), [nameFromUpcProduct, upcFromUpcProduct])
   const itemInList = useSelector(itemsListItemSelector(keyToUse))
+  const itemInListUsingName = useSelector(itemsListItemSelector(nameFromUpcProduct))
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING)
   const [upcValue, setUpcValue] = useState(itemInList?.upc || upcFromUpcProduct);
   const [productNameValue, setProductNameValue] = useState(itemInList?.name || nameFromUpcProduct);
   const [shouldSaveToDevice, setShouldSaveToDevice] = useState(
     SHOULD_SAVE_TO_DEVICE_INITIAL,
-  )
+    )
   const frequencyInMsRef = useRef<number>(-1)
   const isUpcValid = useMemo(
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
@@ -108,7 +109,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
     setUpcValue(itemInList?.upc || upcFromUpcProduct)
     setProductNameValue(itemInList?.name || nameFromUpcProduct)
     setSelectedUrl(itemInList?.imageUri || EMPTY_STRING)
-  }, [itemInList])
+  }, [itemInList, upcProduct])
 
   return (
     <FormControl {...maxWidthCentered}>
@@ -195,8 +196,8 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
             message={formValidation.message}
           />
           <InputValidationMessage
-            isValid={!itemInList}
-            message={`An item with the key of '${keyToUse}' is already in the list and will be overriden.`}
+            isValid={!upcValue ? !itemInListUsingName : !itemInList}
+            message={`An item with the key of '${upcValue && productNameValue ? keyToUse : !upcValue && productNameValue ? productNameValue : upcValue}' is already in the list and will be overriden.`}
           />
         </Column>
       </Stack>

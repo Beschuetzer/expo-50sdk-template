@@ -22,41 +22,44 @@ export function useUpcProduct(props?: UseUpcProductProps) {
   const [product, setProduct] = useState<UpcProduct | null>(null);
   const dispatch = useDispatch();
 
-  const fetchUpcData = useCallback(async (upcToFetch: string) => {
-    const url = `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`;
-    try {
-      setIsLoading(true);
-      setErrorMsg(null);
-      // alert(`fetching data for ${url}`);
-      // const response = await fetch(url);
+  const fetchUpcData = useCallback(
+    async (upcToFetch: string) => {
+      const url = `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`
+      try {
+        setIsLoading(true)
+        setErrorMsg(null)
+        // alert(`fetching data for ${url}`);
+        // const response = await fetch(url);
 
-      const response = await handleMockResponse(upcToFetch);
-      if (response.ok) {
-        const data = (await response.json()) as UpcResponse;
-        dispatch(addUpcProduct(data.product));
-        setProduct(data.product);
-        onSuccessfulFetch && onSuccessfulFetch(data.product);
-      } else {
-        setErrorMsg(
-          `Invalid resopnse from service for '${upcToFetch}'.  Make sure you have a data connection and try again in a few seconds.`,
-        );
-        setProduct(null);
+        const response = await handleMockResponse(upcToFetch)
+        if (response.ok) {
+          const data = (await response.json()) as UpcResponse
+          dispatch(addUpcProduct(data.product))
+          setProduct(data.product)
+          onSuccessfulFetch && onSuccessfulFetch(data.product)
+        } else {
+          setErrorMsg(
+            `Invalid resopnse from service for '${upcToFetch}'.  Make sure you have a data connection and try again in a few seconds.`,
+          )
+          setProduct(null)
+        }
+      } catch (error) {
+        setErrorMsg(`Error fetching data for '${lastUpcScanned}': ${error}.`)
+        setProduct(null)
+      } finally {
+        setIsLoading(false)
+        dispatch(resetLastUpcScanned())
       }
-    } catch (error) {
-      setErrorMsg(`Error fetching data for '${lastUpcScanned}': ${error}.`);
-      setProduct(null);
-    } finally {
-      setIsLoading(false);
-      dispatch(resetLastUpcScanned());
-    }
-  }, []);
+    },
+    [lastUpcScanned],
+  )
 
   useEffect(() => {
     if (upcProduct) {
       dispatch(resetLastUpcScanned());
       setProduct(upcProduct);
       onSuccessfulFetch && onSuccessfulFetch(upcProduct);
-    } else if (lastUpcScanned) {
+    } else if (lastUpcScanned.match(/\d{12,13}/i)) {
       fetchUpcData(lastUpcScanned);
     }
   });
@@ -223,3 +226,4 @@ async function handleMockResponse(upc: string) {
 
   return new Response(JSON.stringify(toReturn));
 }
+

@@ -1,5 +1,5 @@
 ## Work on Next
-
+//todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
 -UpcDetails rendering:
     --use PagerView to render the thumbnails 
     --figure out adding own image button

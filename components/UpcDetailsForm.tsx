@@ -38,12 +38,12 @@ type UpcDetailsFormProps = {
 }
 
 function getProductNameValue(upcProduct: UpcProduct) {
-  if (!upcProduct.brands && !upcProduct.product_name) return EMPTY_STRING
-  return `${upcProduct.brands} - ${upcProduct.product_name}` || EMPTY_STRING
+  if (!upcProduct?.brands && !upcProduct?.product_name) return EMPTY_STRING
+  return `${upcProduct?.brands} - ${upcProduct?.product_name}` || EMPTY_STRING
 }
 
 function getUpcValue(upcProduct: UpcProduct) {
-  return upcProduct.code || upcProduct.id || EMPTY_STRING
+  return upcProduct?.code || upcProduct?.id || EMPTY_STRING
 }
 
 /**

@@ -46,8 +46,6 @@ function getUpcValue(upcProduct: UpcProduct) {
   return upcProduct.code || upcProduct.id || EMPTY_STRING
 }
 
-const SHOULD_SAVE_TO_DEVICE_INITIAL = true
-
 /**
  *NOTE: Be sure to update and new POS in the useEffect below
  **/
@@ -64,9 +62,6 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING)
   const [upcValue, setUpcValue] = useState(itemInList?.upc || upcFromUpcProduct);
   const [productNameValue, setProductNameValue] = useState(itemInList?.name || nameFromUpcProduct);
-  const [shouldSaveToDevice, setShouldSaveToDevice] = useState(
-    SHOULD_SAVE_TO_DEVICE_INITIAL,
-    )
   const frequencyInMsRef = useRef<number>(-1)
   const isUpcValid = useMemo(
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
@@ -108,7 +103,10 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   useEffect(() => {
     setUpcValue(itemInList?.upc || upcFromUpcProduct)
     setProductNameValue(itemInList?.name || nameFromUpcProduct)
-    setSelectedUrl(itemInList?.imageUri || EMPTY_STRING)
+    
+    if (itemInList?.imageUri) {
+      setSelectedUrl(itemInList.imageUri)
+    }
   }, [itemInList, upcProduct])
 
   return (
@@ -154,19 +152,6 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
               placeholder="Thumbnail Image Url"
               value={selectedUrl}
             />
-            <Row
-              space={theme.space[1]}
-              alignItems="center"
-              onTouchStart={() => setShouldSaveToDevice((current) => !current)}
-            >
-              <Checkbox
-                value={shouldSaveToDevice}
-                color={
-                  shouldSaveToDevice ? theme.colors.primary[900] : undefined
-                }
-              />
-              <Text>Save thumbnail to device?</Text>
-            </Row>
             <ThumbnailPicker
               selectedUrl={selectedUrl}
               setSelectedUrl={setSelectedUrl}

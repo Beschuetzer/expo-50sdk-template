@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-  resetLastUpcScanned,
-} from "@/state/slices/generalSlice";
 import { addUpcProduct, upcProductSelector } from "@/state/slices/scannerSlice";
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
 import { UpcProp } from "@/types/general";
@@ -56,7 +53,6 @@ export function useUpcProduct(props: UseUpcProductProps) {
 
   useEffect(() => {
     if (upcProduct) {
-      dispatch(resetLastUpcScanned());
       setProduct(upcProduct);
       onSuccessfulFetch && onSuccessfulFetch(upcProduct);
     } else if (upc.match(/\d{12,13}/i)) {

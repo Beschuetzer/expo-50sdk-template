@@ -1,4 +1,3 @@
-import { Checkbox } from 'expo-checkbox'
 import {
   Stack,
   FormControl,
@@ -18,8 +17,6 @@ import { ThumbnailPicker } from './ThumbnailPicker'
 
 import { EMPTY_STRING } from '@/constants/general'
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs'
-import { maxWidthCentered } from '@/constants/styles'
-import { upcProductToDisplaySelector } from '@/state/slices/generalSlice'
 import {
   addItemsListItem,
   itemsListItemSelector,

@@ -3,7 +3,6 @@ import { Link, Tabs } from "expo-router";
 import React from "react";
 import { Pressable } from "react-native";
 
-import { useResetState } from "@/components/hooks/useResetState";
 import { useClientOnlyValue } from "@/components/useClientOnlyValue";
 import { useColorScheme } from "@/components/useColorScheme";
 import { COLORS } from "@/constants/colors";
@@ -17,7 +16,6 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  useResetState();
   const colorScheme = useColorScheme();
 
   return (

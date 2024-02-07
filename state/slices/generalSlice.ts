@@ -22,27 +22,13 @@ export const generalSlice = createSlice({
   name: "general",
   initialState,
   reducers: {
-    resetUpcProductToDisplay: (state: GeneralState) => {
-      state.upcProductToDisplay = getEmptyObject();
-    },
-    resetLastUpcScanned: (state: GeneralState) => {
-      state.lastUpcScanned = LAST_UPC_SCANNED_INITIAL;
-    },
-    setLastUpcScanned: (state: GeneralState, action: PayloadAction<string>) => {
-      if (!action?.payload) return;
-      state.lastUpcScanned = action.payload;
-    },
+   
   },
 });
 
 // Action creators are generated for each case reducer function
 export const {
-  resetUpcProductToDisplay,
-  resetLastUpcScanned,
-  setLastUpcScanned,
 } = generalSlice.actions;
 
 export default generalSlice.reducer;
 
-export const upcProductToDisplaySelector = (state: RootState) =>
-  (state[generalSlice.name] as GeneralState).upcProductToDisplay;

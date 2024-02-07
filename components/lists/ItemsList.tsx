@@ -7,14 +7,14 @@ import { RectButton } from 'react-native-gesture-handler'
 //  To toggle LTR/RTL uncomment the next line
 // I18nManager.allowRTL(true);
 
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 import { SwipeableRow } from './SwipeableRow'
 
 import { itemsListArraySelector } from '@/state/slices/listsSlice'
 import { Item } from '@/types/Item'
 import { ImageRenderer } from '../ImageRenderer'
-import { setLastUpcScanned } from '@/state/slices/generalSlice'
+import { useNavigation } from 'expo-router'
 
 type Row = { item: Item; index: number }
 type ItemsListProps = {}
@@ -22,7 +22,7 @@ type ItemsListProps = {}
 export function ItemsList(props: ItemsListProps) {
   const itemsList = useSelector(itemsListArraySelector)
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const navigation = useNavigation()
 
   return (
     <View>
@@ -35,7 +35,7 @@ export function ItemsList(props: ItemsListProps) {
           <SwipeableRow>
             <RectButton
               style={styles.rectButton}
-              onPress={() => dispatch(setLastUpcScanned(item.upc || item.name || ""))}
+              onPress={() => null}
             >
               <Row space={2}>
                 <ImageRenderer source={item.imageUri} />

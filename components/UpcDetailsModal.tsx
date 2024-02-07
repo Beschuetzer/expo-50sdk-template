@@ -12,6 +12,7 @@ import {
   setUpcProductToDisplay,
 } from "@/state/slices/generalSlice";
 import { UpcProduct } from "@/types/UpcResponse";
+import { useNavigation } from "expo-router";
 
 type UpcDetailsSheetProps = object;
 
@@ -20,10 +21,12 @@ const defaultSnappoint = snapPointPercents.length - 1;
 
 export function UpcDetailsModal(props: UpcDetailsSheetProps) {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const windowDimensions = Dimensions.get("window");
   const { upcProduct, isLoading, errorMsg } = useUpcProduct({
     onSuccessfulFetch: (upcProduct: UpcProduct) => {
-      dispatch(setUpcProductToDisplay(upcProduct || ({} as UpcProduct)));
+      navigation.navigate('modal', {upcProduct});
+      // dispatch(setUpcProductToDisplay(upcProduct || ({} as UpcProduct)));
     },
   });
   const theme = useTheme();
@@ -53,10 +56,10 @@ export function UpcDetailsModal(props: UpcDetailsSheetProps) {
     }
   }, []);
 
-  useEffect(() => {
-    if (!upcProduct && !isLoading) return;
-    openModal();
-  }, [lastUpcScanned]);
+  // useEffect(() => {
+  //   if (!upcProduct && !isLoading) return;
+  //   openModal();
+  // }, [lastUpcScanned]);
 
   //#region Rendering
   function renderContent() {

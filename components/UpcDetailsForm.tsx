@@ -27,6 +27,7 @@ import {
 import { UpcProduct } from '@/types/UpcResponse'
 import { getKeyToUse, saveImageLocally } from '@/utils/helpers'
 import { Keyboard } from 'react-native'
+import { UpcProductProp } from '@/types/general'
 
 type UpcDetailsFormValdation = {
   isValid: boolean
@@ -35,7 +36,7 @@ type UpcDetailsFormValdation = {
 
 type UpcDetailsFormProps = {
   onClose: () => void
-}
+} & UpcProductProp
 
 function getProductNameValue(upcProduct: UpcProduct) {
   if (!upcProduct?.brands && !upcProduct?.product_name) return EMPTY_STRING
@@ -50,25 +51,37 @@ function getUpcValue(upcProduct: UpcProduct) {
  *NOTE: Be sure to update and new POS in the useEffect below
  **/
 export function UpcDetailsForm(props: UpcDetailsFormProps) {
-  const { onClose } = props
+  const { onClose, upcProduct } = props
   const dispatch = useDispatch()
   const theme = useTheme()
-  const upcProduct = useSelector(upcProductToDisplaySelector)
+  // const upcProduct = useSelector(upcProductToDisplaySelector)
   const upcFromUpcProduct = useMemo(() => getUpcValue(upcProduct), [upcProduct])
-  const nameFromUpcProduct = useMemo(() => getProductNameValue(upcProduct), [upcProduct])
-  const keyToUse = useMemo(() => getKeyToUse({ name: nameFromUpcProduct, upc: upcFromUpcProduct }, false), [nameFromUpcProduct, upcFromUpcProduct])
+  const nameFromUpcProduct = useMemo(
+    () => getProductNameValue(upcProduct),
+    [upcProduct],
+  )
+  const keyToUse = useMemo(
+    () =>
+      getKeyToUse({ name: nameFromUpcProduct, upc: upcFromUpcProduct }, false),
+    [nameFromUpcProduct, upcFromUpcProduct],
+  )
   const itemInList = useSelector(itemsListItemSelector(keyToUse))
-  const itemInListUsingName = useSelector(itemsListItemSelector(nameFromUpcProduct))
+  const itemInListUsingName = useSelector(
+    itemsListItemSelector(nameFromUpcProduct),
+  )
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING)
-  const [upcValue, setUpcValue] = useState(itemInList?.upc || upcFromUpcProduct);
-  const [productNameValue, setProductNameValue] = useState(itemInList?.name || nameFromUpcProduct);
+  const [upcValue, setUpcValue] = useState(itemInList?.upc || upcFromUpcProduct)
+  const [productNameValue, setProductNameValue] = useState(
+    itemInList?.name || nameFromUpcProduct,
+  )
   const frequencyInMsRef = useRef<number>(-1)
   const isUpcValid = useMemo(
     () => upcValue.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue],
   )
   const formValidation: UpcDetailsFormValdation = useMemo(() => {
-    const isValid = (isUpcValid && upcFromUpcProduct.length > 0) || !!productNameValue
+    const isValid =
+      (isUpcValid && upcFromUpcProduct.length > 0) || !!productNameValue
     return {
       isValid,
       message: isValid
@@ -89,7 +102,7 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   }
 
   useLayoutEffect(() => {
-    Keyboard.dismiss();
+    Keyboard.dismiss()
   }, [upcProduct, itemInList])
 
   /**
@@ -103,92 +116,85 @@ export function UpcDetailsForm(props: UpcDetailsFormProps) {
   useEffect(() => {
     setUpcValue(itemInList?.upc || upcFromUpcProduct)
     setProductNameValue(itemInList?.name || nameFromUpcProduct)
-    
+
     if (itemInList?.imageUri) {
       setSelectedUrl(itemInList.imageUri)
     }
   }, [itemInList, upcProduct])
 
   return (
-    <FormControl {...maxWidthCentered}>
+    <Column m={theme.space[1]}>
       <Stack>
-        <Column space={theme.space[1]} m={theme.space[1]}>
-          <Stack flex={1}>
-            <FormControl.Label>Upc</FormControl.Label>
-            <Input
-              variant="outline"
-              keyboardType="numeric"
-              p={theme.space[1]}
-              placeholder="UPC Code"
-              value={upcValue}
-              onChangeText={(newText) => setUpcValue(newText)}
-              isInvalid={
-                (!UPC_REGEX.test(upcValue || EMPTY_STRING) &&
-                  upcValue.length !== 0) ||
-                productNameValue.length === 0
-              }
-            />
-            <InputValidationMessage
-              isValid={isUpcValid}
-              message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${upcValue.length} chars)`}
-            />
-          </Stack>
-          <Stack flex={1}>
-            <FormControl.Label>Name</FormControl.Label>
-            <Input
-              variant="outline"
-              p={theme.space[1]}
-              placeholder="Product Name"
-              value={productNameValue}
-              onChangeText={(newText) => setProductNameValue(newText)}
-              isInvalid={productNameValue.length <= 0}
-            />
-          </Stack>
-          <Stack space={theme.space[1]}>
-            <FormControl.Label>Image</FormControl.Label>
-            <Input
-              variant="outline"
-              p={theme.space[1]}
-              placeholder="Thumbnail Image Url"
-              value={selectedUrl}
-            />
-            <ThumbnailPicker
-              selectedUrl={selectedUrl}
-              setSelectedUrl={setSelectedUrl}
-              upcProduct={upcProduct}
-            />
-          </Stack>
-          <FrequencyInput
-            onValueChange={(frequencyInMs) => {
-              frequencyInMsRef.current = frequencyInMs
-            }}
-            headingTag={FormControl.Label}
-          />
-          <Row space={1}>
-            <Button
-              isDisabled={!formValidation.isValid}
-              flex={1}
-              onPress={onSavePress}
-            >
-              Save
-            </Button>
-            <Button flex={1} onPress={() => onClose && onClose()}>
-              Close
-            </Button>
-          </Row>
-          <InputValidationMessage
-            isValid={formValidation.isValid}
-            message={formValidation.message}
-          />
-          <InputValidationMessage
-            isValid={!upcValue ? !itemInListUsingName : !itemInList}
-            message={`An item with the key of '${upcValue && productNameValue ? keyToUse : !upcValue && productNameValue ? productNameValue : upcValue}' is already in the list and will be overriden.`}
-          />
-        </Column>
+        <FormControl.Label>Upc</FormControl.Label>
+        <Input
+          variant="outline"
+          keyboardType="numeric"
+          p={theme.space[1]}
+          placeholder="UPC Code"
+          value={upcValue}
+          onChangeText={(newText) => setUpcValue(newText)}
+          isInvalid={
+            (!UPC_REGEX.test(upcValue || EMPTY_STRING) &&
+              upcValue.length !== 0) ||
+            productNameValue.length === 0
+          }
+        />
+        <InputValidationMessage
+          isValid={isUpcValid}
+          message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${upcValue.length} chars)`}
+        />
       </Stack>
-    </FormControl>
+      <Stack>
+        <FormControl.Label>Name</FormControl.Label>
+        <Input
+          variant="outline"
+          p={theme.space[1]}
+          placeholder="Product Name"
+          value={productNameValue}
+          onChangeText={(newText) => setProductNameValue(newText)}
+          isInvalid={productNameValue.length <= 0}
+        />
+      </Stack>
+      <Stack space={theme.space[1]}>
+        <FormControl.Label>Image</FormControl.Label>
+        <Input
+          variant="outline"
+          p={theme.space[1]}
+          placeholder="Thumbnail Image Url"
+          value={selectedUrl}
+        />
+        <ThumbnailPicker
+          selectedUrl={selectedUrl}
+          setSelectedUrl={setSelectedUrl}
+          upcProduct={upcProduct}
+        />
+      </Stack>
+      <FrequencyInput
+        onValueChange={(frequencyInMs) => {
+          frequencyInMsRef.current = frequencyInMs
+        }}
+        headingTag={FormControl.Label}
+      />
+      <Row space={1}>
+        <Button
+          isDisabled={!formValidation.isValid}
+          flex={1}
+          onPress={onSavePress}
+        >
+          Save
+        </Button>
+        <Button flex={1} onPress={() => onClose && onClose()}>
+          Close
+        </Button>
+      </Row>
+      <InputValidationMessage
+        isValid={formValidation.isValid}
+        message={formValidation.message}
+      />
+      <InputValidationMessage
+        isValid={!upcValue ? !itemInListUsingName : !itemInList}
+        message={`An item with the key of '${upcValue && productNameValue ? keyToUse : !upcValue && productNameValue ? productNameValue : upcValue}' is already in the list and will be overriden.`}
+      />
+    </Column>
   )
 }
-
-
-

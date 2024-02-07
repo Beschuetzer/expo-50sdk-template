@@ -70,7 +70,7 @@ function RootLayoutNav() {
                     options={{ headerShown: false }}
                   />
                   <Stack.Screen
-                    name="upcModal"
+                    name="itemModal"
                     options={{ presentation: 'modal', title: 'Upc Details' }}
                   />
                 </Stack>

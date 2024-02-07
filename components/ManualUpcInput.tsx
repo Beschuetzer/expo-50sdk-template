@@ -1,13 +1,13 @@
 import { Button, Input, View, Text, useTheme, Row } from "native-base";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GestureResponderEvent } from "react-native";
-import { useSelector } from "react-redux";
 
 import { InputValidationMessage } from "./InputValidationMessage";
 import { MOCKS_UPCS } from "./useUpcData";
 
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
 import { useNavigation } from "expo-router";
+import { Routes } from "@/constants/navigation";
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -34,7 +34,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
     (e: GestureResponderEvent) => {
       e.preventDefault();
       if (getIsValidValue(value)) {
-        navigation.navigate("upcModal", {upc: value})
+        navigation.navigate(Routes.itemModal, { upc: value })
       }
     },
     [value],
@@ -113,4 +113,5 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
     </View>
   );
 }
+
 

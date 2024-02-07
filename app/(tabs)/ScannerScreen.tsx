@@ -7,6 +7,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { FullscreenSpinner } from "@/components/FullscreenSpinner";
 import { ManualUpcInput } from "@/components/ManualUpcInput";
 import { useRequestCameraPermissions } from "@/components/hooks/useRequestCameraPermissions";
+import { Routes } from "@/constants/navigation";
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
@@ -19,7 +20,7 @@ const BarcodeScannerScreen = () => {
   const handleBarCodeScanned = useCallback((scannedObj: { data: string }) => {
     const { data } = scannedObj;
     setScanned(true);
-    navigation.navigate('upcModal', { upc: data })
+    navigation.navigate(Routes.itemModal, { upc: data })
   }, []);
 
   const onSwitchCameraPress = useCallback(() => {

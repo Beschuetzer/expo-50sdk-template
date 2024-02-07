@@ -6,7 +6,7 @@ import { ReduxViewer } from "@/components/stateTesting/ReduxViewer";
 
 export default function TabOneScreen() {
   return (
-    <ScrollView p={2} keyboardShouldPersistTaps="always">
+    <ScrollView py={2} keyboardShouldPersistTaps="always">
       <ReduxViewer />
       <ItemsList />
       <Playground />

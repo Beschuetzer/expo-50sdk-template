@@ -28,7 +28,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
         flexDirection={I18nManager.isRTL ? 'row-reverse' : 'row'}
       >
         {renderAction('Add to Shopping List', theme.colors.primary[900], 192, progress, 'left')}
-        {renderAction("Edit", theme.colors.warning[900], 128, progress, 'left')}
+        {/* {renderAction("Edit", theme.colors.warning[900], 128, progress, 'left')} */}
       </View>
     )
   }
@@ -76,7 +76,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
 
   function close() {
     if (swipeableRef.current) {
-      swipeableRef.current.close()
+      (swipeableRef.current as any).close()
     }
   }
 

@@ -9,7 +9,7 @@ import { RectButton } from 'react-native-gesture-handler'
 
 import { useSelector } from 'react-redux'
 
-import SwipeableRow from './SwipeableRow'
+import { SwipeableRow } from './SwipeableRow'
 
 import { itemsListArraySelector } from '@/state/slices/listsSlice'
 import { Item } from '@/types/Item'

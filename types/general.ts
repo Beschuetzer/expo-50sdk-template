@@ -8,6 +8,10 @@ export type Frequency = {
   timeSpan: TimeSpan;
 };
 
+export type UpcProp = {
+  upc: string;
+}
+
 export type UpcProductProp = {
   upcProduct: UpcProduct;
 };

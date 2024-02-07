@@ -1,4 +1,5 @@
 ## Work on Next
+//todo: finish replacing setLastUpcScanned calls to navigation.navigate(upcModal, {upc})
 //todo: figure out types for useRoute (react-navigation)
 //todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/
 //todo: fix bug where editing an item with upc then one without doesn't set the upc to blank

@@ -28,13 +28,6 @@ export const generalSlice = createSlice({
     resetLastUpcScanned: (state: GeneralState) => {
       state.lastUpcScanned = LAST_UPC_SCANNED_INITIAL;
     },
-    setUpcProductToDisplay: (
-      state: GeneralState,
-      action: PayloadAction<UpcProduct>,
-    ) => {
-      if (!action?.payload) return;
-      state.upcProductToDisplay = action.payload;
-    },
     setLastUpcScanned: (state: GeneralState, action: PayloadAction<string>) => {
       if (!action?.payload) return;
       state.lastUpcScanned = action.payload;
@@ -46,14 +39,10 @@ export const generalSlice = createSlice({
 export const {
   resetUpcProductToDisplay,
   resetLastUpcScanned,
-  setUpcProductToDisplay,
   setLastUpcScanned,
 } = generalSlice.actions;
 
 export default generalSlice.reducer;
-
-export const lastUpcScannedSelector = (state: RootState) =>
-  (state[generalSlice.name] as GeneralState).lastUpcScanned.trim();
 
 export const upcProductToDisplaySelector = (state: RootState) =>
   (state[generalSlice.name] as GeneralState).upcProductToDisplay;

@@ -14,7 +14,7 @@ import { SwipeableRow } from './SwipeableRow'
 import { itemsListArraySelector } from '@/state/slices/listsSlice'
 import { Item } from '@/types/Item'
 import { ImageRenderer } from '../ImageRenderer'
-import { setLastUpcScanned, setUpcProductToDisplay } from '@/state/slices/generalSlice'
+import { setLastUpcScanned } from '@/state/slices/generalSlice'
 
 type Row = { item: Item; index: number }
 type ItemsListProps = {}

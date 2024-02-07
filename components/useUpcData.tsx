@@ -2,67 +2,67 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
-  lastUpcScannedSelector,
   resetLastUpcScanned,
 } from "@/state/slices/generalSlice";
 import { addUpcProduct, upcProductSelector } from "@/state/slices/scannerSlice";
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
+import { UpcProp } from "@/types/general";
 import { delay } from "@/utils/helpers";
 
 type UseUpcProductProps = {
   onSuccessfulFetch?: (upcProduct: UpcProduct) => void;
-};
+} & UpcProp;
 
-export function useUpcProduct(props?: UseUpcProductProps) {
-  const { onSuccessfulFetch } = props || {};
-  const lastUpcScanned = useSelector(lastUpcScannedSelector);
-  const upcProduct = useSelector(upcProductSelector(lastUpcScanned));
+export function useUpcProduct(props: UseUpcProductProps) {
+  const { onSuccessfulFetch, upc } = props;
+  const upcProduct = useSelector(upcProductSelector(upc));
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [product, setProduct] = useState<UpcProduct | null>(null);
   const dispatch = useDispatch();
 
-  const fetchUpcData = useCallback(
-    async (upcToFetch: string) => {
-      const url = `https://world.openfoodfacts.org/api/v0/product/${upcToFetch}`
-      try {
-        setIsLoading(true)
-        setErrorMsg(null)
-        // alert(`fetching data for ${url}`);
-        // const response = await fetch(url);
+  const fetchUpcData = useCallback(async () => {
+    const url = `https://world.openfoodfacts.org/api/v0/product/${upc}`;
+    try {
+      setIsLoading(true);
+      setErrorMsg(null);
+      // alert(`fetching data for ${url}`);
+      // const response = await fetch(url);
 
-        const response = await handleMockResponse(upcToFetch)
-        if (response.ok) {
-          const data = (await response.json()) as UpcResponse
-          dispatch(addUpcProduct(data.product))
-          setProduct(data.product)
-          onSuccessfulFetch && onSuccessfulFetch(data.product)
-        } else {
-          setErrorMsg(
-            `Invalid resopnse from service for '${upcToFetch}'.  Make sure you have a data connection and try again in a few seconds.`,
-          )
-          setProduct(null)
+      const response = await handleMockResponse(upc)
+      if (response.ok) {
+        const data = (await response.json()) as UpcResponse;
+        const upcProduct = data.product;
+        if (!upcProduct.code && !upcProduct.id && !upcProduct.product_name) {
+          upcProduct.product_name = "N/A";
+          upcProduct.brands = "N/A";
         }
-      } catch (error) {
-        setErrorMsg(`Error fetching data for '${lastUpcScanned}': ${error}.`)
-        setProduct(null)
-      } finally {
-        setIsLoading(false)
-        dispatch(resetLastUpcScanned())
+        dispatch(addUpcProduct(upcProduct));
+        setProduct(upcProduct);
+        onSuccessfulFetch && onSuccessfulFetch(upcProduct);
+      } else {
+        setErrorMsg(
+          `Invalid resopnse from service for '${upc}'.  Make sure you have a data connection and try again in a few seconds.`,
+        );
+        setProduct(null);
       }
-    },
-    [lastUpcScanned],
-  )
+    } catch (error) {
+      setErrorMsg(`Error fetching data for '${upc}': ${error}.`);
+      setProduct(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [upc]);
 
   useEffect(() => {
     if (upcProduct) {
       dispatch(resetLastUpcScanned());
       setProduct(upcProduct);
       onSuccessfulFetch && onSuccessfulFetch(upcProduct);
-    } else if (lastUpcScanned.match(/\d{12,13}/i)) {
-      fetchUpcData(lastUpcScanned);
+    } else if (upc.match(/\d{12,13}/i)) {
+      fetchUpcData();
     }
-  });
+  }, [upc]);
 
   return {
     upcProduct: product,
@@ -226,4 +226,3 @@ async function handleMockResponse(upc: string) {
 
   return new Response(JSON.stringify(toReturn));
 }
-

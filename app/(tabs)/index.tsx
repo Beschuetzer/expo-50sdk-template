@@ -9,7 +9,7 @@ export default function TabOneScreen() {
     <ScrollView py={2} keyboardShouldPersistTaps="always">
       <ReduxViewer />
       <ItemsList />
-      <Playground />
+      {/* <Playground /> */}
     </ScrollView>
   )
 }

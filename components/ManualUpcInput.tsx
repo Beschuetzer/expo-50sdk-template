@@ -1,17 +1,13 @@
 import { Button, Input, View, Text, useTheme, Row } from "native-base";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GestureResponderEvent } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
-import { ButtonWithLoadingSpinner } from "./ButtonWithLoadingSpinner";
 import { InputValidationMessage } from "./InputValidationMessage";
 import { MOCKS_UPCS } from "./useUpcData";
 
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
-import {
-  lastUpcScannedSelector,
-  setLastUpcScanned,
-} from "@/state/slices/generalSlice";
+import { useNavigation } from "expo-router";
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -32,14 +28,13 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
   const [isValid, setIsValid] = useState(IS_VALID_INITIAL);
   const [value, setValue] = useState<string>(VALUE_INITIAL);
   const theme = useTheme();
-  const dispatch = useDispatch();
-  const lastUpcScanned = useSelector(lastUpcScannedSelector);
+  const navigation = useNavigation();
 
   const onSearchPress = useCallback(
     (e: GestureResponderEvent) => {
       e.preventDefault();
       if (getIsValidValue(value)) {
-        dispatch(setLastUpcScanned(value));
+        navigation.navigate("upcModal", {upc: value})
       }
     },
     [value],
@@ -108,7 +103,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         </Button>
       </Row>
       <Button
-        isDisabled={!isValid || !!lastUpcScanned}
+        isDisabled={!isValid || value.length === 0}
         backgroundColor="secondary.900"
         borderRadius={0}
         onPress={onSearchPress}
@@ -118,3 +113,4 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
     </View>
   );
 }
+

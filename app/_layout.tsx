@@ -17,7 +17,6 @@ import { PersistGate } from "redux-persist/integration/react";
 import { Text } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import { persistor, store } from "@/state/store";
-import { UpcDetailsModal } from "@/components/UpcDetailsModal";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -65,15 +64,14 @@ function RootLayoutNav() {
           <NativeBaseProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <BottomSheetModalProvider>
-                <UpcDetailsModal />
                 <Stack>
                   <Stack.Screen
                     name="(tabs)"
                     options={{ headerShown: false }}
                   />
                   <Stack.Screen
-                    name="modal"
-                    options={{ presentation: 'modal' }}
+                    name="upcModal"
+                    options={{ presentation: 'modal', title: 'Upc Details' }}
                   />
                 </Stack>
               </BottomSheetModalProvider>

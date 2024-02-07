@@ -1,15 +1,17 @@
-import { useTheme } from "native-base";
-import React, { ReactNode, useRef } from "react";
-import { Animated, StyleSheet, Text, View, I18nManager } from "react-native";
-import { RectButton, Swipeable } from "react-native-gesture-handler";
+import { useTheme, View, Text } from 'native-base'
+import React, { ReactNode, useRef } from 'react'
+import { Animated, StyleSheet, I18nManager } from 'react-native'
+import { RectButton, Swipeable } from 'react-native-gesture-handler'
 
 type SwipeableRowProps = {
   children?: ReactNode | ReactNode[];
-};
+  width?: string | number;
+}
+
 export function SwipeableRow(props: SwipeableRowProps) {
-  const { children } = props;
-  const theme = useTheme();
-  const swipeableRef = useRef(null);
+  const { children, width = "50%" } = props;
+  const theme = useTheme()
+  const swipeableRef = useRef(null)
 
   function renderLeftActions(
     progress: Animated.AnimatedInterpolation<string | number>,
@@ -18,38 +20,45 @@ export function SwipeableRow(props: SwipeableRowProps) {
     const trans = dragX.interpolate({
       inputRange: [0, 50, 100, 101],
       outputRange: [-20, 0, 0, 1],
-    });
+    })
+
     return (
-      <RectButton style={styles.leftAction} onPress={close}>
-        <Animated.Text style={[styles.actionText]}>Archive</Animated.Text>
-      </RectButton>
-    );
+      <View
+        width={width}
+        flexDirection={I18nManager.isRTL ? 'row-reverse' : 'row'}
+      >
+        {renderAction('Add to Shopping List', theme.colors.primary[900], 192, progress, 'left')}
+        {renderAction("Edit", theme.colors.warning[900], 128, progress, 'left')}
+      </View>
+    )
   }
 
-  function renderRightAction(
+
+  function renderAction(
     text: string,
     color: string,
     x: number,
     progress: Animated.AnimatedInterpolation<string | number>,
+    direction: 'left' | 'right',
   ) {
     const trans = progress.interpolate({
       inputRange: [0, 1],
       outputRange: [x, 0],
-    });
+    })
     const pressHandler = () => {
-      close();
-      alert(text);
-    };
+      close()
+      alert(text)
+    }
     return (
       <Animated.View style={{ flex: 1, transform: [{ translateX: 0 }] }}>
         <RectButton
-          style={[styles.rightAction, { backgroundColor: color }]}
+          style={[styles.action, { backgroundColor: color }]}
           onPress={pressHandler}
         >
           <Text style={styles.actionText}>{text}</Text>
         </RectButton>
       </Animated.View>
-    );
+    )
   }
 
   function renderRightActions(
@@ -57,21 +66,17 @@ export function SwipeableRow(props: SwipeableRowProps) {
   ) {
     return (
       <View
-        style={{
-          width: 192,
-          flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
-        }}
+        width={width}
+        flexDirection={I18nManager.isRTL ? 'row-reverse' : 'row'}
       >
-        {renderRightAction("Add", theme.colors.primary[900], 192, progress)}
-        {renderRightAction("Edit", theme.colors.secondary[900], 128, progress)}
-        {renderRightAction("Delete", theme.colors.tertiary[900], 64, progress)}
+        {renderAction('Delete', theme.colors.secondary[900], 0, progress, 'right')}
       </View>
-    );
+    )
   }
 
   function close() {
     if (swipeableRef.current) {
-      swipeableRef.current.close();
+      swipeableRef.current.close()
     }
   }
 
@@ -86,24 +91,20 @@ export function SwipeableRow(props: SwipeableRowProps) {
     >
       {children}
     </Swipeable>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
-  leftAction: {
-    flex: 1,
-    backgroundColor: "#497AFC",
-    justifyContent: "center",
-  },
   actionText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     padding: 10,
   },
-  rightAction: {
-    alignItems: "center",
+  action: {
+    alignItems: 'center',
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
+    textAlign: 'center'
   },
-});
+})

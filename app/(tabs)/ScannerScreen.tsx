@@ -7,7 +7,6 @@ import { useDispatch } from "react-redux";
 
 import { FullscreenSpinner } from "@/components/FullscreenSpinner";
 import { ManualUpcInput } from "@/components/ManualUpcInput";
-import { UpcDetailsModal } from "@/components/UpcDetailsModal";
 import { useRequestCameraPermissions } from "@/components/hooks/useRequestCameraPermissions";
 import { setLastUpcScanned } from "@/state/slices/generalSlice";
 
@@ -79,7 +78,6 @@ const BarcodeScannerScreen = () => {
           <Text style={styles.scanAgainText}>Tap to Scan Again</Text>
         </TouchableOpacity>
       ) : null}
-      <UpcDetailsModal />
     </View>
   );
 };

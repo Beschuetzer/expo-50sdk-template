@@ -20,7 +20,7 @@ const BarcodeScannerScreen = () => {
   const handleBarCodeScanned = useCallback((scannedObj: { data: string }) => {
     const { data } = scannedObj;
     setScanned(true);
-    navigation.navigate(Routes.upcModal, { upc: data })
+    navigation.navigate(Routes.itemModal, { upc: data })
   }, []);
 
   const onSwitchCameraPress = useCallback(() => {

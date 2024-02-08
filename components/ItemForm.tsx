@@ -164,28 +164,6 @@ export function ItemForm(props: UpcDetailsFormProps) {
         }}
         headingTag={FormControl.Label}
       />
-      <Stack>
-        <FormControl.Label>Name</FormControl.Label>
-        <Input
-          variant="outline"
-          p={theme.space[1]}
-          placeholder="Product Name"
-          value={productNameValue}
-          onChangeText={(newText) => setProductNameValue(newText)}
-          isInvalid={productNameValue.length <= 0}
-        />
-      </Stack>
-      <Stack>
-        <FormControl.Label>Name</FormControl.Label>
-        <Input
-          variant="outline"
-          p={theme.space[1]}
-          placeholder="Product Name"
-          value={productNameValue}
-          onChangeText={(newText) => setProductNameValue(newText)}
-          isInvalid={productNameValue.length <= 0}
-        />
-      </Stack>
     </AbsolutePositionedScreen>
   );
 }

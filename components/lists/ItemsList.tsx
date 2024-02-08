@@ -36,7 +36,7 @@ export function ItemsList(props: ItemsListProps) {
             <SwipeableRow>
               <RectButton
                 style={styles.rectButton}
-                onPress={() => navigation.navigate(Routes.upcModal, { upc: item.upc, showOverrideMsg: false })}
+                onPress={() => navigation.navigate(Routes.itemModal, { upc: item.upc, showOverrideMsg: false })}
               >
                 <Row space={2}>
                   <ImageRenderer source={item.images[item.imageToUseIndex]} />

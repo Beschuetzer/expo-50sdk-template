@@ -1,7 +1,4 @@
 ## Work on Next
--fix issue when opening an item with a custom image and trying to save a new custom image
--make sure that if a custom image is not selected when an item is saved that an file:// image is removed from array and deleted from storage
-
 -what if there were no ShoppingListItem but instead the fields where the values differ are objects where keys are the name of the store and the value is the value for that store?
 
 //todo: figure out how to handle pressing item in itemslist (add a new modal or use the current?)

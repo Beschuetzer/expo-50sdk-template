@@ -17,7 +17,7 @@ import { itemsListItemSelector } from '@/state/slices/listsSlice'
 import { upcProductSelector } from '@/state/slices/scannerSlice'
 import { Item } from '@/types/Item'
 import { ItemProp } from '@/types/general'
-import { getKeyToUse } from '@/utils/helpers'
+import { deleteFile, getKeyToUse } from '@/utils/helpers'
 
 type UpcDetailsFormValdation = {
   isValid: boolean
@@ -168,7 +168,13 @@ export function ItemForm(props: UpcDetailsFormProps) {
           onSelectImage={(url, isCustomImage) => {
             if (isCustomImage) {
               item.images = item.images.filter(
-                (imageUrl) => !imageUrl.match(LOCAL_FILE_REGEX),
+                (imageUrl) => {
+                    const shouldKeep = !imageUrl.match(LOCAL_FILE_REGEX)
+                    if (!shouldKeep) {
+                        deleteFile(imageUrl);
+                    }
+                    return shouldKeep;
+                }
               )
               item.images.push(url)
             }

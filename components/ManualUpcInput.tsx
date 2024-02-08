@@ -34,7 +34,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
     (e: GestureResponderEvent) => {
       e.preventDefault();
       if (getIsValidValue(value)) {
-        navigation.navigate(Routes.itemModal, { upc: value });
+        navigation.navigate(Routes.upcModal, { upc: value });
       }
     },
     [value],

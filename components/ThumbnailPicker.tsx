@@ -1,5 +1,5 @@
 import { Row, View } from "native-base";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { TouchableOpacity } from "react-native";
 
 import { ImageRenderer } from "./ImageRenderer";
@@ -7,38 +7,29 @@ import { useIsDarkMode } from "./hooks/useIsDarkTheme";
 
 import { UpcProduct } from "@/types/UpcResponse";
 import { StyleProp } from "@/types/general";
+import { getImagesFromUpcProduct } from "@/utils/helpers";
 
 type ThumbnailPickerProps = {
   upcProduct: UpcProduct;
   selectedUrl: string;
-  setSelectedUrl: React.Dispatch<React.SetStateAction<string>>;
+  onSelectImage: (url: string) => void;
 } & StyleProp;
 
-const DEFAULT_SELECTION_INDEX = 0;
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
-  const { upcProduct, selectedUrl, setSelectedUrl, style } = props;
+  const { upcProduct, selectedUrl, onSelectImage, style } = props;
   const isDarkMode = useIsDarkMode();
-
   const imagesToRender = useMemo(
-    () =>
-      new Set([
-        upcProduct?.image_front_thumb_url || "",
-        upcProduct?.image_ingredients_thumb_url || "",
-        upcProduct?.image_thumb_url || "",
-        upcProduct?.image_nutrition_url || "",
-      ]),
+    () => new Set(getImagesFromUpcProduct(upcProduct)),
     [upcProduct],
   );
 
-  const handleSelect = useCallback((imageUrl?: string) => {
-    if (!imageUrl) return;
-    setSelectedUrl(imageUrl);
-  }, []);
-
-  useEffect(() => {
-    if (!imagesToRender) return;
-    setSelectedUrl(Array.from(imagesToRender)?.[DEFAULT_SELECTION_INDEX])
-  }, [upcProduct, imagesToRender])
+  const handleSelect = useCallback(
+    (imageUrl?: string) => {
+      if (!imageUrl) return;
+      onSelectImage && onSelectImage(imageUrl);
+    },
+    [onSelectImage],
+  );
 
   return (
     <Row space={1} style={style}>
@@ -67,4 +58,3 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     </Row>
   );
 }
-

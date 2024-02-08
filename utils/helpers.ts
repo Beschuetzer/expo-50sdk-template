@@ -1,8 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 
-import { EMPTY_STRING } from "@/constants/general";
+import { EMPTY_STRING, IMAGE_PRIORITY_MAPPING } from "@/constants/general";
 import { Key } from "@/types/Item";
+import { UpcProduct } from "@/types/UpcResponse";
 
 export async function delay(ms: number) {
   if (ms <= 0) return;
@@ -35,6 +36,12 @@ export function getKeyToUse(key: Key, displayAlert = true) {
   }
 
   return toReturn;
+}
+
+export function getImagesFromUpcProduct(upcProduct: UpcProduct) {
+  return Object.values(IMAGE_PRIORITY_MAPPING).map(
+    (key) => upcProduct?.[key] || EMPTY_STRING,
+  )
 }
 
 export async function retrieveImagePathFromAsyncStorage(key: Key) {
@@ -81,3 +88,4 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
     console.error("Error storing image path in AsyncStorage", error);
   }
 }
+

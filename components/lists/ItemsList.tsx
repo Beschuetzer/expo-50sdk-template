@@ -21,9 +21,8 @@ type ItemsListProps = {}
 
 export function ItemsList(props: ItemsListProps) {
   const itemsList = useSelector(itemsListArraySelector)
-  const theme = useTheme();
+  const theme = useTheme()
   const navigation = useNavigation()
-
   return (
     <View>
       <Center>
@@ -31,23 +30,22 @@ export function ItemsList(props: ItemsListProps) {
       </Center>
       <FlashList
         data={itemsList}
-        renderItem={({ item, index }: Row) => (
-          <SwipeableRow>
-            <RectButton
-              style={styles.rectButton}
-              onPress={() => null}
-            >
-              <Row space={2}>
-                <ImageRenderer source={item.imageUri} />
-                <Column>
-                  <Text>{item.name}</Text>
-                  <Text>{item.upc}</Text>
-                  <Text>{item.frequency}</Text>
-                </Column>
-              </Row>
-            </RectButton>
-          </SwipeableRow>
-        )}
+        renderItem={({ item, index }: Row) => {
+          return (
+            <SwipeableRow>
+              <RectButton style={styles.rectButton} onPress={() => null}>
+                <Row space={2}>
+                  <ImageRenderer source={item.images[item.imageToUseIndex]} />
+                  <Column>
+                    <Text>{item.name}</Text>
+                    <Text>{item.upc}</Text>
+                    <Text>{item.frequency}</Text>
+                  </Column>
+                </Row>
+              </RectButton>
+            </SwipeableRow>
+          )
+        }}
         keyExtractor={(item: Item, index: number) => `item ${index}`}
         estimatedItemSize={180} //todo: caculate this approriately
         ItemSeparatorComponent={() => (

@@ -15,14 +15,14 @@ import { FrequencyInput } from "./FrequencyInput";
 import { InputValidationMessage } from "./InputValidationMessage";
 import { ThumbnailPicker } from "./ThumbnailPicker";
 
-import { EMPTY_STRING } from "@/constants/general";
+import { DEFAULT_IMAGE_INDEX, EMPTY_STRING } from "@/constants/general";
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
 import { itemsListItemSelector } from "@/state/slices/listsSlice";
 import { upcProductSelector } from "@/state/slices/scannerSlice";
 import { Item } from "@/types/Item";
-import { UpcProduct } from "@/types/UpcResponse";
 import { ItemProp } from "@/types/general";
 import { getKeyToUse } from "@/utils/helpers";
+import { getUpcProduct } from "@/utils/model-mappings";
 
 type UpcDetailsFormValdation = {
   isValid: boolean;
@@ -36,8 +36,6 @@ type UpcDetailsFormProps = {
 
 export function ItemForm(props: UpcDetailsFormProps) {
   const { onClose, onSave, item } = props;
-  console.log({ item });
-
   const upcProduct = useSelector(upcProductSelector(item.upc || EMPTY_STRING));
   const theme = useTheme();
   const keyToUse = useMemo(
@@ -52,7 +50,11 @@ export function ItemForm(props: UpcDetailsFormProps) {
   const itemInListUsingName = useSelector(
     itemsListItemSelector(item.name || EMPTY_STRING),
   );
-  const [selectedUrl, setSelectedUrl] = useState(item.imageUri || EMPTY_STRING);
+  const [selectedUrl, setSelectedUrl] = useState(
+    itemInList?.images[itemInList?.imageToUseIndex] ||
+      item.images[item.imageToUseIndex] ||
+      EMPTY_STRING,
+  );
   const [upcValue, setUpcValue] = useState(item.upc || EMPTY_STRING);
   const [productNameValue, setProductNameValue] = useState(
     item.name || EMPTY_STRING,
@@ -75,10 +77,14 @@ export function ItemForm(props: UpcDetailsFormProps) {
   async function onSavePress() {
     const itemToSave = {
       frequency: frequencyInMsRef.current,
-      imageUri: selectedUrl || EMPTY_STRING,
+      images: item.images,
+      imageToUseIndex:
+        item.images.findIndex((image) => {
+          return image === selectedUrl;
+        }) || DEFAULT_IMAGE_INDEX,
       name: productNameValue,
       upc: upcValue,
-    };
+    } as Item;
     onSave && onSave(itemToSave);
     onClose && onClose();
   }
@@ -126,15 +132,10 @@ export function ItemForm(props: UpcDetailsFormProps) {
         />
         <ThumbnailPicker
           selectedUrl={selectedUrl}
-          setSelectedUrl={setSelectedUrl}
-          upcProduct={
-            upcProduct ||
-            ({
-              image_front_thumb_url: item.imageUri,
-              product_name: item.name,
-              code: item.upc,
-            } as UpcProduct)
-          }
+          onSelectImage={(url) => {
+            setSelectedUrl(url);
+          }}
+          upcProduct={upcProduct || getUpcProduct(item)}
         />
       </Stack>
       <FrequencyInput

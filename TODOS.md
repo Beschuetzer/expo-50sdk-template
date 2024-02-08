@@ -1,4 +1,6 @@
 ## Work on Next
+-how to delete custom images when they are taken but the modal is closed (not saved)?
+
 -what if there were no ShoppingListItem but instead the fields where the values differ are objects where keys are the name of the store and the value is the value for that store?
 
 //todo: figure out how to handle pressing item in itemslist (add a new modal or use the current?)

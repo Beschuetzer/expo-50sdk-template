@@ -21,7 +21,8 @@ export async function delay(ms: number) {
 
 export async function deleteFile(path: string) {
   if (!path) return;
-  try {
+    try {
+    console.log(`deleting '${path}'...`);
     await FileSystem.deleteAsync(path);
     return true;
   } catch (error) {

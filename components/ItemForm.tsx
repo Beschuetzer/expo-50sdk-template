@@ -1,5 +1,5 @@
 import { Stack, FormControl, Input, Row, useTheme, Button } from 'native-base'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { AbsolutePositionedScreen } from './AbsolutelyPositionedScreen'
@@ -14,7 +14,6 @@ import {
   UPC_REQUIRED_CHAR_LENGTH,
 } from '@/constants/regexs'
 import { itemsListItemSelector } from '@/state/slices/listsSlice'
-import { upcProductSelector } from '@/state/slices/scannerSlice'
 import { Item } from '@/types/Item'
 import { ItemProp } from '@/types/general'
 import { deleteFile, getKeyToUse } from '@/utils/helpers'
@@ -32,7 +31,6 @@ type UpcDetailsFormProps = {
 
 export function ItemForm(props: UpcDetailsFormProps) {
   const { onClose, onSave, item, showOverrideMsg = true } = props
-  const upcProduct = useSelector(upcProductSelector(item.upc || EMPTY_STRING))
   const theme = useTheme()
   const keyToUse = useMemo(
     () =>
@@ -69,10 +67,15 @@ export function ItemForm(props: UpcDetailsFormProps) {
         : 'Either a Upc or a Name must be given for each item.',
     }
   }, [isUpcValid, upcValue, productNameValue])
+  const customImagesToDeleteOnUnloadRef = useRef<string[]>([])
+  const shouldDeleteLastImageRef = useRef(true)
+
+  function onClosePress() {
+    shouldDeleteLastImageRef.current = true;
+    onClose && onClose()
+  }
 
   async function onSavePress() {
-    console.log('here')
-
     const itemToSave = {
       frequency: frequencyInMsRef.current,
       images: item.images || [],
@@ -89,11 +92,20 @@ export function ItemForm(props: UpcDetailsFormProps) {
       itemToSave.imageToUseIndex = itemToSave.images.length - 1
     }
 
-    console.log({ itemToSave, selectedUrl })
-
+    shouldDeleteLastImageRef.current = false
     onSave && onSave(itemToSave)
     onClose && onClose()
   }
+
+  useEffect(() => {
+    return () => {
+        for (let index = 0; index < customImagesToDeleteOnUnloadRef.current.length; index++) {
+            const imageUrl = customImagesToDeleteOnUnloadRef.current[index];
+            if (index === customImagesToDeleteOnUnloadRef.current.length - 1 && shouldDeleteLastImageRef.current === false) break;
+            deleteFile(imageUrl)
+        }
+    }
+  }, [])
 
   return (
     <AbsolutePositionedScreen
@@ -107,7 +119,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
             >
               Save
             </Button>
-            <Button flex={1} onPress={() => onClose && onClose()}>
+            <Button flex={1} onPress={onClosePress}>
               Close
             </Button>
           </Row>
@@ -167,15 +179,14 @@ export function ItemForm(props: UpcDetailsFormProps) {
           selectedUrl={selectedUrl}
           onSelectImage={(url, isCustomImage) => {
             if (isCustomImage) {
-              item.images = item.images.filter(
-                (imageUrl) => {
-                    const shouldKeep = !imageUrl.match(LOCAL_FILE_REGEX)
-                    if (!shouldKeep) {
-                        deleteFile(imageUrl);
-                    }
-                    return shouldKeep;
+              customImagesToDeleteOnUnloadRef.current.push(url)
+              item.images = item.images.filter((imageUrl) => {
+                const shouldKeep = !imageUrl.match(LOCAL_FILE_REGEX)
+                if (!shouldKeep) {
+                  deleteFile(imageUrl)
                 }
-              )
+                return shouldKeep
+              })
               item.images.push(url)
             }
             setSelectedUrl(url)

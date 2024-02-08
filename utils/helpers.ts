@@ -26,7 +26,7 @@ export async function deleteFile(path: string) {
     await FileSystem.deleteAsync(path);
     return true;
   } catch (error) {
-    console.error(error)
+    console.log(error)
     return false;
   }
 }
@@ -69,7 +69,7 @@ export async function captureImage() {
       return result.assets[0].uri;
     }
   } catch (error) {
-    console.error({ error });
+    console.log({ error });
   }
 }
 
@@ -83,7 +83,7 @@ export async function pickImage() {
       return result.assets[0].uri;
     }
   } catch (error) {
-    console.error({ error });
+    console.log({ error });
   }
 }
 
@@ -92,7 +92,7 @@ export async function retrieveImagePathFromAsyncStorage(key: Key) {
     const keyToUse = getKeyToUse(key);
     return await AsyncStorage.getItem(keyToUse);
   } catch (error) {
-    console.error("Error retrieving image path in AsyncStorage", error);
+    console.log("Error retrieving image path in AsyncStorage", error);
     return null;
   }
 }
@@ -114,11 +114,11 @@ export async function saveImageLocally(key: Key, uri: string) {
       await saveImagePathToAsyncStorage(key, imagePath);
       return imagePath;
     } else {
-      console.error(`Unable to save image ${response?.uri}`);
+      console.log(`Unable to save image ${response?.uri}`);
       return "";
     }
   } catch (error) {
-    console.error("Error saving image locally", error);
+    console.log("Error saving image locally", error);
     return "";
   }
 }
@@ -128,7 +128,7 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
     const keyToUse = getKeyToUse(key);
     await AsyncStorage.setItem(keyToUse, imagePath);
   } catch (error) {
-    console.error("Error storing image path in AsyncStorage", error);
+    console.log("Error storing image path in AsyncStorage", error);
   }
 }
 

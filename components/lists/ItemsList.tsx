@@ -43,6 +43,7 @@ export function ItemsList(props: ItemsListProps) {
           } as Key
           return (
             <SwipeableRow
+              key={index}
               leftActions={[
                 {
                   title: 'Add to Shopping List',

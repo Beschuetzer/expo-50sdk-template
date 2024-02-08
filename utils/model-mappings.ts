@@ -14,8 +14,8 @@ export function getItem(input: UpcProduct): Item {
     frequency: EMPTY_FREQUENCY,
     images: getImagesFromUpcProduct(input),
     imageToUseIndex: DEFAULT_IMAGE_INDEX,
-    name: input.product_name,
-    upc: input.code || input.id,
+    name: input?.product_name || EMPTY_STRING,
+    upc: input?.code || input?.id || EMPTY_STRING,
   };
 }
 

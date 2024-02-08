@@ -17,7 +17,8 @@ export type Key = XOR<
  *This represents something that can be added to any store
  **/
 export type Item = Key & {
-  imageUri?: string;
+  images: string[];
+  imageToUseIndex: number;
   /**
    *This is in milliseconds
    **/
@@ -28,8 +29,13 @@ export type Item = Key & {
  *This is an item when it is in the shoppingList (and has a store associated with it)
  **/
 export type ShoppingItem = {
-  aisle: string;
+  aisle?: string;
   quantity: number;
+  price?: number;
+  /**
+  *This is the id unique to this store (could be useful if able to scan receipts and extract pricing item based on item id)
+  **/
+  itemId?: string;
   /**
    *Something like 'box', 'kg', or 'bottle'
    **/

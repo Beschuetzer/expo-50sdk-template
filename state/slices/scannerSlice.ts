@@ -4,6 +4,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 
 import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
+import { getKeyToUse } from "@/utils/helpers";
 
 type Upc = string;
 export type TimeStamp = {
@@ -25,9 +26,12 @@ export const scannerSlice = createSlice({
   initialState,
   reducers: {
     addUpcProduct: (state: ScannerState, action: PayloadAction<UpcProduct>) => {
-      const idToUse = action.payload.id || action.payload.code;
+      const keyToUse = getKeyToUse({
+        name: action.payload.product_name,
+        upc: action.payload.id || action.payload.code,
+      });
 
-      if (!action?.payload || !idToUse) {
+      if (!action?.payload || !keyToUse) {
         alert(
           `Unable to add UpcProduct for ${JSON.stringify(
             action.payload,
@@ -37,7 +41,7 @@ export const scannerSlice = createSlice({
         );
         return;
       }
-      state.upcProducts[idToUse] = {
+      state.upcProducts[keyToUse] = {
         ...action.payload,
         timestamp: Date.now(),
       };

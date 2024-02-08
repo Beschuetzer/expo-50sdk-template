@@ -58,7 +58,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Provider store={store}>
         <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
           <NativeBaseProvider>
@@ -70,8 +70,8 @@ function RootLayoutNav() {
                     options={{ headerShown: false }}
                   />
                   <Stack.Screen
-                    name="modal"
-                    options={{ presentation: "modal" }}
+                    name="itemModal"
+                    options={{ presentation: 'modal', title: 'Upc Details' }}
                   />
                 </Stack>
               </BottomSheetModalProvider>
@@ -80,5 +80,6 @@ function RootLayoutNav() {
         </PersistGate>
       </Provider>
     </ThemeProvider>
-  );
+  )
 }
+

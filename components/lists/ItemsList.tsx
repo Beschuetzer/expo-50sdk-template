@@ -1,5 +1,5 @@
 import { FlashList } from '@shopify/flash-list'
-import { Heading, View, Text, Row, useTheme } from 'native-base'
+import { Heading, View, Text, Row, useTheme, Column, Center } from 'native-base'
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import { RectButton } from 'react-native-gesture-handler'
@@ -7,48 +7,82 @@ import { RectButton } from 'react-native-gesture-handler'
 //  To toggle LTR/RTL uncomment the next line
 // I18nManager.allowRTL(true);
 
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { SwipeableRow } from './SwipeableRow'
 
-import { itemsListArraySelector } from '@/state/slices/listsSlice'
-import { Item } from '@/types/Item'
+import {
+  itemsListArraySelector,
+  removeItemsListItem,
+} from '@/state/slices/listsSlice'
+import { Item, Key } from '@/types/Item'
 import { ImageRenderer } from '../ImageRenderer'
+import { useNavigation } from 'expo-router'
+import { Routes } from '@/constants/navigation'
 
-
-type Row = { item: Item; index: number };
-const RectRow = ({ item, index }: Row) => (
-  <RectButton style={styles.rectButton} onPress={() => alert('click 1')}>
-    <View>
-      <ImageRenderer source={item.imageUri} />
-      <Text>{item.imageUri}</Text>
-    </View>
-  </RectButton>
-)
-
-const SwipeableRowLocal = ({ item, index }: Row) => {
-  return (
-    <SwipeableRow>
-      <RectRow item={item} index={index}/>
-    </SwipeableRow>
-  )
-}
-
+type Row = { item: Item; index: number }
 type ItemsListProps = {}
+
 export function ItemsList(props: ItemsListProps) {
   const itemsList = useSelector(itemsListArraySelector)
   const theme = useTheme()
+  const navigation = useNavigation()
+  const dispatch = useDispatch()
 
   return (
     <View>
-      <Heading>Items List</Heading>
+      <Center>
+        <Heading p={theme.sizes[2]}>Items List</Heading>
+      </Center>
       <FlashList
         data={itemsList}
-        renderItem={({ item, index }: Row) => (
-          <SwipeableRowLocal key={index} item={item} index={index} />
-        )}
+        renderItem={({ item, index }: Row) => {
+          const keyToUse = {
+            name: item.name,
+            upc: item.upc,
+          } as Key
+          return (
+            <SwipeableRow
+              leftActions={[
+                {
+                  title: 'Add to Shopping List',
+                  backgroundColor: theme.colors.primary[900],
+                  onPress: () => alert('add'),
+                },
+              ]}
+              rightActions={[
+                {
+                  title: 'Delete',
+                  backgroundColor: theme.colors.red[900],
+                  onPress: () => {
+                    dispatch(removeItemsListItem(keyToUse))
+                  },
+                },
+              ]}
+            >
+              <RectButton
+                style={styles.rectButton}
+                onPress={() => {
+                  navigation.navigate(Routes.itemModal, {
+                    key: item.upc || item.name,
+                    showOverrideMsg: false,
+                  })
+                }}
+              >
+                <Row space={2}>
+                  <ImageRenderer source={item.images[item.imageToUseIndex]} />
+                  <Column>
+                    <Text>{item.name}</Text>
+                    <Text>{item.upc}</Text>
+                    <Text>{item.frequency}</Text>
+                  </Column>
+                </Row>
+              </RectButton>
+            </SwipeableRow>
+          )
+        }}
         keyExtractor={(item: Item, index: number) => `item ${index}`}
-        estimatedItemSize={60} //todo: caculate this approriately
+        estimatedItemSize={180} //todo: caculate this approriately
         ItemSeparatorComponent={() => (
           <View
             height={StyleSheet.hairlineWidth}
@@ -63,9 +97,8 @@ export function ItemsList(props: ItemsListProps) {
 const styles = StyleSheet.create({
   rectButton: {
     flex: 1,
-    // height: 80,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     justifyContent: 'space-between',
     flexDirection: 'column',
     backgroundColor: 'white',

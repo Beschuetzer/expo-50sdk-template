@@ -16,7 +16,9 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "photosPermission": "Allow $(PRODUCT_NAME) to access your photos for selecting items",
+      "cameraPermission": "Allow $(PRODUCT_NAME) to access your photos for taking pictures of items"
     },
     "android": {
       "adaptiveIcon": {
@@ -35,6 +37,12 @@
         "expo-camera",
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to pick an image for an item"
         }
       ]
     ],

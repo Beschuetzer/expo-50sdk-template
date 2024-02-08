@@ -1,13 +1,40 @@
-import { EMPTY_FREQUENCY, EMPTY_STRING } from "@/constants/general";
+import { getImagesFromUpcProduct } from "./helpers";
+
+import {
+  DEFAULT_IMAGE_INDEX,
+  EMPTY_FREQUENCY,
+  EMPTY_STRING,
+  IMAGE_PRIORITY_MAPPING,
+} from "@/constants/general";
 import { Item } from "@/types/Item";
 import { UpcProduct } from "@/types/UpcResponse";
 
-export async function getItem(input: UpcProduct): Promise<Item> {
+export function getItem(input: UpcProduct): Item {
   return {
     frequency: EMPTY_FREQUENCY,
-    imageUri:
-      input.image_front_thumb_url || input.image_thumb_url || EMPTY_STRING,
-    name: input.product_name,
-    upc: input.code || input.id,
+    images: getImagesFromUpcProduct(input),
+    imageToUseIndex: DEFAULT_IMAGE_INDEX,
+    name: input?.product_name || EMPTY_STRING,
+    upc: input?.code || input?.id || EMPTY_STRING,
   };
+}
+
+export function getUpcProduct(item: Item, addLeadingZero = true): UpcProduct {
+  const toReturn = {
+    product_name: item.name || EMPTY_STRING,
+    code: (addLeadingZero ? `0${item.upc}` : item.upc) || EMPTY_STRING,
+    id: (addLeadingZero ? `0${item.upc}` : item.upc) || EMPTY_STRING,
+  } as UpcProduct;
+
+  let keyNumber = 0;
+  for (const image of item?.images || []) {
+    const nextKey = IMAGE_PRIORITY_MAPPING?.[keyNumber];
+    if (nextKey) {
+      toReturn[nextKey as keyof UpcProduct] = image;
+      keyNumber++;
+    } else {
+      break;
+    }
+  }
+  return toReturn;
 }

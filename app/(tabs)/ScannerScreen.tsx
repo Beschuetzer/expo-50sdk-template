@@ -1,15 +1,13 @@
 import { Camera, CameraType } from "expo-camera";
-import { useFocusEffect } from "expo-router";
-import { Button, Input, View, Row, Text } from "native-base";
+import { useFocusEffect, useNavigation } from "expo-router";
+import { Button, View, Row, Text } from "native-base";
 import React, { useState, useCallback } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { useDispatch } from "react-redux";
 
 import { FullscreenSpinner } from "@/components/FullscreenSpinner";
 import { ManualUpcInput } from "@/components/ManualUpcInput";
-import { UpcDetailsModal } from "@/components/UpcDetailsModal";
 import { useRequestCameraPermissions } from "@/components/hooks/useRequestCameraPermissions";
-import { setLastUpcScanned } from "@/state/slices/generalSlice";
+import { Routes } from "@/constants/navigation";
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
@@ -17,13 +15,12 @@ const BarcodeScannerScreen = () => {
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
-  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const handleBarCodeScanned = useCallback((scannedObj: { data: string }) => {
     const { data } = scannedObj;
-    const dataToUse = data.length === 12 ? `0${data}` : data;
     setScanned(true);
-    dispatch(setLastUpcScanned(dataToUse));
+    navigation.navigate(Routes.itemModal, { key: data })
   }, []);
 
   const onSwitchCameraPress = useCallback(() => {
@@ -79,7 +76,6 @@ const BarcodeScannerScreen = () => {
           <Text style={styles.scanAgainText}>Tap to Scan Again</Text>
         </TouchableOpacity>
       ) : null}
-      <UpcDetailsModal />
     </View>
   );
 };

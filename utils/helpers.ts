@@ -1,8 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
 
-import { EMPTY_STRING } from "@/constants/general";
+import {
+  EMPTY_STRING,
+  IMAGE_PICKER_OPTIONS,
+  IMAGE_PRIORITY_MAPPING,
+} from "@/constants/general";
 import { Key } from "@/types/Item";
+import { UpcProduct } from "@/types/UpcResponse";
 
 export async function delay(ms: number) {
   if (ms <= 0) return;
@@ -11,6 +17,18 @@ export async function delay(ms: number) {
       resolve(null);
     }, ms);
   });
+}
+
+export async function deleteFile(path: string) {
+  if (!path) return;
+    try {
+    console.log(`deleting '${path}'...`);
+    await FileSystem.deleteAsync(path);
+    return true;
+  } catch (error) {
+    console.log(error)
+    return false;
+  }
 }
 
 export function displayAlert(object: object) {
@@ -37,12 +55,44 @@ export function getKeyToUse(key: Key, displayAlert = true) {
   return toReturn;
 }
 
+export function getImagesFromUpcProduct(upcProduct: UpcProduct) {
+  return Object.values(IMAGE_PRIORITY_MAPPING).map(
+    (key) => upcProduct?.[key] || EMPTY_STRING,
+  );
+}
+
+export async function captureImage() {
+  try {
+    const result = await ImagePicker.launchCameraAsync(IMAGE_PICKER_OPTIONS);
+
+    if (!result.canceled) {
+      return result.assets[0].uri;
+    }
+  } catch (error) {
+    console.log({ error });
+  }
+}
+
+export async function pickImage() {
+  try {
+    // No permissions request is necessary for launching the image library
+    const result =
+      await ImagePicker.launchImageLibraryAsync(IMAGE_PICKER_OPTIONS);
+
+    if (!result.canceled) {
+      return result.assets[0].uri;
+    }
+  } catch (error) {
+    console.log({ error });
+  }
+}
+
 export async function retrieveImagePathFromAsyncStorage(key: Key) {
   try {
     const keyToUse = getKeyToUse(key);
     return await AsyncStorage.getItem(keyToUse);
   } catch (error) {
-    console.error("Error retrieving image path in AsyncStorage", error);
+    console.log("Error retrieving image path in AsyncStorage", error);
     return null;
   }
 }
@@ -64,11 +114,11 @@ export async function saveImageLocally(key: Key, uri: string) {
       await saveImagePathToAsyncStorage(key, imagePath);
       return imagePath;
     } else {
-      console.error(`Unable to save image ${response?.uri}`);
+      console.log(`Unable to save image ${response?.uri}`);
       return "";
     }
   } catch (error) {
-    console.error("Error saving image locally", error);
+    console.log("Error saving image locally", error);
     return "";
   }
 }
@@ -78,6 +128,7 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
     const keyToUse = getKeyToUse(key);
     await AsyncStorage.setItem(keyToUse, imagePath);
   } catch (error) {
-    console.error("Error storing image path in AsyncStorage", error);
+    console.log("Error storing image path in AsyncStorage", error);
   }
 }
+

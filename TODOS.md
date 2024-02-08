@@ -1,5 +1,12 @@
 ## Work on Next
+-what if there were no ShoppingListItem but instead the fields where the values differ are objects where keys are the name of the store and the value is the value for that store?
 
+//todo: figure out how to handle pressing item in itemslist (add a new modal or use the current?)
+add price field to ShoppingListItem
+Make the form a pure component
+//todo: figure out types for useRouter/useNavigation (expo-router)
+//todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/
+//todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
 -UpcDetails rendering:
     --use PagerView to render the thumbnails 
     --figure out adding own image button
@@ -8,15 +15,12 @@
     --any data from the API will pre-populate the fields
     --use a default thumbnail with the option to press a button to select the another if desired
     --the fields will be the fields in the type Item
--for the scanner screen, add a checkbox to enter "Add to Shopping List mode", where scanning checks for the item in the itemsList and add it if found, otherwise it grabs fetchs the upc data and adds it automatically; the default mode is to just populate the form?;  add an option to change default behavior (e.g. "Auto-save new Upcs scanned")?
--create ImagePicker, which displays the images in a row and allows you to select one (acheive this by passing in a setPickedImage useState setter where it is being used)
+-add store creation form and screen (maybe even a tab?)
+-create a component that sets the current store POS (create POS in generalSlice)
+
+-Add 'Add to Shopping List" button in 
 -figure out how to save thumbnails to android storage for caching purposes
--add lib react native picker
--fix bug with Thumbnail Picker where selecting ?
--use react-native-swipe-list-view to render items in the list (option to delete from list)
--use swipe list view to add items to grocery list from items not in the list (left to delete, right to add to grocery list)?
--figure out how to override the default back behavior when the UpcDetailsModal is open
--add options drawer (auto save and a backup button which can email a .json file of the items added)
+-add options tab (move mock buttons there, add auto save checkbox, add a backup button which can email a .json file of the current lists in redux, add a load button to load the .json file)
 -reomove handleMockResponse in useUpcData when done and enable the actual fetch
 
 ## Features

@@ -2,13 +2,7 @@ import { Button, FlatList, Heading, Text, View } from "native-base";
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import { ThumbnailPicker } from "../ThumbnailPicker";
-
-import {
-  lastUpcScannedSelector,
-  resetLastUpcScanned,
-} from "@/state/slices/generalSlice";
-import { addItemsListItem, resetItemsList } from "@/state/slices/listsSlice";
+import { resetItemsList } from "@/state/slices/listsSlice";
 import {
   resetUpcProducts,
   upcProductsSelector,
@@ -16,7 +10,6 @@ import {
 
 export function ReduxViewer() {
   const [selectedUrl, setSelectedUrl] = useState("");
-  const lastUpcScanned = useSelector(lastUpcScannedSelector);
   const upcProducts = useSelector(upcProductsSelector);
   const dispatch = useDispatch();
 
@@ -44,40 +37,22 @@ export function ReduxViewer() {
               new Date(item.timestamp).toLocaleString(),
             )}
             {renderFieldAndText("Selected Image", selectedUrl)}
-            <ThumbnailPicker
+            {/* <ThumbnailPicker
               upcProduct={item}
               setSelectedUrl={setSelectedUrl}
               selectedUrl={selectedUrl}
-            />
+            /> */}
           </View>
         );
       }}
       ListHeaderComponent={
         <>
-          <Button onPress={() => dispatch(resetLastUpcScanned())}>
-            Reset lastUpcScanned
-          </Button>
           <Button onPress={() => dispatch(resetUpcProducts())}>
             Reset upcProducts
           </Button>
           <Button onPress={() => dispatch(resetItemsList())}>
             Reset Items
           </Button>
-          <Button
-            onPress={() =>
-              dispatch(
-                addItemsListItem({
-                  frequency: 10000,
-                  imageUri: 'test.com',
-                  name: "test",
-                  upc: "00999348348",
-                }),
-              )
-            }
-          >
-            Save Item
-          </Button>
-          <Text>The lastUpcScanned is: {lastUpcScanned}</Text>
         </>
       }
     />

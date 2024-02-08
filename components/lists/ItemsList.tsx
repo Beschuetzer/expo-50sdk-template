@@ -7,12 +7,15 @@ import { RectButton } from 'react-native-gesture-handler'
 //  To toggle LTR/RTL uncomment the next line
 // I18nManager.allowRTL(true);
 
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { SwipeableRow } from './SwipeableRow'
 
-import { itemsListArraySelector } from '@/state/slices/listsSlice'
-import { Item } from '@/types/Item'
+import {
+  itemsListArraySelector,
+  removeItemsListItem,
+} from '@/state/slices/listsSlice'
+import { Item, Key } from '@/types/Item'
 import { ImageRenderer } from '../ImageRenderer'
 import { useNavigation } from 'expo-router'
 import { Routes } from '@/constants/navigation'
@@ -24,6 +27,8 @@ export function ItemsList(props: ItemsListProps) {
   const itemsList = useSelector(itemsListArraySelector)
   const theme = useTheme()
   const navigation = useNavigation()
+  const dispatch = useDispatch()
+
   return (
     <View>
       <Center>
@@ -32,6 +37,10 @@ export function ItemsList(props: ItemsListProps) {
       <FlashList
         data={itemsList}
         renderItem={({ item, index }: Row) => {
+          const keyToUse = {
+            name: item.name,
+            upc: item.upc,
+          } as Key
           return (
             <SwipeableRow
               leftActions={[
@@ -45,7 +54,9 @@ export function ItemsList(props: ItemsListProps) {
                 {
                   title: 'Delete',
                   backgroundColor: theme.colors.red[900],
-                  onPress: () => alert('delete'),
+                  onPress: () => {
+                    dispatch(removeItemsListItem(keyToUse))
+                  },
                 },
               ]}
             >

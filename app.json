@@ -45,7 +45,6 @@
           "photosPermission": "The app accesses your photos to pick an image for an item"
         }
       ]
-      ]
     ],
     "experiments": {
       "typedRoutes": true

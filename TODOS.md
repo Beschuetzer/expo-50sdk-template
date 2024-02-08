@@ -1,4 +1,6 @@
 ## Work on Next
+-make sure the ImagePicker items are usable on re-load and are being stored in the cache/redux
+
 -what if there were no ShoppingListItem but instead the fields where the values differ are objects where keys are the name of the store and the value is the value for that store?
 
 //todo: figure out how to handle pressing item in itemslist (add a new modal or use the current?)

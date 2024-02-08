@@ -70,7 +70,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
   async function onSavePress() {
     const itemToSave = {
       frequency: frequencyInMsRef.current,
-      images: item.images,
+      images: item.images || [],
       imageToUseIndex:
         item.images.findIndex((image) => {
           return image === selectedUrl;
@@ -78,6 +78,12 @@ export function ItemForm(props: UpcDetailsFormProps) {
       name: productNameValue,
       upc: upcValue,
     } as Item;
+
+    if (!itemToSave.images.includes(selectedUrl)) {
+        itemToSave.images.push(selectedUrl);
+        itemToSave.imageToUseIndex = itemToSave.images.length - 1;
+    }
+    
     onSave && onSave(itemToSave);
     onClose && onClose();
   }

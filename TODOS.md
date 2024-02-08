@@ -1,5 +1,6 @@
 ## Work on Next
--make sure the ImagePicker items are usable on re-load and are being stored in the cache/redux
+-fix issue when opening an item with a custom image and trying to save a new custom image
+-make sure that if a custom image is not selected when an item is saved that an file:// image is removed from array and deleted from storage
 
 -what if there were no ShoppingListItem but instead the fields where the values differ are objects where keys are the name of the store and the value is the value for that store?
 

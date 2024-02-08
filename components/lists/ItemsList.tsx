@@ -33,12 +33,30 @@ export function ItemsList(props: ItemsListProps) {
         data={itemsList}
         renderItem={({ item, index }: Row) => {
           return (
-            <SwipeableRow>
+            <SwipeableRow
+              leftActions={[
+                {
+                  title: 'Add to Shopping List',
+                  backgroundColor: theme.colors.primary[900],
+                  onPress: () => alert('add'),
+                },
+              ]}
+              rightActions={[
+                {
+                  title: 'Delete',
+                  backgroundColor: theme.colors.red[900],
+                  onPress: () => alert('delete'),
+                },
+              ]}
+            >
               <RectButton
                 style={styles.rectButton}
                 onPress={() => {
-                    navigation.navigate(Routes.itemModal, { key: item.upc || item.name, showOverrideMsg: false })}
-                }
+                  navigation.navigate(Routes.itemModal, {
+                    key: item.upc || item.name,
+                    showOverrideMsg: false,
+                  })
+                }}
               >
                 <Row space={2}>
                   <ImageRenderer source={item.images[item.imageToUseIndex]} />

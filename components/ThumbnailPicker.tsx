@@ -14,24 +14,23 @@ import {
 } from '@/utils/helpers'
 import { Feather, FontAwesome } from '@expo/vector-icons'
 import { EMPTY_FREQUENCY, EMPTY_STRING } from '@/constants/general'
+import { LOCAL_FILE_REGEX } from '@/constants/regexs'
 
 type ThumbnailPickerProps = {
-  upcProduct: UpcProduct
-  selectedUrl: string
+  imagesToRender: Set<string>;
+  selectedUrl: string;
   onSelectImage: (url: string) => void
 } & StyleProp
 
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
-  const { upcProduct, selectedUrl, onSelectImage, style } = props
-  const [customImageUri, setCustomImageUri] = useState(EMPTY_STRING)
+  const { imagesToRender, selectedUrl, onSelectImage, style } = props
+  const [customImageUri, setCustomImageUri] = useState(
+    selectedUrl.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
+  )
   const isDarkMode = useIsDarkMode()
   const modeColor = useMemo(
     () => (isDarkMode ? theme.colors.black : theme.colors.white),
     [theme],
-  )
-  const imagesToRender = useMemo(
-    () => new Set([...getImagesFromUpcProduct(upcProduct), customImageUri]),
-    [upcProduct, customImageUri],
   )
 
   const handleSelect = useCallback(
@@ -45,10 +44,9 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   const getCustomImage = useCallback(
     async (resultFetcher: () => Promise<string | undefined>) => {
       try {
-        const result = await resultFetcher()
-        console.log({result});
-        
-        setCustomImageUri(result || EMPTY_STRING)
+        const result = (await resultFetcher()) || EMPTY_STRING
+        setCustomImageUri(result)
+        handleSelect(result)
       } catch (error) {
         console.error('Error obtaining a custom image: ' + error)
       }
@@ -60,7 +58,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     <Column>
       <Row space={theme.space['0.5']} style={style}>
         {Array.from(imagesToRender).map((imageUrl) => {
-          if (!imageUrl) return null;
+          if (!imageUrl) return null
 
           const isSelected = imageUrl === selectedUrl
           const borderColor = isSelected
@@ -96,5 +94,4 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     </Column>
   )
 }
-
 

@@ -14,7 +14,6 @@ import { upcProductSelector } from "@/state/slices/scannerSlice";
 import { Item } from "@/types/Item";
 import { ItemProp } from "@/types/general";
 import { getKeyToUse } from "@/utils/helpers";
-import { getUpcProduct } from "@/utils/model-mappings";
 
 type UpcDetailsFormValdation = {
   isValid: boolean;
@@ -83,7 +82,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
         itemToSave.images.push(selectedUrl);
         itemToSave.imageToUseIndex = itemToSave.images.length - 1;
     }
-    
+
     onSave && onSave(itemToSave);
     onClose && onClose();
   }
@@ -159,17 +158,19 @@ export function ItemForm(props: UpcDetailsFormProps) {
         <ThumbnailPicker
           selectedUrl={selectedUrl}
           onSelectImage={(url) => {
-            setSelectedUrl(url);
+            setSelectedUrl(url)
           }}
-          upcProduct={upcProduct || getUpcProduct(item)}
+          imagesToRender={
+            new Set(item.images)
+          }
         />
       </Stack>
       <FrequencyInput
         onValueChange={(frequencyInMs) => {
-          frequencyInMsRef.current = frequencyInMs;
+          frequencyInMsRef.current = frequencyInMs
         }}
         headingTag={FormControl.Label}
       />
     </AbsolutePositionedScreen>
-  );
+  )
 }

@@ -2,7 +2,7 @@ import { EMPTY_FREQUENCY, EMPTY_STRING } from "@/constants/general";
 import { Item } from "@/types/Item";
 import { UpcProduct } from "@/types/UpcResponse";
 
-export async function getItem(input: UpcProduct): Promise<Item> {
+export function getItem(input: UpcProduct): Item {
   return {
     frequency: EMPTY_FREQUENCY,
     imageUri:

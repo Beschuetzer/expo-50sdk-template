@@ -36,6 +36,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   }, []);
 
   useEffect(() => {
+    if (!imagesToRender) return;
     setSelectedUrl(Array.from(imagesToRender)?.[DEFAULT_SELECTION_INDEX])
   }, [upcProduct, imagesToRender])
 

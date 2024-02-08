@@ -15,6 +15,7 @@ import { itemsListArraySelector } from '@/state/slices/listsSlice'
 import { Item } from '@/types/Item'
 import { ImageRenderer } from '../ImageRenderer'
 import { useNavigation } from 'expo-router'
+import { Routes } from '@/constants/navigation'
 
 type Row = { item: Item; index: number }
 type ItemsListProps = {}
@@ -33,7 +34,10 @@ export function ItemsList(props: ItemsListProps) {
         renderItem={({ item, index }: Row) => {
           return (
             <SwipeableRow>
-              <RectButton style={styles.rectButton} onPress={() => null}>
+              <RectButton
+                style={styles.rectButton}
+                onPress={() => navigation.navigate(Routes.upcModal, { upc: item.upc, showOverrideMsg: false })}
+              >
                 <Row space={2}>
                   <ImageRenderer source={item.images[item.imageToUseIndex]} />
                   <Column>

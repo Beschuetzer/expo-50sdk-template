@@ -13,7 +13,7 @@ export default function UpcModal() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const route = useRoute();
-  const { upc } = route.params as any;
+  const { upc, showOverrideMsg } = route.params as any
   const { upcProduct, errorMsg } = useUpcProduct({
     upc,
   });
@@ -24,11 +24,12 @@ export default function UpcModal() {
         <ItemForm
           onClose={() => navigation.canGoBack() && navigation.goBack()}
           onSave={(item) => {
-            dispatch(addItemsListItem(item));
+            dispatch(addItemsListItem(item))
           }}
           item={getItem(upcProduct)}
+          showOverrideMsg={showOverrideMsg}
         />
-      );
+      )
     }
     return (
       <Center height="100%">

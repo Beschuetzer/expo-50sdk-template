@@ -1,32 +1,27 @@
-import { Center, Column, Icon, Row, View, theme } from 'native-base'
+import { Center, Column, Row, View, theme } from 'native-base'
 import { useCallback, useMemo, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 
 import { ImageRenderer } from './ImageRenderer'
 import { useIsDarkMode } from './hooks/useIsDarkTheme'
 
-import { UpcProduct } from '@/types/UpcResponse'
 import { StyleProp } from '@/types/general'
 import {
   captureImage,
-  getImagesFromUpcProduct,
   pickImage,
 } from '@/utils/helpers'
-import { Feather, FontAwesome } from '@expo/vector-icons'
-import { EMPTY_FREQUENCY, EMPTY_STRING } from '@/constants/general'
+import { FontAwesome } from '@expo/vector-icons'
+import { EMPTY_STRING } from '@/constants/general'
 import { LOCAL_FILE_REGEX } from '@/constants/regexs'
 
 type ThumbnailPickerProps = {
   imagesToRender: Set<string>;
   selectedUrl: string;
-  onSelectImage: (url: string) => void
+  onSelectImage: (url: string, isCustomImage: boolean) => void
 } & StyleProp
 
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
   const { imagesToRender, selectedUrl, onSelectImage, style } = props
-  const [customImageUri, setCustomImageUri] = useState(
-    selectedUrl.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
-  )
   const isDarkMode = useIsDarkMode()
   const modeColor = useMemo(
     () => (isDarkMode ? theme.colors.black : theme.colors.white),
@@ -34,9 +29,9 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   )
 
   const handleSelect = useCallback(
-    (imageUrl?: string) => {
+    (imageUrl?: string, isCustomImage?: boolean) => {
       if (!imageUrl) return
-      onSelectImage && onSelectImage(imageUrl)
+      onSelectImage && onSelectImage(imageUrl, isCustomImage || false)
     },
     [onSelectImage],
   )
@@ -45,8 +40,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     async (resultFetcher: () => Promise<string | undefined>) => {
       try {
         const result = (await resultFetcher()) || EMPTY_STRING
-        setCustomImageUri(result)
-        handleSelect(result)
+        handleSelect(result, true)
       } catch (error) {
         console.error('Error obtaining a custom image: ' + error)
       }

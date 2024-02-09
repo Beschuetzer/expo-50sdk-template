@@ -1,5 +1,6 @@
 ## Work on Next
 
+-finish swipeable row changes; adjust how far to go before the open is 
 -Shopping list conversion:
     --add a new component that handles the ItemFormStoreSpecificFields
     --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed

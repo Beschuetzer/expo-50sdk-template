@@ -45,23 +45,35 @@ export function ItemsList(props: ItemsListProps) {
           } as Key
           return (
             <SwipeableRow
+              leftSwipe={{
+                title: 'Delete',
+                backgroundColor: theme.colors.red[900],
+                onPress: () => {
+                  dispatch(removeItemsListItem(keyToUse))
+                },
+              }}
+              rightSwipe={{
+                backgroundColor: theme.colors.primary[900],
+                onPress: () => alert('left'),
+                title: 'Add to Shopping List',
+              }}
               key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
-              leftActions={[
-                {
-                  title: 'Add to Shopping List',
-                  backgroundColor: theme.colors.primary[900],
-                  onPress: () => alert('add'),
-                },
-              ]}
-              rightActions={[
-                {
-                  title: 'Delete',
-                  backgroundColor: theme.colors.red[900],
-                  onPress: () => {
-                    dispatch(removeItemsListItem(keyToUse))
-                  },
-                },
-              ]}
+              // leftActions={[
+              //   {
+              //     title: 'Add to Shopping List',
+              //     backgroundColor: theme.colors.primary[900],
+              //     onPress: () => alert('add'),
+              //   },
+              // ]}
+              // rightActions={[
+              //   {
+              //     title: 'Delete',
+              //     backgroundColor: theme.colors.red[900],
+              //     onPress: () => {
+              //       dispatch(removeItemsListItem(keyToUse))
+              //     },
+              //   },
+              // ]}
             >
               <RectButton
                 style={styles.rectButton}

@@ -71,7 +71,11 @@ function RootLayoutNav() {
                   />
                   <Stack.Screen
                     name="itemModal"
-                    options={{ presentation: 'modal', title: 'Upc Details' }}
+                    options={{ presentation: 'modal', title: 'Item Details' }}
+                  />
+                  <Stack.Screen
+                    name="storeModal"
+                    options={{ presentation: 'modal', title: 'Store Details' }}
                   />
                 </Stack>
               </BottomSheetModalProvider>

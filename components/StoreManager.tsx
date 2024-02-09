@@ -33,7 +33,12 @@ export function StoreManager() {
 
   return (
     <Stack>
-      <Row flex={1} {...maxWidth} justifyContent={"space-between"} alignItems={"center"}>
+      <Row
+        flex={1}
+        {...maxWidth}
+        justifyContent={'space-between'}
+        alignItems={'center'}
+      >
         <FormControl.Label>
           Current Store: {currentStore || 'No store selected'}
         </FormControl.Label>
@@ -43,7 +48,11 @@ export function StoreManager() {
       </Row>
       <Picker selectedValue={currentStore} onValueChange={onChangeStore}>
         {storesListArray.map((store) => (
-          <Picker.Item key={store.name} label={store.name} value={store.name} />
+          <Picker.Item
+            key={store.name}
+            label={`${store.name} (lat: ${store.gpsCoordinates?.lat}, long: ${store.gpsCoordinates?.long})`}
+            value={store.name}
+          />
         ))}
       </Picker>
     </Stack>

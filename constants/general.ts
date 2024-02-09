@@ -1,10 +1,16 @@
+import * as ImagePicker from "expo-image-picker";
+
+import { GpsCoordinate } from "@/types/Store";
 import { UpcProduct } from "@/types/UpcResponse";
 import { TimeSpan } from "@/types/general";
-import * as ImagePicker from 'expo-image-picker'
 
 export const DEFAULT_IMAGE_INDEX = 0;
 export const EMPTY_FREQUENCY = 0;
 export const EMPTY_STRING = "";
+export const GPS_COORDINATES_DEFAULT = Object.freeze({
+  lat: EMPTY_STRING,
+  long: EMPTY_STRING,
+} as GpsCoordinate);
 export const HOUR_IN_MS = 1000 * 60 * 60;
 export const IMAGE_PICKER_OPTIONS = {
   mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -27,5 +33,3 @@ export const TIME_SPAN_TO_MILLISECONDS_MAPPING: { [key in TimeSpan]: number } =
     Day: HOUR_IN_MS * 24,
     Week: HOUR_IN_MS * 24 * 7,
   };
-
-

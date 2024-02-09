@@ -3,7 +3,7 @@ export type Store = {
   name: string;
 };
 
-type GpsCoordinate = {
-  lat: number;
-  long: number;
+export type GpsCoordinate = {
+  lat: string;
+  long: string;
 };

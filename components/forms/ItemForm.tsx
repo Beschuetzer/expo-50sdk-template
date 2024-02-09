@@ -227,6 +227,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
         spacing={theme.space[INTER_ITEM_SPACING]}
       />
       <UnitInput
+        initialValue={itemInList?.unit}
         onValueChange={onUnitChange}
         headingTag={FormControl.Label}
         spacing={theme.space[INTER_ITEM_SPACING]}

@@ -15,16 +15,16 @@ import {
   UPC_REQUIRED_CHAR_LENGTH,
 } from "@/constants/regexs";
 import { itemsListItemSelector } from "@/state/slices/listsSlice";
-import { Item, ItemUnit } from "@/types/Item";
+import { Item } from "@/types/Item";
 import { ItemProp } from "@/types/general";
 import { deleteFile, getKeyToUse } from "@/utils/helpers";
 
-type UpcDetailsFormValdation = {
+type ItemFormValdation = {
   isValid: boolean;
   message: string;
 };
 
-type UpcDetailsFormProps = {
+type ItemFormProps = {
   onClose: () => void;
   onSave: (item: Item) => void;
   showOverrideMsg?: boolean;
@@ -32,7 +32,7 @@ type UpcDetailsFormProps = {
 
 
 const INTER_ITEM_SPACING = 0.5;
-export function ItemForm(props: UpcDetailsFormProps) {
+export function ItemForm(props: ItemFormProps) {
   const { onClose, onSave, item, showOverrideMsg = true } = props;
   const theme = useTheme();
   const keyToUse = useMemo(
@@ -62,7 +62,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
     () => upcValue?.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue],
   );
-  const formValidation: UpcDetailsFormValdation = useMemo(() => {
+  const formValidation: ItemFormValdation = useMemo(() => {
     const isValid = (isUpcValid && upcValue.length > 0) || !!productNameValue;
     return {
       isValid,

@@ -4,17 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { EMPTY_STRING } from "@/constants/general";
 import { ItemUnit } from "@/types/Item";
-import { SpacingProp } from "@/types/general";
+import { HeadingTagProp, SpacingProp } from "@/types/general";
 
 const UNIT_INITIAL = ItemUnit.Package;
 type UnitInputProps = {
   initialValue?: string;
   onValueChange: (unit: string) => void;
-  /**
-   *This is the component to use to render the header.
-   **/
-  headingTag?: any;
-} & SpacingProp;
+} & SpacingProp &
+  HeadingTagProp;
 
 const DEBOUNCE_DURATION = 100;
 export function UnitInput(props: UnitInputProps) {
@@ -41,8 +38,7 @@ export function UnitInput(props: UnitInputProps) {
   const hasComponentLoadedRef = useRef(false);
   const theme = useTheme();
 
-  console.log({isInitialCustom, initialValue, UNIT_INITIAL});
-  
+  console.log({ isInitialCustom, initialValue, UNIT_INITIAL });
 
   const onChangeCustomUnit = useCallback(
     (customUnitValue: string) => {
@@ -64,7 +60,7 @@ export function UnitInput(props: UnitInputProps) {
   );
 
   /**
-   *This needs to come before the use effect with no deps otherwise the custom unit field will be focused on item load 
+   *This needs to come before the use effect with no deps otherwise the custom unit field will be focused on item load
    **/
   useEffect(() => {
     if (unit === ItemUnit.Custom && hasComponentLoadedRef.current) {

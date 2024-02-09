@@ -9,7 +9,7 @@ export default function TabOneScreen() {
   return (
     <ScrollView py={2} keyboardShouldPersistTaps="always">
       <ReduxViewer />
-      <StoreManager />
+      <StoreManager showAddStore={true} showStoreList={true}/>
       <ItemsList />
       {/* <Playground /> */}
     </ScrollView>

@@ -7,6 +7,8 @@ import {
   resetUpcProducts,
   upcProductsSelector,
 } from "@/state/slices/scannerSlice";
+import { resetCurrentStore, setCurrentStore } from "@/state/slices/generalSlice";
+import { EMPTY_STRING } from "@/constants/general";
 
 export function ReduxViewer() {
   const [selectedUrl, setSelectedUrl] = useState("");
@@ -53,7 +55,10 @@ export function ReduxViewer() {
           <Button onPress={() => dispatch(resetItemsList())}>
             Reset Items
           </Button>
-          <Button onPress={() => dispatch(resetStoresList())}>
+          <Button onPress={() => {
+              dispatch(resetStoresList())
+              dispatch(resetCurrentStore());
+            }}>
             Reset Stores
           </Button>
         </>

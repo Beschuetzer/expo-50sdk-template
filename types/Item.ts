@@ -23,31 +23,28 @@ export type Item = Key & {
    *This is in milliseconds
    **/
   frequency?: number;
-};
+} & StoreSpecificValues;
 
 /**
- *This is an item when it is in the shoppingList (and has a store associated with it)
+ *These are fields which vary based on the store
  **/
-export type ShoppingItem = {
-  aisle?: string;
-  quantity: number;
-  price?: number;
-  /**
-  *This is the id unique to this store (could be useful if able to scan receipts and extract pricing item based on item id)
-  **/
-  itemId?: string;
-  /**
-   *Something like 'box', 'kg', or 'bottle'
-   **/
-  unit?: string;
-} & Item;
+type StoreSpecificValues = {
+  aisle: StoreSpecificValue<string>;
+  itemId: StoreSpecificValue<string>;
+  price: StoreSpecificValue<number>;
+  quantity: StoreSpecificValue<number>;
+  unit: StoreSpecificValue<string>;
+};
+
+export type StoreSpecificValue<T> = { [storeId: string]: T };
 
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;
 };
 
 type UpcOrName = string;
-export type ItemsList = { [upcOrName: UpcOrName]: Item };
-export type ShoppingList = { [upcOrName: UpcOrName]: ShoppingItem };
-export type LastPurchasedList = { [upcOrName: UpcOrName]: LastPurchasedItem };
+type KeyedList<T> = { [upcOrName: UpcOrName]: T };
+export type ItemsList = KeyedList<Item>;
+export type ShoppingList = KeyedList<Item>;
+export type LastPurchasedList = KeyedList<LastPurchasedItem>;
 export type StoreList = { [name: string]: Store };

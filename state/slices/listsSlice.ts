@@ -9,7 +9,6 @@ import {
   Key,
   LastPurchasedItem,
   LastPurchasedList,
-  ShoppingItem,
   ShoppingList,
   StoreList,
 } from "@/types/Item";
@@ -70,10 +69,7 @@ export const listsSlice = createSlice({
         [keyToUse]: action.payload,
       };
     },
-    addShoppingListItem: (
-      state: ListsState,
-      action: PayloadAction<ShoppingItem>,
-    ) => {
+    addShoppingListItem: (state: ListsState, action: PayloadAction<Item>) => {
       const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
         alert(

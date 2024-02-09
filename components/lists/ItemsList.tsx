@@ -75,7 +75,8 @@ export function ItemsList(props: ItemsListProps) {
                   <Column>
                     <Text>{item.name}</Text>
                     <Text>{item.upc}</Text>
-                    <Text>{item.frequency}</Text>
+                    <Text>Frequency: {item.frequency}</Text>
+                    <Text>Unit: {item?.unit}</Text>
                   </Column>
                 </Row>
               </RectButton>

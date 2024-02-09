@@ -3,7 +3,7 @@ import { Row, Input, theme, View, Stack, Heading, Text } from "native-base";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { TIME_SPAN_TO_MILLISECONDS_MAPPING } from "@/constants/general";
-import { Frequency, TimeSpan } from "@/types/general";
+import { Frequency, SpacingProp, TimeSpan } from "@/types/general";
 
 const FREQUENCY_INITIAL = Object.freeze({
   number: 1,
@@ -16,9 +16,9 @@ type FrequencyInputProps = {
    *This is the component to use to render the header.
    **/
   headingTag?: any;
-};
+} & SpacingProp;
 export function FrequencyInput(props: FrequencyInputProps) {
-  const { onValueChange, headingTag: Tag = Heading } = props;
+  const { onValueChange, headingTag: Tag = Heading, spacing } = props;
   const [frequency, setFrequency] = useState<Frequency>({
     ...FREQUENCY_INITIAL,
   });
@@ -48,7 +48,7 @@ export function FrequencyInput(props: FrequencyInputProps) {
   }, [onValueChange, frequency]);
 
   return (
-    <Stack>
+    <Stack mt={spacing}>
       <Tag>Frequency</Tag>
       <Row>
         <Input
@@ -69,7 +69,7 @@ export function FrequencyInput(props: FrequencyInputProps) {
             {Object.keys(TIME_SPAN_TO_MILLISECONDS_MAPPING).map((timespan) => (
               <Picker.Item
                 key={timespan}
-                label={`${timespan}${frequency?.number > 1 ? "s" : ""}`}
+                label={`${timespan}${frequency?.number > 1 ? 's' : ''}`}
                 value={timespan}
               />
             ))}
@@ -85,5 +85,6 @@ export function FrequencyInput(props: FrequencyInputProps) {
         </Text>
       ) : null}
     </Stack>
-  );
+  )
 }
+

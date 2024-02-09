@@ -1,46 +1,45 @@
-import { useRoute } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
-import { Center, theme, Heading, Text } from "native-base";
-import { useMemo } from "react";
-import { ActivityIndicator } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useRoute } from '@react-navigation/native'
+import { useNavigation } from 'expo-router'
+import { Center, theme, Heading, Text } from 'native-base'
+import { ActivityIndicator } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { ItemForm } from "@/components/ItemForm";
-import { useUpcProduct } from "@/components/useUpcData";
+import { ItemForm } from '@/components/forms/ItemForm'
+import { useUpcProduct } from '@/components/useUpcData'
 import {
   addItemsListItem,
   itemsListItemSelector,
-} from "@/state/slices/listsSlice";
-import { getItem } from "@/utils/model-mappings";
+} from '@/state/slices/listsSlice'
+import { getItem } from '@/utils/model-mappings'
 
 export default function ItemModal() {
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const route = useRoute();
-  const { key, showOverrideMsg } = route.params as any;
+  const navigation = useNavigation()
+  const dispatch = useDispatch()
+  const route = useRoute()
+  const { key, showOverrideMsg } = route.params as any
   const { upcProduct, errorMsg } = useUpcProduct({
     upc: key,
-  });
-  const itemInList = useSelector(itemsListItemSelector(key));
+  })
+  const itemInList = useSelector(itemsListItemSelector(key))
 
   function renderContent() {
     if (upcProduct) {
-      const item = getItem(upcProduct);
+      const item = getItem(upcProduct)
       if (itemInList) {
-        item.images = itemInList.images;
-        item.imageToUseIndex = itemInList.imageToUseIndex;
+        item.images = itemInList.images
+        item.imageToUseIndex = itemInList.imageToUseIndex
       }
 
       return (
         <ItemForm
           onClose={() => navigation.canGoBack() && navigation.goBack()}
           onSave={(item) => {
-            dispatch(addItemsListItem(item));
+            dispatch(addItemsListItem(item))
           }}
           item={item}
           showOverrideMsg={showOverrideMsg}
         />
-      );
+      )
     }
     return (
       <Center height="100%">
@@ -56,8 +55,8 @@ export default function ItemModal() {
           </>
         )}
       </Center>
-    );
+    )
   }
 
-  return renderContent();
+  return renderContent()
 }

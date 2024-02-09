@@ -2,9 +2,9 @@ import { Center, Column, Row, theme } from 'native-base'
 import { useCallback, useMemo, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 
-import { useIsDarkMode } from './hooks/useIsDarkTheme'
+import { useIsDarkMode } from '../hooks/useIsDarkTheme'
 
-import { StyleProp } from '@/types/general'
+import { SpacingProp, StyleProp } from '@/types/general'
 import { captureImage, pickImage } from '@/utils/helpers'
 import { FontAwesome } from '@expo/vector-icons'
 import { EMPTY_STRING } from '@/constants/general'
@@ -15,10 +15,10 @@ type ThumbnailPickerProps = {
   imagesToRender: Set<string>
   selectedUrl: string
   onSelectImage: (url: string, isCustomImage: boolean) => void
-} & StyleProp
+} & StyleProp & SpacingProp
 
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
-  const { imagesToRender, selectedUrl, onSelectImage, style } = props
+  const { imagesToRender, selectedUrl, onSelectImage, style, spacing } = props
   const [customImageUri, setCustomImageUri] = useState(
     selectedUrl.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
   )
@@ -40,7 +40,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     async (resultFetcher: () => Promise<string | undefined>) => {
       try {
         const result = (await resultFetcher()) || EMPTY_STRING
-        setCustomImageUri(result);
+        setCustomImageUri(result)
         handleSelect(result, true)
       } catch (error) {
         console.error('Error obtaining a custom image: ' + error)
@@ -48,9 +48,9 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     },
     [],
   )
-  
+
   return (
-    <Column>
+    <Column mt={spacing}>
       <Row space={theme.space['0.5']} style={style}>
         {Array.from(imagesToRender.add(customImageUri)).map((imageUrl) => {
           if (!imageUrl) return null

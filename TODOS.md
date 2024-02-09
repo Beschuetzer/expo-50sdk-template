@@ -1,5 +1,10 @@
 ## Work on Next
--what if there were no ShoppingListItem but instead the fields where the values differ are objects where keys are the name of the store and the value is the value for that store?
+
+-Shopping list conversion:
+    --add a new component that handles the ItemFormStoreSpecificFields
+    --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed
+    --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given
+
 
 //todo: figure out how to handle pressing item in itemslist (add a new modal or use the current?)
 add price field to ShoppingListItem

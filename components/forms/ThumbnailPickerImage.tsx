@@ -1,16 +1,16 @@
-import { View } from "native-base";
-import { TouchableOpacity } from "react-native";
+import { View } from 'native-base'
+import { TouchableOpacity } from 'react-native'
 
-import { ImageRenderer } from "./ImageRenderer";
+import { ImageRenderer } from '../ImageRenderer'
 
 type ThumbnailPickerImageProps = {
-  borderColor: string;
-  imageUrl: string;
-  onPress: (imageUrl: string) => void;
-};
+  borderColor: string
+  imageUrl: string
+  onPress: (imageUrl: string) => void
+}
 
 export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
-  const { imageUrl, borderColor, onPress } = props;
+  const { imageUrl, borderColor, onPress } = props
   return (
     <View key={imageUrl} borderWidth={2} borderColor={borderColor}>
       <TouchableOpacity onPress={() => onPress && onPress(imageUrl)}>
@@ -22,5 +22,5 @@ export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
         />
       </TouchableOpacity>
     </View>
-  );
+  )
 }

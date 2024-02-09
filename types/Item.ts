@@ -2,6 +2,27 @@ import { XOR } from "ts-xor";
 
 import { Store } from "./Store";
 
+export enum ItemUnit {
+  Bunch = 'bunch',
+  Can = 'can',
+  Case = 'case',
+  Cups = 'c',
+  Dozen = 'dozen',
+  Each = 'ea',
+  FluidOunce = 'fl oz',
+  Gallon = 'gal',
+  Jar = 'jar',
+  Kilogram = 'kg',
+  Ounce = 'oz',
+  Package = 'package',
+  Pint = 'pt',
+  Pound = 'lb',
+  Quart = 'qt',
+  Tablespoon = 'tbsp',
+  Teaspoon = 'tsp',
+  Custom = 'Custom',
+}
+
 export type Key = XOR<
   {
     name: string;
@@ -17,13 +38,14 @@ export type Key = XOR<
  *This represents something that can be added to any store
  **/
 export type Item = Key & {
-  images: string[];
-  imageToUseIndex: number;
+  images: string[]
+  imageToUseIndex: number
   /**
    *This is in milliseconds
    **/
   frequency?: number;
-} & StoreSpecificValues;
+  unit: string;
+} & StoreSpecificValues
 
 /**
  *These are fields which vary based on the store
@@ -33,7 +55,6 @@ type StoreSpecificValues = {
   itemId: StoreSpecificValue<string>;
   price: StoreSpecificValue<number>;
   quantity: StoreSpecificValue<number>;
-  unit: StoreSpecificValue<string>;
 };
 
 export type StoreSpecificValue<T> = { [storeId: string]: T };

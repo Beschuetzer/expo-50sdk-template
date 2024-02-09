@@ -9,6 +9,10 @@ export type Frequency = {
   timeSpan: TimeSpan;
 };
 
+export type SpacingProp = {
+  spacing?: number | string;
+}
+
 export type ItemProp = {
   item: Item;
 }

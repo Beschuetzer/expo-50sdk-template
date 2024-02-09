@@ -8,7 +8,40 @@ import {
   IMAGE_PRIORITY_MAPPING,
 } from "@/constants/general";
 import { Key } from "@/types/Item";
+import { GpsCoordinate } from "@/types/Store";
 import { UpcProduct } from "@/types/UpcResponse";
+
+export function calculateDistance(
+  gpsCoordinateStart: GpsCoordinate,
+  gpsCoordinateEnd: GpsCoordinate,
+) {
+  const { lat: lat1, lon: lon1 } = gpsCoordinateStart;
+  const { lat: lat2, lon: lon2 } = gpsCoordinateEnd;
+
+  // Convert latitude and longitude from degrees to radians
+  const radLat1 = (Math.PI * parseFloat(lat1)) / 180;
+  const radLon1 = (Math.PI * parseFloat(lon1)) / 180;
+  const radLat2 = (Math.PI * parseFloat(lat2)) / 180;
+  const radLon2 = (Math.PI * parseFloat(lon2)) / 180;
+
+  // Calculate the differences between coordinates
+  const deltaLat = radLat2 - radLat1;
+  const deltaLon = radLon2 - radLon1;
+
+  // Haversine formula to calculate distance
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(radLat1) * Math.cos(radLat2) * Math.sin(deltaLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  // Earth's radius in kilometers (you can use 3959 for miles)
+  const radius = 6371;
+
+  // Calculate the distance
+  const distance = radius * c;
+
+  return distance;
+}
 
 export async function delay(ms: number) {
   if (ms <= 0) return;
@@ -21,12 +54,12 @@ export async function delay(ms: number) {
 
 export async function deleteFile(path: string) {
   if (!path) return;
-    try {
+  try {
     console.log(`deleting '${path}'...`);
     await FileSystem.deleteAsync(path);
     return true;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return false;
   }
 }
@@ -131,4 +164,3 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
     console.log("Error storing image path in AsyncStorage", error);
   }
 }
-

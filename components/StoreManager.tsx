@@ -12,8 +12,12 @@ import {
   currentStoreSelector,
   setCurrentStore,
 } from '@/state/slices/generalSlice'
-import { storesListArraySelector, storesListSelector } from '@/state/slices/listsSlice'
+import {
+  storesListArraySelector,
+  storesListSelector,
+} from '@/state/slices/listsSlice'
 import { HeadingTagProp } from '@/types/general'
+import { useGeoLocation } from './hooks/useGeoLocation'
 
 type StorageManagerProps = {
   showAddStore?: boolean
@@ -23,7 +27,7 @@ export function StoreManager(props: StorageManagerProps) {
   const {
     showAddStore = false,
     showStoreList = false,
-    headingTag: Tag = FormControl.Label
+    headingTag: Tag = FormControl.Label,
   } = props
 
   const currentStore = useSelector(currentStoreSelector)
@@ -31,9 +35,9 @@ export function StoreManager(props: StorageManagerProps) {
   const storesList = useSelector(storesListSelector)
   const navigation = useNavigation()
   const dispatch = useDispatch()
+  const { location } = useGeoLocation()
 
-  console.log({storesList, storesListArray});
-  
+  console.log({ storesList, storesListArray, location })
 
   const onAddPress = useCallback(() => {
     navigation.navigate(Routes.storeModal)
@@ -65,7 +69,7 @@ export function StoreManager(props: StorageManagerProps) {
           {storesListArray.map((store) => (
             <Picker.Item
               key={store.name}
-              label={`${store.name} (lat: ${store.gpsCoordinates?.lat}, long: ${store.gpsCoordinates?.long})`}
+              label={`${store.name} (lat: ${store.gpsCoordinates?.lat}, long: ${store.gpsCoordinates?.lon})`}
               value={store.name}
             />
           ))}

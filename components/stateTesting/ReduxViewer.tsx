@@ -1,55 +1,55 @@
-import { Button, FlatList, Heading, Text, View } from "native-base";
-import React, { useRef, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { Button, FlatList, Heading, Text, View } from 'native-base'
+import React, { useRef, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
-import { resetCurrentStore } from "@/state/slices/generalSlice";
+import { resetCurrentStore } from '@/state/slices/generalSlice'
 import {
   addStoresListItem,
   resetItemsList,
   resetStoresList,
-} from "@/state/slices/listsSlice";
+} from '@/state/slices/listsSlice'
 import {
   resetUpcProducts,
   upcProductsSelector,
-} from "@/state/slices/scannerSlice";
+} from '@/state/slices/scannerSlice'
 
 export function ReduxViewer() {
-  const [selectedUrl, setSelectedUrl] = useState("");
-  const currentStoreNumberRef = useRef(1);
-  const upcProducts = useSelector(upcProductsSelector);
-  const dispatch = useDispatch();
+  const [selectedUrl, setSelectedUrl] = useState('')
+  const currentStoreNumberRef = useRef(1)
+  const upcProducts = useSelector(upcProductsSelector)
+  const dispatch = useDispatch()
 
   function renderFieldAndText(key: string, value: any) {
     return (
       <Text fontWeight="bold">
         {key}: <Text fontWeight="normal">{value}</Text>
       </Text>
-    );
+    )
   }
 
   return (
     <FlatList
       data={Object.values(upcProducts || {})}
       renderItem={(data) => {
-        const { item, index } = data;
+        const { item, index } = data
         return (
           <View key={`${index}-${item.id}`}>
             <Heading size="sm" mt={3}>
               '{item.id}' details:
             </Heading>
-            {renderFieldAndText("Name", item.product_name)}
+            {renderFieldAndText('Name', item.product_name)}
             {renderFieldAndText(
-              "Fetched At",
+              'Fetched At',
               new Date(item.timestamp).toLocaleString(),
             )}
-            {renderFieldAndText("Selected Image", selectedUrl)}
+            {renderFieldAndText('Selected Image', selectedUrl)}
             {/* <ThumbnailPicker
               upcProduct={item}
               setSelectedUrl={setSelectedUrl}
               selectedUrl={selectedUrl}
             /> */}
           </View>
-        );
+        )
       }}
       ListHeaderComponent={
         <>
@@ -61,8 +61,8 @@ export function ReduxViewer() {
           </Button>
           <Button
             onPress={() => {
-              dispatch(resetStoresList());
-              dispatch(resetCurrentStore());
+              dispatch(resetStoresList())
+              dispatch(resetCurrentStore())
             }}
           >
             Reset Stores
@@ -73,12 +73,12 @@ export function ReduxViewer() {
                 addStoresListItem({
                   name: `Store-${currentStoreNumberRef.current}`,
                   gpsCoordinates: {
-                    lat: "34.232",
-                    long: "-94.28801",
+                    lat: '34.232',
+                    lon: '-94.28801',
                   },
                 }),
-              );
-              currentStoreNumberRef.current += 1;
+              )
+              currentStoreNumberRef.current += 1
             }}
           >
             Add Mock Store
@@ -86,5 +86,5 @@ export function ReduxViewer() {
         </>
       }
     />
-  );
+  )
 }

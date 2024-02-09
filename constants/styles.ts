@@ -1,9 +1,13 @@
 import { ResponsiveValue } from "native-base/lib/typescript/components/types";
 
-export const maxWidthCentered = {
+export const maxWidth = {
   maxWidth: 800,
+}
+
+export const maxWidthCentered = {
   marginRight: "auto",
   marginLeft: "auto",
+  ...maxWidth,
 };
 
 export const absolutePositioning = {

@@ -8,11 +8,11 @@ import {
   setCurrentStore,
 } from '@/state/slices/generalSlice'
 import { storesListArraySelector } from '@/state/slices/listsSlice'
-import { Button } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { FontAwesome } from '@expo/vector-icons'
 import { useNavigation } from 'expo-router'
 import { Routes } from '@/constants/navigation'
+import { maxWidth } from '@/constants/styles'
 
 export function StoreManager() {
   const currentStore = useSelector(currentStoreSelector)
@@ -33,15 +33,15 @@ export function StoreManager() {
 
   return (
     <Stack>
-      <Row>
+      <Row flex={1} {...maxWidth} justifyContent={"space-between"} alignItems={"center"}>
         <FormControl.Label>
-          Current Store: {currentStore?.name || 'No stores created'}
+          Current Store: {currentStore || 'No store selected'}
         </FormControl.Label>
         <TouchableOpacity onPress={onAddPress}>
           <FontAwesome size={28} name="plus" />
         </TouchableOpacity>
       </Row>
-      <Picker selectedValue={currentStore?.name} onValueChange={onChangeStore}>
+      <Picker selectedValue={currentStore} onValueChange={onChangeStore}>
         {storesListArray.map((store) => (
           <Picker.Item key={store.name} label={store.name} value={store.name} />
         ))}

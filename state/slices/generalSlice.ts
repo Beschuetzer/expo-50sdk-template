@@ -3,32 +3,34 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "../store";
 
-import { UpcProduct } from "@/types/UpcResponse";
-import { getEmptyObject } from "@/utils/helpers";
+import { EMPTY_STRING } from "@/constants/general";
 
 export type GeneralState = {
-  lastUpcScanned: string;
-  upcProductToDisplay: UpcProduct;
+  currentStore: string;
 };
 
-const LAST_UPC_SCANNED_INITIAL = "";
 
 const initialState: GeneralState = {
-  lastUpcScanned: LAST_UPC_SCANNED_INITIAL,
-  upcProductToDisplay: getEmptyObject(),
+  currentStore: EMPTY_STRING,
 };
 
 export const generalSlice = createSlice({
   name: "general",
   initialState,
   reducers: {
-   
+    setCurrentStore: (state: GeneralState, action: PayloadAction<string>) => {
+      if (!action.payload) return;
+      state.currentStore = action.payload;
+    }
   },
 });
 
 // Action creators are generated for each case reducer function
 export const {
+  setCurrentStore,
 } = generalSlice.actions;
+
+export const currentStoreSelector = (state: RootState) => state[generalSlice.name].currentStore;
 
 export default generalSlice.reducer;
 

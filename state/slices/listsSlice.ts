@@ -179,7 +179,13 @@ export const itemsListItemSelector = (id: string) =>
   );
 
 export const itemsListSelector = (state: RootState) =>
-  (state[listsSlice.name] as ListsState).itemsList;
+  state[listsSlice.name].itemsList;
 
 export const itemsListArraySelector = (state: RootState) =>
-  Object.values((state[listsSlice.name] as ListsState).itemsList || {});
+  Object.values(state[listsSlice.name].itemsList || {});
+
+export const storesListSelector = (state: RootState) =>
+  state[listsSlice.name].storesList;
+
+export const storesListArraySelector = (state: RootState) =>
+  Object.values(state[listsSlice.name].storesList || {})

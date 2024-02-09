@@ -33,6 +33,7 @@ export function StoreForm(props: StoreFormProps) {
   const { onClose, onSave } = props;
   const theme = useTheme();
   const [storeName, setStoreName] = useState(EMPTY_STRING);
+  const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
   const [gpsCoordinates, setGpsCoordinates] = useState<GpsCoordinate>({
     ...GPS_COORDINATES_DEFAULT,
   });
@@ -61,6 +62,7 @@ export function StoreForm(props: StoreFormProps) {
 
   async function onGetCurrentCoordinatesPress() {
     try {
+      setIsLoadingGpscoords(true);
       const location = await getGpsCoordinates();
       if (!location.coords) throw new Error("No coordinates found...");
       setGpsCoordinates({
@@ -69,6 +71,8 @@ export function StoreForm(props: StoreFormProps) {
       });
     } catch (error: any) {
       displayAlert(error);
+    } finally {
+      setIsLoadingGpscoords(false);
     }
   }
 
@@ -150,7 +154,12 @@ export function StoreForm(props: StoreFormProps) {
           />
         </Row>
         <Center mt={theme.space[INTER_ITEM_SPACING]}>
-          <Button onPress={onGetCurrentCoordinatesPress}>Get Current</Button>
+          <Button
+            isDisabled={isLoadingGpscoords}
+            onPress={onGetCurrentCoordinatesPress}
+          >
+            Get Current
+          </Button>
         </Center>
       </Stack>
     </AbsolutePositionedScreen>

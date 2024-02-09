@@ -27,7 +27,7 @@ export function UnitInput(props: UnitInputProps) {
 
   const isInitialCustom = useMemo(() => {
     const units = Object.values(ItemUnit) as string[];
-    return !units.includes(initialValue || EMPTY_STRING);
+    return initialValue && !units.includes(initialValue);
   }, [initialValue, ItemUnit]);
 
   const [unit, setUnit] = useState<string>(
@@ -40,6 +40,9 @@ export function UnitInput(props: UnitInputProps) {
   const customUnitRef = useRef<HTMLInputElement>(null);
   const hasComponentLoadedRef = useRef(false);
   const theme = useTheme();
+
+  console.log({isInitialCustom, initialValue, UNIT_INITIAL});
+  
 
   const onChangeCustomUnit = useCallback(
     (customUnitValue: string) => {

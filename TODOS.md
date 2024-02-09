@@ -2,6 +2,7 @@
 
 -Shopping list conversion:
     -- setup gps stuff
+    -- figure out why stores are not being persisted
     --add a new component that handles the ItemFormStoreSpecificFields
     --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed
     --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given

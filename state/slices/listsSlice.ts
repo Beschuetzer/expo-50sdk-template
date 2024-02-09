@@ -188,4 +188,13 @@ export const storesListSelector = (state: RootState) =>
   state[listsSlice.name].storesList;
 
 export const storesListArraySelector = (state: RootState) =>
-  Object.values(state[listsSlice.name].storesList || {})
+  Object.values(state[listsSlice.name].storesList || {});
+
+export const storesListItemSelector = (storeName: string) =>
+  createSelector(
+    [(state: RootState) => state[listsSlice.name].storesList],
+    (storesList) => {
+      const value = storesList[storeName];
+      return (value || null) as Item | null;
+    },
+  );

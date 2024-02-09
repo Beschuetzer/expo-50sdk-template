@@ -5,7 +5,7 @@ import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemForm } from '@/components/forms/ItemForm'
-import { useUpcProduct } from '@/components/useUpcData'
+import { useUpcProduct } from '@/components/hooks/useUpcProduct'
 import {
   addItemsListItem,
   itemsListItemSelector,

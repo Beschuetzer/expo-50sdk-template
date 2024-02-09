@@ -1,27 +1,27 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Tabs } from "expo-router";
-import React from "react";
-import { Pressable } from "react-native";
+import FontAwesome from '@expo/vector-icons/FontAwesome'
+import { Link, Tabs } from 'expo-router'
+import React from 'react'
+import { Pressable } from 'react-native'
 
-import { useClientOnlyValue } from "@/components/useClientOnlyValue";
-import { useColorScheme } from "@/components/useColorScheme";
-import { COLORS } from "@/constants/colors";
+import { useClientOnlyValue } from '@/components/hooks/useClientOnlyValue'
+import { useColorScheme } from '@/components/hooks/useColorScheme'
+import { COLORS } from '@/constants/colors'
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
+  name: React.ComponentProps<typeof FontAwesome>['name']
+  color: string
 }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme()
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: COLORS[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: COLORS[colorScheme ?? 'light'].tint,
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
@@ -30,7 +30,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "List",
+          title: 'List',
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
           headerRight: () => (
             <Link href={`/itemModal`} asChild>
@@ -39,7 +39,7 @@ export default function TabLayout() {
                   <FontAwesome
                     name="info-circle"
                     size={25}
-                    color={COLORS[colorScheme ?? "light"].text}
+                    color={COLORS[colorScheme ?? 'light'].text}
                     style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
@@ -51,12 +51,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ScannerScreen"
         options={{
-          title: "Scanner",
+          title: 'Scanner',
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="barcode" color={color} />
           ),
         }}
       />
     </Tabs>
-  );
+  )
 }

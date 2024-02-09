@@ -181,14 +181,22 @@ export const itemsListItemSelector = (id: string) =>
 export const itemsListSelector = (state: RootState) =>
   state[listsSlice.name].itemsList;
 
-export const itemsListArraySelector = (state: RootState) =>
-  Object.values(state[listsSlice.name].itemsList || {});
+export const itemsListArraySelector = createSelector(
+  [(state: RootState) => state[listsSlice.name].itemsList],
+  (itemsList) => {
+    return Object.values(itemsList || {});
+  },
+);
 
 export const storesListSelector = (state: RootState) =>
   state[listsSlice.name].storesList;
 
-export const storesListArraySelector = (state: RootState) =>
-  Object.values(state[listsSlice.name].storesList || {});
+export const storesListArraySelector = createSelector(
+  [(state: RootState) => state[listsSlice.name].storesList],
+  (storesList) => {
+    return Object.values(storesList);
+  },
+);
 
 export const storesListItemSelector = (storeName: string) =>
   createSelector(

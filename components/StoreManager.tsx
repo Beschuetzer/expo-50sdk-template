@@ -12,7 +12,7 @@ import {
   currentStoreSelector,
   setCurrentStore,
 } from '@/state/slices/generalSlice'
-import { storesListArraySelector } from '@/state/slices/listsSlice'
+import { storesListArraySelector, storesListSelector } from '@/state/slices/listsSlice'
 import { HeadingTagProp } from '@/types/general'
 
 type StorageManagerProps = {
@@ -28,8 +28,12 @@ export function StoreManager(props: StorageManagerProps) {
 
   const currentStore = useSelector(currentStoreSelector)
   const storesListArray = useSelector(storesListArraySelector)
+  const storesList = useSelector(storesListSelector)
   const navigation = useNavigation()
   const dispatch = useDispatch()
+
+  console.log({storesList, storesListArray});
+  
 
   const onAddPress = useCallback(() => {
     navigation.navigate(Routes.storeModal)

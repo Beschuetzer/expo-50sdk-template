@@ -14,10 +14,11 @@ type SwipeableRowProps = {
   rightActions: SwipeableRowAction[];
   children?: ReactNode | ReactNode[];
   width?: string | number;
+  id?: any;
 };
 
 export function SwipeableRow(props: SwipeableRowProps) {
-  const { children, width = "50%", leftActions, rightActions } = props;
+  const { children, width = "50%", leftActions, rightActions, id } = props;
   const swipeableRef = useRef(null);
 
   function renderLeftActions(
@@ -67,6 +68,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
 
   return (
     <Swipeable
+      key={id}
       ref={swipeableRef}
       friction={2}
       leftThreshold={30}

@@ -7,8 +7,7 @@ import {
   resetUpcProducts,
   upcProductsSelector,
 } from "@/state/slices/scannerSlice";
-import { resetCurrentStore, setCurrentStore } from "@/state/slices/generalSlice";
-import { EMPTY_STRING } from "@/constants/general";
+import { resetCurrentStore } from "@/state/slices/generalSlice";
 
 export function ReduxViewer() {
   const [selectedUrl, setSelectedUrl] = useState("");
@@ -29,7 +28,7 @@ export function ReduxViewer() {
       renderItem={(data) => {
         const { item, index } = data
         return (
-          <View key={index}>
+          <View key={`${index}-${item.id}`}>
             <Heading size="sm" mt={3}>
               '{item.id}' details:
             </Heading>

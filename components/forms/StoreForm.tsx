@@ -1,54 +1,72 @@
-import { Stack, FormControl, Input, Row, useTheme, Button } from 'native-base'
-import { useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { Stack, FormControl, Input, Row, useTheme, Button } from "native-base";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
-import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen'
-import { InputValidationMessage } from '../InputValidationMessage'
+import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
+import { InputValidationMessage } from "../InputValidationMessage";
+import { useGeoLocation } from "../hooks/useGeoLocation";
 
-import { EMPTY_STRING, GPS_COORDINATES_DEFAULT } from '@/constants/general'
-import { storesListSelector } from '@/state/slices/listsSlice'
-import { GpsCoordinate, Store } from '@/types/Store'
+import { EMPTY_STRING, GPS_COORDINATES_DEFAULT } from "@/constants/general";
+import { storesListSelector } from "@/state/slices/listsSlice";
+import { GpsCoordinate, Store } from "@/types/Store";
 
 type StoreFormValdation = {
-  isValid: boolean
-  message: string
-}
+  isValid: boolean;
+  message: string;
+};
 
 type StoreFormProps = {
-  onClose: () => void
-  onSave: (store: Store) => void
-}
+  onClose: () => void;
+  onSave: (store: Store) => void;
+};
 
-const INTER_ITEM_SPACING = 0.5
+const INTER_ITEM_SPACING = 0.5;
 export function StoreForm(props: StoreFormProps) {
-  const { onClose, onSave } = props
-  const theme = useTheme()
-  const [storeName, setStoreName] = useState(EMPTY_STRING)
+  const { onClose, onSave } = props;
+  const theme = useTheme();
+  const [storeName, setStoreName] = useState(EMPTY_STRING);
   const [gpsCoordinates, setGpsCoordinates] = useState<GpsCoordinate>({
     ...GPS_COORDINATES_DEFAULT,
-  })
-  const storesList = useSelector(storesListSelector)
+  });
+  const storesList = useSelector(storesListSelector);
+  const {
+    location,
+    isLoading: isLoadingGpsCoordinates,
+    errorMsg: errorMsgGpsCoordinates,
+  } = useGeoLocation();
 
   const formValidation: StoreFormValdation = useMemo(() => {
-    const isValid = storeName.length > 0
+    const isValid = storeName.length > 0;
     return {
       isValid,
-      message: isValid ? EMPTY_STRING : 'A store name must be given',
-    }
-  }, [storeName])
+      message: isValid ? EMPTY_STRING : "A store name must be given",
+    };
+  }, [storeName]);
 
   function onClosePress() {
-    onClose && onClose()
+    onClose && onClose();
   }
 
   function onSavePress() {
     const itmeToSave = {
       name: storeName,
       gpsCoordinates,
-    } as Store
-    onSave && onSave(itmeToSave)
-    onClose && onClose()
+    } as Store;
+    onSave && onSave(itmeToSave);
+    onClose && onClose();
   }
+
+  useEffect(() => {
+    console.log({ location, isLoadingGpsCoordinates, errorMsgGpsCoordinates })
+    if (isLoadingGpsCoordinates || !location?.coords) return
+    if (errorMsgGpsCoordinates) {
+      console.log(errorMsgGpsCoordinates)
+    }
+    setGpsCoordinates({
+      lat: `${location.coords.latitude}`,
+      lon: `${location.coords.longitude}`,
+    })
+  }, [location, isLoadingGpsCoordinates, errorMsgGpsCoordinates])
 
   return (
     <AbsolutePositionedScreen
@@ -101,7 +119,7 @@ export function StoreForm(props: StoreFormProps) {
                 return {
                   ...current,
                   lat: newLat,
-                }
+                };
               })
             }
             isInvalid={isNaN(parseFloat(gpsCoordinates.lat))}
@@ -121,7 +139,7 @@ export function StoreForm(props: StoreFormProps) {
                 return {
                   ...current,
                   lon: newLong,
-                }
+                };
               })
             }
             isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
@@ -129,5 +147,5 @@ export function StoreForm(props: StoreFormProps) {
         </Row>
       </Stack>
     </AbsolutePositionedScreen>
-  )
+  );
 }

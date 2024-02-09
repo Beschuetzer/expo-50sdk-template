@@ -2,10 +2,11 @@ import * as Location from "expo-location";
 import { useState, useEffect } from "react";
 
 import { EMPTY_STRING } from "@/constants/general";
+import { getGpsCoordinates } from "@/utils/helpers";
 
 export function useGeoLocation() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null,
+  const [location, setLocation] = useState<Location.LocationObject | undefined>(
+    undefined,
   );
   const [errorMsg, setErrorMsg] = useState(EMPTY_STRING);
   const [isLoading, setIsLoading] = useState(false);
@@ -14,14 +15,10 @@ export function useGeoLocation() {
     (async () => {
       try {
         setIsLoading(true);
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
-          return;
-        }
-        const location = await Location.getCurrentPositionAsync({});
-        setLocation(location);
-      } catch (error) {
+        const response = await getGpsCoordinates();
+        setLocation(response);
+      } catch (error: any) {
+        setErrorMsg(error.message);
       } finally {
         setIsLoading(false);
       }

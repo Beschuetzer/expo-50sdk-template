@@ -14,10 +14,8 @@ import {
 } from '@/state/slices/generalSlice'
 import {
   storesListArraySelector,
-  storesListSelector,
 } from '@/state/slices/listsSlice'
 import { HeadingTagProp } from '@/types/general'
-import { useGeoLocation } from './hooks/useGeoLocation'
 
 type StorageManagerProps = {
   showAddStore?: boolean
@@ -32,12 +30,8 @@ export function StoreManager(props: StorageManagerProps) {
 
   const currentStore = useSelector(currentStoreSelector)
   const storesListArray = useSelector(storesListArraySelector)
-  const storesList = useSelector(storesListSelector)
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  const { location } = useGeoLocation()
-
-  console.log({ storesList, storesListArray, location })
 
   const onAddPress = useCallback(() => {
     navigation.navigate(Routes.storeModal)
@@ -46,8 +40,6 @@ export function StoreManager(props: StorageManagerProps) {
   const onChangeStore = useCallback((storeName: string) => {
     dispatch(setCurrentStore(storeName))
   }, [])
-
-  console.log({ currentStore })
 
   return (
     <Stack>

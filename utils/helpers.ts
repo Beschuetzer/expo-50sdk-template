@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 
 import {
   EMPTY_STRING,
@@ -64,8 +65,8 @@ export async function deleteFile(path: string) {
   }
 }
 
-export function displayAlert(object: object) {
-  alert(JSON.stringify(object, null, 2));
+export function displayAlert(object: object | null) {
+  alert(object ? JSON.stringify(object, null, 2) : object);
 }
 
 export function getEmptyArray<T>() {
@@ -86,6 +87,15 @@ export function getKeyToUse(key: Key, displayAlert = true) {
   }
 
   return toReturn;
+}
+
+export async function getGpsCoordinates() {
+  const { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== "granted") {
+    throw new Error("Permission to access location was denied");
+  }
+  const location = await Location.getCurrentPositionAsync({});
+  return location;
 }
 
 export function getImagesFromUpcProduct(upcProduct: UpcProduct) {

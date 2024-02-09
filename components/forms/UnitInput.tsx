@@ -17,7 +17,7 @@ type UnitInputProps = {
   headingTag?: any;
 } & SpacingProp;
 
-const DEBOUNCE_DURATION = 1000;
+const DEBOUNCE_DURATION = 100;
 export function UnitInput(props: UnitInputProps) {
   const { onValueChange, headingTag: Tag = Heading, spacing } = props;
   const [unit, setUnit] = useState<ItemUnit>(UNIT_INITIAL);
@@ -27,11 +27,11 @@ export function UnitInput(props: UnitInputProps) {
   const theme = useTheme();
 
   const onChangeCustomUnit = useCallback(
-    (itemValue: string) => {
+    (customUnitValue: string) => {
       clearTimeout(debounceRef.current);
-      setCustomUnit(itemValue);
+      setCustomUnit(customUnitValue);
       debounceRef.current = setTimeout(() => {
-        onValueChange && onValueChange(itemValue);
+        onValueChange && onValueChange(customUnitValue);
       }, DEBOUNCE_DURATION);
     },
     [onValueChange],
@@ -50,6 +50,10 @@ export function UnitInput(props: UnitInputProps) {
       customUnitRef.current?.focus();
     }
   }, [unit]);
+
+  useEffect(() => {
+    onValueChange && onValueChange(UNIT_INITIAL);
+  }, [])
 
   return (
     <Stack mt={spacing}>

@@ -57,6 +57,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
     item.name || EMPTY_STRING,
   );
   const frequencyInMsRef = useRef<number>(-1);
+  const unitRef = useRef<string>(EMPTY_STRING);
   const isUpcValid = useMemo(
     () => upcValue?.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue],
@@ -81,6 +82,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
   function onSavePress() {
     const itemToSave = {
       frequency: frequencyInMsRef.current,
+      unit: unitRef.current,
       images: item.images || [],
       imageToUseIndex:
         item.images.findIndex((image) => {
@@ -90,6 +92,8 @@ export function ItemForm(props: UpcDetailsFormProps) {
       upc: upcValue,
     } as Item;
 
+    console.log({itemToSave});
+    
     if (!itemToSave.images.includes(selectedUrl)) {
       itemToSave.images.push(selectedUrl);
       itemToSave.imageToUseIndex = itemToSave.images.length - 1;
@@ -108,7 +112,7 @@ export function ItemForm(props: UpcDetailsFormProps) {
   )
 
   const onUnitChange = useCallback((unit: string) => {
-    alert(unit);
+    unitRef.current = unit;
   }, []);
 
   useEffect(() => {

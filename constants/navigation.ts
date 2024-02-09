@@ -1,5 +1,5 @@
 export enum Routes {
-  shoppingList = 'shoppingList',
-  itemModal = 'itemModal',
-  storeModal = 'storeModal',
+  ShoppingList = 'ShoppingList',
+  ItemModal = 'ItemModal',
+  StoreScreen = 'StoreScreen',
 }

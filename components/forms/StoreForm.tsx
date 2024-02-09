@@ -1,14 +1,22 @@
-import { Stack, FormControl, Input, Row, useTheme, Button } from "native-base";
-import { useEffect, useMemo, useState } from "react";
+import {
+  Stack,
+  FormControl,
+  Input,
+  Row,
+  useTheme,
+  Button,
+  Center,
+} from "native-base";
+import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
 import { InputValidationMessage } from "../InputValidationMessage";
-import { useGeoLocation } from "../hooks/useGeoLocation";
 
 import { EMPTY_STRING, GPS_COORDINATES_DEFAULT } from "@/constants/general";
 import { storesListSelector } from "@/state/slices/listsSlice";
 import { GpsCoordinate, Store } from "@/types/Store";
+import { displayAlert, getGpsCoordinates } from "@/utils/helpers";
 
 type StoreFormValdation = {
   isValid: boolean;
@@ -29,11 +37,6 @@ export function StoreForm(props: StoreFormProps) {
     ...GPS_COORDINATES_DEFAULT,
   });
   const storesList = useSelector(storesListSelector);
-  const {
-    location,
-    isLoading: isLoadingGpsCoordinates,
-    errorMsg: errorMsgGpsCoordinates,
-  } = useGeoLocation();
 
   const formValidation: StoreFormValdation = useMemo(() => {
     const isValid = storeName.length > 0;
@@ -56,17 +59,18 @@ export function StoreForm(props: StoreFormProps) {
     onClose && onClose();
   }
 
-  useEffect(() => {
-    console.log({ location, isLoadingGpsCoordinates, errorMsgGpsCoordinates })
-    if (isLoadingGpsCoordinates || !location?.coords) return
-    if (errorMsgGpsCoordinates) {
-      console.log(errorMsgGpsCoordinates)
+  async function onGetCurrentCoordinatesPress() {
+    try {
+      const location = await getGpsCoordinates();
+      if (!location.coords) throw new Error("No coordinates found...");
+      setGpsCoordinates({
+        lat: `${location.coords.latitude}`,
+        lon: `${location.coords.longitude}`,
+      });
+    } catch (error: any) {
+      displayAlert(error);
     }
-    setGpsCoordinates({
-      lat: `${location.coords.latitude}`,
-      lon: `${location.coords.longitude}`,
-    })
-  }, [location, isLoadingGpsCoordinates, errorMsgGpsCoordinates])
+  }
 
   return (
     <AbsolutePositionedScreen
@@ -145,6 +149,9 @@ export function StoreForm(props: StoreFormProps) {
             isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
           />
         </Row>
+        <Center mt={theme.space[INTER_ITEM_SPACING]}>
+          <Button onPress={onGetCurrentCoordinatesPress}>Get Current</Button>
+        </Center>
       </Stack>
     </AbsolutePositionedScreen>
   );

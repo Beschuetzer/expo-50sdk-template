@@ -25,7 +25,6 @@ export function StoreManager() {
   }, [])
 
   const onChangeStore = useCallback((storeName: string) => {
-    alert({ storeName })
     dispatch(setCurrentStore(storeName))
   }, [])
 

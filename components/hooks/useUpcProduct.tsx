@@ -23,7 +23,6 @@ export function useUpcProduct(props: UseUpcProductProps) {
     try {
       setIsLoading(true)
       setErrorMsg(null)
-      // alert(`fetching data for ${url}`);
       // const response = await fetch(url);
 
       const response = await handleMockResponse(upc)

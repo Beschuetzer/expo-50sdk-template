@@ -1,19 +1,15 @@
-import { useTheme, View, Text, theme } from "native-base";
+import { View, Text, theme } from "native-base";
 import React, { ReactNode, useEffect, useRef } from "react";
-import {
-  Animated,
-  StyleSheet,
-  I18nManager,
-  ActivityIndicator,
-  Dimensions,
-} from "react-native";
+import { Animated, StyleSheet, I18nManager, Dimensions } from "react-native";
 import { RectButton, Swipeable } from "react-native-gesture-handler";
+import { useSelector } from "react-redux";
 
 import { EMPTY_STRING } from "@/constants/general";
+import { swipeableRowOpenThresholdSelector } from "@/state/slices/optionsSlice";
 
 type SwipeableRowDirection = "left" | "right";
 type SwipeableRowAction = {
-  title: string;
+  title: string | ReactNode | ReactNode[];
   backgroundColor: string;
   onPress: () => void;
 };
@@ -28,7 +24,6 @@ type SwipeableRowProps = {
   id?: any;
 };
 
-const OPEN_THRESHOLD = 125;
 export function SwipeableRow(props: SwipeableRowProps) {
   const windowDimensions = Dimensions.get("window");
   const {
@@ -40,6 +35,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
     leftSwipe,
     rightSwipe,
   } = props;
+  const openThreshhold = useSelector(swipeableRowOpenThresholdSelector);
   const swipeableRef = useRef<Swipeable>(null);
 
   function resetRow() {
@@ -112,13 +108,10 @@ export function SwipeableRow(props: SwipeableRowProps) {
           flex: 1,
           transform: [
             {
-              translateX:
-                direction === "left"
-                  ? 0
-                  : windowDimensions.width - OPEN_THRESHOLD,
+              translateX: 0,
             },
           ],
-          width: '100%',
+          width: "100%",
         }}
       >
         <RectButton
@@ -127,12 +120,16 @@ export function SwipeableRow(props: SwipeableRowProps) {
             {
               backgroundColor,
               alignItems: direction === "left" ? "flex-start" : "flex-end",
-              width: OPEN_THRESHOLD,
+              // width: ,
             },
           ]}
           onPress={onPress}
         >
-          <Text style={styles.actionText}>{title}</Text>
+          {typeof title === "string" ? (
+            <Text style={styles.actionText}>{title}</Text>
+          ) : (
+            title
+          )}
         </RectButton>
       </Animated.View>
     );
@@ -143,8 +140,8 @@ export function SwipeableRow(props: SwipeableRowProps) {
       key={id}
       ref={swipeableRef}
       friction={2}
-      leftThreshold={Math.min(OPEN_THRESHOLD, windowDimensions.width / 2)}
-      rightThreshold={Math.min(OPEN_THRESHOLD, windowDimensions.width / 2)}
+      leftThreshold={Math.min(openThreshhold, windowDimensions.width / 2)}
+      rightThreshold={Math.min(openThreshhold, windowDimensions.width / 2)}
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
       onSwipeableOpen={async (direction) => {

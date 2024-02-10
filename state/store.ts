@@ -5,6 +5,7 @@ import storage from "redux-persist/lib/storage";
 
 import generalReducer, { generalSlice } from "@/state/slices/generalSlice";
 import listsReducer, { listsSlice } from "@/state/slices/listsSlice";
+import optionsReducer, { optionsSlice } from "@/state/slices/optionsSlice";
 import scannerReducer, { scannerSlice } from "@/state/slices/scannerSlice";
 
 const persistConfig = {
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   [generalSlice.name]: persistReducer(persistConfig, generalReducer),
   [scannerSlice.name]: persistReducer(persistConfig, scannerReducer),
   [listsSlice.name]: persistReducer(persistConfig, listsReducer),
+  [optionsSlice.name]: persistReducer(persistConfig, optionsReducer),
 });
 
 export const store = configureStore({

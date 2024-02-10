@@ -1,6 +1,6 @@
 import { FlashList } from '@shopify/flash-list'
 import { useNavigation } from 'expo-router'
-import { Heading, View, Text, Row, useTheme, Column, Center } from 'native-base'
+import { Heading, View, Text, Row, useTheme, Column, Center, Stack } from 'native-base'
 import React from 'react'
 import { StyleSheet } from 'react-native'
 import { RectButton } from 'react-native-gesture-handler'
@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { SwipeableRow } from './SwipeableRow'
 import { ImageRenderer } from '../ImageRenderer'
 
-import { EMPTY_STRING } from '@/constants/general'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import {
   itemsListArraySelector,
@@ -21,6 +21,7 @@ import {
 } from '@/state/slices/listsSlice'
 import { Item, Key } from '@/types/Item'
 import { getKeyToUse } from '@/utils/helpers'
+import { FontAwesome } from '@expo/vector-icons'
 
 type Row = { item: Item; index: number }
 type ItemsListProps = object
@@ -46,7 +47,18 @@ export function ItemsList(props: ItemsListProps) {
           return (
             <SwipeableRow
               leftSwipe={{
-                title: 'Delete',
+                title: (
+                  <Stack
+                    paddingRight={theme.space[2]}
+                    alignItems={'center'}
+                  >
+                    <FontAwesome
+                      name="trash"
+                      color={theme.colors.white}
+                      size={theme.sizes[8]}
+                    />
+                  </Stack>
+                ),
                 backgroundColor: theme.colors.red[900],
                 onPress: () => {
                   dispatch(removeItemsListItem(keyToUse))
@@ -55,7 +67,19 @@ export function ItemsList(props: ItemsListProps) {
               rightSwipe={{
                 backgroundColor: theme.colors.primary[900],
                 onPress: () => alert('left'),
-                title: 'Add to Shopping List',
+                title: (
+                  <Stack
+                    paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
+                    alignItems={'center'}
+                  >
+                    <FontAwesome
+                      name="plus"
+                      color={theme.colors.white}
+                      size={theme.sizes[8]}
+                    />
+                    <Text color={theme.colors.white}>Shopping List</Text>
+                  </Stack>
+                ),
               }}
               key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
               // leftActions={[

@@ -1,11 +1,12 @@
 ## Work on Next
 
 -add useGpsCoordinates on load and make sure it works
--add options tab with button to Update Location (currentLocation POS)
+-add StoresList (similar to Items list) with ability to remove stores and edit them (add to StoreScreen)
+
 -Shopping list conversion:
     --add a new component that handles the ItemFormStoreSpecificFields
     --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed
-    --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given
+    --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given (needs to check and update dict values for those fields)
     -- figure out why stores are not being persisted
 
 
@@ -16,7 +17,6 @@ add price field to ShoppingListItem
 //todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
 -UpcDetails rendering:
     --use PagerView to render the thumbnails 
-    --figure out adding own image button
     --The user will be presented will two different set of options depending on whether  item is already in the itemsList (add to items list if not otherwise the ability to modify the item and add it to the shopping list) .
     --it should be a form with a save and clear button
     --any data from the API will pre-populate the fields
@@ -39,3 +39,4 @@ the ability to create a store layout and have a map/route be generated based on 
 -have the ability to share/post created store layouts
 -ability to start a "shopping run" and have it track where you are in the run and provide images of the current item and accept input to change to the next item (or go back)
 -voice commands like adding an item to the list
+-add ability to open google maps for directions to a store (would need to allow input of address or ability to get from GPS coords)

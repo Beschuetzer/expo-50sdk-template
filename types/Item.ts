@@ -3,6 +3,7 @@ import { XOR } from "ts-xor";
 import { Store } from "./Store";
 
 export enum ItemUnit {
+  Bar = 'bar',
   Bunch = 'bunch',
   Can = 'can',
   Case = 'case',

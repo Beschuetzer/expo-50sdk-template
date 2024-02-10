@@ -5,11 +5,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { EMPTY_STRING } from "@/constants/general";
 import {
   currentLocationSelector,
-  currentStoreSelector,
-  resetCurrentStore,
+  resetCurrentLocation,
 } from "@/state/slices/generalSlice";
 import {
+  addItemsListItem,
   addStoresListItem,
+  currentStoreSelector,
+  resetCurrentStoreName,
   resetItemsList,
   resetStoresList,
 } from "@/state/slices/listsSlice";
@@ -18,9 +20,11 @@ import {
   upcProductsSelector,
 } from "@/state/slices/scannerSlice";
 import { calculateDistance } from "@/utils/helpers";
+import { MOCKS_UPCS } from "../mocks/mockUpcData";
 
 export function ReduxViewer() {
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
+  const lastUpcIndexRef = useRef(0);
   const upcProducts = useSelector(upcProductsSelector);
   const currentLocation = useSelector(currentLocationSelector);
   const currentStore = useSelector(currentStoreSelector);
@@ -64,15 +68,21 @@ export function ReduxViewer() {
             Reset upcProducts
           </Button>
           <Button onPress={() => dispatch(resetItemsList())}>
-            Reset Items
+            Reset itemsList
+          </Button>
+          <Button onPress={() => dispatch(resetCurrentLocation())}>
+            Reset currentLocation
+          </Button>
+          <Button onPress={() => dispatch(resetCurrentStoreName())}>
+            Reset currentStoreName
           </Button>
           <Button
             onPress={() => {
               dispatch(resetStoresList());
-              dispatch(resetCurrentStore());
+              dispatch(resetCurrentStoreName());
             }}
           >
-            Reset Stores
+            Reset storeList
           </Button>
           <Button
             onPress={() => {
@@ -89,13 +99,42 @@ export function ReduxViewer() {
           >
             Add Mock Store
           </Button>
+          <Button
+            onPress={() => {
+              const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current];
+              if (lastUpcIndexRef.current > MOCKS_UPCS.length - 1) {
+                lastUpcIndexRef.current = 0
+              } else {
+                lastUpcIndexRef.current += 1;
+
+              }
+              dispatch(
+                addItemsListItem({
+                  frequency: 604800000,
+                  imageToUseIndex: 0,
+                  images: [
+                    "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
+                  ],
+                  name: "Cholocate",
+                  unit: "bar",
+                  upc: upcToUse,
+                  itemId: {},
+                  aisle: {},
+                  price: {},
+                  quantity: {},
+                }),
+              );
+            }}
+          >
+            Add Mock Item
+          </Button>
           <Text>
             Current Location: (Lat: {currentLocation?.lat}, Lon:{" "}
             {currentLocation?.lon})
           </Text>
           <Text>
             Distance to Store from Current:{" "}
-            {calculateDistance(currentLocation, currentStore)}
+            {calculateDistance(currentLocation, currentStore?.gpsCoordinates)}
           </Text>
         </>
       }

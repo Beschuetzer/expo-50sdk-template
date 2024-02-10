@@ -3,6 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "../store";
 
+import { EMPTY_STRING } from "@/constants/general";
 import {
   Item,
   ItemsList,
@@ -22,6 +23,7 @@ import { getEmptyObject, getKeyToUse } from "@/utils/helpers";
  * {@link ListsState.stores stores} is a list of the stores created
  **/
 export type ListsState = {
+  currentStoreName: string;
   itemsList: ItemsList;
   lastPurchasedList: LastPurchasedList;
   shoppingList: ShoppingList;
@@ -29,6 +31,7 @@ export type ListsState = {
 };
 
 const initialState: ListsState = {
+  currentStoreName: EMPTY_STRING,
   itemsList: getEmptyObject(),
   lastPurchasedList: getEmptyObject(),
   shoppingList: getEmptyObject(),
@@ -147,6 +150,14 @@ export const listsSlice = createSlice({
     },
     resetStoresList: (state: ListsState) => {
       state.storesList = getEmptyObject();
+      state.currentStoreName = EMPTY_STRING;
+    },
+    resetCurrentStoreName: (state: ListsState) => {
+      state.currentStoreName = EMPTY_STRING;
+    },
+    setCurrentStoreName: (state: ListsState, action: PayloadAction<string>) => {
+      if (!action.payload) return;
+      state.currentStoreName = action.payload;
     },
   },
 });
@@ -165,9 +176,23 @@ export const {
   resetLastPurchasedList,
   resetShoppingList,
   resetStoresList,
+  resetCurrentStoreName,
+  setCurrentStoreName,
 } = listsSlice.actions;
 
 export default listsSlice.reducer;
+
+export const currentStoreSelector = createSelector(
+  [
+    (state: RootState) => state[listsSlice.name].storesList,
+    (state: RootState) => state[listsSlice.name].currentStoreName,
+  ],
+  (storesList, currentStoreName) => {
+    console.log({storesList, currentStoreName});
+    
+    return (storesList?.[currentStoreName] || null) as Store | null;
+  },
+);
 
 export const itemsListItemSelector = (id: string) =>
   createSelector(

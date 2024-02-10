@@ -6,16 +6,15 @@ import { useCallback } from 'react'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { Routes } from '@/constants/navigation'
 import { maxWidth } from '@/constants/styles'
 import {
   currentStoreSelector,
-  setCurrentStore,
-} from '@/state/slices/generalSlice'
-import {
+  setCurrentStoreName,
   storesListArraySelector,
 } from '@/state/slices/listsSlice'
 import { HeadingTagProp } from '@/types/general'
+import { Routes } from '@/constants/navigation'
+import { EMPTY_STRING } from '@/constants/general'
 
 type StorageManagerProps = {
   showAddStore?: boolean
@@ -34,12 +33,12 @@ export function StoreManager(props: StorageManagerProps) {
   const dispatch = useDispatch()
 
   const onAddPress = useCallback(() => {
-    navigation.navigate('StoreScreen')
+    navigation.navigate(Routes.StoreScreen)
   }, [])
 
   const onChangeStore = useCallback((storeName: string) => {
     alert(storeName)
-    dispatch(setCurrentStore(storeName))
+    dispatch(setCurrentStoreName(storeName))
   }, [])
 
   return (
@@ -50,7 +49,7 @@ export function StoreManager(props: StorageManagerProps) {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Tag>Current Store: {currentStore || 'No store selected'}</Tag>
+        <Tag>Current Store: {currentStore?.name || 'No store selected'}</Tag>
         {showAddStore ? (
           <TouchableOpacity onPress={onAddPress}>
             <FontAwesome size={28} name="plus" />
@@ -58,12 +57,12 @@ export function StoreManager(props: StorageManagerProps) {
         ) : null}
       </Row>
       {showStoreList ? (
-        <Picker selectedValue={currentStore} onValueChange={onChangeStore}>
+        <Picker selectedValue={currentStore?.name || EMPTY_STRING} onValueChange={onChangeStore}>
           {storesListArray.map((store) => (
             <Picker.Item
-              key={store.name}
-              label={`${store.name} (lat: ${store.gpsCoordinates?.lat}, long: ${store.gpsCoordinates?.lon})`}
-              value={store.name}
+              key={store?.name}
+              label={`${store?.name} (lat: ${store?.gpsCoordinates?.lat}, long: ${store?.gpsCoordinates?.lon})`}
+              value={store?.name}
             />
           ))}
         </Picker>

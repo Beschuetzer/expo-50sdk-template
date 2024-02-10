@@ -13,13 +13,13 @@ import { GpsCoordinate } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
 
 export function calculateDistance(
-  gpsCoordinateStart: GpsCoordinate | null,
-  gpsCoordinateEnd: GpsCoordinate | null,
+  gpsCoordinateStart: GpsCoordinate | null | undefined,
+  gpsCoordinateEnd: GpsCoordinate | null | undefined,
 ) {
-  if (!gpsCoordinateEnd || !gpsCoordinateEnd) return -1;
+  const { lat: lat1, lon: lon1 } = gpsCoordinateStart || {};
+  const { lat: lat2, lon: lon2 } = gpsCoordinateEnd || {};
 
-  const { lat: lat1, lon: lon1 } = gpsCoordinateStart
-  const { lat: lat2, lon: lon2 } = gpsCoordinateEnd
+  if (lat1 == null || lat2 == null || lon1 == null || lon2 == null) return -1;
 
   // Convert latitude and longitude from degrees to radians
   const radLat1 = (Math.PI * parseFloat(lat1)) / 180
@@ -43,7 +43,7 @@ export function calculateDistance(
   // Calculate the distance
   const distance = radius * c
 
-  return distance
+  return Math.round(distance * 100) / 100;
 }
 
 export async function delay(ms: number) {

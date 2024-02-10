@@ -1,13 +1,13 @@
-import * as Location from "expo-location";
 import { useState, useEffect } from "react";
 
 import { EMPTY_STRING } from "@/constants/general";
+import { GpsCoordinate } from "@/types/Store";
 import { getGpsCoordinates } from "@/utils/helpers";
 
-export function useGeoLocation() {
-  const [location, setLocation] = useState<Location.LocationObject | undefined>(
-    undefined,
-  );
+export function useGpsCoordinates() {
+  const [gpsCoordinates, setGpsCoordinates] = useState<
+    GpsCoordinate | undefined
+  >(undefined);
   const [errorMsg, setErrorMsg] = useState(EMPTY_STRING);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -16,7 +16,7 @@ export function useGeoLocation() {
       try {
         setIsLoading(true);
         const response = await getGpsCoordinates();
-        setLocation(response);
+        setGpsCoordinates(response);
       } catch (error: any) {
         setErrorMsg(error.message);
       } finally {
@@ -26,7 +26,7 @@ export function useGeoLocation() {
   }, []);
 
   return {
-    location,
+    gpsCoordinates,
     errorMsg,
     isLoading,
   };

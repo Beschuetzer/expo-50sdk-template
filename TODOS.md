@@ -1,6 +1,6 @@
 ## Work on Next
 
--add currentLocation in generalSlice which is obtained on load
+-add useGpsCoordinates on load and make sure it works
 -add options tab with button to Update Location (currentLocation POS)
 -Shopping list conversion:
     --add a new component that handles the ItemFormStoreSpecificFields

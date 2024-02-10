@@ -63,11 +63,7 @@ export function StoreForm(props: StoreFormProps) {
     try {
       setIsLoadingGpscoords(true);
       const location = await getGpsCoordinates();
-      if (!location.coords) throw new Error("No coordinates found...");
-      setGpsCoordinates({
-        lat: `${location.coords.latitude}`,
-        lon: `${location.coords.longitude}`,
-      });
+      setGpsCoordinates(location);
     } catch (error: any) {
       displayAlert(error);
     } finally {

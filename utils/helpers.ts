@@ -1,118 +1,129 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as FileSystem from "expo-file-system";
-import * as ImagePicker from "expo-image-picker";
-import * as Location from "expo-location";
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as FileSystem from 'expo-file-system'
+import * as ImagePicker from 'expo-image-picker'
+import * as Location from 'expo-location'
 
 import {
   EMPTY_STRING,
   IMAGE_PICKER_OPTIONS,
   IMAGE_PRIORITY_MAPPING,
-} from "@/constants/general";
-import { Key } from "@/types/Item";
-import { GpsCoordinate } from "@/types/Store";
-import { UpcProduct } from "@/types/UpcResponse";
+} from '@/constants/general'
+import { Key } from '@/types/Item'
+import { GpsCoordinate } from '@/types/Store'
+import { UpcProduct } from '@/types/UpcResponse'
 
 export function calculateDistance(
-  gpsCoordinateStart: GpsCoordinate,
-  gpsCoordinateEnd: GpsCoordinate,
+  gpsCoordinateStart: GpsCoordinate | null,
+  gpsCoordinateEnd: GpsCoordinate | null,
 ) {
-  const { lat: lat1, lon: lon1 } = gpsCoordinateStart;
-  const { lat: lat2, lon: lon2 } = gpsCoordinateEnd;
+  if (!gpsCoordinateEnd || !gpsCoordinateEnd) return -1;
+
+  const { lat: lat1, lon: lon1 } = gpsCoordinateStart
+  const { lat: lat2, lon: lon2 } = gpsCoordinateEnd
 
   // Convert latitude and longitude from degrees to radians
-  const radLat1 = (Math.PI * parseFloat(lat1)) / 180;
-  const radLon1 = (Math.PI * parseFloat(lon1)) / 180;
-  const radLat2 = (Math.PI * parseFloat(lat2)) / 180;
-  const radLon2 = (Math.PI * parseFloat(lon2)) / 180;
+  const radLat1 = (Math.PI * parseFloat(lat1)) / 180
+  const radLon1 = (Math.PI * parseFloat(lon1)) / 180
+  const radLat2 = (Math.PI * parseFloat(lat2)) / 180
+  const radLon2 = (Math.PI * parseFloat(lon2)) / 180
 
   // Calculate the differences between coordinates
-  const deltaLat = radLat2 - radLat1;
-  const deltaLon = radLon2 - radLon1;
+  const deltaLat = radLat2 - radLat1
+  const deltaLon = radLon2 - radLon1
 
   // Haversine formula to calculate distance
   const a =
     Math.sin(deltaLat / 2) ** 2 +
-    Math.cos(radLat1) * Math.cos(radLat2) * Math.sin(deltaLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    Math.cos(radLat1) * Math.cos(radLat2) * Math.sin(deltaLon / 2) ** 2
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
   // Earth's radius in kilometers (you can use 3959 for miles)
-  const radius = 6371;
+  const radius = 6371
 
   // Calculate the distance
-  const distance = radius * c;
+  const distance = radius * c
 
-  return distance;
+  return distance
 }
 
 export async function delay(ms: number) {
-  if (ms <= 0) return;
+  if (ms <= 0) return
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(null);
-    }, ms);
-  });
+      resolve(null)
+    }, ms)
+  })
 }
 
 export async function deleteFile(path: string) {
-  if (!path) return;
+  if (!path) return
   try {
-    console.log(`deleting '${path}'...`);
-    await FileSystem.deleteAsync(path);
-    return true;
+    console.log(`deleting '${path}'...`)
+    await FileSystem.deleteAsync(path)
+    return true
   } catch (error) {
-    console.log(error);
-    return false;
+    console.log(error)
+    return false
   }
 }
 
 export function displayAlert(object: object | null) {
-  alert(object ? JSON.stringify(object, null, 2) : object);
+  alert(object ? JSON.stringify(object, null, 2) : object)
 }
 
 export function getEmptyArray<T>() {
-  return [] as T;
+  return [] as T
 }
 
 export function getEmptyObject<T>() {
-  return {} as T;
+  return {} as T
 }
 
 export function getKeyToUse(key: Key, displayAlert = true) {
-  const toReturn = key?.upc || key?.name || EMPTY_STRING;
+  const toReturn = key?.upc || key?.name || EMPTY_STRING
 
   if (!toReturn && displayAlert) {
     alert(
-      "No key given.  Please delete the item in question and ensure there is either a upc or name given.",
-    );
+      'No key given.  Please delete the item in question and ensure there is either a upc or name given.',
+    )
   }
 
-  return toReturn;
+  return toReturn
 }
 
-export async function getGpsCoordinates() {
-  const { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== "granted") {
-    throw new Error("Permission to access location was denied");
+export async function getGpsCoordinates(): Promise<GpsCoordinate> {
+  const { status } = await Location.requestForegroundPermissionsAsync()
+  if (status !== 'granted') {
+    throw new Error('Permission to access location was denied')
   }
-  const location = await Location.getCurrentPositionAsync({});
-  return location;
+  const location = await Location.getCurrentPositionAsync({})
+  if (!location?.coords) {
+    return {
+      lat: '-1',
+      lon: '-1',
+    }
+  }
+  return {
+    lat: location.coords.latitude.toString(),
+    lon: location.coords.longitude.toString(),
+  }
 }
 
 export function getImagesFromUpcProduct(upcProduct: UpcProduct) {
   return Object.values(IMAGE_PRIORITY_MAPPING).map(
     (key) => upcProduct?.[key] || EMPTY_STRING,
-  );
+  )
 }
 
 export async function captureImage() {
   try {
-    const result = await ImagePicker.launchCameraAsync(IMAGE_PICKER_OPTIONS);
+    const result = await ImagePicker.launchCameraAsync(IMAGE_PICKER_OPTIONS)
 
     if (!result.canceled) {
-      return result.assets[0].uri;
+      return result.assets[0].uri
     }
   } catch (error) {
-    console.log({ error });
+    console.log({ error })
   }
 }
 
@@ -120,23 +131,23 @@ export async function pickImage() {
   try {
     // No permissions request is necessary for launching the image library
     const result =
-      await ImagePicker.launchImageLibraryAsync(IMAGE_PICKER_OPTIONS);
+      await ImagePicker.launchImageLibraryAsync(IMAGE_PICKER_OPTIONS)
 
     if (!result.canceled) {
-      return result.assets[0].uri;
+      return result.assets[0].uri
     }
   } catch (error) {
-    console.log({ error });
+    console.log({ error })
   }
 }
 
 export async function retrieveImagePathFromAsyncStorage(key: Key) {
   try {
-    const keyToUse = getKeyToUse(key);
-    return await AsyncStorage.getItem(keyToUse);
+    const keyToUse = getKeyToUse(key)
+    return await AsyncStorage.getItem(keyToUse)
   } catch (error) {
-    console.log("Error retrieving image path in AsyncStorage", error);
-    return null;
+    console.log('Error retrieving image path in AsyncStorage', error)
+    return null
   }
 }
 
@@ -146,31 +157,28 @@ export async function retrieveImagePathFromAsyncStorage(key: Key) {
  **/
 export async function saveImageLocally(key: Key, uri: string) {
   try {
-    const keyToUse = getKeyToUse(key);
-    const imagePath = `${FileSystem.documentDirectory}${keyToUse}`;
-    const downloadResumable = FileSystem.createDownloadResumable(
-      uri,
-      imagePath,
-    );
-    const response = await downloadResumable.downloadAsync();
+    const keyToUse = getKeyToUse(key)
+    const imagePath = `${FileSystem.documentDirectory}${keyToUse}`
+    const downloadResumable = FileSystem.createDownloadResumable(uri, imagePath)
+    const response = await downloadResumable.downloadAsync()
     if (response?.status && response.status <= 300) {
-      await saveImagePathToAsyncStorage(key, imagePath);
-      return imagePath;
+      await saveImagePathToAsyncStorage(key, imagePath)
+      return imagePath
     } else {
-      console.log(`Unable to save image ${response?.uri}`);
-      return "";
+      console.log(`Unable to save image ${response?.uri}`)
+      return ''
     }
   } catch (error) {
-    console.log("Error saving image locally", error);
-    return "";
+    console.log('Error saving image locally', error)
+    return ''
   }
 }
 
 export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
   try {
-    const keyToUse = getKeyToUse(key);
-    await AsyncStorage.setItem(keyToUse, imagePath);
+    const keyToUse = getKeyToUse(key)
+    await AsyncStorage.setItem(keyToUse, imagePath)
   } catch (error) {
-    console.log("Error storing image path in AsyncStorage", error);
+    console.log('Error storing image path in AsyncStorage', error)
   }
 }

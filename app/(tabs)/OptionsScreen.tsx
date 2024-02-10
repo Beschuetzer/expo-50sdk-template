@@ -21,10 +21,12 @@ import {
   FORM_INTER_ITEM_SPACING,
   SWIPEABLE_ROW_OPEN_THRESHOLD,
 } from "@/constants/general";
+import { setCurrentLocation } from "@/state/slices/generalSlice";
 import {
   setSwipeableRowOpenThreshold,
   swipeableRowOpenThresholdSelector,
 } from "@/state/slices/optionsSlice";
+import { getGpsCoordinates } from "@/utils/helpers";
 
 const DEBOUNCE_TIMEOUT = 500;
 
@@ -37,7 +39,7 @@ export default function OptionsScreen() {
   const debounceHandlerRef = useRef<{ [key: string]: any }>({});
 
   const maxAllowableSwipeThreshold = Math.round(
-    windowDimensions.width * 47.5 / 100,
+    (windowDimensions.width * 47.5) / 100,
   );
 
   //any new state should be updated in useEffect below when it changes, due to how values are being updated in redux
@@ -112,6 +114,16 @@ export default function OptionsScreen() {
           isValid={Math.round(openThreshhold) < maxAllowableSwipeThreshold}
           message={`The current value will be set to ${maxAllowableSwipeThreshold}, since that is the max allowed for this device.`}
         />
+      </Stack>
+      <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <Button
+          onPress={async () => {
+            const currentGpsCoordinates = await getGpsCoordinates();
+            dispatch(setCurrentLocation(currentGpsCoordinates))
+          }}
+        >
+          Update Current Location
+        </Button>
       </Stack>
     </AbsolutePositionedScreen>
   );

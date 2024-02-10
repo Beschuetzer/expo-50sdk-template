@@ -17,6 +17,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { Text } from '@/components/Themed'
 import { useColorScheme } from '@/components/hooks/useColorScheme'
 import { persistor, store } from '@/state/store'
+import { Routes } from '@/constants/navigation'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -70,8 +71,12 @@ function RootLayoutNav() {
                     options={{ headerShown: false }}
                   />
                   <Stack.Screen
-                    name="ItemModal"
+                    name={Routes.ItemModal}
                     options={{ presentation: 'modal', title: 'Item Details' }}
+                  />
+                  <Stack.Screen
+                    name={Routes.StoreModal}
+                    options={{ presentation: 'modal', title: 'Store Details' }}
                   />
                 </Stack>
               </BottomSheetModalProvider>

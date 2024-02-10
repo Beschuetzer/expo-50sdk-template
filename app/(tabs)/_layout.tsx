@@ -6,6 +6,7 @@ import { Pressable } from "react-native";
 import { useClientOnlyValue } from "@/components/hooks/useClientOnlyValue";
 import { useColorScheme } from "@/components/hooks/useColorScheme";
 import { COLORS } from "@/constants/colors";
+import { Routes } from "@/constants/navigation";
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -28,14 +29,14 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name={Routes.ShoppingListScreen}
         options={{
           title: "List",
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="ScannerScreen"
+        name={Routes.ScannerScreen}
         options={{
           title: "Scanner",
           tabBarIcon: ({ color }) => (
@@ -44,7 +45,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="StoreScreen"
+        name={Routes.StoreScreen}
         options={{
           title: "Stores",
           tabBarIcon: ({ color }) => (
@@ -53,7 +54,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="OptionsScreen"
+        name={Routes.OptionsScreen}
         options={{
           title: "Options",
           tabBarIcon: ({ color }) => <TabBarIcon name="adjust" color={color} />,

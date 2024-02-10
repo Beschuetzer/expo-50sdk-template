@@ -2,6 +2,7 @@ import { ViewStyle } from 'react-native'
 
 import { UpcProduct } from './UpcResponse'
 import { Item } from './Item'
+import { Store } from './Store'
 
 export type TimeSpan = 'Hour' | 'Day' | 'Week'
 export type Frequency = {
@@ -28,6 +29,10 @@ export type UpcProp = {
   upc: string
 }
 
+export type StoreProp = {
+  store: Store | null;
+}
+
 export type UpcProductProp = {
   upcProduct: UpcProduct
 }
@@ -35,3 +40,5 @@ export type UpcProductProp = {
 export type StyleProp = {
   style?: ViewStyle
 }
+
+export type ListRow<T> = { item: T; index: number }

@@ -1,6 +1,8 @@
 ## Work on Next
 
--finish swipeable row changes; adjust how far to go before the open is 
+-Swipeable row
+-add currentLocation in generalSlice which is obtained on load
+-add options tab with button to Update Location (currentLocation POS)
 -Shopping list conversion:
     --add a new component that handles the ItemFormStoreSpecificFields
     --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed

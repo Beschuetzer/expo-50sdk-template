@@ -140,8 +140,8 @@ export function SwipeableRow(props: SwipeableRowProps) {
       key={id}
       ref={swipeableRef}
       friction={2}
-      leftThreshold={Math.min(openThreshhold, windowDimensions.width / 2)}
-      rightThreshold={Math.min(openThreshhold, windowDimensions.width / 2)}
+      leftThreshold={openThreshhold}
+      rightThreshold={openThreshhold}
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
       onSwipeableOpen={async (direction) => {

@@ -37,7 +37,7 @@ export default function OptionsScreen() {
   const debounceHandlerRef = useRef<{ [key: string]: any }>({});
 
   const maxAllowableSwipeThreshold = Math.round(
-    (windowDimensions.width * 7) / 10,
+    windowDimensions.width * 47.5 / 100,
   );
 
   //any new state should be updated in useEffect below when it changes, due to how values are being updated in redux

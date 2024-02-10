@@ -16,7 +16,7 @@ export default function ItemModal() {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const route = useRoute()
-  const { key, showOverrideMsg } = route.params as any
+  const { key, showOverrideMsg } = (route.params || {}) as any
   const { upcProduct, errorMsg } = useUpcProduct({
     upc: key,
   })

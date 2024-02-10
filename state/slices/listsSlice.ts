@@ -194,8 +194,6 @@ export const currentStoreSelector = createSelector(
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (storesList, currentStoreName) => {
-    console.log({storesList, currentStoreName});
-    
     return (storesList?.[currentStoreName] || null) as Store | null;
   },
 );
@@ -234,6 +232,6 @@ export const storesListItemSelector = (storeName: string) =>
     [(state: RootState) => state[listsSlice.name].storesList],
     (storesList) => {
       const value = storesList[storeName];
-      return (value || null) as Item | null;
+      return (value || null) as Store | null;
     },
   );

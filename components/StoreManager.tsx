@@ -33,7 +33,7 @@ export function StoreManager(props: StorageManagerProps) {
   const dispatch = useDispatch()
 
   const onAddPress = useCallback(() => {
-    navigation.navigate(Routes.StoreScreen)
+    navigation.navigate(Routes.StoreModal)
   }, [])
 
   const onChangeStore = useCallback((storeName: string) => {

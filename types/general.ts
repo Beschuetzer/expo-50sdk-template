@@ -30,7 +30,7 @@ export type UpcProp = {
 }
 
 export type StoreProp = {
-  store: Store | null;
+  store?: Store | null | undefined;
 }
 
 export type UpcProductProp = {

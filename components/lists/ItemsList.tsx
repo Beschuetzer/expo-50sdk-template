@@ -22,8 +22,8 @@ import {
 import { Item, Key } from '@/types/Item'
 import { getKeyToUse } from '@/utils/helpers'
 import { FontAwesome } from '@expo/vector-icons'
+import { ListRow } from '@/types/general'
 
-type Row = { item: Item; index: number }
 type ItemsListProps = object
 
 export function ItemsList(props: ItemsListProps) {
@@ -39,7 +39,7 @@ export function ItemsList(props: ItemsListProps) {
       </Center>
       <FlashList
         data={itemsList}
-        renderItem={({ item, index }: Row) => {
+        renderItem={({ item, index }: ListRow<Item>) => {
           const keyToUse = {
             name: item.name,
             upc: item.upc,
@@ -48,10 +48,7 @@ export function ItemsList(props: ItemsListProps) {
             <SwipeableRow
               leftSwipe={{
                 title: (
-                  <Stack
-                    paddingRight={theme.space[2]}
-                    alignItems={'center'}
-                  >
+                  <Stack paddingRight={theme.space[2]} alignItems={'center'}>
                     <FontAwesome
                       name="trash"
                       color={theme.colors.white}

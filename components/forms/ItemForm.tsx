@@ -207,7 +207,7 @@ export function ItemForm(props: ItemFormProps) {
             if (isCustomImage) {
               customImagesToDeleteOnUnloadRef.current.push(url)
               item.images = item.images.filter((imageUrl) => {
-                const shouldKeep = !imageUrl.match(LOCAL_FILE_REGEX)
+                const shouldKeep = !imageUrl?.match(LOCAL_FILE_REGEX)
                 if (!shouldKeep) {
                   deleteFile(imageUrl)
                 }

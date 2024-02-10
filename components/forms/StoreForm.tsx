@@ -6,72 +6,75 @@ import {
   useTheme,
   Button,
   Center,
-} from 'native-base'
-import { useMemo, useState } from 'react'
-import { useSelector } from 'react-redux'
+} from "native-base";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
-import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen'
-import { InputValidationMessage } from '../InputValidationMessage'
+import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
+import { InputValidationMessage } from "../InputValidationMessage";
 
 import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
   GPS_COORDINATES_DEFAULT,
-} from '@/constants/general'
-import { storesListSelector } from '@/state/slices/listsSlice'
-import { GpsCoordinate, Store } from '@/types/Store'
-import { displayAlert, getGpsCoordinate } from '@/utils/helpers'
+} from "@/constants/general";
+import { storesListSelector } from "@/state/slices/listsSlice";
+import { GpsCoordinate, Store } from "@/types/Store";
+import { StoreProp } from "@/types/general";
+import { displayAlert, getGpsCoordinate } from "@/utils/helpers";
 
 type StoreFormValdation = {
-  isValid: boolean
-  message: string
-}
+  isValid: boolean;
+  message: string;
+};
 
 type StoreFormProps = {
-  onClose: () => void
-  onSave: (store: Store) => void
-}
+  onClose: () => void;
+  onSave: (store: Store) => void;
+} & StoreProp;
 
 export function StoreForm(props: StoreFormProps) {
-  const { onClose, onSave } = props
-  const theme = useTheme()
-  const [storeName, setStoreName] = useState(EMPTY_STRING)
-  const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false)
-  const [gpsCoordinates, setGpsCoordinates] = useState<GpsCoordinate>({
-    ...GPS_COORDINATES_DEFAULT,
-  })
-  const storesList = useSelector(storesListSelector)
+  const { onClose, onSave, store } = props;
+  const theme = useTheme();
+  const [storeName, setStoreName] = useState(store?.name || EMPTY_STRING);
+  const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
+  const [gpsCoordinates, setGpsCoordinates] = useState<GpsCoordinate>(
+    store?.gpsCoordinates || {
+      ...GPS_COORDINATES_DEFAULT,
+    },
+  );
+  const storesList = useSelector(storesListSelector);
 
   const formValidation: StoreFormValdation = useMemo(() => {
-    const isValid = storeName.length > 0
+    const isValid = storeName.length > 0;
     return {
       isValid,
-      message: isValid ? EMPTY_STRING : 'A store name must be given',
-    }
-  }, [storeName])
+      message: isValid ? EMPTY_STRING : "A store name must be given",
+    };
+  }, [storeName]);
 
   function onClosePress() {
-    onClose && onClose()
+    onClose && onClose();
   }
 
   function onSavePress() {
     const itmeToSave = {
       name: storeName,
       gpsCoordinates,
-    } as Store
-    onSave && onSave(itmeToSave)
-    onClose && onClose()
+    } as Store;
+    onSave && onSave(itmeToSave);
+    onClose && onClose();
   }
 
   async function onGetCurrentCoordinatesPress() {
     try {
-      setIsLoadingGpscoords(true)
-      const gpsCoordinate = await getGpsCoordinate()
-      setGpsCoordinates(gpsCoordinate)
+      setIsLoadingGpscoords(true);
+      const gpsCoordinate = await getGpsCoordinate();
+      setGpsCoordinates(gpsCoordinate);
     } catch (error: any) {
-      displayAlert(error)
+      displayAlert(error);
     } finally {
-      setIsLoadingGpscoords(false)
+      setIsLoadingGpscoords(false);
     }
   }
 
@@ -126,7 +129,7 @@ export function StoreForm(props: StoreFormProps) {
                 return {
                   ...current,
                   lat: newLat,
-                }
+                };
               })
             }
             isInvalid={isNaN(parseFloat(gpsCoordinates.lat))}
@@ -146,7 +149,7 @@ export function StoreForm(props: StoreFormProps) {
                 return {
                   ...current,
                   lon: newLong,
-                }
+                };
               })
             }
             isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
@@ -162,5 +165,5 @@ export function StoreForm(props: StoreFormProps) {
         </Center>
       </Stack>
     </AbsolutePositionedScreen>
-  )
+  );
 }

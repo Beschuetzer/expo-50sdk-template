@@ -21,7 +21,7 @@ type ThumbnailPickerProps = {
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
   const { imagesToRender, selectedUrl, onSelectImage, style, spacing } = props;
   const [customImageUri, setCustomImageUri] = useState(
-    selectedUrl.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
+    selectedUrl?.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
   );
   const isDarkMode = useIsDarkMode();
   const modeColor = useMemo(

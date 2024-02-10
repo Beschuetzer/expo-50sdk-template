@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { StoreForm } from "@/components/forms/StoreForm";
 import { addStoresListItem } from "@/state/slices/listsSlice";
 
-export default function StoreModal() {
+export default function StoreScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 

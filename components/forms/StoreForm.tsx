@@ -13,7 +13,7 @@ import { useSelector } from "react-redux";
 import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
 import { InputValidationMessage } from "../InputValidationMessage";
 
-import { EMPTY_STRING, GPS_COORDINATES_DEFAULT } from "@/constants/general";
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING, GPS_COORDINATES_DEFAULT } from "@/constants/general";
 import { storesListSelector } from "@/state/slices/listsSlice";
 import { GpsCoordinate, Store } from "@/types/Store";
 import { displayAlert, getGpsCoordinates } from "@/utils/helpers";
@@ -28,7 +28,6 @@ type StoreFormProps = {
   onSave: (store: Store) => void;
 };
 
-const INTER_ITEM_SPACING = 0.5;
 export function StoreForm(props: StoreFormProps) {
   const { onClose, onSave } = props;
   const theme = useTheme();
@@ -99,7 +98,7 @@ export function StoreForm(props: StoreFormProps) {
         </>
       }
     >
-      <Stack mt={theme.space[INTER_ITEM_SPACING]}>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <FormControl.Label>Name</FormControl.Label>
         <Input
           variant="outline"
@@ -110,9 +109,9 @@ export function StoreForm(props: StoreFormProps) {
           isInvalid={storeName.length <= 0}
         />
       </Stack>
-      <Stack mt={theme.space[INTER_ITEM_SPACING]}>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Row alignItems="center">
-          <FormControl.Label mr={theme.space[INTER_ITEM_SPACING]}>
+          <FormControl.Label mr={theme.space[FORM_INTER_ITEM_SPACING]}>
             Lat:
           </FormControl.Label>
           <Input
@@ -132,7 +131,7 @@ export function StoreForm(props: StoreFormProps) {
             }
             isInvalid={isNaN(parseFloat(gpsCoordinates.lat))}
           />
-          <FormControl.Label mx={theme.space[INTER_ITEM_SPACING]}>
+          <FormControl.Label mx={theme.space[FORM_INTER_ITEM_SPACING]}>
             Long:
           </FormControl.Label>
           <Input
@@ -153,7 +152,7 @@ export function StoreForm(props: StoreFormProps) {
             isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
           />
         </Row>
-        <Center mt={theme.space[INTER_ITEM_SPACING]}>
+        <Center mt={theme.space[FORM_INTER_ITEM_SPACING]}>
           <Button
             isDisabled={isLoadingGpscoords}
             onPress={onGetCurrentCoordinatesPress}

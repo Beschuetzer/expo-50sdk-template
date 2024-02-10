@@ -1,7 +1,8 @@
-import { Column, theme, ScrollView, View, useTheme } from 'native-base'
+import { Column, ScrollView, View, useTheme } from 'native-base'
 import { ReactNode, useState } from 'react'
 
 import { absolutePositioning } from '@/constants/styles'
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 
 type AbsolutePositionedScreenProps = {
   absolutelyPositionedJsx: ReactNode | ReactNode[]
@@ -25,7 +26,7 @@ export function AbsolutePositionedScreen(props: AbsolutePositionedScreenProps) {
         {...absolutePositioning}
         top="auto"
         p={theme.space[1]}
-        py={theme.space[0.5]}
+        py={theme.space[FORM_INTER_ITEM_SPACING]}
         backgroundColor={theme.colors.white}
         onLayout={(event) => {
           const height = event.nativeEvent?.layout?.height

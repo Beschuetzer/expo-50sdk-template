@@ -8,7 +8,7 @@ import { UnitInput } from "./UnitInput";
 import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
 import { InputValidationMessage } from "../InputValidationMessage";
 
-import { DEFAULT_IMAGE_INDEX, EMPTY_STRING } from "@/constants/general";
+import { DEFAULT_IMAGE_INDEX, EMPTY_STRING, FORM_INTER_ITEM_SPACING } from "@/constants/general";
 import {
   LOCAL_FILE_REGEX,
   UPC_REGEX,
@@ -31,7 +31,6 @@ type ItemFormProps = {
 } & ItemProp;
 
 
-const INTER_ITEM_SPACING = 0.5;
 export function ItemForm(props: ItemFormProps) {
   const { onClose, onSave, item, showOverrideMsg = true } = props;
   const theme = useTheme();
@@ -182,7 +181,7 @@ export function ItemForm(props: ItemFormProps) {
           message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${upcValue.length} chars)`}
         />
       </Stack>
-      <Stack mt={theme.space[INTER_ITEM_SPACING]}>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <FormControl.Label>Name</FormControl.Label>
         <Input
           variant="outline"
@@ -193,7 +192,7 @@ export function ItemForm(props: ItemFormProps) {
           isInvalid={productNameValue.length <= 0}
         />
       </Stack>
-      <Stack mt={theme.space[INTER_ITEM_SPACING]}>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <FormControl.Label>Image</FormControl.Label>
         <Input
           variant="outline"
@@ -202,7 +201,7 @@ export function ItemForm(props: ItemFormProps) {
           value={selectedUrl}
         />
         <ThumbnailPicker
-          spacing={theme.space[INTER_ITEM_SPACING]}
+          spacing={theme.space[FORM_INTER_ITEM_SPACING]}
           selectedUrl={selectedUrl}
           onSelectImage={(url, isCustomImage) => {
             if (isCustomImage) {
@@ -224,13 +223,13 @@ export function ItemForm(props: ItemFormProps) {
       <FrequencyInput
         onValueChange={onFrequencyChange}
         headingTag={FormControl.Label}
-        spacing={theme.space[INTER_ITEM_SPACING]}
+        spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
       <UnitInput
         initialValue={itemInList?.unit}
         onValueChange={onUnitChange}
         headingTag={FormControl.Label}
-        spacing={theme.space[INTER_ITEM_SPACING]}
+        spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
     </AbsolutePositionedScreen>
   )

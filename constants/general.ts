@@ -7,6 +7,7 @@ import { TimeSpan } from '@/types/general'
 export const DEFAULT_IMAGE_INDEX = 0
 export const EMPTY_FREQUENCY = 0
 export const EMPTY_STRING = ''
+export const FORM_INTER_ITEM_SPACING = 0.5
 export const GPS_COORDINATES_DEFAULT = Object.freeze({
   lat: EMPTY_STRING,
   lon: EMPTY_STRING,
@@ -27,6 +28,7 @@ export const IMAGE_PRIORITY_MAPPING: {
   2: 'image_ingredients_thumb_url',
   3: 'image_nutrition_thumb_url',
 }
+export const SWIPEABLE_ROW_OPEN_THRESHOLD = 100
 export const TIME_SPAN_TO_MILLISECONDS_MAPPING: { [key in TimeSpan]: number } =
   {
     Hour: HOUR_IN_MS,

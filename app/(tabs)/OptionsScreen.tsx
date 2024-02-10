@@ -16,6 +16,7 @@ import { Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 
 import { AbsolutePositionedScreen } from "@/components/AbsolutelyPositionedScreen";
+import { InputValidationMessage } from "@/components/InputValidationMessage";
 import {
   FORM_INTER_ITEM_SPACING,
   SWIPEABLE_ROW_OPEN_THRESHOLD,
@@ -24,9 +25,8 @@ import {
   setSwipeableRowOpenThreshold,
   swipeableRowOpenThresholdSelector,
 } from "@/state/slices/optionsSlice";
-import { InputValidationMessage } from "@/components/InputValidationMessage";
 
-const DEBOUNCE_TIMEOUT = 250;
+const DEBOUNCE_TIMEOUT = 500;
 
 export default function OptionsScreen() {
   const openThreshhold = useSelector(swipeableRowOpenThresholdSelector);
@@ -35,18 +35,20 @@ export default function OptionsScreen() {
   const theme = useTheme();
   const windowDimensions = Dimensions.get("window");
   const debounceHandlerRef = useRef<{ [key: string]: any }>({});
-  
-  const maxAllowableSwipeThreshold = Math.round(windowDimensions.width - 25);
+
+  const maxAllowableSwipeThreshold = Math.round(
+    (windowDimensions.width * 7) / 10,
+  );
 
   //any new state should be updated in useEffect below when it changes, due to how values are being updated in redux
   const [swipeableRowOpenThresholdValue, setSwipeableRowOpenThresholdValue] =
-    useState(openThreshhold);
+    useState(openThreshhold.toString());
 
   function onDonePress() {
     navigation.goBack();
   }
 
-  function handleDebounce(
+  function handleReduxUpdate(
     key: string,
     text: string,
     toDispatch: ActionCreatorWithPayload<any>,
@@ -60,7 +62,7 @@ export default function OptionsScreen() {
   }
 
   useEffect(() => {
-    setSwipeableRowOpenThresholdValue(openThreshhold);
+    setSwipeableRowOpenThresholdValue(openThreshhold.toString());
   }, [openThreshhold]);
 
   return (
@@ -86,22 +88,23 @@ export default function OptionsScreen() {
             keyboardType="numeric"
             p={theme.space[1]}
             placeholder="Value in pixels"
-            value={swipeableRowOpenThresholdValue as any}
-            onChangeText={(text) =>
-              handleDebounce(
-                'swipeOpenThreshold',
+            value={swipeableRowOpenThresholdValue}
+            onChangeText={(text) => {
+              handleReduxUpdate(
+                "swipeOpenThreshold",
                 text,
                 setSwipeableRowOpenThreshold,
                 (text) => {
-                  const parsedInt = parseInt(text, 10)
+                  const parsedInt = parseInt(text, 10);
                   const toReturn = Math.max(
                     0,
                     Math.min(parsedInt, maxAllowableSwipeThreshold),
-                  )
-                  return toReturn
+                  );
+                  return toReturn;
                 },
-              )
-            }
+              );
+              setSwipeableRowOpenThresholdValue(text);
+            }}
           />
           <FormControl.Label>px</FormControl.Label>
         </Row>
@@ -111,5 +114,5 @@ export default function OptionsScreen() {
         />
       </Stack>
     </AbsolutePositionedScreen>
-  )
+  );
 }

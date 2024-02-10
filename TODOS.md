@@ -1,6 +1,5 @@
 ## Work on Next
 
--Swipeable row
 -add currentLocation in generalSlice which is obtained on load
 -add options tab with button to Update Location (currentLocation POS)
 -Shopping list conversion:

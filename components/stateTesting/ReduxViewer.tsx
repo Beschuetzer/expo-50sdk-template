@@ -1,4 +1,4 @@
-import { Button, FlatList, Heading, Text, View } from "native-base";
+import { Button, FlatList, Heading, Row, Stack, Text, View } from "native-base";
 import React, { useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -42,102 +42,114 @@ export function ReduxViewer() {
     <FlatList
       data={Object.values(upcProducts || {})}
       renderItem={(data) => {
-        const { item, index } = data;
+        const { item, index } = data
         return (
           <View key={`${index}-${item.id}`}>
             <Heading size="sm" mt={3}>
               '{item.id}' details:
             </Heading>
-            {renderFieldAndText("Name", item.product_name)}
-            {renderFieldAndText(
+            {renderFieldAndText('Name', item.product_name)}
+            {/* {renderFieldAndText(
               "Fetched At",
               new Date(item.timestamp).toLocaleString(),
             )}
-            {renderFieldAndText("Selected Image", selectedUrl)}
+            {renderFieldAndText("Selected Image", selectedUrl)} */}
             {/* <ThumbnailPicker
               upcProduct={item}
               setSelectedUrl={setSelectedUrl}
               selectedUrl={selectedUrl}
             /> */}
           </View>
-        );
+        )
       }}
       ListHeaderComponent={
         <>
-          <Button onPress={() => dispatch(resetUpcProducts())}>
-            Reset upcProducts
-          </Button>
-          <Button onPress={() => dispatch(resetItemsList())}>
-            Reset itemsList
-          </Button>
-          <Button onPress={() => dispatch(resetCurrentLocation())}>
-            Reset currentLocation
-          </Button>
-          <Button onPress={() => dispatch(resetCurrentStoreName())}>
-            Reset currentStoreName
-          </Button>
-          <Button
-            onPress={() => {
-              dispatch(resetStoresList());
-              dispatch(resetCurrentStoreName());
-            }}
-          >
-            Reset storeList
-          </Button>
-          <Button
-            onPress={() => {
-              dispatch(
-                addStoresListItem({
-                  name: `Costco`,
-                  gpsCoordinates: {
-                    lat: "45.0297043",
-                    lon: "-93.0393775",
-                  },
-                }),
-              );
-            }}
-          >
-            Add Mock Store
-          </Button>
-          <Button
-            onPress={() => {
-              const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current];
-              if (lastUpcIndexRef.current > MOCKS_UPCS.length - 1) {
-                lastUpcIndexRef.current = 0
-              } else {
-                lastUpcIndexRef.current += 1;
+          <Stack space={1}>
+            <Text>Resetting:</Text>
+            <Row space={1}>
+              <Button onPress={() => dispatch(resetUpcProducts())}>
+                upcProducts
+              </Button>
+              <Button onPress={() => dispatch(resetItemsList())}>
+                itemsList
+              </Button>
+              <Button onPress={() => dispatch(resetCurrentLocation())}>
+                currentLocation
+              </Button>
+            </Row>
+            <Row space={1}>
+              <Button onPress={() => dispatch(resetCurrentStoreName())}>
+                currentStoreName
+              </Button>
+              <Button
+                onPress={() => {
+                  dispatch(resetStoresList())
+                  dispatch(resetCurrentStoreName())
+                }}
+              >
+                storeList
+              </Button>
+            </Row>
+          </Stack>
+          <Stack space={1}>
+            <Text>Adding Mock:</Text>
+            <Row space={1}>
+              <Button
+                onPress={() => {
+                  dispatch(
+                    addStoresListItem({
+                      name: `Costco`,
+                      gpsCoordinates: {
+                        lat: '45.0297043',
+                        lon: '-93.0393775',
+                      },
+                    }),
+                  )
+                }}
+              >
+                Store
+              </Button>
+              <Button
+                onPress={() => {
+                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current]
+                  if (lastUpcIndexRef.current > MOCKS_UPCS.length - 1) {
+                    lastUpcIndexRef.current = 0
+                  } else {
+                    lastUpcIndexRef.current += 1
+                  }
+                  dispatch(
+                    addItemsListItem({
+                      frequency: 604800000,
+                      imageToUseIndex: 0,
+                      images: [
+                        'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
+                      ],
+                      name: 'Cholocate',
+                      unit: 'bar',
+                      upc: upcToUse,
+                      itemId: {},
+                      aisle: {},
+                      price: {},
+                      quantity: {},
+                    }),
+                  )
+                }}
+              >
+                Item
+              </Button>
+            </Row>
+          </Stack>
 
-              }
-              dispatch(
-                addItemsListItem({
-                  frequency: 604800000,
-                  imageToUseIndex: 0,
-                  images: [
-                    "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
-                  ],
-                  name: "Cholocate",
-                  unit: "bar",
-                  upc: upcToUse,
-                  itemId: {},
-                  aisle: {},
-                  price: {},
-                  quantity: {},
-                }),
-              );
-            }}
-          >
-            Add Mock Item
-          </Button>
           <Text>
-            Current Location: (Lat: {currentLocation?.lat}, Lon:{" "}
+            Current Location: (Lat: {currentLocation?.lat}, Lon:{' '}
             {currentLocation?.lon})
           </Text>
           <Text>
-            Distance to Store from Current:{" "}
+            Distance to Store from Current:{' '}
             {calculateDistance(currentLocation, currentStore?.gpsCoordinates)}
           </Text>
         </>
       }
     />
-  );
+  )
 }

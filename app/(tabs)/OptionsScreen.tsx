@@ -1,5 +1,5 @@
-import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
-import { useNavigation } from "expo-router";
+import { ActionCreatorWithPayload } from '@reduxjs/toolkit'
+import { useNavigation } from 'expo-router'
 import {
   Button,
   Row,
@@ -10,44 +10,44 @@ import {
   theme,
   useTheme,
   Stack,
-} from "native-base";
-import { useEffect, useState, useRef } from "react";
-import { Dimensions } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+} from 'native-base'
+import { useEffect, useState, useRef } from 'react'
+import { Dimensions } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { AbsolutePositionedScreen } from "@/components/AbsolutelyPositionedScreen";
-import { InputValidationMessage } from "@/components/InputValidationMessage";
+import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen'
+import { InputValidationMessage } from '@/components/InputValidationMessage'
 import {
   FORM_INTER_ITEM_SPACING,
   SWIPEABLE_ROW_OPEN_THRESHOLD,
-} from "@/constants/general";
-import { setCurrentLocation } from "@/state/slices/generalSlice";
+} from '@/constants/general'
+import { setCurrentLocation } from '@/state/slices/generalSlice'
 import {
   setSwipeableRowOpenThreshold,
   swipeableRowOpenThresholdSelector,
-} from "@/state/slices/optionsSlice";
-import { getGpsCoordinates } from "@/utils/helpers";
+} from '@/state/slices/optionsSlice'
+import { getGpsCoordinate } from '@/utils/helpers'
 
-const DEBOUNCE_TIMEOUT = 500;
+const DEBOUNCE_TIMEOUT = 500
 
 export default function OptionsScreen() {
-  const openThreshhold = useSelector(swipeableRowOpenThresholdSelector);
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const theme = useTheme();
-  const windowDimensions = Dimensions.get("window");
-  const debounceHandlerRef = useRef<{ [key: string]: any }>({});
+  const openThreshhold = useSelector(swipeableRowOpenThresholdSelector)
+  const navigation = useNavigation()
+  const dispatch = useDispatch()
+  const theme = useTheme()
+  const windowDimensions = Dimensions.get('window')
+  const debounceHandlerRef = useRef<{ [key: string]: any }>({})
 
   const maxAllowableSwipeThreshold = Math.round(
     (windowDimensions.width * 47.5) / 100,
-  );
+  )
 
   //any new state should be updated in useEffect below when it changes, due to how values are being updated in redux
   const [swipeableRowOpenThresholdValue, setSwipeableRowOpenThresholdValue] =
-    useState(openThreshhold.toString());
+    useState(openThreshhold.toString())
 
   function onDonePress() {
-    navigation.goBack();
+    navigation.goBack()
   }
 
   function handleReduxUpdate(
@@ -56,16 +56,16 @@ export default function OptionsScreen() {
     toDispatch: ActionCreatorWithPayload<any>,
     textTransformer: (text: string) => void,
   ) {
-    clearTimeout(debounceHandlerRef.current[key]);
+    clearTimeout(debounceHandlerRef.current[key])
     debounceHandlerRef.current[key] = setTimeout(() => {
-      const transformed = textTransformer ? textTransformer(text) : text;
-      dispatch(toDispatch(transformed));
-    }, DEBOUNCE_TIMEOUT);
+      const transformed = textTransformer ? textTransformer(text) : text
+      dispatch(toDispatch(transformed))
+    }, DEBOUNCE_TIMEOUT)
   }
 
   useEffect(() => {
-    setSwipeableRowOpenThresholdValue(openThreshhold.toString());
-  }, [openThreshhold]);
+    setSwipeableRowOpenThresholdValue(openThreshhold.toString())
+  }, [openThreshhold])
 
   return (
     <AbsolutePositionedScreen
@@ -93,19 +93,19 @@ export default function OptionsScreen() {
             value={swipeableRowOpenThresholdValue}
             onChangeText={(text) => {
               handleReduxUpdate(
-                "swipeOpenThreshold",
+                'swipeOpenThreshold',
                 text,
                 setSwipeableRowOpenThreshold,
                 (text) => {
-                  const parsedInt = parseInt(text, 10);
+                  const parsedInt = parseInt(text, 10)
                   const toReturn = Math.max(
                     0,
                     Math.min(parsedInt, maxAllowableSwipeThreshold),
-                  );
-                  return toReturn;
+                  )
+                  return toReturn
                 },
-              );
-              setSwipeableRowOpenThresholdValue(text);
+              )
+              setSwipeableRowOpenThresholdValue(text)
             }}
           />
           <FormControl.Label>px</FormControl.Label>
@@ -118,13 +118,13 @@ export default function OptionsScreen() {
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Button
           onPress={async () => {
-            const currentGpsCoordinates = await getGpsCoordinates();
-            dispatch(setCurrentLocation(currentGpsCoordinates))
+            const currentGpsCoordinate = await getGpsCoordinate()
+            dispatch(setCurrentLocation(currentGpsCoordinate))
           }}
         >
           Update Current Location
         </Button>
       </Stack>
     </AbsolutePositionedScreen>
-  );
+  )
 }

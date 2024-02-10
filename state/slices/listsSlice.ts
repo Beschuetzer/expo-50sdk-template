@@ -91,10 +91,16 @@ export const listsSlice = createSlice({
         alert("Unable to add an item with no name to the storesList.");
         return;
       }
+
       state.storesList = {
         ...state.storesList,
         [keyToUse]: action.payload,
       };
+
+      const currentStores = Object.values(state.storesList || {});
+      if (currentStores.length === 1) {
+        state.currentStoreName = currentStores[0].name;
+      }
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);

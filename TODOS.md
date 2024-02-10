@@ -1,6 +1,5 @@
 ## Work on Next
 
--add useGpsCoordinates on load and make sure it works
 -add StoresList (similar to Items list) with ability to remove stores and edit them (add to StoreScreen)
 
 -Shopping list conversion:

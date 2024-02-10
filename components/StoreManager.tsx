@@ -37,7 +37,6 @@ export function StoreManager(props: StorageManagerProps) {
   }, [])
 
   const onChangeStore = useCallback((storeName: string) => {
-    alert(storeName)
     dispatch(setCurrentStoreName(storeName))
   }, [])
 

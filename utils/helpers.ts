@@ -16,10 +16,10 @@ export function calculateDistance(
   gpsCoordinateStart: GpsCoordinate | null | undefined,
   gpsCoordinateEnd: GpsCoordinate | null | undefined,
 ) {
-  const { lat: lat1, lon: lon1 } = gpsCoordinateStart || {};
-  const { lat: lat2, lon: lon2 } = gpsCoordinateEnd || {};
+  const { lat: lat1, lon: lon1 } = gpsCoordinateStart || {}
+  const { lat: lat2, lon: lon2 } = gpsCoordinateEnd || {}
 
-  if (lat1 == null || lat2 == null || lon1 == null || lon2 == null) return -1;
+  if (lat1 == null || lat2 == null || lon1 == null || lon2 == null) return -1
 
   // Convert latitude and longitude from degrees to radians
   const radLat1 = (Math.PI * parseFloat(lat1)) / 180
@@ -43,7 +43,7 @@ export function calculateDistance(
   // Calculate the distance
   const distance = radius * c
 
-  return Math.round(distance * 100) / 100;
+  return Math.round(distance * 100) / 100
 }
 
 export async function delay(ms: number) {
@@ -91,7 +91,7 @@ export function getKeyToUse(key: Key, displayAlert = true) {
   return toReturn
 }
 
-export async function getGpsCoordinates(): Promise<GpsCoordinate> {
+export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   const { status } = await Location.requestForegroundPermissionsAsync()
   if (status !== 'granted') {
     throw new Error('Permission to access location was denied')

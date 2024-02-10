@@ -1,33 +1,38 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react'
 
-import { EMPTY_STRING } from "@/constants/general";
-import { GpsCoordinate } from "@/types/Store";
-import { getGpsCoordinates } from "@/utils/helpers";
+import { EMPTY_STRING } from '@/constants/general'
+import { GpsCoordinate } from '@/types/Store'
+import { getGpsCoordinate } from '@/utils/helpers'
 
-export function useGpsCoordinates() {
+type UseGpsCoordinatesProps = {
+  onSuccess?: (gpsCoordinates: GpsCoordinate) => void
+}
+export function useGpsCoordinate(props?: UseGpsCoordinatesProps) {
+  const { onSuccess } = props || {}
   const [gpsCoordinates, setGpsCoordinates] = useState<
     GpsCoordinate | undefined
-  >(undefined);
-  const [errorMsg, setErrorMsg] = useState(EMPTY_STRING);
-  const [isLoading, setIsLoading] = useState(false);
+  >(undefined)
+  const [errorMsg, setErrorMsg] = useState(EMPTY_STRING)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     (async () => {
       try {
-        setIsLoading(true);
-        const response = await getGpsCoordinates();
-        setGpsCoordinates(response);
+        setIsLoading(true)
+        const gpsCoordinate = await getGpsCoordinate()
+        onSuccess && onSuccess(gpsCoordinate)
+        setGpsCoordinates(gpsCoordinate)
       } catch (error: any) {
-        setErrorMsg(error.message);
+        setErrorMsg(error.message)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    })();
-  }, []);
+    })()
+  }, [])
 
   return {
     gpsCoordinates,
     errorMsg,
     isLoading,
-  };
+  }
 }

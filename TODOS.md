@@ -1,4 +1,4 @@
-## Work on Next
+## MVP
 
 -add StoresList (similar to Items list) with ability to remove stores and edit them (add to StoreScreen)
 
@@ -9,8 +9,6 @@
     -- figure out why stores are not being persisted
 
 
-//todo: figure out how to handle pressing item in itemslist (add a new modal or use the current?)
-add price field to ShoppingListItem
 //todo: figure out types for useRouter/useNavigation (expo-router)
 //todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/
 //todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
@@ -24,9 +22,9 @@ add price field to ShoppingListItem
 -add store creation form and screen (maybe even a tab?)
 -create a component that sets the current store POS (create POS in generalSlice)
 
--Add 'Add to Shopping List" button in 
--figure out how to save thumbnails to android storage for caching purposes
--add options tab (move mock buttons there, add auto save checkbox, add a backup button which can email a .json file of the current lists in redux, add a load button to load the .json file)
+-Swiping to add to shopping list should not be an option unless a store is selected (or a message should display indicating a store is needed (add an AlertModal for this?))
+-Swiping to add to shopping list should add one of that item for the current store 
+-add options tab (move mock buttons there when done, add auto save checkbox, add a backup button which can email a .json file of the current lists in redux, add a load button to load the .json file)
 -reomove handleMockResponse in useUpcData when done and enable the actual fetch
 
 ## Features

@@ -1,7 +1,4 @@
 ## MVP
-
-
--add sort by type picker for StoresList (make generic for use with other lists?)
 -add filter for StoresList (make generic for use with other lists?)
 -add StoresList (similar to Items list) with ability to remove stores and edit them (add to StoreScreen)
 

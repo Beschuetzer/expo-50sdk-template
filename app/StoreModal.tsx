@@ -8,7 +8,7 @@ import {
   storesListItemSelector,
 } from "@/state/slices/listsSlice";
 
-export function StoreModal() {
+export default function StoreModal() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const route = useRoute();

@@ -12,9 +12,16 @@ import {
   LastPurchasedList,
   ShoppingList,
   StoreList,
+  StoreSpecificValues,
 } from "@/types/Item";
 import { Store } from "@/types/Store";
 import { getEmptyObject, getKeyToUse } from "@/utils/helpers";
+
+export type AddItemsListItemPayload = {
+  item: Item;
+  storeSpecificValues?: StoreSpecificValues;
+  currentStore?: Store;
+}
 
 /**
  * {@link ListsState.itemsList itemsList} has all of the items that have been scanned (these can be added to any store)
@@ -42,8 +49,13 @@ export const listsSlice = createSlice({
   name: "lists",
   initialState,
   reducers: {
-    addItemsListItem: (state: ListsState, action: PayloadAction<Item>) => {
-      const keyToUse = getKeyToUse(action.payload);
+    addItemsListItem: (
+      state: ListsState,
+      action: PayloadAction<AddItemsListItemPayload>,
+    ) => {
+      const { item, storeSpecificValues, currentStore } = action.payload || {};
+      console.log({ item, storeSpecificValues, currentStore });
+      const keyToUse = getKeyToUse(action.payload.item);
 
       if (!keyToUse) {
         alert(
@@ -51,9 +63,24 @@ export const listsSlice = createSlice({
         );
         return;
       }
+
+      const newItem = { ...item };
+
+
+      //todo: finish this
+      // if (storeSpecificValues) {
+      //   for (const [valueName, value] of Object.entries(storeSpecificValues)) {
+      //     console.log({ key: valueName, value });
+      //     newItem[valueName] = {
+      //       ...newItem[valueName],
+      //       []
+      //     }
+      //   }
+      // }
+
       state.itemsList = {
         ...state.itemsList,
-        [keyToUse]: action.payload,
+        [keyToUse]: newItem,
       };
     },
     addLastPurchasedList: (

@@ -2,12 +2,14 @@ import { FontAwesome } from '@expo/vector-icons'
 import { TouchableOpacity } from '@gorhom/bottom-sheet'
 import { useNavigation } from 'expo-router'
 import { useTheme, Center, Heading, Row, View, Stack, Text } from 'native-base'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { FlatList, RectButton } from 'react-native-gesture-handler'
 import { useSelector, useDispatch } from 'react-redux'
 
+import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
+import { SORTERS, SortType } from './sorters'
 
 import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
@@ -22,22 +24,12 @@ import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
 import { calculateDistance, getKeyToUse } from '@/utils/helpers'
 
-enum StoresListSortType {
-  ByDistance = 'By Distance',
-  ByName = 'By Name',
-}
-
 export function StoresList() {
   const storesList = useSelector(storesListArraySelector)
   const currentLocation = useSelector(currentLocationSelector)
   const theme = useTheme()
   const navigation = useNavigation()
   const dispatch = useDispatch()
-  console.log({ storesList })
-  const [sortType, setsortType] = useState<StoresListSortType>(
-    StoresListSortType.ByName,
-  )
-
   const arrayWithDistances = useMemo(() => {
     return storesList.map((store) => {
       return {
@@ -48,40 +40,27 @@ export function StoresList() {
         ),
       }
     })
-  }, [storesList, currentLocation])
+  }, [storesList, currentLocation]) as Store[]
+  const [sortedList, setSortedList] = useState(arrayWithDistances)
 
-  console.log({arrayWithDistances});
-  
+  const onSortTypeChange = useCallback(
+    (sortType: SortType) => {
+      const newSorted = [...sortedList.sort(SORTERS[sortType])]
+      setSortedList(newSorted)
+    },
+    [sortedList, setSortedList],
+  )
 
-  const arrayToUse = useMemo(() => {
-    return sortType === StoresListSortType.ByDistance
-      ? arrayWithDistances.sort((current: Store, next: Store) => {
-          console.log({ current, next })
-          if (!current.calculatedDistance && next.calculatedDistance) return 1
-          if (current.calculatedDistance && !next.calculatedDistance) return -1
-          if (current.calculatedDistance === next.calculatedDistance) return 0
-          if (
-            !current &&
-            !next &&
-            current.calculatedDistance <= next.calculatedDistance
-          )
-            return -1
-          return 1
-        })
-      : arrayWithDistances.sort((current: Store, next: Store) => {
-          console.log({ current, next })
-          if (!current.name && next.name) return 1
-          if (current.name && !next.name) return -1
-          if (current.name === next.name) return 0
-          if (current.name <= next.name) return -1
-          return 1
-        })
-  }, [arrayWithDistances])
+  console.log({ sortedList, arrayWithDistances })
 
   return (
     <Stack>
+      <ListSorter
+        onValueChange={onSortTypeChange}
+        sortTypes={[SortType.Distance, SortType.Name]}
+      />
       <FlatList
-        data={arrayToUse}
+        data={sortedList}
         renderItem={({ item, index }: ListRow<Store>) => {
           const keyToUse = {
             name: item.name,
@@ -142,7 +121,8 @@ export function StoresList() {
                       </Text>
                       <Text>
                         Estimated Distance:{' '}
-                        {!item?.calculatedDistance || item.calculatedDistance === -1
+                        {!item?.calculatedDistance ||
+                        item.calculatedDistance === -1
                           ? 'N/A'
                           : `${item.calculatedDistance}mi.`}
                       </Text>

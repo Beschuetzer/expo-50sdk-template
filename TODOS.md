@@ -1,6 +1,8 @@
 ## MVP
 -move Store Manager to header in Stores tab?
 -save store specific data on save
+-Store details should have a way to view all of the isles and sort them in order
+-Need to figure out how to drag and drop rows for easier custom sorting
 
 -add filter for StoresList (make generic for use with other lists?)
 -add StoresList (similar to Items list) with ability to remove stores and edit them (add to StoreScreen)

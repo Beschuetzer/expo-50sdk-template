@@ -15,6 +15,7 @@ import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import { currentLocationSelector } from '@/state/slices/generalSlice'
 import {
+  currentStoreSelector,
   removeStoresListItem,
   setCurrentStoreName,
   storesListArraySelector,
@@ -23,10 +24,12 @@ import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
 import { calculateDistance, getKeyToUse } from '@/utils/helpers'
+import { StoreManager } from '../StoreManager'
 
 export function StoresList() {
   const storesList = useSelector(storesListArraySelector)
   const currentLocation = useSelector(currentLocationSelector)
+  const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const navigation = useNavigation()
   const dispatch = useDispatch()
@@ -128,11 +131,19 @@ export function StoresList() {
                       </Text>
                     </Stack>
                     <Stack>
-                      <TouchableOpacity
-                        onPress={() => dispatch(removeStoresListItem(keyToUse))}
-                      >
-                        <Text>Set as Current</Text>
-                      </TouchableOpacity>
+                      {currentStore?.name !== keyToUse.name ? (
+                        <TouchableOpacity
+                          onPress={() =>
+                            dispatch(setCurrentStoreName(keyToUse.name))
+                          }
+                        >
+                          <Text color={theme.colors.info[900]}>
+                            Set as Current
+                          </Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <Text>Current</Text>
+                      )}
                     </Stack>
                   </Row>
                 </Stack>

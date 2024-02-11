@@ -73,7 +73,12 @@ export function ReduxViewer() {
               <Button onPress={() => dispatch(resetUpcProducts())}>
                 upcProducts
               </Button>
-              <Button onPress={() => dispatch(resetItemsList())}>
+              <Button
+                onPress={() => {
+                  lastUpcIndexRef.current = 0;
+                  dispatch(resetItemsList());
+                }}
+              >
                 itemsList
               </Button>
               <Button onPress={() => dispatch(resetCurrentLocation())}>
@@ -86,6 +91,7 @@ export function ReduxViewer() {
               </Button>
               <Button
                 onPress={() => {
+                  lastStoreIndexRef.current = 0
                   dispatch(resetStoresList());
                   dispatch(resetCurrentStoreName());
                 }}
@@ -100,12 +106,12 @@ export function ReduxViewer() {
               <Button
                 onPress={() => {
                   const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current];
-                  if (lastStoreIndexRef.current > MOCK_STORES.length - 1) {
+                  if (lastStoreIndexRef.current >= MOCK_STORES.length - 1) {
                     lastStoreIndexRef.current = 0;
                   } else {
                     lastStoreIndexRef.current += 1;
                   }
-                  dispatch(addStoresListItem(storeToUse))
+                  dispatch(addStoresListItem(storeToUse));
                 }}
               >
                 Store
@@ -113,7 +119,7 @@ export function ReduxViewer() {
               <Button
                 onPress={() => {
                   const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current];
-                  if (lastUpcIndexRef.current > MOCKS_UPCS.length - 1) {
+                  if (lastUpcIndexRef.current >= MOCKS_UPCS.length - 1) {
                     lastUpcIndexRef.current = 0;
                   } else {
                     lastUpcIndexRef.current += 1;
@@ -123,16 +129,16 @@ export function ReduxViewer() {
                       frequency: 604800000,
                       imageToUseIndex: 0,
                       images: [
-                        'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
+                        "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
                       ],
-                      name: 'Cholocate',
-                      unit: 'bar',
+                      name: "Cholocate",
+                      unit: "bar",
                       upc: upcToUse,
                       itemId: {
-                        [MOCK_STORES[0].name]: '123456',
+                        [MOCK_STORES[0].name]: "123456",
                       },
                       aisle: {
-                        [MOCK_STORES[0].name]: 'A12',
+                        [MOCK_STORES[0].name]: "A12",
                       },
                       price: {
                         [MOCK_STORES[0].name]: 22.99,
@@ -141,7 +147,7 @@ export function ReduxViewer() {
                         [MOCK_STORES[0].name]: 3,
                       },
                     }),
-                  )
+                  );
                 }}
               >
                 Item

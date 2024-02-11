@@ -1,20 +1,20 @@
-import { useNavigation } from 'expo-router'
-import { useDispatch } from 'react-redux'
+import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation } from "expo-router";
+import { View, useTheme } from "native-base";
+import { useEffect } from "react";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useDispatch } from "react-redux";
 
-import { Button, Row, Stack, View, useTheme } from 'native-base'
-import { StoresList } from '@/components/lists/StoresList'
-import { Routes } from '@/constants/navigation'
-import { useEffect } from 'react'
-import { TouchableOpacity } from 'react-native-gesture-handler'
-import { FontAwesome } from '@expo/vector-icons'
+import { StoreManager } from "@/components/StoreManager";
+import { StoresList } from "@/components/lists/StoresList";
+import { Routes } from "@/constants/navigation";
 
 export default function StoreScreen() {
-  const navigation = useNavigation()
-  const dispatch = useDispatch()
-  const theme = useTheme()
+  const navigation = useNavigation();
+  const theme = useTheme();
 
   function onAddStorePress() {
-    navigation.navigate(Routes.StoreModal)
+    navigation.navigate(Routes.StoreModal);
   }
 
   useEffect(() => {
@@ -22,16 +22,22 @@ export default function StoreScreen() {
       headerRight: () => (
         <View paddingRight={theme.space[1]}>
           <TouchableOpacity onPress={onAddStorePress}>
-            <FontAwesome name="plus" size={20} color={'black'} />
+            <FontAwesome name="plus" size={20} color="black" />
           </TouchableOpacity>
         </View>
       ),
-    })
-  }, [navigation])
+      headerLeft: () => (
+        <View pl={theme.space[1]}>
+          <StoreManager useAbbreviatedVerbiage />
+        </View>
+      ),
+      headerTitleAlign: "center",
+    });
+  }, [navigation]);
 
   return (
     <View>
       <StoresList />
     </View>
-  )
+  );
 }

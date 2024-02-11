@@ -9,7 +9,7 @@ export const MOCK_STORES = [
     },
   },
   {
-    name: `Target`,
+    name: `Target in North St. Paul, MN`,
     gpsCoordinates: {
       lat: '45.011662',
       lon: '-93.005648',

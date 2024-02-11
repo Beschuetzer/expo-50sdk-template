@@ -5,7 +5,7 @@ import { UpcProduct } from '@/types/UpcResponse'
 import { TimeSpan } from '@/types/general'
 
 export const DEFAULT_IMAGE_INDEX = 0
-export const EMPTY_FREQUENCY = 0
+export const EMPTY_NUMBER = 0
 export const EMPTY_STRING = ''
 export const FORM_INTER_ITEM_SPACING = 0.5
 export const GPS_COORDINATES_DEFAULT = Object.freeze({

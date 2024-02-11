@@ -3,21 +3,26 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { FrequencyInput } from "./FrequencyInput";
+import { ItemFormStoreSpecific } from "./ItemFormStoreSpecificItems";
 import { ThumbnailPicker } from "./ThumbnailPicker";
 import { UnitInput } from "./UnitInput";
 import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
 import { InputValidationMessage } from "../InputValidationMessage";
 
-import { DEFAULT_IMAGE_INDEX, EMPTY_STRING, FORM_INTER_ITEM_SPACING } from "@/constants/general";
+import {
+  DEFAULT_IMAGE_INDEX,
+  EMPTY_STRING,
+  FORM_INTER_ITEM_SPACING,
+} from "@/constants/general";
 import {
   LOCAL_FILE_REGEX,
   UPC_REGEX,
   UPC_REQUIRED_CHAR_LENGTH,
 } from "@/constants/regexs";
 import { itemsListItemSelector } from "@/state/slices/listsSlice";
-import { Item } from "@/types/Item";
+import { Item, StoreSpecificValues } from "@/types/Item";
 import { ItemProp } from "@/types/general";
-import { deleteFile, getKeyToUse } from "@/utils/helpers";
+import { deleteFile, displayAlert, getKeyToUse } from "@/utils/helpers";
 
 type ItemFormValdation = {
   isValid: boolean;
@@ -29,7 +34,6 @@ type ItemFormProps = {
   onSave: (item: Item) => void;
   showOverrideMsg?: boolean;
 } & ItemProp;
-
 
 export function ItemForm(props: ItemFormProps) {
   const { onClose, onSave, item, showOverrideMsg = true } = props;
@@ -67,7 +71,7 @@ export function ItemForm(props: ItemFormProps) {
       isValid,
       message: isValid
         ? EMPTY_STRING
-        : "Either a Upc or a Name must be given for each item.",
+        : "A unique key must be given for each item.  Please enter either a 'Upc' or a 'Name'",
     };
   }, [isUpcValid, upcValue, productNameValue]);
   const customImagesToDeleteOnUnloadRef = useRef<string[]>([]);
@@ -91,8 +95,8 @@ export function ItemForm(props: ItemFormProps) {
       upc: upcValue,
     } as Item;
 
-    console.log({itemToSave});
-    
+    console.log({ itemToSave });
+
     if (!itemToSave.images.includes(selectedUrl)) {
       itemToSave.images.push(selectedUrl);
       itemToSave.imageToUseIndex = itemToSave.images.length - 1;
@@ -105,10 +109,17 @@ export function ItemForm(props: ItemFormProps) {
 
   const onFrequencyChange = useCallback(
     (frequencyInMs: number) => {
-      frequencyInMsRef.current = frequencyInMs
+      frequencyInMsRef.current = frequencyInMs;
     },
     [frequencyInMsRef],
-  )
+  );
+
+  const onItemSpecificValueChange = useCallback(
+    (state: StoreSpecificValues) => {
+      console.log({state});
+    },
+    [],
+  );
 
   const onUnitChange = useCallback((unit: string) => {
     unitRef.current = unit;
@@ -205,17 +216,17 @@ export function ItemForm(props: ItemFormProps) {
           selectedUrl={selectedUrl}
           onSelectImage={(url, isCustomImage) => {
             if (isCustomImage) {
-              customImagesToDeleteOnUnloadRef.current.push(url)
+              customImagesToDeleteOnUnloadRef.current.push(url);
               item.images = item.images.filter((imageUrl) => {
-                const shouldKeep = !imageUrl?.match(LOCAL_FILE_REGEX)
+                const shouldKeep = !imageUrl?.match(LOCAL_FILE_REGEX);
                 if (!shouldKeep) {
-                  deleteFile(imageUrl)
+                  deleteFile(imageUrl);
                 }
-                return shouldKeep
-              })
-              item.images.push(url)
+                return shouldKeep;
+              });
+              item.images.push(url);
             }
-            setSelectedUrl(url)
+            setSelectedUrl(url);
           }}
           imagesToRender={new Set(item.images)}
         />
@@ -231,6 +242,10 @@ export function ItemForm(props: ItemFormProps) {
         headingTag={FormControl.Label}
         spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
+      <ItemFormStoreSpecific
+        item={item}
+        onValueChange={onItemSpecificValueChange}
+      />
     </AbsolutePositionedScreen>
-  )
+  );
 }

@@ -51,7 +51,7 @@ export type Item = Key & {
 /**
  *These are fields which vary based on the store
  **/
-type StoreSpecificValues = {
+export type StoreSpecificValues = {
   aisle: StoreSpecificValue<string>;
   itemId: StoreSpecificValue<string>;
   price: StoreSpecificValue<number>;

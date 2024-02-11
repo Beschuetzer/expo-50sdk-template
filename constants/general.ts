@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { GpsCoordinate } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
 import { TimeSpan } from '@/types/general'
+import { ItemUnit } from '@/types/Item'
 
 export const DEFAULT_IMAGE_INDEX = 0
 export const EMPTY_NUMBER = 0
@@ -35,3 +36,4 @@ export const TIME_SPAN_TO_MILLISECONDS_MAPPING: { [key in TimeSpan]: number } =
     Day: HOUR_IN_MS * 24,
     Week: HOUR_IN_MS * 24 * 7,
   }
+export const UNIT_INITIAL = ItemUnit.Package

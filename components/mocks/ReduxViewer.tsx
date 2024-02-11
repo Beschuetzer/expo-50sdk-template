@@ -1,15 +1,15 @@
-import { Button, FlatList, Heading, Row, Stack, Text, View } from "native-base";
-import React, { useRef, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { Button, FlatList, Heading, Row, Stack, Text, View } from 'native-base'
+import React, { useRef, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
-import { MOCK_STORES } from "../mocks/mockStores";
-import { MOCKS_UPCS } from "../mocks/mockUpcData";
+import { MOCK_STORES } from './mockStores'
+import { MOCKS_UPCS } from './mockUpcData'
 
-import { EMPTY_STRING } from "@/constants/general";
+import { EMPTY_STRING } from '@/constants/general'
 import {
   currentLocationSelector,
   resetCurrentLocation,
-} from "@/state/slices/generalSlice";
+} from '@/state/slices/generalSlice'
 import {
   addItemsListItem,
   addStoresListItem,
@@ -17,41 +17,41 @@ import {
   resetCurrentStoreName,
   resetItemsList,
   resetStoresList,
-} from "@/state/slices/listsSlice";
+} from '@/state/slices/listsSlice'
 import {
   resetUpcProducts,
   upcProductsSelector,
-} from "@/state/slices/scannerSlice";
-import { calculateDistance } from "@/utils/helpers";
+} from '@/state/slices/scannerSlice'
+import { calculateDistance } from '@/utils/helpers'
 
 export function ReduxViewer() {
-  const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
-  const lastUpcIndexRef = useRef(0);
-  const lastStoreIndexRef = useRef(0);
-  const upcProducts = useSelector(upcProductsSelector);
-  const currentLocation = useSelector(currentLocationSelector);
-  const currentStore = useSelector(currentStoreSelector);
-  const dispatch = useDispatch();
+  const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING)
+  const lastUpcIndexRef = useRef(0)
+  const lastStoreIndexRef = useRef(0)
+  const upcProducts = useSelector(upcProductsSelector)
+  const currentLocation = useSelector(currentLocationSelector)
+  const currentStore = useSelector(currentStoreSelector)
+  const dispatch = useDispatch()
 
   function renderFieldAndText(key: string, value: any) {
     return (
       <Text fontWeight="bold">
         {key}: <Text fontWeight="normal">{value}</Text>
       </Text>
-    );
+    )
   }
 
   return (
     <FlatList
       data={Object.values(upcProducts || {})}
       renderItem={(data) => {
-        const { item, index } = data;
+        const { item, index } = data
         return (
           <View key={`${index}-${item.id}`}>
             <Heading size="sm" mt={3}>
               '{item.id}' details:
             </Heading>
-            {renderFieldAndText("Name", item.product_name)}
+            {renderFieldAndText('Name', item.product_name)}
             {/* {renderFieldAndText(
               "Fetched At",
               new Date(item.timestamp).toLocaleString(),
@@ -63,7 +63,7 @@ export function ReduxViewer() {
               selectedUrl={selectedUrl}
             /> */}
           </View>
-        );
+        )
       }}
       ListHeaderComponent={
         <>
@@ -75,8 +75,8 @@ export function ReduxViewer() {
               </Button>
               <Button
                 onPress={() => {
-                  lastUpcIndexRef.current = 0;
-                  dispatch(resetItemsList());
+                  lastUpcIndexRef.current = 0
+                  dispatch(resetItemsList())
                 }}
               >
                 itemsList
@@ -92,8 +92,8 @@ export function ReduxViewer() {
               <Button
                 onPress={() => {
                   lastStoreIndexRef.current = 0
-                  dispatch(resetStoresList());
-                  dispatch(resetCurrentStoreName());
+                  dispatch(resetStoresList())
+                  dispatch(resetCurrentStoreName())
                 }}
               >
                 storeList
@@ -105,49 +105,54 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current];
+                  const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current]
                   if (lastStoreIndexRef.current >= MOCK_STORES.length - 1) {
-                    lastStoreIndexRef.current = 0;
+                    lastStoreIndexRef.current = 0
                   } else {
-                    lastStoreIndexRef.current += 1;
+                    lastStoreIndexRef.current += 1
                   }
-                  dispatch(addStoresListItem(storeToUse));
+                  dispatch(addStoresListItem(storeToUse))
                 }}
               >
                 Store
               </Button>
               <Button
                 onPress={() => {
-                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current];
+                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current]
                   if (lastUpcIndexRef.current >= MOCKS_UPCS.length - 1) {
-                    lastUpcIndexRef.current = 0;
+                    lastUpcIndexRef.current = 0
                   } else {
-                    lastUpcIndexRef.current += 1;
+                    lastUpcIndexRef.current += 1
                   }
                   dispatch(
                     addItemsListItem({
-                      frequency: 604800000,
-                      imageToUseIndex: 0,
-                      images: [
-                        "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
-                      ],
-                      name: "Cholocate",
-                      unit: "bar",
-                      upc: upcToUse,
-                      itemId: {
-                        [MOCK_STORES[0].name]: "123456",
+                      item: {
+                        frequency: 604800000,
+                        imageToUseIndex: 0,
+                        images: [
+                          'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
+                        ],
+                        name: 'Cholocate',
+                        unit: 'bar',
+                        upc: upcToUse,
                       },
-                      aisle: {
-                        [MOCK_STORES[0].name]: "A12",
+                      storeSpecificValues: {
+                        itemId: {
+                          [MOCK_STORES[0].name]: '123456',
+                        },
+                        aisle: {
+                          [MOCK_STORES[0].name]: 'A12',
+                        },
+                        price: {
+                          [MOCK_STORES[0].name]: 22.99,
+                        },
+                        quantity: {
+                          [MOCK_STORES[0].name]: 3,
+                        },
                       },
-                      price: {
-                        [MOCK_STORES[0].name]: 22.99,
-                      },
-                      quantity: {
-                        [MOCK_STORES[0].name]: 3,
-                      },
+                      currentStore: MOCK_STORES[0]
                     }),
-                  );
+                  )
                 }}
               >
                 Item
@@ -156,15 +161,15 @@ export function ReduxViewer() {
           </Stack>
 
           <Text>
-            Current Location: (Lat: {currentLocation?.lat}, Lon:{" "}
+            Current Location: (Lat: {currentLocation?.lat}, Lon:{' '}
             {currentLocation?.lon})
           </Text>
           <Text>
-            Distance to Store from Current:{" "}
+            Distance to Store from Current:{' '}
             {calculateDistance(currentLocation, currentStore?.gpsCoordinates)}
           </Text>
         </>
       }
     />
-  );
+  )
 }

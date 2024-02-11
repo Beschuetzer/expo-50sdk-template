@@ -5,8 +5,9 @@ import {
   EMPTY_NUMBER,
   EMPTY_STRING,
   IMAGE_PRIORITY_MAPPING,
+  UNIT_INITIAL,
 } from '@/constants/general'
-import { Item } from '@/types/Item'
+import { Item, ItemWithStoreSpecificValues } from '@/types/Item'
 import { UpcProduct } from '@/types/UpcResponse'
 
 export function getItem(input: UpcProduct): Item {
@@ -16,6 +17,7 @@ export function getItem(input: UpcProduct): Item {
     imageToUseIndex: DEFAULT_IMAGE_INDEX,
     name: input?.product_name || EMPTY_STRING,
     upc: input?.code || input?.id || EMPTY_STRING,
+    unit: UNIT_INITIAL, 
   }
 }
 

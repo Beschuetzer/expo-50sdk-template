@@ -1,36 +1,53 @@
-import { FlashList } from '@shopify/flash-list'
-import { useNavigation } from 'expo-router'
-import { Heading, View, Text, Row, useTheme, Column, Center, Stack } from 'native-base'
-import React from 'react'
-import { StyleSheet } from 'react-native'
-import { RectButton } from 'react-native-gesture-handler'
+import { FontAwesome } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
+import { useNavigation } from "expo-router";
+import {
+  Heading,
+  View,
+  Text,
+  Row,
+  useTheme,
+  Column,
+  Center,
+  Stack,
+} from "native-base";
+import React, { useCallback } from "react";
+import { StyleSheet } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
 
 //  To toggle LTR/RTL uncomment the next line
 // I18nManager.allowRTL(true);
 
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch, useSelector } from "react-redux";
 
-import { SwipeableRow } from './SwipeableRow'
-import { ImageRenderer } from '../ImageRenderer'
+import { SwipeableRow } from "./SwipeableRow";
+import { ImageRenderer } from "../ImageRenderer";
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { Routes } from '@/constants/navigation'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from "@/constants/general";
+import { Routes } from "@/constants/navigation";
 import {
   itemsListArraySelector,
   removeItemsListItem,
-} from '@/state/slices/listsSlice'
-import { Item, Key } from '@/types/Item'
-import { getKeyToUse } from '@/utils/helpers'
-import { FontAwesome } from '@expo/vector-icons'
-import { ListRow } from '@/types/general'
+} from "@/state/slices/listsSlice";
+import { Item, ItemWithStoreSpecificValues, Key } from "@/types/Item";
+import { ListRow } from "@/types/general";
+import { getKeyToUse } from "@/utils/helpers";
 
-type ItemsListProps = object
+type ItemsListProps = object;
 
 export function ItemsList(props: ItemsListProps) {
-  const itemsList = useSelector(itemsListArraySelector)
-  const theme = useTheme()
-  const navigation = useNavigation()
-  const dispatch = useDispatch()
+  const itemsList = useSelector(itemsListArraySelector);
+  const theme = useTheme();
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  const onSwipeRight = useCallback(() => {
+    // dispatch();
+  }, []);
+
+  const onSwipeLeft = useCallback((keyToUse: Key) => {
+    dispatch(removeItemsListItem(keyToUse))
+  }, [])
 
   return (
     <View>
@@ -39,16 +56,17 @@ export function ItemsList(props: ItemsListProps) {
       </Center>
       <FlashList
         data={itemsList}
-        renderItem={({ item, index }: ListRow<Item>) => {
+        renderItem={({ item, index }: ListRow<ItemWithStoreSpecificValues>) => {
           const keyToUse = {
             name: item.name,
             upc: item.upc,
-          } as Key
+          } as Key;
           return (
             <SwipeableRow
+              key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
               leftSwipe={{
                 title: (
-                  <Stack paddingRight={theme.space[2]} alignItems={'center'}>
+                  <Stack paddingRight={theme.space[2]} alignItems="center">
                     <FontAwesome
                       name="trash"
                       color={theme.colors.white}
@@ -57,17 +75,15 @@ export function ItemsList(props: ItemsListProps) {
                   </Stack>
                 ),
                 backgroundColor: theme.colors.red[900],
-                onPress: () => {
-                  dispatch(removeItemsListItem(keyToUse))
-                },
+                onPress: onSwipeLeft.bind(null, keyToUse),
               }}
               rightSwipe={{
                 backgroundColor: theme.colors.primary[900],
-                onPress: () => alert('left'),
+                onPress: onSwipeRight,
                 title: (
                   <Stack
                     paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-                    alignItems={'center'}
+                    alignItems="center"
                   >
                     <FontAwesome
                       name="plus"
@@ -78,23 +94,6 @@ export function ItemsList(props: ItemsListProps) {
                   </Stack>
                 ),
               }}
-              key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
-              // leftActions={[
-              //   {
-              //     title: 'Add to Shopping List',
-              //     backgroundColor: theme.colors.primary[900],
-              //     onPress: () => alert('add'),
-              //   },
-              // ]}
-              // rightActions={[
-              //   {
-              //     title: 'Delete',
-              //     backgroundColor: theme.colors.red[900],
-              //     onPress: () => {
-              //       dispatch(removeItemsListItem(keyToUse))
-              //     },
-              //   },
-              // ]}
             >
               <RectButton
                 style={styles.rectButton}
@@ -102,7 +101,7 @@ export function ItemsList(props: ItemsListProps) {
                   navigation.navigate(Routes.ItemModal, {
                     key: item.upc || item.name,
                     showOverrideMsg: false,
-                  })
+                  });
                 }}
               >
                 <Row space={2}>
@@ -116,9 +115,9 @@ export function ItemsList(props: ItemsListProps) {
                 </Row>
               </RectButton>
             </SwipeableRow>
-          )
+          );
         }}
-        keyExtractor={(item: Item, index: number) => `item ${index}`}
+        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) => `item ${index}`}
         estimatedItemSize={180} //todo: caculate this approriately
         ItemSeparatorComponent={() => (
           <View
@@ -128,7 +127,7 @@ export function ItemsList(props: ItemsListProps) {
         )}
       />
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -136,24 +135,24 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 10,
-    justifyContent: 'space-between',
-    flexDirection: 'column',
-    backgroundColor: 'white',
+    justifyContent: "space-between",
+    flexDirection: "column",
+    backgroundColor: "white",
   },
   fromText: {
-    fontWeight: 'bold',
-    backgroundColor: 'transparent',
+    fontWeight: "bold",
+    backgroundColor: "transparent",
   },
   messageText: {
-    color: '#999',
-    backgroundColor: 'transparent',
+    color: "#999",
+    backgroundColor: "transparent",
   },
   dateText: {
-    backgroundColor: 'transparent',
-    position: 'absolute',
+    backgroundColor: "transparent",
+    position: "absolute",
     right: 20,
     top: 10,
-    color: '#999',
-    fontWeight: 'bold',
+    color: "#999",
+    fontWeight: "bold",
   },
-})
+});

@@ -6,6 +6,7 @@ import { RootState } from "../store";
 import { EMPTY_STRING } from "@/constants/general";
 import {
   Item,
+  ItemWithStoreSpecificValues,
   ItemsList,
   Key,
   LastPurchasedItem,
@@ -235,7 +236,7 @@ export const itemsListItemSelector = (id: string) =>
     [(state: RootState) => (state[listsSlice.name] as ListsState).itemsList],
     (itemsList) => {
       const value = (itemsList as any)?.[id];
-      return (value || null) as Item | null;
+      return (value || null) as ItemWithStoreSpecificValues | null;
     },
   );
 

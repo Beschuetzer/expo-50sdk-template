@@ -46,7 +46,9 @@ export type Item = Key & {
    **/
   frequency?: number;
   unit: string;
-} & StoreSpecificValues
+}
+
+export type ItemWithStoreSpecificValues = Item & StoreSpecificValues
 
 /**
  *These are fields which vary based on the store
@@ -66,7 +68,7 @@ export type LastPurchasedItem = Key & {
 
 type UpcOrName = string;
 type KeyedList<T> = { [upcOrName: UpcOrName]: T };
-export type ItemsList = KeyedList<Item>;
+export type ItemsList = KeyedList<ItemWithStoreSpecificValues>;
 export type ShoppingList = KeyedList<Item>;
 export type LastPurchasedList = KeyedList<LastPurchasedItem>;
 export type StoreList = { [name: string]: Store };

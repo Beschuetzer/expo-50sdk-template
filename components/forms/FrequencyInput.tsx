@@ -59,7 +59,7 @@ export function FrequencyInput(props: FrequencyInputProps) {
           variant="outline"
           p={theme.space[1]}
           placeholder="Number"
-          value={frequency.number.toString()}
+          value={frequency.number?.toString()}
           onChangeText={onChangeFrequencyNumber}
           isInvalid={frequency.number <= 0}
           flex={1}

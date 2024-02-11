@@ -40,7 +40,7 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
     itemInList?.itemId?.[currentStore.name] || EMPTY_STRING,
   );
   const [price, setPrice] = useState(
-    itemInList?.price?.[currentStore.name].toString() || EMPTY_STRING,
+    itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING,
   );
   const [quantity, setQuantity] = useState(
     itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER,

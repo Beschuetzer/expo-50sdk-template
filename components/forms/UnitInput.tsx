@@ -2,11 +2,10 @@ import { Picker } from "@react-native-picker/picker";
 import { Input, Stack, Heading, useTheme } from "native-base";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { EMPTY_STRING } from "@/constants/general";
+import { EMPTY_STRING, UNIT_INITIAL } from "@/constants/general";
 import { ItemUnit } from "@/types/Item";
 import { HeadingTagProp, SpacingProp } from "@/types/general";
 
-const UNIT_INITIAL = ItemUnit.Package;
 type UnitInputProps = {
   initialValue?: string;
   onValueChange: (unit: string) => void;

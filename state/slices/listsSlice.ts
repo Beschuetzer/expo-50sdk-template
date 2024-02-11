@@ -161,7 +161,10 @@ export const listsSlice = createSlice({
     resetCurrentStoreName: (state: ListsState) => {
       state.currentStoreName = EMPTY_STRING;
     },
-    setCurrentStoreName: (state: ListsState, action: PayloadAction<string | undefined>) => {
+    setCurrentStoreName: (
+      state: ListsState,
+      action: PayloadAction<string | undefined>,
+    ) => {
       if (!action.payload) return;
       state.currentStoreName = action.payload;
     },
@@ -194,7 +197,10 @@ export const currentStoreSelector = createSelector(
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (storesList, currentStoreName) => {
-    return (storesList?.[currentStoreName] || null) as Store | null;
+    return (storesList?.[currentStoreName] || {
+      name: EMPTY_STRING,
+      gpsCoordinates: null,
+    }) as Store;
   },
 );
 

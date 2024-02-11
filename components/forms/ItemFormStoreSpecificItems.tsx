@@ -1,38 +1,19 @@
-import { Stack, FormControl, Input, Row, useTheme, Button } from "native-base";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { Stack, FormControl, Input, useTheme } from "native-base";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
-import { FrequencyInput } from "./FrequencyInput";
-import { ThumbnailPicker } from "./ThumbnailPicker";
-import { UnitInput } from "./UnitInput";
-import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
-import { InputValidationMessage } from "../InputValidationMessage";
-
 import {
-  DEFAULT_IMAGE_INDEX,
   EMPTY_NUMBER,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
 } from "@/constants/general";
 import {
-  LOCAL_FILE_REGEX,
-  UPC_REGEX,
-  UPC_REQUIRED_CHAR_LENGTH,
-} from "@/constants/regexs";
-import {
   currentStoreSelector,
   itemsListItemSelector,
 } from "@/state/slices/listsSlice";
-import { Item, StoreSpecificValues } from "@/types/Item";
+import { StoreSpecificValues } from "@/types/Item";
 import { ItemProp } from "@/types/general";
-import { deleteFile, getKeyToUse } from "@/utils/helpers";
+import { getKeyToUse } from "@/utils/helpers";
 
 type ItemFormProps = {
   onValueChange: (storeSpecificValues: StoreSpecificValues) => void;
@@ -53,17 +34,16 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
   const itemInList = useSelector(itemsListItemSelector(keyToUse));
 
   const [aisle, setAisle] = useState(
-    itemInList?.aisle?.[currentStore?.name || EMPTY_STRING] || EMPTY_STRING,
+    itemInList?.aisle?.[currentStore.name] || EMPTY_STRING,
   );
   const [itemId, setItemId] = useState(
-    itemInList?.itemId?.[currentStore?.name || EMPTY_STRING] || EMPTY_STRING,
+    itemInList?.itemId?.[currentStore.name] || EMPTY_STRING,
   );
   const [price, setPrice] = useState(
-    itemInList?.price?.[currentStore?.name || EMPTY_STRING].toString() ||
-      EMPTY_STRING,
+    itemInList?.price?.[currentStore.name].toString() || EMPTY_STRING,
   );
   const [quantity, setQuantity] = useState(
-    itemInList?.quantity?.[currentStore?.name || EMPTY_STRING] || EMPTY_NUMBER,
+    itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER,
   );
 
   useEffect(() => {

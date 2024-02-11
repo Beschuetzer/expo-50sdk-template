@@ -56,7 +56,7 @@ export type StoreSpecificValues = {
   itemId: StoreSpecificValue<string>;
   price: StoreSpecificValue<number>;
   quantity: StoreSpecificValue<number>;
-};
+} | null;
 
 export type StoreSpecificValue<T> = { [storeId: string]: T };
 

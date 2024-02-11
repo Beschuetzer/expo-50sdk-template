@@ -1,5 +1,9 @@
 ## MVP
--save store specific data on save
+-add action for adding to storesList called updateStoreSpecificValues
+-finish ItemsList left swipe callback
+-start ShoppingList (can remove storesList related stuff from listSlice?)
+
+
 -Store details should have a way to view all of the isles and sort them in order
 -Need to figure out how to drag and drop rows for easier custom sorting
 
@@ -11,7 +15,7 @@
     --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed
     --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given (needs to check and update dict values for those fields)
     -- figure out why stores are not being persisted
-    --storesList may be irrelevant now
+    --
 
 
 //todo: figure out types for useRouter/useNavigation (expo-router)

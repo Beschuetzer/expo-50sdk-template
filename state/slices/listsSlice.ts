@@ -80,19 +80,20 @@ export const listsSlice = createSlice({
         return;
       }
 
+      const currentItem = state.itemsList?.[keyToUse] as any;
       const newItem = { ...item } as any;
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
         for (const [valueName, value] of Object.entries(storeSpecificValues)) {
           newItem[valueName] = {
-            ...newItem[valueName],
+            ...(currentItem?.[valueName]
+              ? currentItem[valueName]
+              : newItem[valueName]),
             [currentStore.name]: value?.[currentStore.name],
           };
         }
       }
-
-      console.log({ newItem });
 
       state.itemsList = {
         ...state.itemsList,
@@ -234,7 +235,7 @@ export const listsSlice = createSlice({
         itemToUpdate[valueName] = {
           ...itemToUpdate[valueName],
           [storeName]: value,
-        }
+        };
       }
 
       console.log({ itemToUpdateAfter: itemToUpdate });

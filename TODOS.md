@@ -1,5 +1,4 @@
 ## MVP
--bug in addItemsLIstItem (add item then toggle to costco store and add a store-specific value, then save.  Go back and the target values are gone)
 -finish ItemsList left swipe callback
 -start ShoppingList (can remove storesList related stuff from listSlice?)
 

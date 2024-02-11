@@ -138,19 +138,19 @@ export function ReduxViewer() {
                       },
                       storeSpecificValues: {
                         itemId: {
-                          [MOCK_STORES[0].name]: '123456',
+                          [MOCK_STORES[1].name]: '123456',
                         },
                         aisle: {
-                          [MOCK_STORES[0].name]: 'A12',
+                          [MOCK_STORES[1].name]: 'A12',
                         },
                         price: {
-                          [MOCK_STORES[0].name]: 22.99,
+                          [MOCK_STORES[1].name]: 22.99,
                         },
                         quantity: {
-                          [MOCK_STORES[0].name]: 3,
+                          [MOCK_STORES[1].name]: 1,
                         },
                       },
-                      currentStore: MOCK_STORES[0]
+                      currentStore: MOCK_STORES[1]
                     }),
                   )
                 }}

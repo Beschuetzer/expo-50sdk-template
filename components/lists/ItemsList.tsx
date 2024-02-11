@@ -26,8 +26,11 @@ import { ImageRenderer } from "../ImageRenderer";
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from "@/constants/general";
 import { Routes } from "@/constants/navigation";
 import {
+  currentStoreSelector,
   itemsListArraySelector,
+  itemsListSelector,
   removeItemsListItem,
+  updateStoreSpecificValues,
 } from "@/state/slices/listsSlice";
 import { Item, ItemWithStoreSpecificValues, Key } from "@/types/Item";
 import { ListRow } from "@/types/general";
@@ -36,18 +39,45 @@ import { getKeyToUse } from "@/utils/helpers";
 type ItemsListProps = object;
 
 export function ItemsList(props: ItemsListProps) {
-  const itemsList = useSelector(itemsListArraySelector);
+  const itemsListArray = useSelector(itemsListArraySelector);
+  const itemsList = useSelector(itemsListSelector);
+  const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const onSwipeRight = useCallback(() => {
-    // dispatch();
-  }, []);
+  const onSwipeRight = useCallback(
+    (key: Key) => {
+      const keyToUse = getKeyToUse(key);
+      const currentQuantity =
+        itemsList?.[keyToUse as any]?.quantity?.[currentStore.name];
+      console.log({
+        keyToUse,
+        quantity: itemsList?.[keyToUse as any]?.quantity,
+        currentQuantity,
+        currentStore,
+      });
 
-  const onSwipeLeft = useCallback((keyToUse: Key) => {
-    dispatch(removeItemsListItem(keyToUse))
-  }, [])
+      dispatch(
+        updateStoreSpecificValues({
+          key,
+          storeSpecificValues: {
+            quantity: {
+              [currentStore.name]:
+                currentQuantity && currentQuantity > 0
+                  ? currentQuantity + 1
+                  : 1,
+            },
+          },
+        }),
+      );
+    },
+    [currentStore, itemsList, updateStoreSpecificValues],
+  );
+
+  const onSwipeLeft = useCallback((key: Key) => {
+    dispatch(removeItemsListItem(key));
+  }, []);
 
   return (
     <View>
@@ -55,9 +85,9 @@ export function ItemsList(props: ItemsListProps) {
         <Heading p={theme.sizes[2]}>Items List</Heading>
       </Center>
       <FlashList
-        data={itemsList}
+        data={itemsListArray}
         renderItem={({ item, index }: ListRow<ItemWithStoreSpecificValues>) => {
-          const keyToUse = {
+          const key = {
             name: item.name,
             upc: item.upc,
           } as Key;
@@ -75,12 +105,12 @@ export function ItemsList(props: ItemsListProps) {
                   </Stack>
                 ),
                 backgroundColor: theme.colors.red[900],
-                onPress: onSwipeLeft.bind(null, keyToUse),
+                onPress: onSwipeLeft.bind(null, key),
               }}
               rightSwipe={{
                 backgroundColor: theme.colors.primary[900],
-                onPress: onSwipeRight,
-                title: (
+                onPress: onSwipeRight.bind(null, key),
+                title: currentStore.name ? (
                   <Stack
                     paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
                     alignItems="center"
@@ -92,6 +122,15 @@ export function ItemsList(props: ItemsListProps) {
                     />
                     <Text color={theme.colors.white}>Shopping List</Text>
                   </Stack>
+                ) : (
+                  <Text
+                    width={150}
+                    numberOfLines={2}
+                    paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
+                    color={theme.colors.white}
+                  >
+                    Select a Store to Add to Shopping List
+                  </Text>
                 ),
               }}
             >
@@ -117,7 +156,9 @@ export function ItemsList(props: ItemsListProps) {
             </SwipeableRow>
           );
         }}
-        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) => `item ${index}`}
+        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
+          `item ${index}`
+        }
         estimatedItemSize={180} //todo: caculate this approriately
         ItemSeparatorComponent={() => (
           <View

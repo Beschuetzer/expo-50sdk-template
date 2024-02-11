@@ -22,7 +22,12 @@ export type AddItemsListItemPayload = {
   item: Item;
   storeSpecificValues?: StoreSpecificValues;
   currentStore?: Store;
-}
+};
+
+export type UpdateStoreSpecificValuesPayload = {
+  key: Key;
+  storeSpecificValues: Partial<StoreSpecificValues>;
+};
 
 /**
  * {@link ListsState.itemsList itemsList} has all of the items that have been scanned (these can be added to any store)
@@ -72,12 +77,12 @@ export const listsSlice = createSlice({
           newItem[valueName] = {
             ...newItem[valueName],
             [currentStore.name]: value?.[currentStore.name],
-          }
+          };
         }
       }
 
-      console.log({newItem});
-      
+      console.log({ newItem });
+
       state.itemsList = {
         ...state.itemsList,
         [keyToUse]: newItem,
@@ -195,6 +200,30 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       state.currentStoreName = action.payload;
     },
+    updateStoreSpecificValues: (
+      state: ListsState,
+      action: PayloadAction<UpdateStoreSpecificValuesPayload>,
+    ) => {
+      if (!action.payload) return;
+      const { storeSpecificValues, key } = action.payload;
+      const keyToUse = getKeyToUse(key);
+      const itemToUpdate = state.itemsList?.[keyToUse] as any;
+      if (!itemToUpdate || !storeSpecificValues) {
+        alert(`A key and values must be provided in order to update an item.`)
+        return
+      }
+
+      console.log({ itemToUpdateBefore: itemToUpdate })
+
+      for (const [valueName, value] of Object.entries(storeSpecificValues)) {
+        itemToUpdate[valueName] = {
+          ...itemToUpdate[valueName],
+          ...value,
+        }
+      }
+
+      console.log({itemToUpdateAfter: itemToUpdate});
+    },
   },
 });
 
@@ -214,6 +243,7 @@ export const {
   resetStoresList,
   resetCurrentStoreName,
   setCurrentStoreName,
+  updateStoreSpecificValues,
 } = listsSlice.actions;
 
 export default listsSlice.reducer;

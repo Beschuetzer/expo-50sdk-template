@@ -54,7 +54,6 @@ export const listsSlice = createSlice({
       action: PayloadAction<AddItemsListItemPayload>,
     ) => {
       const { item, storeSpecificValues, currentStore } = action.payload || {};
-      console.log({ item, storeSpecificValues, currentStore });
       const keyToUse = getKeyToUse(action.payload.item);
 
       if (!keyToUse) {
@@ -64,20 +63,20 @@ export const listsSlice = createSlice({
         return;
       }
 
-      const newItem = { ...item };
+      const newItem = { ...item } as any;
 
+      //add store specific values if they exist
+      if (storeSpecificValues && currentStore?.name) {
+        for (const [valueName, value] of Object.entries(storeSpecificValues)) {
+          newItem[valueName] = {
+            ...newItem[valueName],
+            [currentStore.name]: value?.[currentStore.name],
+          }
+        }
+      }
 
-      //todo: finish this
-      // if (storeSpecificValues) {
-      //   for (const [valueName, value] of Object.entries(storeSpecificValues)) {
-      //     console.log({ key: valueName, value });
-      //     newItem[valueName] = {
-      //       ...newItem[valueName],
-      //       []
-      //     }
-      //   }
-      // }
-
+      console.log({newItem});
+      
       state.itemsList = {
         ...state.itemsList,
         [keyToUse]: newItem,

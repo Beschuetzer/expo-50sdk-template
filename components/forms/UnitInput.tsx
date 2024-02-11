@@ -38,8 +38,6 @@ export function UnitInput(props: UnitInputProps) {
   const hasComponentLoadedRef = useRef(false);
   const theme = useTheme();
 
-  console.log({ isInitialCustom, initialValue, UNIT_INITIAL });
-
   const onChangeCustomUnit = useCallback(
     (customUnitValue: string) => {
       clearTimeout(debounceRef.current);

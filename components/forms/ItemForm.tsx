@@ -109,8 +109,6 @@ export function ItemForm(props: ItemFormProps) {
     }
 
     shouldDeleteLastImageRef.current = false;
-    console.log({ storeSpecificValuesRef: storeSpecificValuesRef.current });
-
     onSave &&
       onSave({
         item: itemToSave,

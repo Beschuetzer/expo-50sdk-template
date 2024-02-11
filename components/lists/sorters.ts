@@ -12,7 +12,6 @@ export const SORTERS: { [key in SortType]: CompareFuntion } = {
     current: HasCalculatedDistanceField,
     next: HasCalculatedDistanceField,
   ) => {
-    console.log({ current, next })
     if (!current.calculatedDistance && next.calculatedDistance) return 1
     if (current.calculatedDistance && !next.calculatedDistance) return -1
     if (current.calculatedDistance === next.calculatedDistance) return 0

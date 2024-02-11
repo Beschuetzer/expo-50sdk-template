@@ -58,7 +58,7 @@ export type StoreSpecificValues = {
   quantity: StoreSpecificValue<number>;
 } | null;
 
-export type StoreSpecificValue<T> = { [storeId: string]: T };
+export type StoreSpecificValue<T> = { [storeId: string]: T } | null | undefined;
 
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;

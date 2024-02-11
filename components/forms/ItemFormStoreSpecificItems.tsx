@@ -65,7 +65,7 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
       });
   }, [aisle, itemId, price, quantity, currentStore, onValueChange]);
 
-  if (!currentStore) return null;
+  if (!currentStore.name) return null;
   return (
     <Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>

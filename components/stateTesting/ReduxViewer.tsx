@@ -123,17 +123,25 @@ export function ReduxViewer() {
                       frequency: 604800000,
                       imageToUseIndex: 0,
                       images: [
-                        "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
+                        'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
                       ],
-                      name: "Cholocate",
-                      unit: "bar",
+                      name: 'Cholocate',
+                      unit: 'bar',
                       upc: upcToUse,
-                      itemId: {},
-                      aisle: {},
-                      price: {},
-                      quantity: {},
+                      itemId: {
+                        [MOCK_STORES[0].name]: '123456',
+                      },
+                      aisle: {
+                        [MOCK_STORES[0].name]: 'A12',
+                      },
+                      price: {
+                        [MOCK_STORES[0].name]: 22.99,
+                      },
+                      quantity: {
+                        [MOCK_STORES[0].name]: 3,
+                      },
                     }),
-                  );
+                  )
                 }}
               >
                 Item

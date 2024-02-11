@@ -161,7 +161,7 @@ export const listsSlice = createSlice({
     resetCurrentStoreName: (state: ListsState) => {
       state.currentStoreName = EMPTY_STRING;
     },
-    setCurrentStoreName: (state: ListsState, action: PayloadAction<string>) => {
+    setCurrentStoreName: (state: ListsState, action: PayloadAction<string | undefined>) => {
       if (!action.payload) return;
       state.currentStoreName = action.payload;
     },

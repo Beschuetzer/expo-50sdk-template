@@ -101,69 +101,69 @@ export function StoreForm(props: StoreFormProps) {
         </>
       }
     >
-      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <FormControl.Label>Name</FormControl.Label>
-        <Input
-          variant="outline"
-          p={theme.space[1]}
-          placeholder="Store Name"
-          value={storeName}
-          onChangeText={(newText) => setStoreName(newText)}
-          isInvalid={storeName.length <= 0}
-        />
-      </Stack>
-      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <Row alignItems="center">
-          <FormControl.Label mr={theme.space[FORM_INTER_ITEM_SPACING]}>
-            Lat:
-          </FormControl.Label>
+        <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+          <FormControl.Label>Name</FormControl.Label>
           <Input
             variant="outline"
-            keyboardType="numeric"
             p={theme.space[1]}
-            flex={1}
-            placeholder="latitude"
-            value={gpsCoordinates.lat.toString()}
-            onChangeText={(newLat) =>
-              setGpsCoordinates((current: GpsCoordinate) => {
-                return {
-                  ...current,
-                  lat: newLat,
-                };
-              })
-            }
-            isInvalid={isNaN(parseFloat(gpsCoordinates.lat))}
+            placeholder="Store Name"
+            value={storeName}
+            onChangeText={(newText) => setStoreName(newText)}
+            isInvalid={storeName.length <= 0}
           />
-          <FormControl.Label mx={theme.space[FORM_INTER_ITEM_SPACING]}>
-            Long:
-          </FormControl.Label>
-          <Input
-            flex={1}
-            variant="outline"
-            keyboardType="numeric"
-            p={theme.space[1]}
-            placeholder="longitude"
-            value={gpsCoordinates.lon.toString()}
-            onChangeText={(newLong) =>
-              setGpsCoordinates((current: GpsCoordinate) => {
-                return {
-                  ...current,
-                  lon: newLong,
-                };
-              })
-            }
-            isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
-          />
-        </Row>
-        <Center mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-          <Button
-            isDisabled={isLoadingGpscoords}
-            onPress={onGetCurrentCoordinatesPress}
-          >
-            Get Current
-          </Button>
-        </Center>
-      </Stack>
+        </Stack>
+        <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+          <Row alignItems="center">
+            <FormControl.Label mr={theme.space[FORM_INTER_ITEM_SPACING]}>
+              Lat:
+            </FormControl.Label>
+            <Input
+              variant="outline"
+              keyboardType="numeric"
+              p={theme.space[1]}
+              flex={1}
+              placeholder="latitude"
+              value={gpsCoordinates.lat.toString()}
+              onChangeText={(newLat) =>
+                setGpsCoordinates((current: GpsCoordinate) => {
+                  return {
+                    ...current,
+                    lat: newLat,
+                  }
+                })
+              }
+              isInvalid={isNaN(parseFloat(gpsCoordinates.lat))}
+            />
+            <FormControl.Label mx={theme.space[FORM_INTER_ITEM_SPACING]}>
+              Long:
+            </FormControl.Label>
+            <Input
+              flex={1}
+              variant="outline"
+              keyboardType="numeric"
+              p={theme.space[1]}
+              placeholder="longitude"
+              value={gpsCoordinates.lon.toString()}
+              onChangeText={(newLong) =>
+                setGpsCoordinates((current: GpsCoordinate) => {
+                  return {
+                    ...current,
+                    lon: newLong,
+                  }
+                })
+              }
+              isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
+            />
+          </Row>
+          <Center mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+            <Button
+              isDisabled={isLoadingGpscoords}
+              onPress={onGetCurrentCoordinatesPress}
+            >
+              Get Current
+            </Button>
+          </Center>
+        </Stack>
     </AbsolutePositionedScreen>
-  );
+  )
 }

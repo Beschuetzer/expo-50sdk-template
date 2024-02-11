@@ -1,6 +1,8 @@
 import { FontAwesome } from "@expo/vector-icons";
+import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { useNavigation } from "expo-router";
 import { useTheme, Center, Heading, Row, View, Stack, Text } from "native-base";
+import { useMemo } from "react";
 import { StyleSheet } from "react-native";
 import { FlatList, RectButton } from "react-native-gesture-handler";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,32 +11,56 @@ import { SwipeableRow } from "./SwipeableRow";
 
 import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from "@/constants/general";
 import { Routes } from "@/constants/navigation";
+import { currentLocationSelector } from "@/state/slices/generalSlice";
 import {
   removeStoresListItem,
+  setCurrentStoreName,
   storesListArraySelector,
 } from "@/state/slices/listsSlice";
 import { Key } from "@/types/Item";
 import { Store } from "@/types/Store";
 import { ListRow } from "@/types/general";
-import { getKeyToUse } from "@/utils/helpers";
+import { calculateDistance, getKeyToUse } from "@/utils/helpers";
 
 export function StoresList() {
   const storesList = useSelector(storesListArraySelector);
+  const currentLocation = useSelector(currentLocationSelector);
   const theme = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   console.log({ storesList });
 
+  const sortedByDistance = useMemo(() => {
+    return storesList
+      .map((store) => {
+        return {
+          ...store,
+          calculatedDistance: calculateDistance(
+            currentLocation,
+            store.gpsCoordinates,
+          ),
+        };
+      })
+      .sort((current: Store, next: Store) => {
+        console.log({ current, next });
+        if (!current.calculatedDistance && next.calculatedDistance) return 1;
+        if (current.calculatedDistance && !next.calculatedDistance) return -1;
+        if (current.calculatedDistance === next.calculatedDistance) return 0;
+        if (
+          current !== undefined &&
+          next !== undefined &&
+          current.calculatedDistance <= next.calculatedDistance
+        )
+          return -1;
+        return 1;
+      });
+  }, [storesList, currentLocation]);
+
   return (
     <Stack>
-      <Center>
-        <Heading p={theme.sizes[2]}>Stores List</Heading>
-      </Center>
       <FlatList
-        data={storesList}
+        data={sortedByDistance}
         renderItem={({ item, index }: ListRow<Store>) => {
-          console.log({ item, index });
-
           const keyToUse = {
             name: item.name,
             upc: EMPTY_STRING,
@@ -58,18 +84,15 @@ export function StoresList() {
               }}
               rightSwipe={{
                 backgroundColor: theme.colors.primary[900],
-                onPress: () => alert("left"),
+                onPress: () => {
+                  dispatch(setCurrentStoreName(keyToUse?.name));
+                },
                 title: (
                   <Stack
                     paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
                     alignItems="center"
                   >
-                    <FontAwesome
-                      name="plus"
-                      color={theme.colors.white}
-                      size={theme.sizes[8]}
-                    />
-                    <Text color={theme.colors.white}>Shopping List</Text>
+                    <Text color={theme.colors.white}>Set as Current</Text>
                   </Stack>
                 ),
               }}
@@ -83,18 +106,37 @@ export function StoresList() {
                   });
                 }}
               >
-                <Row space={theme.space[2]}>
-                  <Text fontSize={16}>
-                    {item.name} ({item.gpsCoordinates?.lat},{" "}
-                    {item.gpsCoordinates?.lon})
-                  </Text>
-                </Row>
+                <Stack>
+                  <Row
+                    px={theme.space[FORM_INTER_ITEM_SPACING]}
+                    space={theme.space[2]}
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Stack justifyContent="center">
+                      <Text fontSize={16}>
+                        {item.name} ({item.gpsCoordinates?.lat},{" "}
+                        {item.gpsCoordinates?.lon})
+                      </Text>
+                      <Text>
+                        Estimated Distance: {item.calculatedDistance}
+                        mi.
+                      </Text>
+                    </Stack>
+                    <Stack>
+                      <TouchableOpacity
+                        onPress={() => dispatch(removeStoresListItem(keyToUse))}
+                      >
+                        <Text>Set as Current</Text>
+                      </TouchableOpacity>
+                    </Stack>
+                  </Row>
+                </Stack>
               </RectButton>
             </SwipeableRow>
           );
         }}
         keyExtractor={(item: Store, index: number) => `${item.name}-${index}`}
-        estimatedItemSize={80} //todo: caculate this approriately
         ItemSeparatorComponent={() => (
           <View
             height={StyleSheet.hairlineWidth}

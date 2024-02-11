@@ -12,7 +12,7 @@ export default function StoreModal() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const route = useRoute();
-  const { name } = route.params as any;
+  const { name } = (route?.params || {}) as any;
   const store = useSelector(storesListItemSelector(name));
   console.log({ nameInModal: name, store });
 

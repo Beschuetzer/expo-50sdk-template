@@ -50,14 +50,21 @@ export type Item = Key & {
 
 export type ItemWithStoreSpecificValues = Item & StoreSpecificValues
 
+
+export enum StoreSpecificValueKey {
+  Aisle = 'aisle',
+  ItemId = 'itemId',
+  Price = 'price',
+  Quantity = 'quantity',
+}
 /**
  *These are fields which vary based on the store
  **/
 export type StoreSpecificValues = {
-  aisle: StoreSpecificValue<string>;
-  itemId: StoreSpecificValue<string>;
-  price: StoreSpecificValue<number>;
-  quantity: StoreSpecificValue<number>;
+  [StoreSpecificValueKey.Aisle]: StoreSpecificValue<string>;
+  [StoreSpecificValueKey.ItemId]: StoreSpecificValue<string>;
+  [StoreSpecificValueKey.Price]: StoreSpecificValue<number>;
+  [StoreSpecificValueKey.Quantity]: StoreSpecificValue<number>;
 } | null;
 
 export type StoreSpecificValue<T> = { [storeId: string]: T } | null | undefined;

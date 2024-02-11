@@ -13,6 +13,7 @@ import {
   LastPurchasedList,
   ShoppingList,
   StoreList,
+  StoreSpecificValueKey,
   StoreSpecificValues,
 } from "@/types/Item";
 import { Store } from "@/types/Store";
@@ -25,8 +26,18 @@ export type AddItemsListItemPayload = {
 };
 
 export type UpdateStoreSpecificValuesPayload = {
+  /**
+   *The key to get the item from {@link ItemsList itemsList}
+   **/
   key: Key;
-  storeSpecificValues: Partial<StoreSpecificValues>;
+  /**
+   *The new value for each store specific value
+   **/
+  storeSpecificValuesToUpdate: Partial<{ [key in StoreSpecificValueKey]: any }>;
+  /**
+   *The store name to use to set the new value
+   **/
+  storeName: string;
 };
 
 /**
@@ -205,24 +216,28 @@ export const listsSlice = createSlice({
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
     ) => {
       if (!action.payload) return;
-      const { storeSpecificValues, key } = action.payload;
+      const { storeSpecificValuesToUpdate, key, storeName } = action.payload;
       const keyToUse = getKeyToUse(key);
       const itemToUpdate = state.itemsList?.[keyToUse] as any;
-      if (!itemToUpdate || !storeSpecificValues) {
-        alert(`A key and values must be provided in order to update an item.`)
-        return
+      if (!itemToUpdate || !storeSpecificValuesToUpdate || !storeName) {
+        alert(
+          `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
+        );
+        return;
       }
 
-      console.log({ itemToUpdateBefore: itemToUpdate })
+      console.log({ itemToUpdateBefore: itemToUpdate });
 
-      for (const [valueName, value] of Object.entries(storeSpecificValues)) {
+      for (const [valueName, value] of Object.entries(
+        storeSpecificValuesToUpdate,
+      )) {
         itemToUpdate[valueName] = {
           ...itemToUpdate[valueName],
-          ...value,
+          [storeName]: value,
         }
       }
 
-      console.log({itemToUpdateAfter: itemToUpdate});
+      console.log({ itemToUpdateAfter: itemToUpdate });
     },
   },
 });

@@ -1,4 +1,4 @@
-import { Stack, FormControl, Input, Row, useTheme, Button } from "native-base";
+import { Stack, Text, Input, Row, useTheme, Button } from "native-base";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -27,6 +27,8 @@ import {
 import { Item, StoreSpecificValues } from "@/types/Item";
 import { ItemProp } from "@/types/general";
 import { deleteFile, getKeyToUse } from "@/utils/helpers";
+import { InputText } from "./InputText";
+import { StoreManager } from "../StoreManager";
 
 type ItemFormValdation = {
   isValid: boolean;
@@ -184,7 +186,7 @@ export function ItemForm(props: ItemFormProps) {
       }
     >
       <Stack>
-        <FormControl.Label>Upc</FormControl.Label>
+        <InputText>Upc</InputText>
         <Input
           variant="outline"
           keyboardType="numeric"
@@ -204,7 +206,7 @@ export function ItemForm(props: ItemFormProps) {
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <FormControl.Label>Name</FormControl.Label>
+        <InputText>Name</InputText>
         <Input
           variant="outline"
           p={theme.space[1]}
@@ -215,7 +217,7 @@ export function ItemForm(props: ItemFormProps) {
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <FormControl.Label>Image</FormControl.Label>
+        <InputText>Image</InputText>
         <Input
           variant="outline"
           p={theme.space[1]}
@@ -244,15 +246,16 @@ export function ItemForm(props: ItemFormProps) {
       </Stack>
       <FrequencyInput
         onValueChange={onFrequencyChange}
-        headingTag={FormControl.Label}
-        spacing={theme.space[FORM_INTER_ITEM_SPACING]}
+        headingTag={InputText}
+        spacing={theme.space[1]}
       />
       <UnitInput
         initialValue={itemInList?.unit}
         onValueChange={onUnitChange}
-        headingTag={FormControl.Label}
+        headingTag={InputText}
         spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
+      <StoreManager showStoreList={true} />
       <ItemFormStoreSpecific
         item={item}
         onValueChange={onItemSpecificValueChange}

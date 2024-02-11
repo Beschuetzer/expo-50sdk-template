@@ -51,7 +51,7 @@ export function FrequencyInput(props: FrequencyInputProps) {
   }, [onValueChange, frequency])
 
   return (
-    <Stack mt={spacing}>
+    <Stack my={spacing}>
       <Tag>Frequency</Tag>
       <Row>
         <Input

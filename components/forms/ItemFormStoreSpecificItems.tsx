@@ -1,6 +1,8 @@
-import { Stack, FormControl, Input, useTheme } from "native-base";
+import { Stack, Input, useTheme } from "native-base";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+
+import { InputText } from "./InputText";
 
 import {
   EMPTY_NUMBER,
@@ -33,6 +35,7 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
   const currentStore = useSelector(currentStoreSelector);
   const itemInList = useSelector(itemsListItemSelector(keyToUse));
 
+  //if adding new state, be sure to update in useEffect below too.
   const [aisle, setAisle] = useState(
     itemInList?.aisle?.[currentStore.name] || EMPTY_STRING,
   );
@@ -65,11 +68,20 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
       });
   }, [aisle, itemId, price, quantity, currentStore, onValueChange]);
 
+  useEffect(() => {
+    setAisle(itemInList?.aisle?.[currentStore.name] || EMPTY_STRING);
+    setItemId(itemInList?.itemId?.[currentStore.name] || EMPTY_STRING);
+    setPrice(
+      itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING,
+    );
+    setQuantity(itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER);
+  }, [currentStore]);
+
   if (!currentStore.name) return null;
   return (
     <Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <FormControl.Label>Price</FormControl.Label>
+        <InputText>Price at '{currentStore.name}'</InputText>
         <Input
           variant="outline"
           keyboardType="numeric"
@@ -80,7 +92,7 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <FormControl.Label>Quantity</FormControl.Label>
+        <InputText>Quantity needed at '{currentStore.name}'</InputText>
         <Input
           variant="outline"
           keyboardType="numeric"
@@ -91,7 +103,7 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <FormControl.Label>Item Id</FormControl.Label>
+        <InputText>Item at '{currentStore.name}' Id</InputText>
         <Input
           variant="outline"
           p={theme.space[1]}
@@ -101,7 +113,7 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <FormControl.Label>Aisle</FormControl.Label>
+        <InputText>Aisle at '{currentStore.name}'</InputText>
         <Input
           variant="outline"
           p={theme.space[1]}

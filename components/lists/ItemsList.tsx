@@ -1,6 +1,6 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { FlashList } from "@shopify/flash-list";
-import { useNavigation } from "expo-router";
+import { FontAwesome } from '@expo/vector-icons'
+import { FlashList } from '@shopify/flash-list'
+import { useNavigation } from 'expo-router'
 import {
   Heading,
   View,
@@ -10,74 +10,71 @@ import {
   Column,
   Center,
   Stack,
-} from "native-base";
-import React, { useCallback } from "react";
-import { StyleSheet } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
+} from 'native-base'
+import React, { useCallback } from 'react'
+import { StyleSheet } from 'react-native'
+import { RectButton } from 'react-native-gesture-handler'
 
 //  To toggle LTR/RTL uncomment the next line
 // I18nManager.allowRTL(true);
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from 'react-redux'
 
-import { SwipeableRow } from "./SwipeableRow";
-import { ImageRenderer } from "../ImageRenderer";
+import { SwipeableRow } from './SwipeableRow'
+import { ImageRenderer } from '../ImageRenderer'
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from "@/constants/general";
-import { Routes } from "@/constants/navigation";
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { Routes } from '@/constants/navigation'
 import {
   currentStoreSelector,
   itemsListArraySelector,
   itemsListSelector,
   removeItemsListItem,
   updateStoreSpecificValues,
-} from "@/state/slices/listsSlice";
-import { Item, ItemWithStoreSpecificValues, Key } from "@/types/Item";
-import { ListRow } from "@/types/general";
-import { getKeyToUse } from "@/utils/helpers";
+} from '@/state/slices/listsSlice'
+import { Item, ItemWithStoreSpecificValues, Key } from '@/types/Item'
+import { ListRow } from '@/types/general'
+import { getKeyToUse } from '@/utils/helpers'
 
-type ItemsListProps = object;
+type ItemsListProps = object
 
 export function ItemsList(props: ItemsListProps) {
-  const itemsListArray = useSelector(itemsListArraySelector);
-  const itemsList = useSelector(itemsListSelector);
-  const currentStore = useSelector(currentStoreSelector);
-  const theme = useTheme();
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
+  const itemsListArray = useSelector(itemsListArraySelector)
+  const itemsList = useSelector(itemsListSelector)
+  const currentStore = useSelector(currentStoreSelector)
+  const theme = useTheme()
+  const navigation = useNavigation()
+  const dispatch = useDispatch()
 
   const onSwipeRight = useCallback(
     (key: Key) => {
-      const keyToUse = getKeyToUse(key);
+      const keyToUse = getKeyToUse(key)
       const currentQuantity =
-        itemsList?.[keyToUse as any]?.quantity?.[currentStore.name];
+        itemsList?.[keyToUse as any]?.quantity?.[currentStore.name]
       console.log({
         keyToUse,
         quantity: itemsList?.[keyToUse as any]?.quantity,
         currentQuantity,
         currentStore,
-      });
+      })
 
       dispatch(
         updateStoreSpecificValues({
           key,
-          storeSpecificValues: {
-            quantity: {
-              [currentStore.name]:
-                currentQuantity && currentQuantity > 0
-                  ? currentQuantity + 1
-                  : 1,
-            },
+          storeSpecificValuesToUpdate: {
+            quantity:
+              currentQuantity && currentQuantity > 0 ? currentQuantity + 1 : 1,
           },
+          storeName: currentStore.name,
         }),
-      );
+      )
     },
     [currentStore, itemsList, updateStoreSpecificValues],
-  );
+  )
 
   const onSwipeLeft = useCallback((key: Key) => {
-    dispatch(removeItemsListItem(key));
-  }, []);
+    dispatch(removeItemsListItem(key))
+  }, [])
 
   return (
     <View>
@@ -90,7 +87,7 @@ export function ItemsList(props: ItemsListProps) {
           const key = {
             name: item.name,
             upc: item.upc,
-          } as Key;
+          } as Key
           return (
             <SwipeableRow
               key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
@@ -140,7 +137,7 @@ export function ItemsList(props: ItemsListProps) {
                   navigation.navigate(Routes.ItemModal, {
                     key: item.upc || item.name,
                     showOverrideMsg: false,
-                  });
+                  })
                 }}
               >
                 <Row space={2}>
@@ -154,7 +151,7 @@ export function ItemsList(props: ItemsListProps) {
                 </Row>
               </RectButton>
             </SwipeableRow>
-          );
+          )
         }}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           `item ${index}`
@@ -168,7 +165,7 @@ export function ItemsList(props: ItemsListProps) {
         )}
       />
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -176,24 +173,24 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 10,
-    justifyContent: "space-between",
-    flexDirection: "column",
-    backgroundColor: "white",
+    justifyContent: 'space-between',
+    flexDirection: 'column',
+    backgroundColor: 'white',
   },
   fromText: {
-    fontWeight: "bold",
-    backgroundColor: "transparent",
+    fontWeight: 'bold',
+    backgroundColor: 'transparent',
   },
   messageText: {
-    color: "#999",
-    backgroundColor: "transparent",
+    color: '#999',
+    backgroundColor: 'transparent',
   },
   dateText: {
-    backgroundColor: "transparent",
-    position: "absolute",
+    backgroundColor: 'transparent',
+    position: 'absolute',
     right: 20,
     top: 10,
-    color: "#999",
-    fontWeight: "bold",
+    color: '#999',
+    fontWeight: 'bold',
   },
-});
+})

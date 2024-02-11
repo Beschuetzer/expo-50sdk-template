@@ -1,70 +1,92 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { TouchableOpacity } from "@gorhom/bottom-sheet";
-import { useNavigation } from "expo-router";
-import { useTheme, Center, Heading, Row, View, Stack, Text } from "native-base";
-import { useMemo } from "react";
-import { StyleSheet } from "react-native";
-import { FlatList, RectButton } from "react-native-gesture-handler";
-import { useSelector, useDispatch } from "react-redux";
+import { FontAwesome } from '@expo/vector-icons'
+import { TouchableOpacity } from '@gorhom/bottom-sheet'
+import { useNavigation } from 'expo-router'
+import { useTheme, Center, Heading, Row, View, Stack, Text } from 'native-base'
+import { useMemo, useState } from 'react'
+import { StyleSheet } from 'react-native'
+import { FlatList, RectButton } from 'react-native-gesture-handler'
+import { useSelector, useDispatch } from 'react-redux'
 
-import { SwipeableRow } from "./SwipeableRow";
+import { SwipeableRow } from './SwipeableRow'
 
-import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from "@/constants/general";
-import { Routes } from "@/constants/navigation";
-import { currentLocationSelector } from "@/state/slices/generalSlice";
+import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from '@/constants/general'
+import { Routes } from '@/constants/navigation'
+import { currentLocationSelector } from '@/state/slices/generalSlice'
 import {
   removeStoresListItem,
   setCurrentStoreName,
   storesListArraySelector,
-} from "@/state/slices/listsSlice";
-import { Key } from "@/types/Item";
-import { Store } from "@/types/Store";
-import { ListRow } from "@/types/general";
-import { calculateDistance, getKeyToUse } from "@/utils/helpers";
+} from '@/state/slices/listsSlice'
+import { Key } from '@/types/Item'
+import { Store } from '@/types/Store'
+import { ListRow } from '@/types/general'
+import { calculateDistance, getKeyToUse } from '@/utils/helpers'
+
+enum StoresListSortType {
+  ByDistance = 'By Distance',
+  ByName = 'By Name',
+}
 
 export function StoresList() {
-  const storesList = useSelector(storesListArraySelector);
-  const currentLocation = useSelector(currentLocationSelector);
-  const theme = useTheme();
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  console.log({ storesList });
+  const storesList = useSelector(storesListArraySelector)
+  const currentLocation = useSelector(currentLocationSelector)
+  const theme = useTheme()
+  const navigation = useNavigation()
+  const dispatch = useDispatch()
+  console.log({ storesList })
+  const [sortType, setsortType] = useState<StoresListSortType>(
+    StoresListSortType.ByName,
+  )
 
-  const sortedByDistance = useMemo(() => {
-    return storesList
-      .map((store) => {
-        return {
-          ...store,
-          calculatedDistance: calculateDistance(
-            currentLocation,
-            store.gpsCoordinates,
-          ),
-        };
-      })
-      .sort((current: Store, next: Store) => {
-        console.log({ current, next });
-        if (!current.calculatedDistance && next.calculatedDistance) return 1;
-        if (current.calculatedDistance && !next.calculatedDistance) return -1;
-        if (current.calculatedDistance === next.calculatedDistance) return 0;
-        if (
-          current !== undefined &&
-          next !== undefined &&
-          current.calculatedDistance <= next.calculatedDistance
-        )
-          return -1;
-        return 1;
-      });
-  }, [storesList, currentLocation]);
+  const arrayWithDistances = useMemo(() => {
+    return storesList.map((store) => {
+      return {
+        ...store,
+        calculatedDistance: calculateDistance(
+          currentLocation,
+          store.gpsCoordinates,
+        ),
+      }
+    })
+  }, [storesList, currentLocation])
+
+  console.log({arrayWithDistances});
+  
+
+  const arrayToUse = useMemo(() => {
+    return sortType === StoresListSortType.ByDistance
+      ? arrayWithDistances.sort((current: Store, next: Store) => {
+          console.log({ current, next })
+          if (!current.calculatedDistance && next.calculatedDistance) return 1
+          if (current.calculatedDistance && !next.calculatedDistance) return -1
+          if (current.calculatedDistance === next.calculatedDistance) return 0
+          if (
+            !current &&
+            !next &&
+            current.calculatedDistance <= next.calculatedDistance
+          )
+            return -1
+          return 1
+        })
+      : arrayWithDistances.sort((current: Store, next: Store) => {
+          console.log({ current, next })
+          if (!current.name && next.name) return 1
+          if (current.name && !next.name) return -1
+          if (current.name === next.name) return 0
+          if (current.name <= next.name) return -1
+          return 1
+        })
+  }, [arrayWithDistances])
 
   return (
     <Stack>
       <FlatList
-        data={sortedByDistance}
+        data={arrayToUse}
         renderItem={({ item, index }: ListRow<Store>) => {
           const keyToUse = {
             name: item.name,
             upc: EMPTY_STRING,
-          } as Key;
+          } as Key
           return (
             <SwipeableRow
               leftSwipe={{
@@ -79,13 +101,13 @@ export function StoresList() {
                 ),
                 backgroundColor: theme.colors.red[900],
                 onPress: () => {
-                  dispatch(removeStoresListItem(keyToUse));
+                  dispatch(removeStoresListItem(keyToUse))
                 },
               }}
               rightSwipe={{
                 backgroundColor: theme.colors.primary[900],
                 onPress: () => {
-                  dispatch(setCurrentStoreName(keyToUse?.name));
+                  dispatch(setCurrentStoreName(keyToUse?.name))
                 },
                 title: (
                   <Stack
@@ -103,7 +125,7 @@ export function StoresList() {
                 onPress={() => {
                   navigation.navigate(Routes.StoreModal, {
                     name: keyToUse.name,
-                  });
+                  })
                 }}
               >
                 <Stack>
@@ -115,12 +137,14 @@ export function StoresList() {
                   >
                     <Stack justifyContent="center">
                       <Text fontSize={16}>
-                        {item.name} ({item.gpsCoordinates?.lat},{" "}
+                        {item.name} ({item.gpsCoordinates?.lat},{' '}
                         {item.gpsCoordinates?.lon})
                       </Text>
                       <Text>
-                        Estimated Distance: {item.calculatedDistance}
-                        mi.
+                        Estimated Distance:{' '}
+                        {!item?.calculatedDistance || item.calculatedDistance === -1
+                          ? 'N/A'
+                          : `${item.calculatedDistance}mi.`}
                       </Text>
                     </Stack>
                     <Stack>
@@ -134,7 +158,7 @@ export function StoresList() {
                 </Stack>
               </RectButton>
             </SwipeableRow>
-          );
+          )
         }}
         keyExtractor={(item: Store, index: number) => `${item.name}-${index}`}
         ItemSeparatorComponent={() => (
@@ -145,7 +169,7 @@ export function StoresList() {
         )}
       />
     </Stack>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -153,24 +177,24 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 10,
-    justifyContent: "space-between",
-    flexDirection: "column",
-    backgroundColor: "white",
+    justifyContent: 'space-between',
+    flexDirection: 'column',
+    backgroundColor: 'white',
   },
   fromText: {
-    fontWeight: "bold",
-    backgroundColor: "transparent",
+    fontWeight: 'bold',
+    backgroundColor: 'transparent',
   },
   messageText: {
-    color: "#999",
-    backgroundColor: "transparent",
+    color: '#999',
+    backgroundColor: 'transparent',
   },
   dateText: {
-    backgroundColor: "transparent",
-    position: "absolute",
+    backgroundColor: 'transparent',
+    position: 'absolute',
     right: 20,
     top: 10,
-    color: "#999",
-    fontWeight: "bold",
+    color: '#999',
+    fontWeight: 'bold',
   },
-});
+})

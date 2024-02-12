@@ -22,7 +22,7 @@ export default function TabOneScreen() {
       <ReduxViewer />
       <StoreManager showAddStore showStoreList />
       <ShoppingList />
-      <ItemsList />
+      {/* <ItemsList /> */}
       {/* <Playground /> */}
     </ScrollView>
   );

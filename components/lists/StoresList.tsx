@@ -71,6 +71,7 @@ export function StoresList() {
           } as Key
           return (
             <SwipeableRow
+              key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
               leftSwipe={{
                 title: (
                   <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -100,7 +101,6 @@ export function StoresList() {
                   </Stack>
                 ),
               }}
-              key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
             >
               <RectButton
                 style={styles.rectButton}
@@ -117,10 +117,10 @@ export function StoresList() {
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Stack justifyContent="center">
-                      <Text fontSize={16}>
-                        {item.name} ({item.gpsCoordinates?.lat},{' '}
-                        {item.gpsCoordinates?.lon})
+                    <Stack flex={1} justifyContent="center">
+                      <Text fontSize={16}>{item.name}</Text>
+                      <Text>
+                        ({item.gpsCoordinates?.lat}, {item.gpsCoordinates?.lon})
                       </Text>
                       <Text>
                         Estimated Distance:{' '}

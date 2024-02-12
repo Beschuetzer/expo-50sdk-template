@@ -1,5 +1,7 @@
 ## MVP
--add button to create 500 items
+-convert ShoppingList to use Flashlist
+
+-turn Itemslist type into { list: Item[], sortType: SortType }
 
 -Figure out how to style the shopping list tile
 -figure out how to handle in cart vs in shopping list

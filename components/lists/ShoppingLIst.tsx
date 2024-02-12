@@ -45,7 +45,6 @@ export function ShoppingList(props: ShoppingListProps) {
           } as Key;
           return (
             <SwipeableRow
-              key={`${index}-${getKeyToUse({ name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING })}`}
               leftSwipe={{
                 title: (
                   <Stack paddingRight={theme.space[2]} alignItems="center">

@@ -27,11 +27,15 @@ import {
 import { ItemsList } from "@/types/Item";
 import { calculateDistance } from "@/utils/helpers";
 
+const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500;
 export function ReduxViewer() {
   const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING);
   const lastUpcIndexRef = useRef(0);
   const lastUpcNumberRef = useRef(1);
   const lastStoreIndexRef = useRef(0);
+  const [numberOfMockItems, setNumberOfMockItems] = useState(
+    NUMBER_OF_ITEM_TO_MOCK_INITIAL,
+  )
   const upcProducts = useSelector(upcProductsSelector);
   const currentLocation = useSelector(currentLocationSelector);
   const currentStore = useSelector(currentStoreSelector);
@@ -53,13 +57,13 @@ export function ReduxViewer() {
     <FlatList
       data={Object.values(upcProducts || {})}
       renderItem={(data) => {
-        const { item, index } = data;
+        const { item, index } = data
         return (
           <View key={`${index}-${item.id}`}>
             <Heading size="sm" mt={3}>
               '{item.id}' details:
             </Heading>
-            {renderFieldAndText("Name", item.product_name)}
+            {renderFieldAndText('Name', item.product_name)}
             {/* {renderFieldAndText(
               "Fetched At",
               new Date(item.timestamp).toLocaleString(),
@@ -71,7 +75,7 @@ export function ReduxViewer() {
               selectedUrl={selectedUrl}
             /> */}
           </View>
-        );
+        )
       }}
       ListHeaderComponent={
         <>
@@ -83,8 +87,8 @@ export function ReduxViewer() {
               </Button>
               <Button
                 onPress={() => {
-                  lastUpcIndexRef.current = 0;
-                  dispatch(resetItemsList());
+                  lastUpcIndexRef.current = 0
+                  dispatch(resetItemsList())
                 }}
               >
                 itemsList
@@ -99,9 +103,9 @@ export function ReduxViewer() {
               </Button>
               <Button
                 onPress={() => {
-                  lastStoreIndexRef.current = 0;
-                  dispatch(resetStoresList());
-                  dispatch(resetCurrentStoreName());
+                  lastStoreIndexRef.current = 0
+                  dispatch(resetStoresList())
+                  dispatch(resetCurrentStoreName())
                 }}
               >
                 storeList
@@ -113,24 +117,24 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current];
+                  const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current]
                   if (lastStoreIndexRef.current >= MOCK_STORES.length - 1) {
-                    lastStoreIndexRef.current = 0;
+                    lastStoreIndexRef.current = 0
                   } else {
-                    lastStoreIndexRef.current += 1;
+                    lastStoreIndexRef.current += 1
                   }
-                  dispatch(addStoresListItem(storeToUse));
+                  dispatch(addStoresListItem(storeToUse))
                 }}
               >
                 Store
               </Button>
               <Button
                 onPress={() => {
-                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current];
+                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current]
                   if (lastUpcIndexRef.current >= MOCKS_UPCS.length - 1) {
-                    lastUpcIndexRef.current = 0;
+                    lastUpcIndexRef.current = 0
                   } else {
-                    lastUpcIndexRef.current += 1;
+                    lastUpcIndexRef.current += 1
                   }
                   dispatch(
                     addItemsListItem({
@@ -138,18 +142,18 @@ export function ReduxViewer() {
                         frequency: 604800000,
                         imageToUseIndex: 0,
                         images: [
-                          "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
+                          'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
                         ],
-                        name: "Cholocate",
-                        unit: "bar",
+                        name: 'Cholocate',
+                        unit: 'bar',
                         upc: upcToUse,
                       },
                       storeSpecificValues: {
                         itemId: {
-                          [MOCK_STORES[1].name]: "123456",
+                          [MOCK_STORES[1].name]: '123456',
                         },
                         aisle: {
-                          [MOCK_STORES[1].name]: "A12",
+                          [MOCK_STORES[1].name]: 'A12',
                         },
                         price: {
                           [MOCK_STORES[1].name]: 22.99,
@@ -160,7 +164,7 @@ export function ReduxViewer() {
                       },
                       currentStore: MOCK_STORES[1],
                     }),
-                  );
+                  )
                 }}
               >
                 Item
@@ -169,53 +173,52 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const itemsList = {} as ItemsList;
-                  for (let index = 0; index < 100; index++) {
+                  const itemsList = {} as ItemsList
+                  for (let index = 0; index < numberOfMockItems; index++) {
                     const upcToUse = lastUpcNumberRef.current
                       .toString()
-                      .padStart(UPC_REQUIRED_CHAR_LENGTH, "0");
+                      .padStart(UPC_REQUIRED_CHAR_LENGTH, '0')
                     itemsList[upcToUse] = {
                       frequency: 604800000,
                       imageToUseIndex: 0,
                       images: [
-                        "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
+                        'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
                       ],
-                      name: "Cholocate",
-                      unit: "bar",
+                      name: 'Cholocate',
+                      unit: 'bar',
                       upc: upcToUse,
                       itemId: {
-                        [MOCK_STORES[1].name]: "123456",
+                        [MOCK_STORES[0].name]: `id for ${MOCK_STORES[0].name}`,
+                        [MOCK_STORES[1].name]: `id for ${MOCK_STORES[1].name}`,
                       },
                       aisle: {
-                        [MOCK_STORES[1].name]: "A12",
+                        [MOCK_STORES[1].name]: 'A12',
                       },
                       price: {
                         [MOCK_STORES[1].name]: 22.99,
                       },
-                      quantity: {
-                        [MOCK_STORES[1].name]: 1,
-                      },
-                    };
-                    lastUpcNumberRef.current += 1;
+                      quantity: {},
+                    }
+                    lastUpcNumberRef.current += 1
                   }
-                  dispatch(addMockItems(itemsList));
+                  dispatch(addMockItems(itemsList))
                 }}
               >
-                Add 100 items
+                Add {numberOfMockItems} items
               </Button>
             </Row>
           </Stack>
 
           <Text>
-            Current Location: (Lat: {currentLocation?.lat}, Lon:{" "}
+            Current Location: (Lat: {currentLocation?.lat}, Lon:{' '}
             {currentLocation?.lon})
           </Text>
           <Text>
-            Distance to Store from Current:{" "}
+            Distance to Store from Current:{' '}
             {calculateDistance(currentLocation, currentStore?.gpsCoordinates)}
           </Text>
         </>
       }
     />
-  );
+  )
 }

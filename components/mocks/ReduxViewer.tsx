@@ -123,7 +123,7 @@ export function ReduxViewer() {
                   } else {
                     lastStoreIndexRef.current += 1
                   }
-                  dispatch(addStoresListItem(storeToUse))
+                  dispatch(addStoresListItem({storeToAdd: storeToUse}))
                 }}
               >
                 Store

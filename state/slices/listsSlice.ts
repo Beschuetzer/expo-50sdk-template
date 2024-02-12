@@ -3,6 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "../store";
 
+import { SortType } from "@/components/lists/sorters";
 import { EMPTY_STRING } from "@/constants/general";
 import {
   Item,
@@ -17,6 +18,11 @@ import {
 } from "@/types/Item";
 import { Store } from "@/types/Store";
 import { getEmptyObject, getKeyToUse } from "@/utils/helpers";
+
+export type AddStoresListItemPayload = {
+  sortType?: SortType;
+  storeToAdd: Store;
+};
 
 export type AddItemsListItemPayload = {
   item: Item;
@@ -116,22 +122,47 @@ export const listsSlice = createSlice({
         [keyToUse]: action.payload,
       };
     },
-    addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
-      const keyToUse = getKeyToUse(action.payload);
+    addStoresListItem: (
+      state: ListsState,
+      action: PayloadAction<AddStoresListItemPayload>,
+    ) => {
+      const { sortType = SortType.None, storeToAdd } = action.payload;
+      const keyToUse = getKeyToUse(storeToAdd);
       if (!keyToUse) {
         alert("Unable to add an item with no name to the storesList.");
         return;
       }
 
+      const sortTypeArray =
+        state.storesList?.[sortType] !== undefined
+          ? state.storesList[sortType]
+          : null;
+      const noneArray = state.storesList?.[SortType.None] || [];
+
+
+      if (noneArray.find((store) => store.name === keyToUse)) return;
+
       state.storesList = {
-        ...state.storesList,
-        [keyToUse]: action.payload,
+        [SortType.None]: [...noneArray, storeToAdd],
+        currentSortType: sortType,
       };
 
-      const currentStores = Object.values(state.storesList || {});
-      if (currentStores.length === 1) {
-        state.currentStoreName = currentStores[0].name;
+      if (sortTypeArray) {
+        state.storesList[sortType] = Array.from(
+          new Set([...sortTypeArray, storeToAdd]),
+        );
       }
+
+      if (noneArray.length === 0) {
+        state.currentStoreName = storeToAdd.name;
+      }
+
+      console.log({ sortTypeArray, noneArray });
+      console.log({
+        addStoresList: state.storesList,
+        none: state.storesList[SortType.None],
+        sortType: state.storesList[sortType],
+      });
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);

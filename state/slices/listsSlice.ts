@@ -16,8 +16,10 @@ import {
   StoreSpecificValueKey,
   StoreSpecificValues,
 } from "@/types/Item";
-import { Store } from "@/types/Store";
-import { getEmptyArray, getKeyToUse } from "@/utils/helpers";
+import { GpsCoordinate, Store } from "@/types/Store";
+import { calculateDistance, getEmptyArray, getKeyToUse } from "@/utils/helpers";
+
+const CURRENT_LOCATION_INITIAL = null;
 
 export type AddStoresListItemPayload = {
   sortType?: SortType;
@@ -52,6 +54,7 @@ export type UpdateStoreSpecificValuesPayload = {
  * {@link ListsState.stores stores} is a list of the stores created
  **/
 export type ListsState = {
+  currentLocation: GpsCoordinate | null;
   currentStoreName: string;
   itemsList: ItemsList;
   lastPurchasedList: LastPurchasedList;
@@ -60,6 +63,7 @@ export type ListsState = {
 };
 
 const initialState: ListsState = {
+  currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
   itemsList: getEmptyArray(),
   lastPurchasedList: getEmptyArray(),
@@ -138,7 +142,13 @@ export const listsSlice = createSlice({
         })
       )
         return;
-      state.storesList.push(store);
+      state.storesList.push({
+        ...store,
+        calculatedDistance: calculateDistance(
+          store.gpsCoordinates,
+          state.currentLocation,
+        ),
+      });
       state.storesList.sort(SORTERS[state.storesListSortType]);
 
       if (state.storesList.length === 1) {
@@ -171,8 +181,8 @@ export const listsSlice = createSlice({
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
-      console.log({keyToUse});
-      
+      console.log({ keyToUse });
+
       if (!keyToUse) {
         alert(
           "A key must be provided in order to remove an item from the storesList.",
@@ -182,6 +192,13 @@ export const listsSlice = createSlice({
       state.storesList = state.storesList.filter(
         (store) => store.name !== keyToUse,
       );
+    },
+    resetCurrentLocation: (state: ListsState) => {
+      state.currentLocation = CURRENT_LOCATION_INITIAL;
+      for (const store of state.storesList) {
+        store.calculatedDistance = -1;
+        console.log({ store })
+      }
     },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyArray();
@@ -195,6 +212,20 @@ export const listsSlice = createSlice({
     },
     resetCurrentStoreName: (state: ListsState) => {
       state.currentStoreName = EMPTY_STRING;
+    },
+    setCurrentLocation: (
+      state: ListsState,
+      action: PayloadAction<GpsCoordinate>,
+    ) => {
+      if (!action.payload) return;
+      state.currentLocation = action.payload;
+      for (const store of state.storesList) {
+        store.calculatedDistance = calculateDistance(
+          state.currentLocation,
+          store.gpsCoordinates,
+        );
+        console.log({store});
+      }
     },
     setCurrentStoreName: (
       state: ListsState,
@@ -254,9 +285,14 @@ export const {
   setCurrentStoreName,
   setStoresList,
   updateStoreSpecificValues,
+  resetCurrentLocation,
+  setCurrentLocation,
 } = listsSlice.actions;
 
 export default listsSlice.reducer;
+
+export const currentLocationSelector = (state: RootState) =>
+  state[listsSlice.name].currentLocation;
 
 export const currentStoreSelector = createSelector(
   [
@@ -322,7 +358,7 @@ export const storesListItemSelector = (storeName: string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].storesList],
     (storesList) => {
-      return storesList?.find((store) => store.name === storeName) as Store
+      return storesList?.find((store) => store.name === storeName) as Store;
     },
   );
 

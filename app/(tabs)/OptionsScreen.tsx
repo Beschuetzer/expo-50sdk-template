@@ -21,12 +21,12 @@ import {
   FORM_INTER_ITEM_SPACING,
   SWIPEABLE_ROW_OPEN_THRESHOLD,
 } from '@/constants/general'
-import { setCurrentLocation } from '@/state/slices/generalSlice'
 import {
   setSwipeableRowOpenThreshold,
   swipeableRowOpenThresholdSelector,
 } from '@/state/slices/optionsSlice'
 import { getGpsCoordinate } from '@/utils/helpers'
+import { setCurrentLocation } from '@/state/slices/listsSlice'
 
 const DEBOUNCE_TIMEOUT = 500
 

@@ -1,11 +1,8 @@
 ## MVP
--add setStoresListSortType reducer and change how ListSorter works
 
--turn all lists into type into { [key in SortType]: T[] } & { currentSortType: SortType }
-    --will need to change how reducers work
-        ---the add reducer will need to use the arrays in SortType.None and currentSortType key to get the current lists and then create a new object after adding to the current lists (the currentSortType one will need to be sorted again but should be minimally challenging since using the already sorted list with the new item as a starting point)  
-        --the remove item reducer will have to do something similar as the add reducer expect the currentSortType key array will not need to be sorted again. (all other sort type keys besides currentSortType and SortType.None will need to be removed)
-        --will need to add a reducer called addSorted...List for each POS to be able to update currentSortType and have it update the key in the object with the sorted array
+-use StoresList approach to rework the other lists (using array and all the reducers/selectors around it):
+   --itemsList
+   --lastPurchasedList?
 
 -convert ShoppingList to use Flashlist
 -turn Itemslist type into { list: Item[], sortType: SortType }

@@ -8,14 +8,12 @@ import { MOCKS_UPCS } from "./mockUpcData";
 import { EMPTY_STRING } from "@/constants/general";
 import { UPC_REQUIRED_CHAR_LENGTH } from "@/constants/regexs";
 import {
-  currentLocationSelector,
-  resetCurrentLocation,
-} from "@/state/slices/generalSlice";
-import {
   addItemsListItem,
   addMockItems,
   addStoresListItem,
+  currentLocationSelector,
   currentStoreSelector,
+  resetCurrentLocation,
   resetCurrentStoreName,
   resetItemsList,
   resetStoresList,

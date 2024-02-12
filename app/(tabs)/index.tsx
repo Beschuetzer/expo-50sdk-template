@@ -7,7 +7,7 @@ import { useGpsCoordinate } from "@/components/hooks/useGeoLocation";
 import { ItemsList } from "@/components/lists/ItemsList";
 import { ShoppingList } from "@/components/lists/ShoppingLIst";
 import { ReduxViewer } from "@/components/mocks/ReduxViewer";
-import { setCurrentLocation } from "@/state/slices/generalSlice";
+import { setCurrentLocation } from "@/state/slices/listsSlice";
 
 export default function TabOneScreen() {
   const dispatch = useDispatch();

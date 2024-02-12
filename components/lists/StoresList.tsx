@@ -2,10 +2,10 @@ import { FontAwesome } from "@expo/vector-icons";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { useNavigation } from "expo-router";
-import { useTheme, Center, Heading, Row, View, Stack, Text } from "native-base";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTheme, Row, View, Stack, Text } from "native-base";
+import { useCallback, useRef, useState } from "react";
 import { LayoutAnimation, StyleSheet } from "react-native";
-import { FlatList, RectButton } from "react-native-gesture-handler";
+import { RectButton } from "react-native-gesture-handler";
 import { useSelector, useDispatch } from "react-redux";
 
 import { ListSorter } from "./ListSorter";
@@ -14,43 +14,34 @@ import { SORTERS, SortType } from "./sorters";
 
 import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from "@/constants/general";
 import { Routes } from "@/constants/navigation";
-import { currentLocationSelector } from "@/state/slices/generalSlice";
 import {
   currentStoreSelector,
   removeStoresListItem,
   setCurrentStoreName,
   setStoresList,
   storesListArraySelector,
-  storesListSortTypeSelector,
 } from "@/state/slices/listsSlice";
 import { Key } from "@/types/Item";
 import { Store } from "@/types/Store";
 import { ListRow } from "@/types/general";
-import { calculateDistance, getKeyToUse } from "@/utils/helpers";
+import { getKeyToUse } from "@/utils/helpers";
 
 export function StoresList() {
   const storesList = useSelector(storesListArraySelector);
-  const currentLocation = useSelector(currentLocationSelector);
-  const storesListSortType = useSelector(storesListSortTypeSelector);
   const currentStore = useSelector(currentStoreSelector);
-  const hasPopulatedStoresListWithDistances = useRef(false);
   const theme = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch();
-
-  console.log({ storesList });
-
   const listRef = useRef<FlashList<Store> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
-      const sortedList = [...storesList.sort(SORTERS[sortType])];
-      console.log(sortType, sortedList);
-      dispatch(setStoresList(sortedList));
+      const sortedList = [...storesList.sort(SORTERS[sortType])]
+      dispatch(setStoresList(sortedList))
     },
     [storesList],
-  );
+  )
 
   const onSwipeLeft = useCallback(
     (keyToUse: Key) => {
@@ -61,27 +52,6 @@ export function StoresList() {
     },
     [listRef],
   );
-
-  useEffect(() => {
-    hasPopulatedStoresListWithDistances.current = false;
-  }, [currentLocation])
-
-  useEffect(() => {
-    if (hasPopulatedStoresListWithDistances.current) return
-    hasPopulatedStoresListWithDistances.current = true
-    const sortedWithDistances = storesList
-      .map((store) => ({
-        ...store,
-        calculatedDistance: calculateDistance(
-          currentLocation,
-          store.gpsCoordinates,
-        ),
-      }))
-      .sort(SORTERS[storesListSortType])
-    console.log({ sortedWithDistances })
-
-    dispatch(setStoresList(sortedWithDistances))
-  }, [storesList, currentLocation, hasPopulatedStoresListWithDistances])
 
   function renderItem({ item, index }: ListRow<Store>) {
     const keyToUse = {
@@ -169,10 +139,10 @@ export function StoresList() {
       ref={listRef}
       refreshing={refreshing}
       onRefresh={() => {
-        setRefreshing(true);
+        setRefreshing(true)
         setTimeout(() => {
-          setRefreshing(false);
-        }, 2000);
+          setRefreshing(false)
+        }, 2000)
       }}
       ListHeaderComponent={
         <ListSorter
@@ -193,7 +163,7 @@ export function StoresList() {
       )}
       renderItem={renderItem}
     />
-  );
+  )
 }
 
 const styles = StyleSheet.create({

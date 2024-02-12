@@ -14,7 +14,6 @@
     --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed
     --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given (needs to check and update dict values for those fields)
     -- figure out why stores are not being persisted
-    --
 
 
 //todo: figure out types for useRouter/useNavigation (expo-router)
@@ -45,3 +44,6 @@ the ability to create a store layout and have a map/route be generated based on 
 -ability to start a "shopping run" and have it track where you are in the run and provide images of the current item and accept input to change to the next item (or go back)
 -voice commands like adding an item to the list
 -add ability to open google maps for directions to a store (would need to allow input of address or ability to get from GPS coords)
+
+## Optimization Idea
+-Create a buton to add 500 or so items to itemsList.  Then try updating the quantity for a few items and see how quickly things render.  If there is slugglishness, separate storeSpecificValues from itemList.  It Would be a dictionary with Key as the key.  Would need to make a selector called itemWithStoreSpecificValuesSelector.  Would need to update the Item type wherever it is being used.  Same for current ItemWithStoreSpecificValues type use cases.  Would need to updat addItemsListItem and updateStoreSpecificValues reducers

@@ -1,11 +1,6 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import {
-  View,
-  Text,
-  useTheme,
-  Stack,
-} from "native-base";
+import { View, Text, useTheme, Stack } from "native-base";
 import React, { useRef, useState } from "react";
 import { LayoutAnimation, StyleSheet } from "react-native";
 
@@ -20,19 +15,17 @@ import { SwipeableRow } from "./SwipeableRow";
 import { FORM_INTER_ITEM_SPACING } from "@/constants/general";
 import {
   currentStoreSelector,
-  itemsListArraySelector,
   itemsListSelector,
   removeItemsListItem,
   updateStoreSpecificValues,
 } from "@/state/slices/listsSlice";
 import { ItemWithStoreSpecificValues, Key } from "@/types/Item";
 import { ListRow } from "@/types/general";
-import { getKeyToUse } from "@/utils/helpers";
+import { getItemFromItemsList, getKeyToUse } from "@/utils/helpers";
 
 type ItemsListProps = object;
 
 export function ItemsList(props: ItemsListProps) {
-  const itemsListArray = useSelector(itemsListArraySelector);
   const itemsList = useSelector(itemsListSelector);
   const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
@@ -43,14 +36,8 @@ export function ItemsList(props: ItemsListProps) {
   function onSwipeRight(key: Key) {
     setRefreshing(false);
     const keyToUse = getKeyToUse(key);
-    const currentQuantity =
-      itemsList?.[keyToUse as any]?.quantity?.[currentStore.name];
-    // console.log({
-    //   keyToUse,
-    //   quantity: itemsList?.[keyToUse as any]?.quantity,
-    //   currentQuantity,
-    //   currentStore,
-    // });
+    const currentQuantity = getItemFromItemsList(itemsList, keyToUse)
+      ?.quantity?.[currentStore.name];
 
     dispatch(
       updateStoreSpecificValues({
@@ -81,7 +68,7 @@ export function ItemsList(props: ItemsListProps) {
           setRefreshing(false);
         }, 2000);
       }}
-      data={itemsListArray}
+      data={itemsList}
       renderItem={({ item, index }: ListRow<ItemWithStoreSpecificValues>) => {
         const key = {
           name: item.name,

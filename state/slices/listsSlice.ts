@@ -17,7 +17,7 @@ import {
   StoreSpecificValues,
 } from "@/types/Item";
 import { GpsCoordinate, Store } from "@/types/Store";
-import { calculateDistance, getEmptyArray, getKeyToUse } from "@/utils/helpers";
+import { calculateDistance, getEmptyArray, getItemFromItemsList, getKeyToUse } from "@/utils/helpers";
 
 const CURRENT_LOCATION_INITIAL = null;
 
@@ -311,20 +311,12 @@ export const itemsListItemSelector = (id: string) =>
   createSelector(
     [(state: RootState) => (state[listsSlice.name] as ListsState).itemsList],
     (itemsList) => {
-      const value = (itemsList as any)?.[id];
-      return (value || null) as ItemWithStoreSpecificValues | null;
+      return getItemFromItemsList(itemsList, id)
     },
   );
 
 export const itemsListSelector = (state: RootState) =>
   state[listsSlice.name].itemsList;
-
-export const itemsListArraySelector = createSelector(
-  [(state: RootState) => state[listsSlice.name].itemsList],
-  (itemsList) => {
-    return Object.values(itemsList || {});
-  },
-);
 
 export const shoppingListArraySelector = createSelector(
   [

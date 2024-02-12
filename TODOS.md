@@ -1,4 +1,6 @@
 ## MVP
+-add setStoresListSortType reducer and change how ListSorter works
+
 -turn all lists into type into { [key in SortType]: T[] } & { currentSortType: SortType }
     --will need to change how reducers work
         ---the add reducer will need to use the arrays in SortType.None and currentSortType key to get the current lists and then create a new object after adding to the current lists (the currentSortType one will need to be sorted again but should be minimally challenging since using the already sorted list with the new item as a starting point)  

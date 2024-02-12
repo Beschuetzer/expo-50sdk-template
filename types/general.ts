@@ -1,7 +1,7 @@
 import { ViewStyle } from 'react-native'
 
 import { UpcProduct } from './UpcResponse'
-import { Item } from './Item'
+import { Item, ItemWithStoreSpecificValues } from './Item'
 import { Store } from './Store'
 
 export type TimeSpan = 'Hour' | 'Day' | 'Week'
@@ -23,6 +23,10 @@ export type HeadingTagProp = {
 
 export type ItemProp = {
   item: Item
+}
+
+export type ItemWithStoreSpecificValuesProp = {
+  itemWithStoreSpecificValues: ItemWithStoreSpecificValues
 }
 
 export type UpcProp = {

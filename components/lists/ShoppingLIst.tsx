@@ -1,76 +1,34 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
-import { useNavigation } from "expo-router";
-import {
-  Heading,
-  View,
-  Text,
-  Row,
-  useTheme,
-  Column,
-  Center,
-  Stack,
-} from "native-base";
-import React, { useCallback } from "react";
+import { useTheme, Center, Heading, Stack, Text, View } from "native-base";
+import { useCallback } from "react";
 import { StyleSheet } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
-
-//  To toggle LTR/RTL uncomment the next line
-// I18nManager.allowRTL(true);
-
 import { useDispatch, useSelector } from "react-redux";
 
 import { ItemTile } from "./ItemTile";
 import { SwipeableRow } from "./SwipeableRow";
-import { ImageRenderer } from "../ImageRenderer";
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from "@/constants/general";
-import { Routes } from "@/constants/navigation";
+import { EMPTY_STRING } from "@/constants/general";
 import {
-  currentStoreSelector,
-  itemsListArraySelector,
-  itemsListSelector,
   removeItemsListItem,
-  updateStoreSpecificValues,
+  shoppingListArraySelector,
 } from "@/state/slices/listsSlice";
-import { Item, ItemWithStoreSpecificValues, Key } from "@/types/Item";
+import { ItemWithStoreSpecificValues, Key } from "@/types/Item";
 import { ListRow } from "@/types/general";
 import { getKeyToUse } from "@/utils/helpers";
 
-type ItemsListProps = object;
+type ShoppingListProps = object;
 
-export function ItemsList(props: ItemsListProps) {
-  const itemsListArray = useSelector(itemsListArraySelector);
-  const itemsList = useSelector(itemsListSelector);
-  const currentStore = useSelector(currentStoreSelector);
+export function ShoppingList(props: ShoppingListProps) {
+  const {} = props;
+  const shoppingListArray = useSelector(shoppingListArraySelector);
+
+  console.log({ shoppingLIst: shoppingListArray });
+
   const theme = useTheme();
   const dispatch = useDispatch();
 
-  const onSwipeRight = useCallback(
-    (key: Key) => {
-      const keyToUse = getKeyToUse(key);
-      const currentQuantity =
-        itemsList?.[keyToUse as any]?.quantity?.[currentStore.name];
-      console.log({
-        keyToUse,
-        quantity: itemsList?.[keyToUse as any]?.quantity,
-        currentQuantity,
-        currentStore,
-      });
-
-      dispatch(
-        updateStoreSpecificValues({
-          key,
-          storeSpecificValuesToUpdate: {
-            quantity:
-              currentQuantity && currentQuantity > 0 ? currentQuantity + 1 : 1,
-          },
-          storeName: currentStore.name,
-        }),
-      );
-    },
-    [currentStore, itemsList, updateStoreSpecificValues],
-  );
+  const onSwipeRight = useCallback((key: Key) => {}, []);
 
   const onSwipeLeft = useCallback((key: Key) => {
     dispatch(removeItemsListItem(key));
@@ -79,10 +37,10 @@ export function ItemsList(props: ItemsListProps) {
   return (
     <View>
       <Center>
-        <Heading p={theme.sizes[2]}>Items List</Heading>
+        <Heading p={theme.sizes[2]}>Shopping List</Heading>
       </Center>
       <FlashList
-        data={itemsListArray}
+        data={shoppingListArray}
         renderItem={({ item, index }: ListRow<ItemWithStoreSpecificValues>) => {
           const key = {
             name: item.name,
@@ -107,27 +65,18 @@ export function ItemsList(props: ItemsListProps) {
               rightSwipe={{
                 backgroundColor: theme.colors.primary[900],
                 onPress: onSwipeRight.bind(null, key),
-                title: currentStore.name ? (
+                title: (
                   <Stack
-                    paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
+                    paddingLeft={theme.space[2]}
                     alignItems="center"
                   >
                     <FontAwesome
-                      name="plus"
+                      name="check"
                       color={theme.colors.white}
                       size={theme.sizes[8]}
                     />
-                    <Text color={theme.colors.white}>Shopping List</Text>
+                    <Text color={theme.colors.white}>In Cart</Text>
                   </Stack>
-                ) : (
-                  <Text
-                    width={150}
-                    numberOfLines={2}
-                    paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-                    color={theme.colors.white}
-                  >
-                    Select a Store to Add to Shopping List
-                  </Text>
                 ),
               }}
             >
@@ -138,7 +87,7 @@ export function ItemsList(props: ItemsListProps) {
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           `item ${index}`
         }
-        estimatedItemSize={180}
+        estimatedItemSize={230}
         ItemSeparatorComponent={() => (
           <View
             height={StyleSheet.hairlineWidth}

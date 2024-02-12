@@ -1,6 +1,13 @@
 ## MVP
--finish ItemsList left swipe callback
--start ShoppingList (can remove storesList related stuff from listSlice?)
+-add button to create 500 items
+
+-Figure out how to style the shopping list tile
+-figure out how to handle in cart vs in shopping list
+-add sorting for items list
+-add sorting for shopping list
+
+-if sorting with 500+ items is slow, may need to rethink data structure for lists (make array and save the sort type (would need to add .None as an option too))
+
 
 
 -Store details should have a way to view all of the isles and sort them in order
@@ -15,6 +22,8 @@
     --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given (needs to check and update dict values for those fields)
     -- figure out why stores are not being persisted
 
+
+ //todo: calculate FlashList estimatedItemSize for each instance
 
 //todo: figure out types for useRouter/useNavigation (expo-router)
 //todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/

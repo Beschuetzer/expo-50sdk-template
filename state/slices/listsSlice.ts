@@ -11,7 +11,6 @@ import {
   Key,
   LastPurchasedItem,
   LastPurchasedList,
-  ShoppingList,
   StoreList,
   StoreSpecificValueKey,
   StoreSpecificValues,
@@ -50,7 +49,6 @@ export type ListsState = {
   currentStoreName: string;
   itemsList: ItemsList;
   lastPurchasedList: LastPurchasedList;
-  shoppingList: ShoppingList;
   storesList: StoreList;
 };
 
@@ -58,7 +56,6 @@ const initialState: ListsState = {
   currentStoreName: EMPTY_STRING,
   itemsList: getEmptyObject(),
   lastPurchasedList: getEmptyObject(),
-  shoppingList: getEmptyObject(),
   storesList: getEmptyObject(),
 };
 
@@ -116,19 +113,6 @@ export const listsSlice = createSlice({
         [keyToUse]: action.payload,
       };
     },
-    addShoppingListItem: (state: ListsState, action: PayloadAction<Item>) => {
-      const keyToUse = getKeyToUse(action.payload);
-      if (!keyToUse) {
-        alert(
-          "Unable to add an item with no name and no upc to the shoppingList.",
-        );
-        return;
-      }
-      state.shoppingList = {
-        ...state.shoppingList,
-        [keyToUse]: action.payload,
-      };
-    },
     addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
       const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
@@ -169,16 +153,6 @@ export const listsSlice = createSlice({
       }
       delete state.lastPurchasedList[keyToUse];
     },
-    removeShoppingListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action.payload);
-      if (!keyToUse) {
-        alert(
-          "A key must be provided in order to remove an item from the shoppingList.",
-        );
-        return;
-      }
-      delete state.shoppingList[keyToUse];
-    },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
       if (!keyToUse) {
@@ -194,9 +168,6 @@ export const listsSlice = createSlice({
     },
     resetLastPurchasedList: (state: ListsState) => {
       state.lastPurchasedList = getEmptyObject();
-    },
-    resetShoppingList: (state: ListsState) => {
-      state.shoppingList = getEmptyObject();
     },
     resetStoresList: (state: ListsState) => {
       state.storesList = getEmptyObject();
@@ -247,15 +218,12 @@ export const listsSlice = createSlice({
 export const {
   addItemsListItem,
   addLastPurchasedList,
-  addShoppingListItem,
   addStoresListItem,
   removeItemsListItem,
   removeLastPurchasedList,
-  removeShoppingListItem,
   removeStoresListItem,
   resetItemsList,
   resetLastPurchasedList,
-  resetShoppingList,
   resetStoresList,
   resetCurrentStoreName,
   setCurrentStoreName,
@@ -295,6 +263,26 @@ export const itemsListArraySelector = createSelector(
     return Object.values(itemsList || {});
   },
 );
+
+export const shoppingListArraySelector = createSelector(
+  [
+    (state: RootState) => state[listsSlice.name].itemsList,
+    (state: RootState) => state[listsSlice.name].storesList,
+    (state: RootState) => state[listsSlice.name].currentStoreName,
+  ],
+  (itemsList, storesList, currentStoreName) => {
+    const currentStore = storesList[currentStoreName];
+    const shoppingList: ItemWithStoreSpecificValues[] = [];
+    for (const item of Object.values(itemsList)) {
+      if (item?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]){
+        shoppingList.push(item);
+      }
+    }
+    console.log({shoppingList});
+    return shoppingList;
+  },
+)
+
 
 export const storesListSelector = (state: RootState) =>
   state[listsSlice.name].storesList;

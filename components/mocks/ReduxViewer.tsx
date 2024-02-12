@@ -40,10 +40,10 @@ export function ReduxViewer() {
   const currentStore = useSelector(currentStoreSelector);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(resetItemsList())
-    dispatch(resetStoresList())
-  }, [])
+  // useEffect(() => {
+  //   dispatch(resetItemsList())
+  //   dispatch(resetStoresList())
+  // }, [])
 
   function renderFieldAndText(key: string, value: any) {
     return (

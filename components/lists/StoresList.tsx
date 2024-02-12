@@ -11,7 +11,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { ListSorter } from "./ListSorter";
 import { SwipeableRow } from "./SwipeableRow";
 import { SORTERS, SortType } from "./sorters";
-import { StoreManager } from "../StoreManager";
 
 import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from "@/constants/general";
 import { Routes } from "@/constants/navigation";
@@ -20,7 +19,9 @@ import {
   currentStoreSelector,
   removeStoresListItem,
   setCurrentStoreName,
+  setStoresList,
   storesListArraySelector,
+  storesListSortTypeSelector,
 } from "@/state/slices/listsSlice";
 import { Key } from "@/types/Item";
 import { Store } from "@/types/Store";
@@ -30,35 +31,25 @@ import { calculateDistance, getKeyToUse } from "@/utils/helpers";
 export function StoresList() {
   const storesList = useSelector(storesListArraySelector);
   const currentLocation = useSelector(currentLocationSelector);
+  const storesListSortType = useSelector(storesListSortTypeSelector);
   const currentStore = useSelector(currentStoreSelector);
+  const hasPopulatedStoresListWithDistances = useRef(false);
   const theme = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const arrayWithDistances = useMemo(() => {
-    return storesList.map((store) => {
-      return {
-        ...store,
-        calculatedDistance: calculateDistance(
-          currentLocation,
-          store.gpsCoordinates,
-        ),
-      };
-    });
-  }, [storesList, currentLocation]) as Store[];
 
   console.log({ storesList });
 
   const listRef = useRef<FlashList<Store> | null>(null);
-  const [sortedList, setSortedList] = useState(arrayWithDistances);
   const [refreshing, setRefreshing] = useState(false);
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
-      const newSorted = [...arrayWithDistances.sort(SORTERS[sortType])];
-      console.log({ newSorted });
-      setSortedList(newSorted);
+      const sortedList = [...storesList.sort(SORTERS[sortType])];
+      console.log(sortType, sortedList);
+      dispatch(setStoresList(sortedList));
     },
-    [arrayWithDistances],
+    [storesList],
   );
 
   const onSwipeLeft = useCallback(
@@ -70,6 +61,27 @@ export function StoresList() {
     },
     [listRef],
   );
+
+  useEffect(() => {
+    hasPopulatedStoresListWithDistances.current = false;
+  }, [currentLocation])
+
+  useEffect(() => {
+    if (hasPopulatedStoresListWithDistances.current) return
+    hasPopulatedStoresListWithDistances.current = true
+    const sortedWithDistances = storesList
+      .map((store) => ({
+        ...store,
+        calculatedDistance: calculateDistance(
+          currentLocation,
+          store.gpsCoordinates,
+        ),
+      }))
+      .sort(SORTERS[storesListSortType])
+    console.log({ sortedWithDistances })
+
+    dispatch(setStoresList(sortedWithDistances))
+  }, [storesList, currentLocation, hasPopulatedStoresListWithDistances])
 
   function renderItem({ item, index }: ListRow<Store>) {
     const keyToUse = {
@@ -168,7 +180,7 @@ export function StoresList() {
           sortTypes={[SortType.Distance, SortType.Name]}
         />
       }
-      data={sortedList}
+      data={storesList}
       estimatedItemSize={150}
       keyExtractor={(item: Store, index: number) =>
         getKeyToUse({ name: item.name, upc: EMPTY_STRING })

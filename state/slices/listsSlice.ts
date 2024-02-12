@@ -126,16 +126,18 @@ export const listsSlice = createSlice({
     },
     addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
       const store = action.payload;
-      const keyToUse = getKeyToUse(store)
+      const keyToUse = getKeyToUse(store);
       if (!keyToUse) {
         alert("Unable to add an item with no name to the storesList.");
         return;
       }
 
-
-      if (state.storesList.find((store) => {
-        return store.name === keyToUse
-      })) return;
+      if (
+        state.storesList.find((store) => {
+          return store.name === keyToUse;
+        })
+      )
+        return;
       state.storesList.push(store);
       state.storesList.sort(SORTERS[state.storesListSortType]);
 
@@ -197,6 +199,10 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       state.currentStoreName = action.payload;
     },
+    setStoresList: (state: ListsState, action: PayloadAction<StoreList>) => {
+      if (!action.payload) return;
+      state.storesList = action.payload;
+    },
     updateStoreSpecificValues: (
       state: ListsState,
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
@@ -242,6 +248,7 @@ export const {
   resetStoresList,
   resetCurrentStoreName,
   setCurrentStoreName,
+  setStoresList,
   updateStoreSpecificValues,
 } = listsSlice.actions;
 
@@ -315,3 +322,6 @@ export const storesListItemSelector = (storeName: string) =>
       return (value || null) as Store | null;
     },
   );
+
+export const storesListSortTypeSelector = (state: RootState) =>
+  state[listsSlice.name].storesListSortType;

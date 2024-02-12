@@ -79,7 +79,7 @@ export function ItemsList(props: ItemsListProps) {
         setRefreshing(true);
         setTimeout(() => {
           setRefreshing(false);
-        }, 10000);
+        }, 2000);
       }}
       data={itemsListArray}
       renderItem={({ item, index }: ListRow<ItemWithStoreSpecificValues>) => {

@@ -36,7 +36,11 @@ export default function StoreScreen() {
   }, [navigation]);
 
   return (
-    <View>
+    <View
+      flex={1}
+      backgroundColor={theme.colors.white}
+      justifyContent="space-between"
+    >
       <StoresList />
     </View>
   );

@@ -1,7 +1,9 @@
 ## MVP
--convert ShoppingList to use Flashlist
+-turn StoresList type into { list: ItemWithStoreSpecificValues[], sortType: SortType }
 
+-convert ShoppingList to use Flashlist
 -turn Itemslist type into { list: Item[], sortType: SortType }
+-turn ShoppingList type into { list: ItemWithStoreSpecificValues[], sortType: SortType }
 
 -Figure out how to style the shopping list tile
 -figure out how to handle in cart vs in shopping list

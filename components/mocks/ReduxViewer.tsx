@@ -42,9 +42,10 @@ export function ReduxViewer() {
   const currentStore = useSelector(currentStoreSelector);
   const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   dispatch(resetItemsList());
-  // }, [])
+  useEffect(() => {
+    dispatch(resetItemsList())
+    dispatch(resetStoresList())
+  }, [])
 
   function renderFieldAndText(key: string, value: any) {
     return (
@@ -124,7 +125,7 @@ export function ReduxViewer() {
                   } else {
                     lastStoreIndexRef.current += 1;
                   }
-                  dispatch(addStoresListItem({ storeToAdd: storeToUse }));
+                  dispatch(addStoresListItem(storeToUse));
                 }}
               >
                 Store

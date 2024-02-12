@@ -2,8 +2,6 @@ import { XOR } from "ts-xor";
 
 import { Store } from "./Store";
 
-import { SortType } from "@/components/lists/sorters";
-
 export enum ItemUnit {
   Bar = "bar",
   Bunch = "bunch",
@@ -74,10 +72,7 @@ export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;
 };
 
-export type SortedList<T> = Partial<{ [key in SortType]: T[] }> & {
-  currentSortType: SortType;
-};
-export type ItemsList = SortedList<ItemWithStoreSpecificValues>;
-export type ShoppingList = SortedList<Item>;
-export type LastPurchasedList = SortedList<LastPurchasedItem>;
-export type StoreList = SortedList<Store>;
+export type ItemsList = Item[];
+export type ShoppingList = ItemWithStoreSpecificValues[]; //todo: this should be removed?
+export type LastPurchasedList = LastPurchasedItem[];
+export type StoreList = Store[];

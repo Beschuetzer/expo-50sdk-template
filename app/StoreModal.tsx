@@ -19,7 +19,7 @@ export default function StoreModal() {
     <StoreForm
       onClose={() => navigation.canGoBack() && navigation.goBack()}
       onSave={(store) => {
-        dispatch(addStoresListItem({storeToAdd: store}));
+        dispatch(addStoresListItem(store));
       }}
       store={store}
     />

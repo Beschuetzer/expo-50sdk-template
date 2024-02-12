@@ -3,7 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "../store";
 
-import { SortType } from "@/components/lists/sorters";
+import { SORTERS, SortType } from "@/components/lists/sorters";
 import { EMPTY_STRING } from "@/constants/general";
 import {
   Item,
@@ -17,7 +17,7 @@ import {
   StoreSpecificValues,
 } from "@/types/Item";
 import { Store } from "@/types/Store";
-import { getEmptyObject, getKeyToUse } from "@/utils/helpers";
+import { getEmptyArray, getKeyToUse } from "@/utils/helpers";
 
 export type AddStoresListItemPayload = {
   sortType?: SortType;
@@ -56,13 +56,15 @@ export type ListsState = {
   itemsList: ItemsList;
   lastPurchasedList: LastPurchasedList;
   storesList: StoreList;
+  storesListSortType: SortType;
 };
 
 const initialState: ListsState = {
   currentStoreName: EMPTY_STRING,
-  itemsList: getEmptyObject(),
-  lastPurchasedList: getEmptyObject(),
-  storesList: getEmptyObject(),
+  itemsList: getEmptyArray(),
+  lastPurchasedList: getEmptyArray(),
+  storesList: getEmptyArray(),
+  storesListSortType: SortType.Name,
 };
 
 export const listsSlice = createSlice({
@@ -122,47 +124,25 @@ export const listsSlice = createSlice({
         [keyToUse]: action.payload,
       };
     },
-    addStoresListItem: (
-      state: ListsState,
-      action: PayloadAction<AddStoresListItemPayload>,
-    ) => {
-      const { sortType = SortType.None, storeToAdd } = action.payload;
-      const keyToUse = getKeyToUse(storeToAdd);
+    addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
+      const store = action.payload;
+      const keyToUse = getKeyToUse(store)
       if (!keyToUse) {
         alert("Unable to add an item with no name to the storesList.");
         return;
       }
 
-      const sortTypeArray =
-        state.storesList?.[sortType] !== undefined
-          ? state.storesList[sortType]
-          : null;
-      const noneArray = state.storesList?.[SortType.None] || [];
 
+      if (state.storesList.find((store) => {
+        return store.name === keyToUse
+      })) return;
+      state.storesList.push(store);
+      state.storesList.sort(SORTERS[state.storesListSortType]);
 
-      if (noneArray.find((store) => store.name === keyToUse)) return;
-
-      state.storesList = {
-        [SortType.None]: [...noneArray, storeToAdd],
-        currentSortType: sortType,
-      };
-
-      if (sortTypeArray) {
-        state.storesList[sortType] = Array.from(
-          new Set([...sortTypeArray, storeToAdd]),
-        );
+      if (state.storesList.length === 1) {
+        state.currentStoreName = store.name;
       }
-
-      if (noneArray.length === 0) {
-        state.currentStoreName = storeToAdd.name;
-      }
-
-      console.log({ sortTypeArray, noneArray });
-      console.log({
-        addStoresList: state.storesList,
-        none: state.storesList[SortType.None],
-        sortType: state.storesList[sortType],
-      });
+      console.log({ storesList: state.storesList });
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -198,13 +178,13 @@ export const listsSlice = createSlice({
       delete state.storesList[keyToUse];
     },
     resetItemsList: (state: ListsState) => {
-      state.itemsList = getEmptyObject();
+      state.itemsList = getEmptyArray();
     },
     resetLastPurchasedList: (state: ListsState) => {
-      state.lastPurchasedList = getEmptyObject();
+      state.lastPurchasedList = getEmptyArray();
     },
     resetStoresList: (state: ListsState) => {
-      state.storesList = getEmptyObject();
+      state.storesList = getEmptyArray();
       state.currentStoreName = EMPTY_STRING;
     },
     resetCurrentStoreName: (state: ListsState) => {

@@ -8,10 +8,9 @@ import {
   IMAGE_PICKER_OPTIONS,
   IMAGE_PRIORITY_MAPPING,
 } from '@/constants/general'
-import { Key, SortedList } from '@/types/Item'
+import { Key } from '@/types/Item'
 import { GpsCoordinate } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
-import { SortType } from '@/components/lists/sorters'
 
 export function calculateDistance(
   gpsCoordinateStart: GpsCoordinate | null | undefined,
@@ -78,13 +77,6 @@ export function getEmptyArray<T>() {
 
 export function getEmptyObject<T>() {
   return {} as T
-}
-
-export function getEmptyList<T>(): SortedList<T> {
-  return {
-    currentSortType: SortType.None,
-    [SortType.None]: [],
-  }
 }
 
 export function getKeyToUse(key: Key, displayAlert = true) {

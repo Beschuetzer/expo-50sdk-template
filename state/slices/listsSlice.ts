@@ -171,13 +171,17 @@ export const listsSlice = createSlice({
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
+      console.log({keyToUse});
+      
       if (!keyToUse) {
         alert(
           "A key must be provided in order to remove an item from the storesList.",
         );
         return;
       }
-      delete state.storesList[keyToUse];
+      state.storesList = state.storesList.filter(
+        (store) => store.name !== keyToUse,
+      );
     },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyArray();
@@ -318,8 +322,7 @@ export const storesListItemSelector = (storeName: string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].storesList],
     (storesList) => {
-      const value = storesList[storeName];
-      return (value || null) as Store | null;
+      return storesList?.find((store) => store.name === storeName) as Store
     },
   );
 

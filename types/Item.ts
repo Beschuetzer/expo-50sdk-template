@@ -74,11 +74,10 @@ export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;
 };
 
-type UpcOrName = string;
-type SortedLists<T> = { [key in SortType]: T[] } & {
+export type SortedList<T> = Partial<{ [key in SortType]: T[] }> & {
   currentSortType: SortType;
 };
-export type ItemsList = SortedLists<ItemWithStoreSpecificValues>;
-export type ShoppingList = SortedLists<Item>;
-export type LastPurchasedList = SortedLists<LastPurchasedItem>;
-export type StoreList = { [name: string]: Store };
+export type ItemsList = SortedList<ItemWithStoreSpecificValues>;
+export type ShoppingList = SortedList<Item>;
+export type LastPurchasedList = SortedList<LastPurchasedItem>;
+export type StoreList = SortedList<Store>;

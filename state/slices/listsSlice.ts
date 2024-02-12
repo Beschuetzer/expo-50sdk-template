@@ -19,10 +19,10 @@ import { Store } from "@/types/Store";
 import { getEmptyObject, getKeyToUse } from "@/utils/helpers";
 
 export type AddItemsListItemPayload = {
-  item: Item;
-  storeSpecificValues?: StoreSpecificValues;
-  currentStore?: Store;
-};
+  item: Item
+  storeSpecificValues?: StoreSpecificValues
+  currentStore?: Store
+}
 
 export type UpdateStoreSpecificValuesPayload = {
   /**
@@ -60,25 +60,29 @@ const initialState: ListsState = {
 };
 
 export const listsSlice = createSlice({
-  name: "lists",
+  name: 'lists',
   initialState,
   reducers: {
+    addMockItems: (
+      state: ListsState,
+      action: PayloadAction<ItemsList>,
+    ) => {
+      state.itemsList = action.payload
+    },
     addItemsListItem: (
       state: ListsState,
       action: PayloadAction<AddItemsListItemPayload>,
     ) => {
-      const { item, storeSpecificValues, currentStore } = action.payload || {};
-      const keyToUse = getKeyToUse(action.payload.item);
+      const { item, storeSpecificValues, currentStore } = action.payload || {}
+      const keyToUse = getKeyToUse(action.payload.item)
 
       if (!keyToUse) {
-        alert(
-          "Unable to add an item with no name and no upc to the itemsList.",
-        );
-        return;
+        alert('Unable to add an item with no name and no upc to the itemsList.')
+        return
       }
 
-      const currentItem = state.itemsList?.[keyToUse] as any;
-      const newItem = { ...item } as any;
+      const currentItem = state.itemsList?.[keyToUse] as any
+      const newItem = { ...item } as any
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
@@ -88,117 +92,117 @@ export const listsSlice = createSlice({
               ? currentItem[valueName]
               : newItem[valueName]),
             [currentStore.name]: value?.[currentStore.name],
-          };
+          }
         }
       }
 
       state.itemsList = {
         ...state.itemsList,
         [keyToUse]: newItem,
-      };
+      }
     },
     addLastPurchasedList: (
       state: ListsState,
       action: PayloadAction<LastPurchasedItem>,
     ) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "Unable to add an item with no name and no upc to the lastPurchasedList.",
-        );
-        return;
+          'Unable to add an item with no name and no upc to the lastPurchasedList.',
+        )
+        return
       }
       state.lastPurchasedList = {
         ...state.lastPurchasedList,
         [keyToUse]: action.payload,
-      };
+      }
     },
     addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
-        alert("Unable to add an item with no name to the storesList.");
-        return;
+        alert('Unable to add an item with no name to the storesList.')
+        return
       }
 
       state.storesList = {
         ...state.storesList,
         [keyToUse]: action.payload,
-      };
+      }
 
-      const currentStores = Object.values(state.storesList || {});
+      const currentStores = Object.values(state.storesList || {})
       if (currentStores.length === 1) {
-        state.currentStoreName = currentStores[0].name;
+        state.currentStoreName = currentStores[0].name
       }
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "A key must be provided in order to remove an item from the itemsList.",
-        );
-        return;
+          'A key must be provided in order to remove an item from the itemsList.',
+        )
+        return
       }
-      delete state.itemsList[keyToUse];
+      delete state.itemsList[keyToUse]
     },
     removeLastPurchasedList: (
       state: ListsState,
       action: PayloadAction<Key>,
     ) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "A key must be provided in order to remove an item from the lastPurchasedList.",
-        );
-        return;
+          'A key must be provided in order to remove an item from the lastPurchasedList.',
+        )
+        return
       }
-      delete state.lastPurchasedList[keyToUse];
+      delete state.lastPurchasedList[keyToUse]
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "A key must be provided in order to remove an item from the storesList.",
-        );
-        return;
+          'A key must be provided in order to remove an item from the storesList.',
+        )
+        return
       }
-      delete state.storesList[keyToUse];
+      delete state.storesList[keyToUse]
     },
     resetItemsList: (state: ListsState) => {
-      state.itemsList = getEmptyObject();
+      state.itemsList = getEmptyObject()
     },
     resetLastPurchasedList: (state: ListsState) => {
-      state.lastPurchasedList = getEmptyObject();
+      state.lastPurchasedList = getEmptyObject()
     },
     resetStoresList: (state: ListsState) => {
-      state.storesList = getEmptyObject();
-      state.currentStoreName = EMPTY_STRING;
+      state.storesList = getEmptyObject()
+      state.currentStoreName = EMPTY_STRING
     },
     resetCurrentStoreName: (state: ListsState) => {
-      state.currentStoreName = EMPTY_STRING;
+      state.currentStoreName = EMPTY_STRING
     },
     setCurrentStoreName: (
       state: ListsState,
       action: PayloadAction<string | undefined>,
     ) => {
-      if (!action.payload) return;
-      state.currentStoreName = action.payload;
+      if (!action.payload) return
+      state.currentStoreName = action.payload
     },
     updateStoreSpecificValues: (
       state: ListsState,
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
     ) => {
-      if (!action.payload) return;
-      const { storeSpecificValuesToUpdate, key, storeName } = action.payload;
-      const keyToUse = getKeyToUse(key);
-      const itemToUpdate = state.itemsList?.[keyToUse] as any;
+      if (!action.payload) return
+      const { storeSpecificValuesToUpdate, key, storeName } = action.payload
+      const keyToUse = getKeyToUse(key)
+      const itemToUpdate = state.itemsList?.[keyToUse] as any
       if (!itemToUpdate || !storeSpecificValuesToUpdate || !storeName) {
         alert(
           `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
-        );
-        return;
+        )
+        return
       }
 
-      console.log({ itemToUpdateBefore: itemToUpdate });
+      console.log({ itemToUpdateBefore: itemToUpdate })
 
       for (const [valueName, value] of Object.entries(
         storeSpecificValuesToUpdate,
@@ -206,16 +210,17 @@ export const listsSlice = createSlice({
         itemToUpdate[valueName] = {
           ...itemToUpdate[valueName],
           [storeName]: value,
-        };
+        }
       }
 
-      console.log({ itemToUpdateAfter: itemToUpdate });
+      console.log({ itemToUpdateAfter: itemToUpdate })
     },
   },
-});
+})
 
 // Action creators are generated for each case reducer function
 export const {
+  addMockItems,
   addItemsListItem,
   addLastPurchasedList,
   addStoresListItem,
@@ -278,7 +283,6 @@ export const shoppingListArraySelector = createSelector(
         shoppingList.push(item);
       }
     }
-    console.log({shoppingList});
     return shoppingList;
   },
 )

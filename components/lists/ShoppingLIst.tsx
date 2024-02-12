@@ -22,9 +22,6 @@ type ShoppingListProps = object;
 export function ShoppingList(props: ShoppingListProps) {
   const {} = props;
   const shoppingListArray = useSelector(shoppingListArraySelector);
-
-  console.log({ shoppingLIst: shoppingListArray });
-
   const theme = useTheme();
   const dispatch = useDispatch();
 

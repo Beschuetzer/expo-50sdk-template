@@ -139,12 +139,12 @@ export function ReduxViewer() {
                   dispatch(
                     addItemsListItem({
                       item: {
-                        frequency: 604800000,
+                        frequency: Math.random(),
                         imageToUseIndex: 0,
                         images: [
                           "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",
                         ],
-                        name: "Cholocate",
+                        name: `Cholocate-${Math.random()}`,
                         unit: "bar",
                         upc: upcToUse,
                       },

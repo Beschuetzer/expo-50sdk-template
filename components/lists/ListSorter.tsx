@@ -1,6 +1,6 @@
 import { Picker } from "@react-native-picker/picker";
 import { FormControl, Row, Stack, View, useTheme } from "native-base";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { SortType } from "./sorters";
 
@@ -18,7 +18,11 @@ export function ListSorter(props: ListSorterProps) {
     sortTypes,
     headingTag: Tag = FormControl.Label,
   } = props;
-  const [selectedSortType, setSelectedSortType] = useState(sortTypes[0]);
+  const defaultSortType = useMemo(
+    () => sortTypes?.[0] || SortType.None,
+    [sortTypes],
+  );
+  const [selectedSortType, setSelectedSortType] = useState(defaultSortType);
   const theme = useTheme();
 
   const onSortTypePress = useCallback(
@@ -30,7 +34,7 @@ export function ListSorter(props: ListSorterProps) {
   );
 
   useEffect(() => {
-    onSortTypePress && onSortTypePress(sortTypes[0])
+    onSortTypePress && onSortTypePress(defaultSortType)
   }, [])
 
   return (
@@ -39,7 +43,7 @@ export function ListSorter(props: ListSorterProps) {
         <Tag>Sort By: </Tag>
       </Row>
       <Picker selectedValue={selectedSortType} onValueChange={onSortTypePress}>
-        {Object.values(SortType).map((sortType) => (
+        {sortTypes.map((sortType) => (
           <Picker.Item key={sortType} label={sortType} value={sortType} />
         ))}
       </Picker>

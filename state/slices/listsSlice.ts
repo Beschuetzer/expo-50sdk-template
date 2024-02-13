@@ -244,6 +244,10 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       state.currentStoreName = action.payload;
     },
+    setItemsList: (state: ListsState, action: PayloadAction<ItemsList>) => {
+      if (!action.payload) return;
+      state.itemsList = action.payload;
+    },
     setStoresList: (state: ListsState, action: PayloadAction<StoreList>) => {
       if (!action.payload) return;
       state.storesList = action.payload;
@@ -255,7 +259,10 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       const { storeSpecificValuesToUpdate, key, storeName } = action.payload;
       const keyToUse = getKeyToUse(key);
-      const itemToUpdate = getItemFromItemsList(state.itemsList, keyToUse) as any;
+      const itemToUpdate = getItemFromItemsList(
+        state.itemsList,
+        keyToUse,
+      ) as any;
       if (!itemToUpdate || !storeSpecificValuesToUpdate || !storeName) {
         alert(
           `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
@@ -277,22 +284,23 @@ export const listsSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-  addMockItems,
   addItemsListItem,
   addLastPurchasedList,
+  addMockItems,
   addStoresListItem,
   removeItemsListItem,
   removeLastPurchasedList,
   removeStoresListItem,
+  resetCurrentLocation,
+  resetCurrentStoreName,
   resetItemsList,
   resetLastPurchasedList,
   resetStoresList,
-  resetCurrentStoreName,
+  setCurrentLocation,
   setCurrentStoreName,
+  setItemsList,
   setStoresList,
   updateStoreSpecificValues,
-  resetCurrentLocation,
-  setCurrentLocation,
 } = listsSlice.actions;
 
 export default listsSlice.reducer;

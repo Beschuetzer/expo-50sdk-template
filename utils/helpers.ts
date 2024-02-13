@@ -4,13 +4,18 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 
 import {
+  DAY_IN_MS,
   EMPTY_STRING,
+  FREQUENCY_INITIAL,
+  HOUR_IN_MS,
   IMAGE_PICKER_OPTIONS,
   IMAGE_PRIORITY_MAPPING,
+  WEEK_IN_MS,
 } from "@/constants/general";
 import { ItemWithStoreSpecificValues, ItemsList, Key } from "@/types/Item";
 import { GpsCoordinate } from "@/types/Store";
 import { UpcProduct } from "@/types/UpcResponse";
+import { Frequency, TimeSpan } from "@/types/general";
 
 export function calculateDistance(
   gpsCoordinateStart: GpsCoordinate | null | undefined,
@@ -90,6 +95,31 @@ export function getKeyToUse(key: string | Key, displayAlert = true) {
   }
 
   return toReturn;
+}
+
+export function getFrequencyValue(number?: number): Frequency {
+  if (!number)
+    return {
+      ...FREQUENCY_INITIAL,
+    };
+
+  let numberToUse = FREQUENCY_INITIAL.number;
+  let timeSpan: TimeSpan = FREQUENCY_INITIAL.timeSpan;
+  if (number % WEEK_IN_MS === 0) {
+    numberToUse = number / WEEK_IN_MS;
+    timeSpan = TimeSpan.Week;
+  } else if (number % DAY_IN_MS === 0) {
+    numberToUse = number / DAY_IN_MS;
+    timeSpan = TimeSpan.Day;
+  } else {
+    numberToUse = number / HOUR_IN_MS;
+    timeSpan = TimeSpan.Hour;
+  }
+
+  return {
+    number: numberToUse,
+    timeSpan,
+  };
 }
 
 export async function getGpsCoordinate(): Promise<GpsCoordinate> {

@@ -28,7 +28,7 @@ import {
 } from "@/state/slices/listsSlice";
 import { Item, StoreSpecificValues } from "@/types/Item";
 import { ItemProp } from "@/types/general";
-import { deleteFile, getKeyToUse } from "@/utils/helpers";
+import { deleteFile, getFrequencyValue, getKeyToUse } from "@/utils/helpers";
 
 type ItemFormValdation = {
   isValid: boolean;
@@ -62,11 +62,15 @@ export function ItemForm(props: ItemFormProps) {
       item.images[item.imageToUseIndex] ||
       EMPTY_STRING,
   );
-  const [upcValue, setUpcValue] = useState(item.upc || EMPTY_STRING);
-  const [productNameValue, setProductNameValue] = useState(
-    item.name || EMPTY_STRING,
+  const [upcValue, setUpcValue] = useState(
+    itemInList?.upc || item.upc || EMPTY_STRING,
   );
-  const frequencyInMsRef = useRef<number>(-1);
+  const [productNameValue, setProductNameValue] = useState(
+    itemInList?.name || item.name || EMPTY_STRING,
+  );
+  const frequencyInMsRef = useRef<number>(
+    itemInList?.frequency || item.frequency || -1,
+  );
   const unitRef = useRef<string>(EMPTY_STRING);
   const isUpcValid = useMemo(
     () => upcValue?.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
@@ -249,6 +253,9 @@ export function ItemForm(props: ItemFormProps) {
         onValueChange={onFrequencyChange}
         headingTag={InputText}
         spacing={theme.space[1]}
+        initialFrequency={getFrequencyValue(
+          itemInList?.frequency || item.frequency,
+        )}
       />
       <UnitInput
         initialValue={itemInList?.unit}

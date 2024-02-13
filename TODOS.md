@@ -1,7 +1,11 @@
 ## MVP
 
+-figure out why changing the frequency for an item doesn't seems to save (opening a new one doesn't seems to update it either)
+
+
 -add addDate field to Item
 -add by date sorter
+
 
 -use StoresList approach to rework the other lists (using array and all the reducers/selectors around it):
    --itemsList (need to figure out sorting stuff)

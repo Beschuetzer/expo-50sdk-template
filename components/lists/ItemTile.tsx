@@ -1,5 +1,6 @@
 import { useNavigation } from "expo-router";
 import { Row, Column, Text } from "native-base";
+import { useMemo } from "react";
 import { StyleSheet } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 
@@ -7,12 +8,17 @@ import { ImageRenderer } from "../ImageRenderer";
 
 import { Routes } from "@/constants/navigation";
 import { ItemWithStoreSpecificValuesProp } from "@/types/general";
+import { getFrequencyValue } from "@/utils/helpers";
 
 type ItemTileProps = ItemWithStoreSpecificValuesProp;
 
 export function ItemTile(props: ItemTileProps) {
   const navigation = useNavigation();
   const { itemWithStoreSpecificValues } = props;
+  const frequencyObj = useMemo(
+    () => getFrequencyValue(itemWithStoreSpecificValues.frequency),
+    [itemWithStoreSpecificValues],
+  );
 
   return (
     <RectButton
@@ -36,7 +42,10 @@ export function ItemTile(props: ItemTileProps) {
         <Column>
           <Text>{itemWithStoreSpecificValues.name}</Text>
           <Text>{itemWithStoreSpecificValues.upc}</Text>
-          <Text>Frequency: {itemWithStoreSpecificValues.frequency}</Text>
+          <Text>
+            Frequency: {frequencyObj.number} {frequencyObj.timeSpan}
+            {frequencyObj.number > 1 ? "s" : ""}
+          </Text>
           <Text>Unit: {itemWithStoreSpecificValues?.unit}</Text>
           <Text>
             Added:{" "}

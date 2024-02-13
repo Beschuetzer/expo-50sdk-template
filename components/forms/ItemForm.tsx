@@ -103,8 +103,6 @@ export function ItemForm(props: ItemFormProps) {
       upc: upcValue,
     } as Item;
 
-    console.log({ itemToSave });
-
     if (!itemToSave.images.includes(selectedUrl)) {
       itemToSave.images.push(selectedUrl);
       itemToSave.imageToUseIndex = itemToSave.images.length - 1;

@@ -38,8 +38,8 @@ export function ItemsList(props: ItemsListProps) {
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
-      console.log({sortType, itemsList});
-      const sortedList = [...itemsList.sort(SORTERS[sortType])];
+      const sortedList = [...itemsList]
+      sortedList.sort(SORTERS[sortType])
       dispatch(setItemsList(sortedList));
     },
     [itemsList],

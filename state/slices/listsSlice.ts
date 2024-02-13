@@ -101,23 +101,15 @@ export const listsSlice = createSlice({
       const newItem = { ...item } as any;
       const itemToUse = currentItem || newItem;
 
-      console.log({ itemToUse });
-
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
-        console.log({ storeSpecificValues, currentStore });
-
         for (const [valueName, value] of Object.entries(storeSpecificValues)) {
-          console.log({ valueName, value });
-
           itemToUse[valueName] = {
             ...itemToUse?.[valueName],
             [currentStore.name]: value?.[currentStore.name],
           };
         }
       }
-
-      console.log({ currentItemAfter: currentItem });
 
       state.itemsList.push(newItem);
       state.itemsList = [

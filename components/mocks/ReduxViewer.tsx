@@ -201,8 +201,6 @@ export function ReduxViewer() {
                     });
                     lastUpcNumberRef.current += 1;
                   }
-                  console.log({itemsList});
-                  
                   dispatch(addMockItems(itemsList));
                 }}
               >

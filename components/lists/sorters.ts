@@ -19,8 +19,6 @@ type HasCalculatedDistanceField = { calculatedDistance: number }
 
 export const SORTERS: { [key in SortType]: CompareFuntion } = {
   [SortType.Aisle]: (current: HasAisleField, next: HasAisleField) => {
-    console.log({current});
-    
     if (!current.aisle && next.aisle) return 1
     if (current.aisle && !next.aisle) return -1
     if (current.aisle === next.aisle) return 0

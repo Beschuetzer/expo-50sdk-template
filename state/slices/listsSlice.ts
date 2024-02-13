@@ -176,7 +176,10 @@ export const listsSlice = createSlice({
         );
         return;
       }
-      delete state.itemsList[keyToUse];
+      state.itemsList = state.itemsList.filter((item) => {
+        if (item.upc && item.name) return item.upc !== keyToUse;
+        return item.name !== keyToUse;
+      });
     },
     removeLastPurchasedList: (
       state: ListsState,

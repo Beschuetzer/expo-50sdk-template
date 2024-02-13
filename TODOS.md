@@ -1,17 +1,14 @@
 ## MVP
 
 -use StoresList approach to rework the other lists (using array and all the reducers/selectors around it):
-   --itemsList
+   --itemsList (need to figure out sorting stuff)
    --lastPurchasedList?
 
 -convert ShoppingList to use Flashlist
--turn Itemslist type into { list: Item[], sortType: SortType }
--turn ShoppingList type into { list: ItemWithStoreSpecificValues[], sortType: SortType }
-
 -Figure out how to style the shopping list tile
 -figure out how to handle in cart vs in shopping list
--add sorting for items list
--add sorting for shopping list
+-figure out how to auto-select store if the difference in current location is <= 1 mile?
+-figure out how to handl lastPurchasedList
 
 -if sorting with 500+ items is slow, may need to rethink data structure for lists (make array and save the sort type (would need to add .None as an option too))
 
@@ -20,15 +17,7 @@
 -Store details should have a way to view all of the isles and sort them in order
 -Need to figure out how to drag and drop rows for easier custom sorting
 
--add filter for StoresList (make generic for use with other lists?)
--add StoresList (similar to Items list) with ability to remove stores and edit them (add to StoreScreen)
-
--Shopping list conversion:
-    --add a new component that handles the ItemFormStoreSpecificFields
-    --create components for each optional/store-specific field which shows a button "Add Frequency" then renders the component when pressed
-    --update how addItemsListItem reducer works to add the specific store fields if a "currentStore" is given (needs to check and update dict values for those fields)
-    -- figure out why stores are not being persisted
-
+-add filter for all lists (make generic for use with other lists?)
 
  //todo: calculate FlashList estimatedItemSize for each instance
 

@@ -179,7 +179,7 @@ export function ReduxViewer() {
                       .toString()
                       .padStart(UPC_REQUIRED_CHAR_LENGTH, "0");
                     itemsList.push({
-                      frequency: 604800000,
+                      frequency: Math.random() * 100000000000000000,
                       imageToUseIndex: 0,
                       images: [
                         "https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg",

@@ -111,10 +111,16 @@ export const listsSlice = createSlice({
         }
       }
 
-      state.itemsList.push(newItem);
-      state.itemsList = [
-        ...state.itemsList.sort(SORTERS[state.itemsListSortType]),
-      ];
+      if (!currentItem) {
+        state.itemsList.push(newItem);
+        state.itemsList = [
+          ...state.itemsList.sort(SORTERS[state.itemsListSortType]),
+        ];
+      } else {
+        for (const [key, value] of Object.entries(item)) {
+          currentItem[key] = value;
+        }
+      }
     },
     addLastPurchasedList: (
       state: ListsState,

@@ -1,7 +1,7 @@
 ## MVP
 
--figure out why changing the frequency for an item doesn't seems to save (opening a new one doesn't seems to update it either)
-
+-figure out how to load initial value for unit on ItemForm load (always shows package)
+-need to figure out how to show items in ItemForm when there is no upc data (just try opening one of the items created from mock 500 items button)
 
 -add addDate field to Item
 -add by date sorter

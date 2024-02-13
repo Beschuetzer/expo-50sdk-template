@@ -117,7 +117,7 @@ export function getItemFromItemsList(itemsList: ItemsList, key: string | Key) {
       if (item?.name && item.upc) return item.upc === keyToUse;
       return item?.name === keyToUse;
     }) || null;
-  return itemFound ? ({ ...itemFound } as ItemWithStoreSpecificValues) : null;
+  return itemFound ? (itemFound as ItemWithStoreSpecificValues) : null;
 }
 
 export function getImagesFromUpcProduct(upcProduct: UpcProduct) {

@@ -3,11 +3,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { FrequencyInput } from "./FrequencyInput";
+import { InputText } from "./InputText";
 import { ItemFormStoreSpecific } from "./ItemFormStoreSpecificItems";
 import { ThumbnailPicker } from "./ThumbnailPicker";
 import { UnitInput } from "./UnitInput";
 import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
 import { InputValidationMessage } from "../InputValidationMessage";
+import { StoreManager } from "../StoreManager";
 
 import {
   DEFAULT_IMAGE_INDEX,
@@ -27,8 +29,6 @@ import {
 import { Item, StoreSpecificValues } from "@/types/Item";
 import { ItemProp } from "@/types/general";
 import { deleteFile, getKeyToUse } from "@/utils/helpers";
-import { InputText } from "./InputText";
-import { StoreManager } from "../StoreManager";
 
 type ItemFormValdation = {
   isValid: boolean;
@@ -91,6 +91,7 @@ export function ItemForm(props: ItemFormProps) {
   }
 
   function onSavePress() {
+    const now = Date.now();
     const itemToSave = {
       frequency: frequencyInMsRef.current,
       unit: unitRef.current,
@@ -101,6 +102,8 @@ export function ItemForm(props: ItemFormProps) {
         }) || DEFAULT_IMAGE_INDEX,
       name: productNameValue,
       upc: upcValue,
+      addedDate: item.addedDate || now,
+      lastUpdatedDate: now,
     } as Item;
 
     if (!itemToSave.images.includes(selectedUrl)) {
@@ -253,7 +256,7 @@ export function ItemForm(props: ItemFormProps) {
         headingTag={InputText}
         spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
-      <StoreManager showStoreList={true} />
+      <StoreManager showStoreList />
       <ItemFormStoreSpecific
         item={item}
         onValueChange={onItemSpecificValueChange}

@@ -147,6 +147,8 @@ export function ReduxViewer() {
                         name: `Cholocate-${Math.random()}`,
                         unit: "bar",
                         upc: upcToUse,
+                        addedDate: Date.now() + Math.random() * 10000,
+                        lastUpdatedDate: Date.now() + Math.random() * 10000,
                       },
                       storeSpecificValues: {
                         itemId: {
@@ -179,6 +181,8 @@ export function ReduxViewer() {
                       .toString()
                       .padStart(UPC_REQUIRED_CHAR_LENGTH, "0");
                     itemsList.push({
+                      addedDate: Date.now(),
+                      lastUpdatedDate: Date.now(),
                       frequency: Math.random() * 100000000000000000,
                       imageToUseIndex: 0,
                       images: [

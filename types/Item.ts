@@ -39,12 +39,14 @@ export type Key = XOR<
  *This represents something that can be added to any store
  **/
 export type Item = Key & {
-  images: string[];
-  imageToUseIndex: number;
+  addedDate: number;
   /**
    *This is in milliseconds
    **/
   frequency?: number;
+  images: string[];
+  imageToUseIndex: number;
+  lastUpdatedDate: number
   unit: string;
 };
 

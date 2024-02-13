@@ -1,6 +1,6 @@
 import { useNavigation } from "expo-router";
-import { StyleSheet } from 'react-native';
 import { Row, Column, Text } from "native-base";
+import { StyleSheet } from "react-native";
 import { RectButton } from "react-native-gesture-handler";
 
 import { ImageRenderer } from "../ImageRenderer";
@@ -38,6 +38,16 @@ export function ItemTile(props: ItemTileProps) {
           <Text>{itemWithStoreSpecificValues.upc}</Text>
           <Text>Frequency: {itemWithStoreSpecificValues.frequency}</Text>
           <Text>Unit: {itemWithStoreSpecificValues?.unit}</Text>
+          <Text>
+            Added:{" "}
+            {new Date(itemWithStoreSpecificValues.addedDate).toLocaleString()}
+          </Text>
+          <Text>
+            Updated:{" "}
+            {new Date(
+              itemWithStoreSpecificValues.lastUpdatedDate,
+            ).toLocaleString()}
+          </Text>
         </Column>
       </Row>
     </RectButton>

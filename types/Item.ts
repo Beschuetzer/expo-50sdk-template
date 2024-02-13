@@ -72,7 +72,7 @@ export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;
 };
 
-export type ItemsList = Item[];
+export type ItemsList = ItemWithStoreSpecificValues[];
 export type ShoppingList = ItemWithStoreSpecificValues[]; //todo: this should be removed?
 export type LastPurchasedList = LastPurchasedItem[];
 export type StoreList = Store[];

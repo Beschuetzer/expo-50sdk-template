@@ -114,10 +114,10 @@ export function getItemFromItemsList(itemsList: ItemsList, key: string | Key) {
   const keyToUse = getKeyToUse(key);
   const itemFound =
     itemsList.find((item) => {
-      if (item.name && item.upc) return item.upc === keyToUse;
-      return item.name === keyToUse;
+      if (item?.name && item.upc) return item.upc === keyToUse;
+      return item?.name === keyToUse;
     }) || null;
-  return itemFound as ItemWithStoreSpecificValues | null;
+  return itemFound ? ({ ...itemFound } as ItemWithStoreSpecificValues) : null;
 }
 
 export function getImagesFromUpcProduct(upcProduct: UpcProduct) {

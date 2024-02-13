@@ -17,14 +17,14 @@ import {
   StoreSpecificValues,
 } from "@/types/Item";
 import { GpsCoordinate, Store } from "@/types/Store";
-import { calculateDistance, getEmptyArray, getItemFromItemsList, getKeyToUse } from "@/utils/helpers";
+import {
+  calculateDistance,
+  getEmptyArray,
+  getItemFromItemsList,
+  getKeyToUse,
+} from "@/utils/helpers";
 
 const CURRENT_LOCATION_INITIAL = null;
-
-export type AddStoresListItemPayload = {
-  sortType?: SortType;
-  storeToAdd: Store;
-};
 
 export type AddItemsListItemPayload = {
   item: Item;
@@ -57,6 +57,7 @@ export type ListsState = {
   currentLocation: GpsCoordinate | null;
   currentStoreName: string;
   itemsList: ItemsList;
+  itemsListSortType: SortType;
   lastPurchasedList: LastPurchasedList;
   storesList: StoreList;
   storesListSortType: SortType;
@@ -66,6 +67,7 @@ const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
   itemsList: getEmptyArray(),
+  itemsListSortType: SortType.Name,
   lastPurchasedList: getEmptyArray(),
   storesList: getEmptyArray(),
   storesListSortType: SortType.Name,
@@ -92,25 +94,35 @@ export const listsSlice = createSlice({
         return;
       }
 
-      const currentItem = state.itemsList?.[keyToUse] as any;
+      const currentItem = getItemFromItemsList(
+        state.itemsList,
+        keyToUse,
+      ) as any;
       const newItem = { ...item } as any;
+      const itemToUse = currentItem || newItem;
+
+      console.log({ itemToUse });
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
+        console.log({ storeSpecificValues, currentStore });
+
         for (const [valueName, value] of Object.entries(storeSpecificValues)) {
-          newItem[valueName] = {
-            ...(currentItem?.[valueName]
-              ? currentItem[valueName]
-              : newItem[valueName]),
+          console.log({ valueName, value });
+
+          itemToUse[valueName] = {
+            ...itemToUse?.[valueName],
             [currentStore.name]: value?.[currentStore.name],
           };
         }
       }
 
-      state.itemsList = {
-        ...state.itemsList,
-        [keyToUse]: newItem,
-      };
+      console.log({ currentItemAfter: currentItem });
+
+      state.itemsList.push(newItem);
+      state.itemsList = [
+        ...state.itemsList.sort(SORTERS[state.itemsListSortType]),
+      ];
     },
     addLastPurchasedList: (
       state: ListsState,
@@ -197,7 +209,7 @@ export const listsSlice = createSlice({
       state.currentLocation = CURRENT_LOCATION_INITIAL;
       for (const store of state.storesList) {
         store.calculatedDistance = -1;
-        console.log({ store })
+        console.log({ store });
       }
     },
     resetItemsList: (state: ListsState) => {
@@ -224,7 +236,7 @@ export const listsSlice = createSlice({
           state.currentLocation,
           store.gpsCoordinates,
         );
-        console.log({store});
+        console.log({ store });
       }
     },
     setCurrentStoreName: (
@@ -300,7 +312,7 @@ export const currentStoreSelector = createSelector(
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (storesList, currentStoreName) => {
-    return (storesList?.[currentStoreName] || {
+    return (storesList.find((store) => store.name === currentStoreName) || {
       name: EMPTY_STRING,
       gpsCoordinates: null,
     }) as Store;
@@ -311,24 +323,30 @@ export const itemsListItemSelector = (id: string) =>
   createSelector(
     [(state: RootState) => (state[listsSlice.name] as ListsState).itemsList],
     (itemsList) => {
-      return getItemFromItemsList(itemsList, id)
+      return getItemFromItemsList(itemsList, id);
     },
   );
 
 export const itemsListSelector = (state: RootState) =>
   state[listsSlice.name].itemsList;
 
-export const shoppingListArraySelector = createSelector(
+export const shoppingListSelector = createSelector(
   [
     (state: RootState) => state[listsSlice.name].itemsList,
     (state: RootState) => state[listsSlice.name].storesList,
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (itemsList, storesList, currentStoreName) => {
-    const currentStore = storesList[currentStoreName];
+    const currentStore = storesList.find(
+      (store) => store.name === currentStoreName,
+    );
     const shoppingList: ItemWithStoreSpecificValues[] = [];
     for (const item of Object.values(itemsList)) {
-      if (item?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]) {
+      if (
+        item?.[StoreSpecificValueKey.Quantity]?.[
+          currentStore?.name || EMPTY_STRING
+        ]
+      ) {
         shoppingList.push(item);
       }
     }

@@ -12,6 +12,7 @@ import { EMPTY_STRING } from "@/constants/general";
 import {
   removeItemsListItem,
   shoppingListArraySelector,
+  shoppingListSelector,
 } from "@/state/slices/listsSlice";
 import { ItemWithStoreSpecificValues, Key } from "@/types/Item";
 import { ListRow } from "@/types/general";
@@ -21,7 +22,7 @@ type ShoppingListProps = object;
 
 export function ShoppingList(props: ShoppingListProps) {
   const {} = props;
-  const shoppingListArray = useSelector(shoppingListArraySelector);
+  const shoppingList = useSelector(shoppingListSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
 
@@ -37,7 +38,7 @@ export function ShoppingList(props: ShoppingListProps) {
         <Heading p={theme.sizes[2]}>Shopping List</Heading>
       </Center>
       <FlashList
-        data={shoppingListArray}
+        data={shoppingList}
         renderItem={({ item, index }: ListRow<ItemWithStoreSpecificValues>) => {
           const key = {
             name: item.name,

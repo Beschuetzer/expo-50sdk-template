@@ -166,7 +166,6 @@ export const listsSlice = createSlice({
       if (state.storesList.length === 1) {
         state.currentStoreName = store.name;
       }
-      console.log({ storesList: state.storesList });
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -196,8 +195,6 @@ export const listsSlice = createSlice({
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
-      console.log({ keyToUse });
-
       if (!keyToUse) {
         alert(
           "A key must be provided in order to remove an item from the storesList.",
@@ -212,7 +209,6 @@ export const listsSlice = createSlice({
       state.currentLocation = CURRENT_LOCATION_INITIAL;
       for (const store of state.storesList) {
         store.calculatedDistance = -1;
-        console.log({ store });
       }
     },
     resetItemsList: (state: ListsState) => {
@@ -239,7 +235,6 @@ export const listsSlice = createSlice({
           state.currentLocation,
           store.gpsCoordinates,
         );
-        console.log({ store });
       }
     },
     setCurrentStoreName: (
@@ -260,15 +255,13 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       const { storeSpecificValuesToUpdate, key, storeName } = action.payload;
       const keyToUse = getKeyToUse(key);
-      const itemToUpdate = state.itemsList?.[keyToUse] as any;
+      const itemToUpdate = getItemFromItemsList(state.itemsList, keyToUse) as any;
       if (!itemToUpdate || !storeSpecificValuesToUpdate || !storeName) {
         alert(
           `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
         );
         return;
       }
-
-      console.log({ itemToUpdateBefore: itemToUpdate });
 
       for (const [valueName, value] of Object.entries(
         storeSpecificValuesToUpdate,
@@ -278,8 +271,6 @@ export const listsSlice = createSlice({
           [storeName]: value,
         };
       }
-
-      console.log({ itemToUpdateAfter: itemToUpdate });
     },
   },
 });

@@ -1,5 +1,6 @@
 ## MVP
 
+-re-work updateStoreSpecificValues
 -use StoresList approach to rework the other lists (using array and all the reducers/selectors around it):
    --itemsList (need to figure out sorting stuff)
    --lastPurchasedList?

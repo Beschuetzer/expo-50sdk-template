@@ -173,12 +173,12 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const itemsList = {} as ItemsList;
+                  const itemsList = [] as ItemsList;
                   for (let index = 0; index < numberOfMockItems; index++) {
                     const upcToUse = lastUpcNumberRef.current
                       .toString()
                       .padStart(UPC_REQUIRED_CHAR_LENGTH, "0");
-                    itemsList[upcToUse] = {
+                    itemsList.push({
                       frequency: 604800000,
                       imageToUseIndex: 0,
                       images: [
@@ -198,9 +198,11 @@ export function ReduxViewer() {
                         [MOCK_STORES[1].name]: 22.99,
                       },
                       quantity: {},
-                    };
+                    });
                     lastUpcNumberRef.current += 1;
                   }
+                  console.log({itemsList});
+                  
                   dispatch(addMockItems(itemsList));
                 }}
               >
@@ -210,13 +212,24 @@ export function ReduxViewer() {
             <Button
               onPress={() => {
                 const items = [];
-                for (let index = 0; index < NUMBER_OF_ITEMS_TO_SORT_INITIAL; index++) {
-                  items.push({ id: Math.random(), users: Array(50).fill().map((_, index) => index + 1),});
+                for (
+                  let index = 0;
+                  index < NUMBER_OF_ITEMS_TO_SORT_INITIAL;
+                  index++
+                ) {
+                  items.push({
+                    id: Math.random(),
+                    users: Array(50)
+                      .fill()
+                      .map((_, index) => index + 1),
+                  });
                 }
                 const start = performance.now();
                 items.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
                 const end = performance.now();
-                displayAlert({[`timeToSort${NUMBER_OF_ITEMS_TO_SORT_INITIAL}`]: end - start})
+                displayAlert({
+                  [`timeToSort${NUMBER_OF_ITEMS_TO_SORT_INITIAL}`]: end - start,
+                });
               }}
             >
               Test Sort

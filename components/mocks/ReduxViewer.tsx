@@ -2,7 +2,7 @@ import { Button, FlatList, Heading, Row, Stack, Text, View } from 'native-base'
 import React, { useEffect, useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { getRandomEnumValue, getRandomInt } from './helpers'
+import { getRandomEnumValue, getRandomInt, getRandomItem } from './helpers'
 import { MOCK_STORES } from './mockStores'
 import { MOCKS_UPCS } from './mockUpcData'
 
@@ -26,7 +26,7 @@ import {
   resetUpcProducts,
   upcProductsSelector,
 } from '@/state/slices/scannerSlice'
-import { ItemsList } from '@/types/Item'
+import { ItemsList, StoreSpecificValueKey } from '@/types/Item'
 import { TimeSpan } from '@/types/general'
 import {
   calculateDistance,
@@ -145,36 +145,25 @@ export function ReduxViewer() {
                   } else {
                     lastUpcIndexRef.current += 1
                   }
+
+                  const randomItem = getRandomItem(lastUpcIndexRef.current);
                   dispatch(
                     addItemsListItem({
                       item: {
-                        frequency:
-                          TIME_SPAN_TO_MILLISECONDS_MAPPING[
-                            getRandomEnumValue<TimeSpan>(TimeSpan)
-                          ] * getRandomInt(1, 10),
+                        addedDate: randomItem.addedDate,
+                        frequency: randomItem.frequency,
+                        images: randomItem.images,
                         imageToUseIndex: 0,
-                        images: [
-                          'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
-                        ],
-                        name: `Cholocate-${Math.random()}`,
-                        unit: 'bar',
+                        lastUpdatedDate: randomItem.lastUpdatedDate,
+                        name: randomItem.name,
+                        unit: randomItem.unit,
                         upc: upcToUse,
-                        addedDate: Date.now() + Math.random() * 10000,
-                        lastUpdatedDate: Date.now() + Math.random() * 10000,
                       },
                       storeSpecificValues: {
-                        itemId: {
-                          [MOCK_STORES[1].name]: '123456',
-                        },
-                        aisle: {
-                          [MOCK_STORES[1].name]: 'A12',
-                        },
-                        price: {
-                          [MOCK_STORES[1].name]: 22.99,
-                        },
-                        quantity: {
-                          [MOCK_STORES[1].name]: 1,
-                        },
+                        aisle: randomItem[StoreSpecificValueKey.Aisle],
+                        itemId: randomItem[StoreSpecificValueKey.ItemId],
+                        price: randomItem[StoreSpecificValueKey.Price],
+                        quantity: randomItem[StoreSpecificValueKey.Quantity],
                       },
                       currentStore: MOCK_STORES[1],
                     }),
@@ -189,35 +178,7 @@ export function ReduxViewer() {
                 onPress={() => {
                   const itemsList = [] as ItemsList
                   for (let index = 0; index < numberOfMockItems; index++) {
-                    const upcToUse = lastUpcNumberRef.current
-                      .toString()
-                      .padStart(UPC_REQUIRED_CHAR_LENGTH, '0')
-                    itemsList.push({
-                      addedDate: Date.now(),
-                      lastUpdatedDate: Date.now(),
-                      frequency:
-                        TIME_SPAN_TO_MILLISECONDS_MAPPING[
-                          getRandomEnumValue<TimeSpan>(TimeSpan)
-                        ] * getRandomInt(1, 10),
-                      imageToUseIndex: 0,
-                      images: [
-                        'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
-                      ],
-                      name: 'Cholocate',
-                      unit: 'bar',
-                      upc: upcToUse,
-                      itemId: {
-                        [MOCK_STORES[0].name]: `id for ${MOCK_STORES[0].name}`,
-                        [MOCK_STORES[1].name]: `id for ${MOCK_STORES[1].name}`,
-                      },
-                      aisle: {
-                        [MOCK_STORES[1].name]: 'A12',
-                      },
-                      price: {
-                        [MOCK_STORES[1].name]: 22.99,
-                      },
-                      quantity: {},
-                    })
+                    itemsList.push(getRandomItem(lastUpcNumberRef.current))
                     lastUpcNumberRef.current += 1
                   }
                   dispatch(addMockItems(itemsList))

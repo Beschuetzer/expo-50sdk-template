@@ -1,9 +1,7 @@
 ## MVP
 
--figure out how to add buttons for sort and filter in header of item screen
+-figure out how to add buttons for sort and filter in header of item screen (in order to be able to add sort and filter buttons)
 
--add addDate field to Item
--add by date sorter
 
 
 -use StoresList approach to rework the other lists (using array and all the reducers/selectors around it):

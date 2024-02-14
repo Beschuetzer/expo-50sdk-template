@@ -119,10 +119,10 @@ export function ItemsList(props: ItemsListProps) {
       ref={list}
       refreshing={refreshing}
       onRefresh={() => {
-        setRefreshing(true)
+        setRefreshing(true);
         setTimeout(() => {
-          setRefreshing(false)
-        }, 2000)
+          setRefreshing(false);
+        }, 2000);
       }}
       data={itemsList}
       ListHeaderComponent={
@@ -131,8 +131,9 @@ export function ItemsList(props: ItemsListProps) {
           sortTypes={[
             SortType.Name,
             SortType.Upc,
+            SortType.DateAdded,
+            SortType.DateLastUpdated,
             SortType.Frequency,
-            SortType.Aisle,
           ]}
         />
       }
@@ -148,5 +149,5 @@ export function ItemsList(props: ItemsListProps) {
         />
       )}
     />
-  )
+  );
 }

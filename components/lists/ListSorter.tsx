@@ -1,37 +1,37 @@
-import { Picker } from "@react-native-picker/picker";
-import { FormControl, Row, Stack, View, useTheme } from "native-base";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Picker } from '@react-native-picker/picker'
+import { FormControl, Row, Stack, View, useTheme } from 'native-base'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { SortType } from "./sorters";
+import { SortType } from './sorters'
 
-import { FORM_INTER_ITEM_SPACING } from "@/constants/general";
-import { HeadingTagProp } from "@/types/general";
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { HeadingTagProp } from '@/types/general'
 
 type ListSorterProps = {
-  onValueChange: (SortType: SortType) => void;
-  sortTypes: SortType[];
-} & HeadingTagProp;
+  onValueChange: (SortType: SortType) => void
+  sortTypes: SortType[]
+} & HeadingTagProp
 
 export function ListSorter(props: ListSorterProps) {
   const {
     onValueChange,
     sortTypes,
     headingTag: Tag = FormControl.Label,
-  } = props;
+  } = props
   const defaultSortType = useMemo(
     () => sortTypes?.[0] || SortType.None,
     [sortTypes],
-  );
-  const [selectedSortType, setSelectedSortType] = useState(defaultSortType);
-  const theme = useTheme();
+  )
+  const [selectedSortType, setSelectedSortType] = useState(defaultSortType)
+  const theme = useTheme()
 
   const onSortTypePress = useCallback(
     (sortType: SortType) => {
-      setSelectedSortType(sortType);
-      onValueChange && onValueChange(sortType);
+      setSelectedSortType(sortType)
+      onValueChange && onValueChange(sortType)
     },
     [onValueChange],
-  );
+  )
 
   useEffect(() => {
     onSortTypePress && onSortTypePress(defaultSortType)
@@ -48,5 +48,5 @@ export function ListSorter(props: ListSorterProps) {
         ))}
       </Picker>
     </Stack>
-  );
+  )
 }

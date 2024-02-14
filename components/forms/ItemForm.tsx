@@ -258,7 +258,7 @@ export function ItemForm(props: ItemFormProps) {
         )}
       />
       <UnitInput
-        initialValue={itemInList?.unit}
+        initialValue={itemInList?.unit || item?.unit}
         onValueChange={onUnitChange}
         headingTag={InputText}
         spacing={theme.space[FORM_INTER_ITEM_SPACING]}

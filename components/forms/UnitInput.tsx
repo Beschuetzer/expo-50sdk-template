@@ -27,7 +27,7 @@ export function UnitInput(props: UnitInputProps) {
   }, [initialValue, ItemUnit]);
 
   const [unit, setUnit] = useState<string>(
-    isInitialCustom ? ItemUnit.Custom : UNIT_INITIAL,
+    isInitialCustom ? ItemUnit.Custom : initialValue || UNIT_INITIAL,
   );
   const [customUnit, setCustomUnit] = useState(
     isInitialCustom ? initialValue : EMPTY_STRING,
@@ -67,7 +67,7 @@ export function UnitInput(props: UnitInputProps) {
 
   useEffect(() => {
     hasComponentLoadedRef.current = true;
-    onValueChange && onValueChange(UNIT_INITIAL);
+    onValueChange && onValueChange(initialValue || UNIT_INITIAL);
   }, []);
 
   return (

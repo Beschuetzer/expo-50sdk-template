@@ -10,30 +10,7 @@ import { StoresList } from "@/components/lists/StoresList";
 import { Routes } from "@/constants/navigation";
 
 export default function StoreScreen() {
-  const navigation = useNavigation();
   const theme = useTheme();
-
-  function onAddStorePress() {
-    navigation.navigate(Routes.StoreModal);
-  }
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <View paddingRight={theme.space[1]}>
-          <TouchableOpacity onPress={onAddStorePress}>
-            <FontAwesome name="plus" size={20} color="black" />
-          </TouchableOpacity>
-        </View>
-      ),
-      headerLeft: () => (
-        <View pl={theme.space[1]}>
-          <StoreManager useAbbreviatedVerbiage />
-        </View>
-      ),
-      headerTitleAlign: "center",
-    });
-  }, [navigation]);
 
   return (
     <View

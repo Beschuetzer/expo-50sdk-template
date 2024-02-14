@@ -1,12 +1,7 @@
 import { Picker } from '@react-native-picker/picker'
-import {
-  Button,
-  FormControl,
-  Row,
-  Stack,
-  useTheme,
-} from 'native-base'
+import { Button, FormControl, Row, Stack, useTheme } from 'native-base'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Dialog from 'react-native-dialog'
 
 import { SortType } from './sorters'
 
@@ -15,6 +10,8 @@ import { HeadingTagProp } from '@/types/general'
 
 export type ListSortViewSize = 'large' | 'small'
 type ListSorterProps = {
+  isVisible: boolean;
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onMount?: () => void
   onUnmount?: () => void
   onValueChange: (SortType: SortType) => void
@@ -24,6 +21,8 @@ type ListSorterProps = {
 
 export function ListSorter(props: ListSorterProps) {
   const {
+    isVisible,
+    setIsVisible,
     onMount,
     onUnmount,
     onValueChange,
@@ -38,6 +37,10 @@ export function ListSorter(props: ListSorterProps) {
   )
   const [selectedSortType, setSelectedSortType] = useState(defaultSortType)
   const theme = useTheme()
+  
+  const onCloseModal = useCallback(() => {
+    setIsVisible && setIsVisible(false);
+  }, [setIsVisible]);
 
   const onSortTypePress = useCallback(
     (sortType: SortType) => {
@@ -55,35 +58,43 @@ export function ListSorter(props: ListSorterProps) {
   }, [])
 
   return (
-    <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-      {viewSize === 'large' ? (
-        <>
-          <Row pl={theme.space[1]}>
-            <Tag>Sort By: </Tag>
-          </Row>
-          <Picker
-            ref={ref}
-            selectedValue={selectedSortType}
-            onValueChange={onSortTypePress}
-          >
-            {sortTypes.map((sortType) => (
-              <Picker.Item key={sortType} label={sortType} value={sortType} />
-            ))}
-          </Picker>
-        </>
-      ) : (
-        <>
-          {sortTypes.map((sortType) => (
-            <Button
-              variant="ghost"
-              key={sortType}
-              onPress={() => onSortTypePress(sortType)}
+    <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
+      <Dialog.Title style={{ textAlign: 'center' }}>Sort By</Dialog.Title>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        {viewSize === 'large' ? (
+          <>
+            <Row pl={theme.space[1]}>
+              <Tag>Sort By: </Tag>
+            </Row>
+            <Picker
+              ref={ref}
+              selectedValue={selectedSortType}
+              onValueChange={onSortTypePress}
             >
-              {sortType}
-            </Button>
-          ))}
-        </>
-      )}
-    </Stack>
+              {sortTypes.map((sortType) => (
+                <Picker.Item key={sortType} label={sortType} value={sortType} />
+              ))}
+            </Picker>
+          </>
+        ) : (
+          <>
+            {sortTypes.map((sortType) => (
+              <Button
+                variant="ghost"
+                key={sortType}
+                onPress={() => onSortTypePress(sortType)}
+              >
+                {sortType}
+              </Button>
+            ))}
+          </>
+        )}
+      </Stack>
+      <Dialog.Button
+        color={theme.colors.primary[900]}
+        label="Close"
+        onPress={onCloseModal}
+      />
+    </Dialog.Container>
   )
 }

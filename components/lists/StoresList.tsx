@@ -1,39 +1,53 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { TouchableOpacity } from "@gorhom/bottom-sheet";
-import { FlashList } from "@shopify/flash-list";
-import { useNavigation } from "expo-router";
-import { useTheme, Row, View, Stack, Text } from "native-base";
-import { useCallback, useRef, useState } from "react";
-import { LayoutAnimation, StyleSheet } from "react-native";
-import { RectButton } from "react-native-gesture-handler";
-import { useSelector, useDispatch } from "react-redux";
+import { FontAwesome } from '@expo/vector-icons'
+import { TouchableOpacity } from '@gorhom/bottom-sheet'
+import { FlashList } from '@shopify/flash-list'
+import { useNavigation } from 'expo-router'
+import { useTheme, Row, View, Stack, Text, Button } from 'native-base'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { LayoutAnimation, StyleSheet } from 'react-native'
+import { RectButton } from 'react-native-gesture-handler'
+import { useSelector, useDispatch } from 'react-redux'
 
-import { ListSorter } from "./ListSorter";
-import { SwipeableRow } from "./SwipeableRow";
-import { SORTERS, SortType } from "./sorters";
+import { ListSorter } from './ListSorter'
+import { SwipeableRow } from './SwipeableRow'
+import { SORTERS, SortType } from './sorters'
 
-import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from "@/constants/general";
-import { Routes } from "@/constants/navigation";
+import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from '@/constants/general'
+import { Routes } from '@/constants/navigation'
 import {
   currentStoreSelector,
   removeStoresListItem,
   setCurrentStoreName,
   setStoresList,
   storesListArraySelector,
-} from "@/state/slices/listsSlice";
-import { Key } from "@/types/Item";
-import { Store } from "@/types/Store";
-import { ListRow } from "@/types/general";
-import { getKeyToUse } from "@/utils/helpers";
+} from '@/state/slices/listsSlice'
+import { Key } from '@/types/Item'
+import { Store } from '@/types/Store'
+import { ListRow } from '@/types/general'
+import { getKeyToUse } from '@/utils/helpers'
+
+const storesListSortTypes = [
+  SortType.Name,
+  SortType.Distance,
+] as SortType[]
 
 export function StoresList() {
-  const storesList = useSelector(storesListArraySelector);
-  const currentStore = useSelector(currentStoreSelector);
-  const theme = useTheme();
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const listRef = useRef<FlashList<Store> | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const navgation = useNavigation()
+  const storesList = useSelector(storesListArraySelector)
+  const currentStore = useSelector(currentStoreSelector)
+  const theme = useTheme()
+  const navigation = useNavigation()
+  const dispatch = useDispatch()
+  const listRef = useRef<FlashList<Store> | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false)
+  const shouldSortOnMountRef = useRef(true)
+  const lastStoresListLengthRef = useRef(storesList.length)
+  const lastSortTypeRef = useRef(storesListSortTypes[0])
+
+  function onAddStorePress() {
+    navigation.navigate(Routes.StoreModal);
+  }
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
@@ -45,19 +59,44 @@ export function StoresList() {
 
   const onSwipeLeft = useCallback(
     (keyToUse: Key) => {
-      dispatch(removeStoresListItem(keyToUse));
-      listRef.current?.prepareForLayoutAnimationRender();
+      dispatch(removeStoresListItem(keyToUse))
+      listRef.current?.prepareForLayoutAnimationRender()
       // after removing the item, we start animation
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     },
     [listRef],
-  );
+  )
+  useEffect(() => {
+    navgation.setOptions({
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          mr={theme.space[1]}
+          onPress={() => setIsSortModalOpen(true)}
+        >
+          Sort
+        </Button>
+      ),
+      headerLeft: () => (
+        <View ml={theme.space[1]}>
+          <TouchableOpacity onPress={onAddStorePress}>
+            <FontAwesome name="plus" size={20} color={theme.colors.primary[900]} />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navgation])
+
+  useEffect(() => {
+    if (storesList.length === lastStoresListLengthRef.current) return
+    shouldSortOnMountRef.current = true
+  }, [storesList])
 
   function renderItem({ item, index }: ListRow<Store>) {
     const keyToUse = {
       name: item.name,
       upc: EMPTY_STRING,
-    } as Key;
+    } as Key
 
     return (
       <SwipeableRow
@@ -77,7 +116,7 @@ export function StoresList() {
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
           onPress: () => {
-            dispatch(setCurrentStoreName(keyToUse?.name));
+            dispatch(setCurrentStoreName(keyToUse?.name))
           },
           title: (
             <Stack
@@ -94,7 +133,7 @@ export function StoresList() {
           onPress={() => {
             navigation.navigate(Routes.StoreModal, {
               name: keyToUse.name,
-            });
+            })
           }}
         >
           <Stack>
@@ -105,14 +144,14 @@ export function StoresList() {
               alignItems="center"
             >
               <Stack flex={1} justifyContent="center">
-                <Text fontSize={theme.fontSizes["lg"]}>{item.name}</Text>
+                <Text fontSize={theme.fontSizes['lg']}>{item.name}</Text>
                 {/* <Text>
                       ({item.gpsCoordinates?.lat}, {item.gpsCoordinates?.lon})
                     </Text> */}
                 <Text>
-                  Estimated Distance:{" "}
+                  Estimated Distance:{' '}
                   {!item?.calculatedDistance || item.calculatedDistance === -1
-                    ? "N/A"
+                    ? 'N/A'
                     : `${item.calculatedDistance}mi.`}
                 </Text>
               </Stack>
@@ -131,38 +170,46 @@ export function StoresList() {
           </Stack>
         </RectButton>
       </SwipeableRow>
-    );
+    )
   }
 
   return (
-    <FlashList
-      ref={listRef}
-      refreshing={refreshing}
-      onRefresh={() => {
-        setRefreshing(true)
-        setTimeout(() => {
-          setRefreshing(false)
-        }, 2000)
-      }}
-      ListHeaderComponent={
-        <ListSorter
-          onValueChange={onSortTypeChange}
-          sortTypes={[SortType.Distance, SortType.Name]}
-        />
-      }
-      data={storesList}
-      estimatedItemSize={150}
-      keyExtractor={(item: Store, index: number) =>
-        getKeyToUse({ name: item.name, upc: EMPTY_STRING })
-      }
-      ItemSeparatorComponent={() => (
-        <View
-          height={StyleSheet.hairlineWidth}
-          backgroundColor={theme.colors.gray[500]}
-        />
-      )}
-      renderItem={renderItem}
-    />
+    <>
+      <FlashList
+        ref={listRef}
+        refreshing={refreshing}
+        onRefresh={() => {
+          setRefreshing(true)
+          setTimeout(() => {
+            setRefreshing(false)
+          }, 2000)
+        }}
+        data={storesList}
+        estimatedItemSize={150}
+        keyExtractor={(item: Store, index: number) =>
+          getKeyToUse({ name: item.name, upc: EMPTY_STRING })
+        }
+        ItemSeparatorComponent={() => (
+          <View
+            height={StyleSheet.hairlineWidth}
+            backgroundColor={theme.colors.gray[500]}
+          />
+        )}
+        renderItem={renderItem}
+      />
+      <ListSorter
+        isVisible={isSortModalOpen}
+        setIsVisible={setIsSortModalOpen}
+        onMount={() => {
+          if (!shouldSortOnMountRef.current) return
+          shouldSortOnMountRef.current = false
+          onSortTypeChange(lastSortTypeRef.current)
+        }}
+        onValueChange={onSortTypeChange}
+        sortTypes={storesListSortTypes}
+        viewSize="small"
+      />
+    </>
   )
 }
 
@@ -171,24 +218,24 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 10,
-    justifyContent: "space-between",
-    flexDirection: "column",
-    backgroundColor: "white",
+    justifyContent: 'space-between',
+    flexDirection: 'column',
+    backgroundColor: 'white',
   },
   fromText: {
-    fontWeight: "bold",
-    backgroundColor: "transparent",
+    fontWeight: 'bold',
+    backgroundColor: 'transparent',
   },
   messageText: {
-    color: "#999",
-    backgroundColor: "transparent",
+    color: '#999',
+    backgroundColor: 'transparent',
   },
   dateText: {
-    backgroundColor: "transparent",
-    position: "absolute",
+    backgroundColor: 'transparent',
+    position: 'absolute',
     right: 20,
     top: 10,
-    color: "#999",
-    fontWeight: "bold",
+    color: '#999',
+    fontWeight: 'bold',
   },
-});
+})

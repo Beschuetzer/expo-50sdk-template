@@ -4,7 +4,6 @@ import { useNavigation } from 'expo-router'
 import { View, Text, useTheme, Stack, Button } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
-import Dialog from 'react-native-dialog'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
@@ -24,9 +23,9 @@ import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
-type ItemsListProps = object
+type ItemsListProps = {}
 
-const itemsListSortType = [
+const itemsListSortTypes = [
   SortType.Name,
   SortType.Upc,
   SortType.DateAdded,
@@ -45,15 +44,11 @@ export function ItemsList(props: ItemsListProps) {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const shouldSortOnMountRef = useRef(true)
   const lastItemsListLengthRef = useRef(itemsList.length)
-  const lastSortTypeRef = useRef(itemsListSortType[0]);
-
-  const onCloseModal = useCallback(() => {
-    setIsSortModalOpen(false)
-  }, [])
+  const lastSortTypeRef = useRef(itemsListSortTypes[0])
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
-      lastSortTypeRef.current = sortType;
+      lastSortTypeRef.current = sortType
       const sortedList = [...itemsList]
       sortedList.sort(SORTERS[sortType])
       dispatch(setItemsList(sortedList))
@@ -158,10 +153,10 @@ export function ItemsList(props: ItemsListProps) {
         ref={list}
         refreshing={refreshing}
         onRefresh={() => {
-          setRefreshing(true)
+          setRefreshing(true);
           setTimeout(() => {
-            setRefreshing(false)
-          }, 2000)
+            setRefreshing(false);
+          }, 2000);
         }}
         data={itemsList}
         renderItem={renderItem}
@@ -176,27 +171,18 @@ export function ItemsList(props: ItemsListProps) {
           />
         )}
       />
-      <Dialog.Container
-        visible={isSortModalOpen}
-        onBackdropPress={onCloseModal}
-      >
-        <Dialog.Title style={{ textAlign: 'center' }}>Sort By</Dialog.Title>
-        <ListSorter
-          onMount={() => {
-            if (!shouldSortOnMountRef.current) return
-            shouldSortOnMountRef.current = false
-            onSortTypeChange(lastSortTypeRef.current)
-          }}
-          onValueChange={onSortTypeChange}
-          sortTypes={itemsListSortType}
-          viewSize="small"
-        />
-        <Dialog.Button
-          color={theme.colors.primary[900]}
-          label="Close"
-          onPress={onCloseModal}
-        />
-      </Dialog.Container>
+      <ListSorter
+        isVisible={isSortModalOpen}
+        setIsVisible={setIsSortModalOpen}
+        onMount={() => {
+          if (!shouldSortOnMountRef.current) return;
+          shouldSortOnMountRef.current = false;
+          onSortTypeChange(lastSortTypeRef.current);
+        }}
+        onValueChange={onSortTypeChange}
+        sortTypes={itemsListSortTypes}
+        viewSize="small"
+      />
     </>
-  )
+  );
 }

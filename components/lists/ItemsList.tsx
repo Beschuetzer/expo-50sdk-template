@@ -1,9 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
-import { View, Text, useTheme, Stack } from 'native-base'
-import React, { useCallback, useRef, useState } from 'react'
+import { useNavigation } from 'expo-router'
+import { View, Text, useTheme, Stack, Button } from 'native-base'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
-
+import Dialog from 'react-native-dialog'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
@@ -25,16 +26,34 @@ import { getKeyToUse } from '@/utils/helpers'
 
 type ItemsListProps = object
 
+const itemsListSortType = [
+  SortType.Name,
+  SortType.Upc,
+  SortType.DateAdded,
+  SortType.DateLastUpdated,
+  SortType.Frequency,
+] as SortType[]
+
 export function ItemsList(props: ItemsListProps) {
+  const navgation = useNavigation()
   const itemsList = useSelector(itemsListSelector)
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
   const list = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false)
+  const shouldSortOnMountRef = useRef(true)
+  const lastItemsListLengthRef = useRef(itemsList.length)
+  const lastSortTypeRef = useRef(itemsListSortType[0]);
+
+  const onCloseModal = useCallback(() => {
+    setIsSortModalOpen(false)
+  }, [])
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
+      lastSortTypeRef.current = sortType;
       const sortedList = [...itemsList]
       sortedList.sort(SORTERS[sortType])
       dispatch(setItemsList(sortedList))
@@ -61,6 +80,25 @@ export function ItemsList(props: ItemsListProps) {
     // after removing the item, we start animation
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }
+
+  useEffect(() => {
+    navgation.setOptions({
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          mr={theme.space[1]}
+          onPress={() => setIsSortModalOpen(true)}
+        >
+          Sort
+        </Button>
+      ),
+    })
+  }, [navgation])
+
+  useEffect(() => {
+    if (itemsList.length === lastItemsListLengthRef.current) return
+    shouldSortOnMountRef.current = true
+  }, [itemsList])
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const key = {
@@ -115,39 +153,50 @@ export function ItemsList(props: ItemsListProps) {
   }
 
   return (
-    <FlashList
-      ref={list}
-      refreshing={refreshing}
-      onRefresh={() => {
-        setRefreshing(true);
-        setTimeout(() => {
-          setRefreshing(false);
-        }, 2000);
-      }}
-      data={itemsList}
-      ListHeaderComponent={
+    <>
+      <FlashList
+        ref={list}
+        refreshing={refreshing}
+        onRefresh={() => {
+          setRefreshing(true)
+          setTimeout(() => {
+            setRefreshing(false)
+          }, 2000)
+        }}
+        data={itemsList}
+        renderItem={renderItem}
+        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
+          getKeyToUse(item)
+        }
+        estimatedItemSize={120}
+        ItemSeparatorComponent={() => (
+          <View
+            height={StyleSheet.hairlineWidth}
+            backgroundColor={theme.colors.gray[500]}
+          />
+        )}
+      />
+      <Dialog.Container
+        visible={isSortModalOpen}
+        onBackdropPress={onCloseModal}
+      >
+        <Dialog.Title style={{ textAlign: 'center' }}>Sort By</Dialog.Title>
         <ListSorter
+          onMount={() => {
+            if (!shouldSortOnMountRef.current) return
+            shouldSortOnMountRef.current = false
+            onSortTypeChange(lastSortTypeRef.current)
+          }}
           onValueChange={onSortTypeChange}
-          sortTypes={[
-            SortType.Name,
-            SortType.Upc,
-            SortType.DateAdded,
-            SortType.DateLastUpdated,
-            SortType.Frequency,
-          ]}
+          sortTypes={itemsListSortType}
+          viewSize="small"
         />
-      }
-      renderItem={renderItem}
-      keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
-        getKeyToUse(item)
-      }
-      estimatedItemSize={120}
-      ItemSeparatorComponent={() => (
-        <View
-          height={StyleSheet.hairlineWidth}
-          backgroundColor={theme.colors.gray[500]}
+        <Dialog.Button
+          color={theme.colors.primary[900]}
+          label="Close"
+          onPress={onCloseModal}
         />
-      )}
-    />
-  );
+      </Dialog.Container>
+    </>
+  )
 }

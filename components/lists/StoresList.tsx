@@ -47,6 +47,8 @@ export function StoresList() {
   const lastStoresListLengthRef = useRef(storesList.length)
   const lastSortTypeRef = useRef(storesListSortTypes[0])
 
+  console.log({storesList});
+  
   function onAddStorePress() {
     navigation.navigate(Routes.StoreModal)
   }
@@ -57,7 +59,9 @@ export function StoresList() {
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
-      const sortedList = [...storesList.sort(SORTERS[sortType])]
+      lastSortTypeRef.current = sortType
+      const sortedList = [...storesList]
+      sortedList.sort(SORTERS[sortType])
       dispatch(setStoresList(sortedList))
     },
     [storesList],

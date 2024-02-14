@@ -1,5 +1,6 @@
 ## MVP
 
+-add menu button for ITemsLIst
 -figure out how to add buttons for sort and filter in header of item screen (in order to be able to add sort and filter buttons)
 
 

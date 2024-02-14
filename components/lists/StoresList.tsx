@@ -1,10 +1,16 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
 import { useNavigation } from 'expo-router'
-import { useTheme, Row, View, Stack, Text, Button } from 'native-base'
+import { useTheme, Row, View, Stack, Text, Button, Center } from 'native-base'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler'
+import {
+  MenuTrigger,
+  MenuOptions,
+  MenuOption,
+  Menu,
+} from 'react-native-popup-menu'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { ListSorter } from './ListSorter'
@@ -45,6 +51,10 @@ export function StoresList() {
     navigation.navigate(Routes.StoreModal)
   }
 
+  const onSortPress = useCallback(() => {
+    setIsSortModalOpen(true)
+  }, [])
+
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
       const sortedList = [...storesList.sort(SORTERS[sortType])]
@@ -65,13 +75,32 @@ export function StoresList() {
   useEffect(() => {
     navgation.setOptions({
       headerRight: () => (
-        <Button
-          variant="ghost"
-          mr={theme.space[1]}
-          onPress={() => setIsSortModalOpen(true)}
-        >
-          Sort
-        </Button>
+        <Menu>
+          <MenuTrigger
+            children={
+              <View pr={theme.space[1]}>
+                <View pl={theme.space[1]}>
+                  <FontAwesome
+                    name="ellipsis-v"
+                    size={20}
+                    color={theme.colors.primary[900]}
+                  />
+                </View>
+              </View>
+            }
+          />
+          <MenuOptions>
+            <MenuOption onSelect={onSortPress} text="Sort" />
+            <MenuOption onSelect={() => alert(`Delete`)}>
+              <Text style={{ color: 'red' }}>Delete</Text>
+            </MenuOption>
+            <MenuOption
+              onSelect={() => alert(`Not called`)}
+              disabled
+              text="Disabled"
+            />
+          </MenuOptions>
+        </Menu>
       ),
       headerLeft: () => (
         <View ml={theme.space[1]}>

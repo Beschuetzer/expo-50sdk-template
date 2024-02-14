@@ -1,147 +1,150 @@
-import { Stack, Text, Input, Row, useTheme, Button } from "native-base";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { Stack, Text, Input, Row, useTheme, Button } from 'native-base'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { FrequencyInput } from "./FrequencyInput";
-import { InputText } from "./InputText";
-import { ItemFormStoreSpecific } from "./ItemFormStoreSpecificItems";
-import { ThumbnailPicker } from "./ThumbnailPicker";
-import { UnitInput } from "./UnitInput";
-import { AbsolutePositionedScreen } from "../AbsolutelyPositionedScreen";
-import { InputValidationMessage } from "../InputValidationMessage";
-import { StoreManager } from "../StoreManager";
+import { FrequencyInput } from './FrequencyInput'
+import { InputText } from './InputText'
+import { ItemFormStoreSpecific } from './ItemFormStoreSpecificItems'
+import { ThumbnailPicker } from './ThumbnailPicker'
+import { UnitInput } from './UnitInput'
+import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen'
+import { InputValidationMessage } from '../InputValidationMessage'
+import { StoreManager } from '../StoreManager'
 
 import {
   DEFAULT_IMAGE_INDEX,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
-} from "@/constants/general";
+} from '@/constants/general'
 import {
   LOCAL_FILE_REGEX,
   UPC_REGEX,
   UPC_REQUIRED_CHAR_LENGTH,
-} from "@/constants/regexs";
+} from '@/constants/regexs'
 import {
   AddItemsListItemPayload,
   currentStoreSelector,
   itemsListItemSelector,
-} from "@/state/slices/listsSlice";
-import { Item, StoreSpecificValues } from "@/types/Item";
-import { ItemProp } from "@/types/general";
-import { deleteFile, getFrequencyValue, getKeyToUse } from "@/utils/helpers";
+} from '@/state/slices/listsSlice'
+import { Item, StoreSpecificValues } from '@/types/Item'
+import { Store } from '@/types/Store'
+import { ItemProp } from '@/types/general'
+import { deleteFile, getFrequencyValue, getKeyToUse } from '@/utils/helpers'
 
 type ItemFormValdation = {
-  isValid: boolean;
-  message: string;
-};
+  isValid: boolean
+  message: string
+}
 
 type ItemFormProps = {
-  onClose: () => void;
-  onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void;
-  showOverrideMsg?: boolean;
-} & ItemProp;
+  itemInListUsingName?: Item | null
+  itemInList?: Item | null
+  currentStore?: Store
+  onClose: () => void
+  onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void
+  showOverrideMsg?: boolean
+} & Partial<ItemProp>
 
 export function ItemForm(props: ItemFormProps) {
-  const { onClose, onSave, item, showOverrideMsg = true } = props;
-  const theme = useTheme();
+  const {
+    onClose,
+    onSave,
+    item,
+    showOverrideMsg = true,
+    itemInList,
+    itemInListUsingName,
+    currentStore,
+  } = props
+  const theme = useTheme()
   const keyToUse = useMemo(
     () =>
       getKeyToUse(
-        { name: item.name || EMPTY_STRING, upc: item.upc || EMPTY_STRING },
+        { name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING },
         false,
       ),
     [item],
-  );
-  const currentStore = useSelector(currentStoreSelector);
-  const itemInList = useSelector(itemsListItemSelector(keyToUse));
-  const itemInListUsingName = useSelector(
-    itemsListItemSelector(item.name || EMPTY_STRING),
-  );
+  )
+
+  const itemToUse = useMemo(() => itemInList || item, [item, itemInList])
+
   const [selectedUrl, setSelectedUrl] = useState(
-    itemInList?.images[itemInList?.imageToUseIndex] ||
-      item.images[item.imageToUseIndex] ||
-      EMPTY_STRING,
-  );
-  const [upcValue, setUpcValue] = useState(
-    itemInList?.upc || item.upc || EMPTY_STRING,
-  );
+    itemToUse?.images[itemToUse?.imageToUseIndex] || EMPTY_STRING,
+  )
+  const [upcValue, setUpcValue] = useState(itemToUse?.upc || EMPTY_STRING)
   const [productNameValue, setProductNameValue] = useState(
-    itemInList?.name || item.name || EMPTY_STRING,
-  );
-  const frequencyInMsRef = useRef<number>(
-    itemInList?.frequency || item.frequency || -1,
-  );
-  const unitRef = useRef<string>(EMPTY_STRING);
+    itemToUse?.name || EMPTY_STRING,
+  )
+  const frequencyInMsRef = useRef<number>(itemToUse?.frequency || -1)
+  const unitRef = useRef<string>(EMPTY_STRING)
   const isUpcValid = useMemo(
     () => upcValue?.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
     [upcValue],
-  );
-  const storeSpecificValuesRef = useRef<StoreSpecificValues>(null);
+  )
+  const storeSpecificValuesRef = useRef<StoreSpecificValues>(null)
   const formValidation: ItemFormValdation = useMemo(() => {
-    const isValid = (isUpcValid && upcValue.length > 0) || !!productNameValue;
+    const isValid = (isUpcValid && upcValue.length > 0) || !!productNameValue
     return {
       isValid,
       message: isValid
         ? EMPTY_STRING
         : "A unique key must be given for each item.  Please enter either a 'Upc' or a 'Name'",
-    };
-  }, [isUpcValid, upcValue, productNameValue]);
-  const customImagesToDeleteOnUnloadRef = useRef<string[]>([]);
-  const shouldDeleteLastImageRef = useRef(true);
+    }
+  }, [isUpcValid, upcValue, productNameValue])
+  const customImagesToDeleteOnUnloadRef = useRef<string[]>([])
+  const shouldDeleteLastImageRef = useRef(true)
 
   function onClosePress() {
-    shouldDeleteLastImageRef.current = true;
-    onClose && onClose();
+    shouldDeleteLastImageRef.current = true
+    onClose && onClose()
   }
 
   function onSavePress() {
-    const now = Date.now();
+    const now = Date.now()
     const itemToSave = {
       frequency: frequencyInMsRef.current,
       unit: unitRef.current,
-      images: item.images || [],
+      images: itemToUse?.images || [],
       imageToUseIndex:
-        item.images.findIndex((image) => {
-          return image === selectedUrl;
+        itemToUse?.images.findIndex((image) => {
+          return image === selectedUrl
         }) || DEFAULT_IMAGE_INDEX,
       name: productNameValue,
       upc: upcValue,
-      addedDate: item.addedDate || now,
+      addedDate: itemToUse?.addedDate || now,
       lastUpdatedDate: now,
-    } as Item;
+    } as Item
 
     if (!itemToSave.images.includes(selectedUrl)) {
-      itemToSave.images.push(selectedUrl);
-      itemToSave.imageToUseIndex = itemToSave.images.length - 1;
+      itemToSave.images.push(selectedUrl)
+      itemToSave.imageToUseIndex = itemToSave.images.length - 1
     }
 
-    shouldDeleteLastImageRef.current = false;
+    shouldDeleteLastImageRef.current = false
     onSave &&
       onSave({
         item: itemToSave,
         storeSpecificValues: storeSpecificValuesRef.current,
         currentStore,
-      });
-    onClose && onClose();
+      })
+    onClose && onClose()
   }
 
   const onFrequencyChange = useCallback(
     (frequencyInMs: number) => {
-      frequencyInMsRef.current = frequencyInMs;
+      frequencyInMsRef.current = frequencyInMs
     },
     [frequencyInMsRef],
-  );
+  )
 
   const onItemSpecificValueChange = useCallback(
     (storeSpecificValuesLocal: StoreSpecificValues) => {
-      storeSpecificValuesRef.current = storeSpecificValuesLocal;
+      storeSpecificValuesRef.current = storeSpecificValuesLocal
     },
     [storeSpecificValuesRef],
-  );
+  )
 
   const onUnitChange = useCallback((unit: string) => {
-    unitRef.current = unit;
-  }, []);
+    unitRef.current = unit
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -150,16 +153,16 @@ export function ItemForm(props: ItemFormProps) {
         index < customImagesToDeleteOnUnloadRef.current.length;
         index++
       ) {
-        const imageUrl = customImagesToDeleteOnUnloadRef.current[index];
+        const imageUrl = customImagesToDeleteOnUnloadRef.current[index]
         if (
           index === customImagesToDeleteOnUnloadRef.current.length - 1 &&
           shouldDeleteLastImageRef.current === false
         )
-          break;
-        deleteFile(imageUrl);
+          break
+        deleteFile(imageUrl)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   return (
     <AbsolutePositionedScreen
@@ -234,40 +237,40 @@ export function ItemForm(props: ItemFormProps) {
           selectedUrl={selectedUrl}
           onSelectImage={(url, isCustomImage) => {
             if (isCustomImage) {
-              customImagesToDeleteOnUnloadRef.current.push(url);
-              item.images = item.images.filter((imageUrl) => {
-                const shouldKeep = !imageUrl?.match(LOCAL_FILE_REGEX);
+              customImagesToDeleteOnUnloadRef.current.push(url)
+              if (!itemToUse) return
+
+              itemToUse.images = itemToUse?.images.filter((imageUrl) => {
+                const shouldKeep = !imageUrl?.match(LOCAL_FILE_REGEX)
                 if (!shouldKeep) {
-                  deleteFile(imageUrl);
+                  deleteFile(imageUrl)
                 }
-                return shouldKeep;
-              });
-              item.images.push(url);
+                return shouldKeep
+              })
+              itemToUse?.images.push(url)
             }
-            setSelectedUrl(url);
+            setSelectedUrl(url)
           }}
-          imagesToRender={new Set(item.images)}
+          imagesToRender={new Set(itemToUse?.images)}
         />
       </Stack>
       <FrequencyInput
         onValueChange={onFrequencyChange}
         headingTag={InputText}
         spacing={theme.space[1]}
-        initialFrequency={getFrequencyValue(
-          itemInList?.frequency || item.frequency,
-        )}
+        initialFrequency={getFrequencyValue(itemToUse?.frequency)}
       />
       <UnitInput
-        initialValue={itemInList?.unit || item?.unit}
+        initialValue={itemToUse?.unit}
         onValueChange={onUnitChange}
         headingTag={InputText}
         spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
       <StoreManager showStoreList />
       <ItemFormStoreSpecific
-        item={item}
+        item={itemToUse}
         onValueChange={onItemSpecificValueChange}
       />
     </AbsolutePositionedScreen>
-  );
+  )
 }

@@ -1,56 +1,56 @@
-import { Stack, Input, useTheme } from "native-base";
-import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { Stack, Input, useTheme } from 'native-base'
+import { useEffect, useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
 
-import { InputText } from "./InputText";
+import { InputText } from './InputText'
 
 import {
   EMPTY_NUMBER,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
-} from "@/constants/general";
+} from '@/constants/general'
 import {
   currentStoreSelector,
   itemsListItemSelector,
-} from "@/state/slices/listsSlice";
-import { StoreSpecificValues } from "@/types/Item";
-import { ItemProp } from "@/types/general";
-import { getKeyToUse } from "@/utils/helpers";
+} from '@/state/slices/listsSlice'
+import { StoreSpecificValues } from '@/types/Item'
+import { ItemProp } from '@/types/general'
+import { getKeyToUse } from '@/utils/helpers'
 
 type ItemFormProps = {
-  onValueChange: (storeSpecificValues: StoreSpecificValues) => void;
-} & ItemProp;
+  onValueChange: (storeSpecificValues: StoreSpecificValues) => void
+} & Partial<ItemProp>
 
 export function ItemFormStoreSpecific(props: ItemFormProps) {
-  const { item, onValueChange } = props;
-  const theme = useTheme();
+  const { item, onValueChange } = props
+  const theme = useTheme()
   const keyToUse = useMemo(
     () =>
       getKeyToUse(
-        { name: item.name || EMPTY_STRING, upc: item.upc || EMPTY_STRING },
+        { name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING },
         false,
       ),
     [item],
-  );
-  const currentStore = useSelector(currentStoreSelector);
-  const itemInList = useSelector(itemsListItemSelector(keyToUse));
+  )
+  const currentStore = useSelector(currentStoreSelector)
+  const itemInList = useSelector(itemsListItemSelector(keyToUse))
 
   //if adding new state, be sure to update in useEffect below too.
   const [aisle, setAisle] = useState(
     itemInList?.aisle?.[currentStore.name] || EMPTY_STRING,
-  );
+  )
   const [itemId, setItemId] = useState(
     itemInList?.itemId?.[currentStore.name] || EMPTY_STRING,
-  );
+  )
   const [price, setPrice] = useState(
     itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING,
-  );
+  )
   const [quantity, setQuantity] = useState(
     itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER,
-  );
+  )
 
   useEffect(() => {
-    if (!currentStore?.name) return;
+    if (!currentStore?.name) return
     onValueChange &&
       onValueChange({
         aisle: {
@@ -65,19 +65,17 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
         quantity: {
           [currentStore.name]: quantity,
         },
-      });
-  }, [aisle, itemId, price, quantity, currentStore, onValueChange]);
+      })
+  }, [aisle, itemId, price, quantity, currentStore, onValueChange])
 
   useEffect(() => {
-    setAisle(itemInList?.aisle?.[currentStore.name] || EMPTY_STRING);
-    setItemId(itemInList?.itemId?.[currentStore.name] || EMPTY_STRING);
-    setPrice(
-      itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING,
-    );
-    setQuantity(itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER);
-  }, [currentStore]);
+    setAisle(itemInList?.aisle?.[currentStore.name] || EMPTY_STRING)
+    setItemId(itemInList?.itemId?.[currentStore.name] || EMPTY_STRING)
+    setPrice(itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING)
+    setQuantity(itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER)
+  }, [currentStore])
 
-  if (!currentStore.name) return null;
+  if (!currentStore.name) return null
   return (
     <Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -123,5 +121,5 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
         />
       </Stack>
     </Stack>
-  );
+  )
 }

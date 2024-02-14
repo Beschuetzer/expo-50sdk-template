@@ -1,6 +1,5 @@
 ## MVP
 
--need to figure out how to show items in ItemForm when there is no upc data (just try opening one of the items created from mock 500 items button)
 
 -add addDate field to Item
 -add by date sorter

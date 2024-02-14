@@ -150,7 +150,7 @@ export function getItemFromItemsList(itemsList: ItemsList, key: string | Key) {
   return itemFound ? (itemFound as ItemWithStoreSpecificValues) : null;
 }
 
-export function getImagesFromUpcProduct(upcProduct: UpcProduct) {
+export function getImagesFromUpcProduct(upcProduct?: UpcProduct | null) {
   return Object.values(IMAGE_PRIORITY_MAPPING).map(
     (key) => upcProduct?.[key] || EMPTY_STRING,
   );

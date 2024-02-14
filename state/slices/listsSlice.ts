@@ -1,10 +1,10 @@
-import { createSelector, createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
 
-import { RootState } from "../store";
+import { RootState } from '../store'
 
-import { SORTERS, SortType } from "@/components/lists/sorters";
-import { EMPTY_STRING } from "@/constants/general";
+import { SORTERS, SortType } from '@/components/lists/sorters'
+import { EMPTY_STRING } from '@/constants/general'
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -15,37 +15,33 @@ import {
   StoreList,
   StoreSpecificValueKey,
   StoreSpecificValues,
-} from "@/types/Item";
-import { GpsCoordinate, Store } from "@/types/Store";
+} from '@/types/Item'
+import { GpsCoordinate, Store } from '@/types/Store'
 import {
   calculateDistance,
   getEmptyArray,
   getItemFromItemsList,
   getKeyToUse,
-} from "@/utils/helpers";
+} from '@/utils/helpers'
 
-const CURRENT_LOCATION_INITIAL = null;
+const CURRENT_LOCATION_INITIAL = null
 
 export type AddItemsListItemPayload = {
-  item: Item;
-  storeSpecificValues?: StoreSpecificValues;
-  currentStore?: Store;
-};
+  item: Item
+  storeSpecificValues?: StoreSpecificValues
+  currentStore?: Store
+}
 
 export type UpdateStoreSpecificValuesPayload = {
   /**
    *The key to get the item from {@link ItemsList itemsList}
    **/
-  key: Key;
+  key: Key
   /**
    *The new value for each store specific value
    **/
-  storeSpecificValuesToUpdate: Partial<{ [key in StoreSpecificValueKey]: any }>;
-  /**
-   *The store name to use to set the new value
-   **/
-  storeName: string;
-};
+  storeSpecificValuesToUpdate: Partial<{ [key in StoreSpecificValueKey]: any }>
+}
 
 /**
  * {@link ListsState.itemsList itemsList} has all of the items that have been scanned (these can be added to any store)
@@ -54,14 +50,14 @@ export type UpdateStoreSpecificValuesPayload = {
  * {@link ListsState.stores stores} is a list of the stores created
  **/
 export type ListsState = {
-  currentLocation: GpsCoordinate | null;
-  currentStoreName: string;
-  itemsList: ItemsList;
-  itemsListSortType: SortType;
-  lastPurchasedList: LastPurchasedList;
-  storesList: StoreList;
-  storesListSortType: SortType;
-};
+  currentLocation: GpsCoordinate | null
+  currentStoreName: string
+  itemsList: ItemsList
+  itemsListSortType: SortType
+  lastPurchasedList: LastPurchasedList
+  storesList: StoreList
+  storesListSortType: SortType
+}
 
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
@@ -71,35 +67,30 @@ const initialState: ListsState = {
   lastPurchasedList: getEmptyArray(),
   storesList: getEmptyArray(),
   storesListSortType: SortType.Name,
-};
+}
 
 export const listsSlice = createSlice({
-  name: "lists",
+  name: 'lists',
   initialState,
   reducers: {
     addMockItems: (state: ListsState, action: PayloadAction<ItemsList>) => {
-      state.itemsList = action.payload;
+      state.itemsList = action.payload
     },
     addItemsListItem: (
       state: ListsState,
       action: PayloadAction<AddItemsListItemPayload>,
     ) => {
-      const { item, storeSpecificValues, currentStore } = action.payload || {};
-      const keyToUse = getKeyToUse(action.payload.item);
+      const { item, storeSpecificValues, currentStore } = action.payload || {}
+      const keyToUse = getKeyToUse(action.payload.item)
 
       if (!keyToUse) {
-        alert(
-          "Unable to add an item with no name and no upc to the itemsList.",
-        );
-        return;
+        alert('Unable to add an item with no name and no upc to the itemsList.')
+        return
       }
 
-      const currentItem = getItemFromItemsList(
-        state.itemsList,
-        keyToUse,
-      ) as any;
-      const newItem = { ...item } as any;
-      const itemToUse = currentItem || newItem;
+      const currentItem = getItemFromItemsList(state.itemsList, keyToUse) as any
+      const newItem = { ...item } as any
+      const itemToUse = currentItem || newItem
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
@@ -107,18 +98,18 @@ export const listsSlice = createSlice({
           itemToUse[valueName] = {
             ...itemToUse?.[valueName],
             [currentStore.name]: value?.[currentStore.name],
-          };
+          }
         }
       }
 
       if (!currentItem) {
-        state.itemsList.push(newItem);
+        state.itemsList.push(newItem)
         state.itemsList = [
           ...state.itemsList.sort(SORTERS[state.itemsListSortType]),
-        ];
+        ]
       } else {
         for (const [key, value] of Object.entries(item)) {
-          currentItem[key] = value;
+          currentItem[key] = value
         }
       }
     },
@@ -126,146 +117,149 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<LastPurchasedItem>,
     ) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "Unable to add an item with no name and no upc to the lastPurchasedList.",
-        );
-        return;
+          'Unable to add an item with no name and no upc to the lastPurchasedList.',
+        )
+        return
       }
       state.lastPurchasedList = {
         ...state.lastPurchasedList,
         [keyToUse]: action.payload,
-      };
+      }
     },
     addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
-      const store = action.payload;
-      const keyToUse = getKeyToUse(store);
+      const store = action.payload
+      const keyToUse = getKeyToUse(store)
       if (!keyToUse) {
-        alert("Unable to add an item with no name to the storesList.");
-        return;
+        alert('Unable to add an item with no name to the storesList.')
+        return
       }
 
       if (
         state.storesList.find((store) => {
-          return store.name === keyToUse;
+          return store.name === keyToUse
         })
       )
-        return;
+        return
       state.storesList.push({
         ...store,
         calculatedDistance: calculateDistance(
           store.gpsCoordinates,
           state.currentLocation,
         ),
-      });
-      state.storesList.sort(SORTERS[state.storesListSortType]);
+      })
+      state.storesList.sort(SORTERS[state.storesListSortType])
 
       if (state.storesList.length === 1) {
-        state.currentStoreName = store.name;
+        state.currentStoreName = store.name
       }
     },
     removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "A key must be provided in order to remove an item from the itemsList.",
-        );
-        return;
+          'A key must be provided in order to remove an item from the itemsList.',
+        )
+        return
       }
       state.itemsList = state.itemsList.filter((item) => {
-        if (item.upc && item.name) return item.upc !== keyToUse;
-        return item.name !== keyToUse;
-      });
+        if (item.upc && item.name) return item.upc !== keyToUse
+        return item.name !== keyToUse
+      })
     },
     removeLastPurchasedList: (
       state: ListsState,
       action: PayloadAction<Key>,
     ) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "A key must be provided in order to remove an item from the lastPurchasedList.",
-        );
-        return;
+          'A key must be provided in order to remove an item from the lastPurchasedList.',
+        )
+        return
       }
-      delete state.lastPurchasedList[keyToUse];
+      state.lastPurchasedList = state.lastPurchasedList.filter((item) => {
+        if (item.upc && item.name) return item.upc !== keyToUse
+        return item.name !== keyToUse
+      })
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action.payload);
+      const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
         alert(
-          "A key must be provided in order to remove an item from the storesList.",
-        );
-        return;
+          'A key must be provided in order to remove an item from the storesList.',
+        )
+        return
       }
       state.storesList = state.storesList.filter(
         (store) => store.name !== keyToUse,
-      );
+      )
     },
     resetCurrentLocation: (state: ListsState) => {
-      state.currentLocation = CURRENT_LOCATION_INITIAL;
+      state.currentLocation = CURRENT_LOCATION_INITIAL
       for (const store of state.storesList) {
-        store.calculatedDistance = -1;
+        store.calculatedDistance = -1
       }
     },
     resetItemsList: (state: ListsState) => {
-      state.itemsList = getEmptyArray();
+      state.itemsList = getEmptyArray()
     },
     resetLastPurchasedList: (state: ListsState) => {
-      state.lastPurchasedList = getEmptyArray();
+      state.lastPurchasedList = getEmptyArray()
     },
     resetStoresList: (state: ListsState) => {
-      state.storesList = getEmptyArray();
-      state.currentStoreName = EMPTY_STRING;
+      state.storesList = getEmptyArray()
+      state.currentStoreName = EMPTY_STRING
     },
     resetCurrentStoreName: (state: ListsState) => {
-      state.currentStoreName = EMPTY_STRING;
+      state.currentStoreName = EMPTY_STRING
     },
     setCurrentLocation: (
       state: ListsState,
       action: PayloadAction<GpsCoordinate>,
     ) => {
-      if (!action.payload) return;
-      state.currentLocation = action.payload;
+      if (!action.payload) return
+      state.currentLocation = action.payload
       for (const store of state.storesList) {
         store.calculatedDistance = calculateDistance(
           state.currentLocation,
           store.gpsCoordinates,
-        );
+        )
       }
     },
     setCurrentStoreName: (
       state: ListsState,
       action: PayloadAction<string | undefined>,
     ) => {
-      if (!action.payload) return;
-      state.currentStoreName = action.payload;
+      if (!action.payload) return
+      state.currentStoreName = action.payload
     },
     setItemsList: (state: ListsState, action: PayloadAction<ItemsList>) => {
-      if (!action.payload) return;
-      state.itemsList = action.payload;
+      if (!action.payload) return
+      state.itemsList = action.payload
     },
     setStoresList: (state: ListsState, action: PayloadAction<StoreList>) => {
-      if (!action.payload) return;
-      state.storesList = action.payload;
+      if (!action.payload) return
+      state.storesList = action.payload
     },
     updateStoreSpecificValues: (
       state: ListsState,
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
     ) => {
-      if (!action.payload) return;
-      const { storeSpecificValuesToUpdate, key, storeName } = action.payload;
-      const keyToUse = getKeyToUse(key);
+      if (!action.payload) return
+      const { storeSpecificValuesToUpdate, key } = action.payload
+      const keyToUse = getKeyToUse(key)
       const itemToUpdate = getItemFromItemsList(
         state.itemsList,
         keyToUse,
-      ) as any;
-      if (!itemToUpdate || !storeSpecificValuesToUpdate || !storeName) {
+      ) as any
+      if (!itemToUpdate || !storeSpecificValuesToUpdate) {
         alert(
           `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
-        );
-        return;
+        )
+        return
       }
 
       for (const [valueName, value] of Object.entries(
@@ -273,12 +267,12 @@ export const listsSlice = createSlice({
       )) {
         itemToUpdate[valueName] = {
           ...itemToUpdate[valueName],
-          [storeName]: value,
-        };
+          [state.currentStoreName]: value,
+        }
       }
     },
   },
-});
+})
 
 // Action creators are generated for each case reducer function
 export const {
@@ -299,12 +293,12 @@ export const {
   setItemsList,
   setStoresList,
   updateStoreSpecificValues,
-} = listsSlice.actions;
+} = listsSlice.actions
 
-export default listsSlice.reducer;
+export default listsSlice.reducer
 
 export const currentLocationSelector = (state: RootState) =>
-  state[listsSlice.name].currentLocation;
+  state[listsSlice.name].currentLocation
 
 export const currentStoreSelector = createSelector(
   [
@@ -312,23 +306,26 @@ export const currentStoreSelector = createSelector(
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (storesList, currentStoreName) => {
-    return (storesList.find((store) => store.name === currentStoreName) || {
+    const foundStore = (storesList.find(
+      (store) => store.name === currentStoreName,
+    ) || {
       name: EMPTY_STRING,
       gpsCoordinates: null,
-    }) as Store;
+    }) as Store
+    return foundStore;
   },
-);
+)
 
 export const itemsListItemSelector = (id: string) =>
   createSelector(
     [(state: RootState) => (state[listsSlice.name] as ListsState).itemsList],
     (itemsList) => {
-      return getItemFromItemsList(itemsList, id);
+      return getItemFromItemsList(itemsList, id)
     },
-  );
+  )
 
 export const itemsListSelector = (state: RootState) =>
-  state[listsSlice.name].itemsList;
+  state[listsSlice.name].itemsList
 
 export const shoppingListSelector = createSelector(
   [
@@ -339,38 +336,38 @@ export const shoppingListSelector = createSelector(
   (itemsList, storesList, currentStoreName) => {
     const currentStore = storesList.find(
       (store) => store.name === currentStoreName,
-    );
-    const shoppingList: ItemWithStoreSpecificValues[] = [];
+    )
+    const shoppingList: ItemWithStoreSpecificValues[] = []
     for (const item of Object.values(itemsList)) {
       if (
         item?.[StoreSpecificValueKey.Quantity]?.[
           currentStore?.name || EMPTY_STRING
         ]
       ) {
-        shoppingList.push(item);
+        shoppingList.push(item)
       }
     }
-    return shoppingList;
+    return shoppingList
   },
-);
+)
 
 export const storesListSelector = (state: RootState) =>
-  state[listsSlice.name].storesList;
+  state[listsSlice.name].storesList
 
 export const storesListArraySelector = createSelector(
   [(state: RootState) => state[listsSlice.name].storesList],
   (storesList) => {
-    return Object.values(storesList);
+    return Object.values(storesList)
   },
-);
+)
 
 export const storesListItemSelector = (storeName: string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].storesList],
     (storesList) => {
-      return storesList?.find((store) => store.name === storeName) as Store;
+      return storesList?.find((store) => store.name === storeName) as Store
     },
-  );
+  )
 
 export const storesListSortTypeSelector = (state: RootState) =>
-  state[listsSlice.name].storesListSortType;
+  state[listsSlice.name].storesListSortType

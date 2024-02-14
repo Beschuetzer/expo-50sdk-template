@@ -32,6 +32,7 @@ export default function TabLayout() {
         name={Routes.ShoppingListScreen}
         options={{
           title: "List",
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
         }}
       />
@@ -39,6 +40,7 @@ export default function TabLayout() {
         name={Routes.ScannerScreen}
         options={{
           title: "Scanner",
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="barcode" color={color} />
           ),
@@ -48,6 +50,7 @@ export default function TabLayout() {
         name={Routes.StoreScreen}
         options={{
           title: "Stores List",
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="building" color={color} />
           ),
@@ -57,6 +60,7 @@ export default function TabLayout() {
         name={Routes.ItemsScreen}
         options={{
           title: "Items",
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="list-alt" color={color} />
           ),
@@ -66,6 +70,7 @@ export default function TabLayout() {
         name={Routes.OptionsScreen}
         options={{
           title: "Options",
+          headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="adjust" color={color} />,
         }}
       />

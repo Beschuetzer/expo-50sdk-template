@@ -58,7 +58,6 @@ export function ItemsList(props: ItemsListProps) {
           quantity:
             currentQuantity && currentQuantity > 0 ? currentQuantity + 1 : 1,
         },
-        storeName: currentStore.name,
       }),
     );
   }

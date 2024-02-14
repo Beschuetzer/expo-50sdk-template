@@ -40,7 +40,9 @@ export type UpdateStoreSpecificValuesPayload = {
   /**
    *The new value for each store specific value
    **/
-  storeSpecificValuesToUpdate: Partial<{ [key in StoreSpecificValueKey]: any }>
+  storeSpecificValuesToUpdate: Partial<{
+    [key in StoreSpecificValueKey]: (currentValue: any) => any
+  }>
 }
 
 /**
@@ -267,7 +269,9 @@ export const listsSlice = createSlice({
       )) {
         itemToUpdate[valueName] = {
           ...itemToUpdate[valueName],
-          [state.currentStoreName]: value,
+          [state.currentStoreName]: value(
+            itemToUpdate[valueName][state.currentStoreName],
+          ),
         }
       }
     },
@@ -312,7 +316,7 @@ export const currentStoreSelector = createSelector(
       name: EMPTY_STRING,
       gpsCoordinates: null,
     }) as Store
-    return foundStore;
+    return foundStore
   },
 )
 

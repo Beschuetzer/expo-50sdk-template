@@ -1,6 +1,5 @@
 ## MVP
 
--make updateStoreSpecificValues to a callback that passes in current value to get the new value
 -figure out how to add buttons for sort and filter in header of item screen
 
 -add addDate field to Item

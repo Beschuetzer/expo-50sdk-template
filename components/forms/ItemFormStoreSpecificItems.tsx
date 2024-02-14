@@ -60,7 +60,7 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
           [currentStore.name]: itemId,
         },
         price: {
-          [currentStore.name]: parseFloat(price),
+          [currentStore.name]: Math.abs(parseFloat(price) || EMPTY_NUMBER),
         },
         quantity: {
           [currentStore.name]: quantity,

@@ -137,10 +137,10 @@ export function ItemsList(props: ItemsListProps) {
         <ListSorter
           onValueChange={onSortTypeChange}
           sortTypes={[
-            SortType.Aisle,
-            SortType.Frequency,
             SortType.Name,
             SortType.Upc,
+            SortType.Frequency,
+            SortType.Aisle,
           ]}
         />
       }

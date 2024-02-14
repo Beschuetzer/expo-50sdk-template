@@ -1,11 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons'
-import { TouchableOpacity } from '@gorhom/bottom-sheet'
 import { FlashList } from '@shopify/flash-list'
 import { useNavigation } from 'expo-router'
 import { useTheme, Row, View, Stack, Text, Button } from 'native-base'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
-import { RectButton } from 'react-native-gesture-handler'
+import { RectButton, TouchableOpacity } from 'react-native-gesture-handler'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { ListSorter } from './ListSorter'
@@ -26,10 +25,7 @@ import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
-const storesListSortTypes = [
-  SortType.Name,
-  SortType.Distance,
-] as SortType[]
+const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[]
 
 export function StoresList() {
   const navgation = useNavigation()
@@ -46,7 +42,7 @@ export function StoresList() {
   const lastSortTypeRef = useRef(storesListSortTypes[0])
 
   function onAddStorePress() {
-    navigation.navigate(Routes.StoreModal);
+    navigation.navigate(Routes.StoreModal)
   }
 
   const onSortTypeChange = useCallback(
@@ -80,11 +76,15 @@ export function StoresList() {
       headerLeft: () => (
         <View ml={theme.space[1]}>
           <TouchableOpacity onPress={onAddStorePress}>
-            <FontAwesome name="plus" size={20} color={theme.colors.primary[900]} />
+            <FontAwesome
+              name="plus"
+              size={20}
+              color={theme.colors.primary[900]}
+            />
           </TouchableOpacity>
         </View>
       ),
-    });
+    })
   }, [navgation])
 
   useEffect(() => {

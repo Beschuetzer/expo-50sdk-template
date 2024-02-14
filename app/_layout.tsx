@@ -1,5 +1,4 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome'
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 import {
   DarkTheme,
   DefaultTheme,
@@ -11,13 +10,14 @@ import * as SplashScreen from 'expo-splash-screen'
 import { NativeBaseProvider } from 'native-base'
 import { useEffect } from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { MenuProvider } from 'react-native-popup-menu'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import { Text } from '@/components/Themed'
 import { useColorScheme } from '@/components/hooks/useColorScheme'
-import { persistor, store } from '@/state/store'
 import { Routes } from '@/constants/navigation'
+import { persistor, store } from '@/state/store'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -64,7 +64,7 @@ function RootLayoutNav() {
         <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
           <NativeBaseProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
-              <BottomSheetModalProvider>
+              <MenuProvider>
                 <Stack>
                   <Stack.Screen
                     name="(tabs)"
@@ -79,7 +79,7 @@ function RootLayoutNav() {
                     options={{ presentation: 'modal', title: 'Store Details' }}
                   />
                 </Stack>
-              </BottomSheetModalProvider>
+              </MenuProvider>
             </GestureHandlerRootView>
           </NativeBaseProvider>
         </PersistGate>

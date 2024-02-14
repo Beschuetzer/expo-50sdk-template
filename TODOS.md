@@ -1,13 +1,9 @@
 ## MVP
 
--add menu button for ITemsLIst
--figure out how to add buttons for sort and filter in header of item screen (in order to be able to add sort and filter buttons)
+-figure out + (add item) button in itemsList (may need to add a param to the route)
+-add filter for all lists (make generic for use with other lists?)
 
-
-
--use StoresList approach to rework the other lists (using array and all the reducers/selectors around it):
-   --itemsList (need to figure out sorting stuff)
-   --lastPurchasedList?
+-use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):
 
 -convert ShoppingList to use Flashlist
 -Figure out how to style the shopping list tile
@@ -22,7 +18,6 @@
 -Store details should have a way to view all of the isles and sort them in order
 -Need to figure out how to drag and drop rows for easier custom sorting
 
--add filter for all lists (make generic for use with other lists?)
 
  //todo: calculate FlashList estimatedItemSize for each instance
 

@@ -1,9 +1,16 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
 import { useNavigation } from 'expo-router'
-import { View, Text, useTheme, Stack, Button } from 'native-base'
+import { View, Text, useTheme, Stack } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
+import { TouchableOpacity } from 'react-native-gesture-handler'
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
@@ -12,6 +19,7 @@ import { SwipeableRow } from './SwipeableRow'
 import { SORTERS, SortType } from './sorters'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { Routes } from '@/constants/navigation'
 import {
   currentStoreSelector,
   itemsListSelector,
@@ -23,7 +31,7 @@ import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
-type ItemsListProps = {}
+type ItemsListProps = object
 
 const itemsListSortTypes = [
   SortType.Name,
@@ -34,7 +42,7 @@ const itemsListSortTypes = [
 ] as SortType[]
 
 export function ItemsList(props: ItemsListProps) {
-  const navgation = useNavigation()
+  const navigation = useNavigation()
   const itemsList = useSelector(itemsListSelector)
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
@@ -45,6 +53,14 @@ export function ItemsList(props: ItemsListProps) {
   const shouldSortOnMountRef = useRef(true)
   const lastItemsListLengthRef = useRef(itemsList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
+
+  function onAddItemPress() {
+    navigation.navigate(Routes.ItemModal)
+  }
+
+  const onSortPress = useCallback(() => {
+    setIsSortModalOpen(true)
+  }, [])
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
@@ -77,18 +93,51 @@ export function ItemsList(props: ItemsListProps) {
   }
 
   useEffect(() => {
-    navgation.setOptions({
+    navigation.setOptions({
       headerRight: () => (
-        <Button
-          variant="ghost"
-          mr={theme.space[1]}
-          onPress={() => setIsSortModalOpen(true)}
-        >
-          Sort
-        </Button>
+        <Menu>
+          <MenuTrigger
+            children={
+              <View pr={theme.space[1]}>
+                <View pl={theme.space[1]}>
+                  <FontAwesome
+                    name="ellipsis-v"
+                    size={20}
+                    color={theme.colors.black}
+                  />
+                </View>
+              </View>
+            }
+          />
+          <MenuOptions
+            customStyles={{
+              optionsContainer: { backgroundColor: theme.colors.black },
+            }}
+          >
+            <MenuOption
+              customStyles={{
+                optionText: {
+                  color: theme.colors.white,
+                  fontWeight: '300',
+                  fontSize: 20,
+                  textAlign: 'center',
+                },
+              }}
+              onSelect={onSortPress}
+              text="Sort"
+            />
+          </MenuOptions>
+        </Menu>
       ),
-    })
-  }, [navgation])
+      headerLeft: () => (
+        <View ml={theme.space[1]}>
+          <TouchableOpacity onPress={onAddItemPress}>
+            <FontAwesome name="plus" size={20} color={theme.colors.black} />
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation])
 
   useEffect(() => {
     if (itemsList.length === lastItemsListLengthRef.current) return
@@ -153,10 +202,10 @@ export function ItemsList(props: ItemsListProps) {
         ref={list}
         refreshing={refreshing}
         onRefresh={() => {
-          setRefreshing(true);
+          setRefreshing(true)
           setTimeout(() => {
-            setRefreshing(false);
-          }, 2000);
+            setRefreshing(false)
+          }, 2000)
         }}
         data={itemsList}
         renderItem={renderItem}
@@ -175,14 +224,14 @@ export function ItemsList(props: ItemsListProps) {
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
         onMount={() => {
-          if (!shouldSortOnMountRef.current) return;
-          shouldSortOnMountRef.current = false;
-          onSortTypeChange(lastSortTypeRef.current);
+          if (!shouldSortOnMountRef.current) return
+          shouldSortOnMountRef.current = false
+          onSortTypeChange(lastSortTypeRef.current)
         }}
         onValueChange={onSortTypeChange}
         sortTypes={itemsListSortTypes}
         viewSize="small"
       />
     </>
-  );
+  )
 }

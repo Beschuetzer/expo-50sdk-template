@@ -47,8 +47,6 @@ export function StoresList() {
   const lastStoresListLengthRef = useRef(storesList.length)
   const lastSortTypeRef = useRef(storesListSortTypes[0])
 
-  console.log({storesList});
-  
   function onAddStorePress() {
     navigation.navigate(Routes.StoreModal)
   }
@@ -87,21 +85,28 @@ export function StoresList() {
                   <FontAwesome
                     name="ellipsis-v"
                     size={20}
-                    color={theme.colors.primary[900]}
+                    color={theme.colors.black}
                   />
                 </View>
               </View>
             }
           />
-          <MenuOptions>
-            <MenuOption onSelect={onSortPress} text="Sort" />
-            <MenuOption onSelect={() => alert(`Delete`)}>
-              <Text style={{ color: 'red' }}>Delete</Text>
-            </MenuOption>
+          <MenuOptions
+            customStyles={{
+              optionsContainer: { backgroundColor: theme.colors.black },
+            }}
+          >
             <MenuOption
-              onSelect={() => alert(`Not called`)}
-              disabled
-              text="Disabled"
+              customStyles={{
+                optionText: {
+                  color: theme.colors.white,
+                  fontWeight: '300',
+                  fontSize: 20,
+                  textAlign: 'center',
+                },
+              }}
+              onSelect={onSortPress}
+              text="Sort"
             />
           </MenuOptions>
         </Menu>
@@ -109,11 +114,7 @@ export function StoresList() {
       headerLeft: () => (
         <View ml={theme.space[1]}>
           <TouchableOpacity onPress={onAddStorePress}>
-            <FontAwesome
-              name="plus"
-              size={20}
-              color={theme.colors.primary[900]}
-            />
+            <FontAwesome name="plus" size={20} color={theme.colors.black} />
           </TouchableOpacity>
         </View>
       ),

@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 import { RootState } from '../store'
 
-import { SORTERS, SortType } from '@/components/lists/sorters'
+import { SortType, getSorter } from '@/components/lists/sorters'
 import { EMPTY_STRING } from '@/constants/general'
 import {
   Item,
@@ -107,7 +107,7 @@ export const listsSlice = createSlice({
       if (!currentItem) {
         state.itemsList.push(newItem)
         state.itemsList = [
-          ...state.itemsList.sort(SORTERS[state.itemsListSortType]),
+          ...state.itemsList.sort(getSorter(state.itemsListSortType)),
         ]
       } else {
         for (const [key, value] of Object.entries(item)) {
@@ -152,7 +152,7 @@ export const listsSlice = createSlice({
           state.currentLocation,
         ),
       })
-      state.storesList.sort(SORTERS[state.storesListSortType])
+      state.storesList.sort(getSorter(state.storesListSortType))
 
       if (state.storesList.length === 1) {
         state.currentStoreName = store.name
@@ -215,7 +215,7 @@ export const listsSlice = createSlice({
       state.storesList = getEmptyArray()
       state.currentStoreName = EMPTY_STRING
     },
-    resetCurrentStoreName: (state: ListsState) => {      
+    resetCurrentStoreName: (state: ListsState) => {
       state.currentStoreName = EMPTY_STRING
     },
     setCurrentLocation: (
@@ -236,7 +236,6 @@ export const listsSlice = createSlice({
       action: PayloadAction<string | undefined>,
     ) => {
       if (!action.payload) return
-      console.log({name: action.payload});
       state.currentStoreName = action.payload
     },
     setItemsList: (state: ListsState, action: PayloadAction<ItemsList>) => {

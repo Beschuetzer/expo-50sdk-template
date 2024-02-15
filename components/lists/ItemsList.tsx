@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ItemTile } from './ItemTile'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
-import { SORTERS, SortType } from './sorters'
+import { SortType, getSorter } from './sorters'
 import { AddButton } from '../header/AddButton'
 import { EllipsisButton } from '../header/EllipsisButton'
 
@@ -38,8 +38,8 @@ type ItemsListProps = object
 const itemsListSortTypes = [
   SortType.Name,
   SortType.Upc,
-  SortType.DateAdded,
-  SortType.DateLastUpdated,
+  SortType.AddedDate,
+  SortType.LastUpdatedDate,
   SortType.Frequency,
 ] as SortType[]
 
@@ -76,7 +76,7 @@ export function ItemsList(props: ItemsListProps) {
     (sortType: SortType) => {
       lastSortTypeRef.current = sortType
       const sortedList = [...itemsList]
-      sortedList.sort(SORTERS[sortType])
+      sortedList.sort(getSorter(sortType))
       dispatch(setItemsList(sortedList))
     },
     [itemsList],

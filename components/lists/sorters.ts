@@ -1,144 +1,53 @@
-import {
-  Item,
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey,
-} from '@/types/Item'
-import { Store } from '@/types/Store'
-
+/**
+ *The string values have to match the field names for {@link ItemWithStoreSpecificValues}
+ **/
 export enum SortType {
-  Aisle = 'Aisle in Current Store',
-  DateAdded = 'Date Added',
-  DateLastUpdated = 'Date Last Updated',
-  Distance = 'Distance',
-  Frequency = 'Frequency',
-  ItemId = 'Item Id in Current Store',
-  Name = 'Name',
-  /**
-   *This is effectively the order in which they were added
-   **/
-  None = 'When Added',
-  Price = 'Price in Current Store',
-  Quantity = 'Quantity in Current Store',
-  Upc = 'Upc',
+  Aisle = 'aisle',
+  AddedDate = 'addedDate',
+  LastUpdatedDate = 'lastUpdatedDate',
+  Distance = 'distance',
+  Frequency = 'frequency',
+  ItemId = 'itemId',
+  Name = 'name',
+  None = 'none',
+  Price = 'price',
+  Quantity = 'quantity',
+  Upc = 'upc',
 }
 
-export type CompareFuntion = ((a: any, b: any) => number) | undefined
-export type HasAisleField = Pick<
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey.Aisle
->
-export type HasItemIdField = Pick<
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey.ItemId
->;
-export type HasPriceField = Pick<
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey.Price
->;
-export type HasQuantityField = Pick<
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey.Quantity
->;
-export type HasDateAddedField = Required<Pick<Item, 'addedDate'>>
-export type HasDateLastUpdatedField = Required<Pick<Item, 'lastUpdatedDate'>>
-export type HasFrequencyField = Required<Pick<Item, 'frequency'>>
-export type HasNameField = Required<Pick<Item, 'name'>>
-export type HasUpcField = Required<Pick<Item, 'upc'>>
-export type HasCalculatedDistanceField = Required<Pick<Store, 'calculatedDistance'>>
+export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
+  [SortType.Aisle]: 'Aisle in Current Store',
+  [SortType.AddedDate]: 'Date Added',
+  [SortType.LastUpdatedDate]: 'Date Last Updated',
+  [SortType.Distance]: 'Distance',
+  [SortType.Frequency]: 'Frequency',
+  [SortType.ItemId]: 'Item Id in Current Store',
+  [SortType.Name]: 'Name',
+  [SortType.None]: 'When Added',
+  [SortType.Price]: 'Price in Current Store',
+  [SortType.Quantity]: 'Quantity in Current Store',
+  [SortType.Upc]: 'Upc',
+}
 
-export const SORTERS: { [key in SortType]: CompareFuntion } = {
-  [SortType.Aisle]: (current: HasAisleField, next: HasAisleField) => {
-    if (!current.aisle && next.aisle) return 1;
-    if (current.aisle && !next.aisle) return -1;
-    if (current.aisle === next.aisle) return 0;
-    if (current.aisle <= next.aisle) return -1;
-    return 1;
-  },
-  [SortType.ItemId]: (current: HasItemIdField, next: HasItemIdField) => {
-    if (!current.itemId && next.itemId) return 1;
-    if (current.itemId && !next.itemId) return -1;
-    if (current.itemId === next.itemId) return 0;
-    if (current.itemId <= next.itemId) return -1;
-    return 1;
-  },
-  [SortType.Quantity]: (current: HasQuantityField, next: HasQuantityField) => {
-    if (!current.quantity && next.quantity) return 1;
-    if (current.quantity && !next.quantity) return -1;
-    if (current.quantity === next.quantity) return 0;
-    if (current.quantity <= next.quantity) return -1;
-    return 1;
-  },
-  [SortType.Price]: (current: HasPriceField, next: HasPriceField) => {
-    if (!current.price && next.price) return 1;
-    if (current.price && !next.price) return -1;
-    if (current.price === next.price) return 0;
-    if (current.price <= next.price) return -1;
-    return 1;
-  },
-  [SortType.DateAdded]: (
-    current: HasDateAddedField,
-    next: HasDateAddedField,
-  ) => {
-    if (!current.addedDate && next.addedDate) return 1;
-    if (current.addedDate && !next.addedDate) return -1;
-    if (current.addedDate === next.addedDate) return 0;
-    if (current && next && current.addedDate <= next.addedDate) return -1;
-    return 1;
-  },
-  [SortType.DateLastUpdated]: (
-    current: HasDateLastUpdatedField,
-    next: HasDateLastUpdatedField,
-  ) => {
-    if (!current.lastUpdatedDate && next.lastUpdatedDate) return 1;
-    if (current.lastUpdatedDate && !next.lastUpdatedDate) return -1;
-    if (current.lastUpdatedDate === next.lastUpdatedDate) return 0;
-    if (current && next && current.lastUpdatedDate <= next.lastUpdatedDate)
-      return -1;
-    return 1;
-  },
-  [SortType.Distance]: (
-    current: HasCalculatedDistanceField,
-    next: HasCalculatedDistanceField,
-  ) => {
-    if (!current.calculatedDistance && next.calculatedDistance) return 1;
-    if (current.calculatedDistance && !next.calculatedDistance) return -1;
-    if (current.calculatedDistance === next.calculatedDistance) return 0;
-    if (
-      current &&
-      next &&
-      current.calculatedDistance <= next.calculatedDistance
-    )
-      return -1;
-    return 1;
-  },
-  [SortType.Frequency]: (
-    current: HasFrequencyField,
-    next: HasFrequencyField,
-  ) => {
-    if (!current.frequency && next.frequency) return 1;
-    if (current.frequency && !next.frequency) return -1;
-    if (current.frequency === next.frequency) return 0;
-    if (current.frequency <= next.frequency) return -1;
-    return 1;
-  },
-  [SortType.Name]: (current: HasNameField, next: HasNameField) => {
-    if (!current.name && next.name) return 1;
-    if (current.name && !next.name) return -1;
-    if (current.name === next.name) return 0;
-    if (current.name <= next.name) return -1;
-    return 1;
-  },
-  [SortType.None]: (
-    current: HasCalculatedDistanceField,
-    next: HasCalculatedDistanceField,
-  ) => {
-    return 0;
-  },
-  [SortType.Upc]: (current: HasUpcField, next: HasUpcField) => {
-    if (!current.upc && next.upc) return 1;
-    if (current.upc && !next.upc) return -1;
-    if (current.upc === next.upc) return 0;
-    if (current.upc <= next.upc) return -1;
-    return 1;
-  },
-};
+export function getSorter(
+  key: SortType,
+  direction: 'ascending' | 'descending' = 'ascending',
+) {
+  if (direction === 'descending') {
+    return (next: any, current: any) => {
+      if (!current[key] && next[key]) return 1
+      if (current[key] && !next[key]) return -1
+      if (current[key] === next[key]) return 0
+      if (current[key] <= next[key]) return -1
+      return 1
+    }
+  } else {
+    return (next: any, current: any) => {
+      if (!current[key] && next[key]) return -1
+      if (current[key] && !next[key]) return 1
+      if (current[key] === next[key]) return 0
+      if (current[key] <= next[key]) return 1
+      return -1
+    }
+  }
+}

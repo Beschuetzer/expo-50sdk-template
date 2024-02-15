@@ -16,7 +16,9 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
-import { SORTERS, SortType } from './sorters'
+import { SortType, getSorter } from './sorters'
+import { AddButton } from '../header/AddButton'
+import { EllipsisButton } from '../header/EllipsisButton'
 
 import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
@@ -31,8 +33,6 @@ import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
-import { AddButton } from '../header/AddButton'
-import { EllipsisButton } from '../header/EllipsisButton'
 
 const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[]
 const { NotAnimatedContextMenu } = renderers
@@ -69,7 +69,7 @@ export function StoresList() {
     (sortType: SortType) => {
       lastSortTypeRef.current = sortType
       const sortedList = [...storesList]
-      sortedList.sort(SORTERS[sortType])
+      sortedList.sort(getSorter(sortType))
       dispatch(setStoresList(sortedList))
     },
     [storesList],
@@ -121,7 +121,7 @@ export function StoresList() {
         </Menu>
       ),
       headerLeft: () => <AddButton onPress={onAddStorePress} />,
-    });
+    })
   }, [navgation])
 
   useEffect(() => {

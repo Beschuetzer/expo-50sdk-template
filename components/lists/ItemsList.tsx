@@ -10,6 +10,7 @@ import {
   MenuOption,
   MenuOptions,
   MenuTrigger,
+  renderers,
 } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -40,6 +41,8 @@ const itemsListSortTypes = [
   SortType.DateLastUpdated,
   SortType.Frequency,
 ] as SortType[]
+
+const { SlideInMenu } = renderers;
 
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation()
@@ -95,7 +98,7 @@ export function ItemsList(props: ItemsListProps) {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Menu>
+        <Menu renderer={SlideInMenu}>
           <MenuTrigger
             children={
               <View pr={theme.space[1]}>

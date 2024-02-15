@@ -10,6 +10,7 @@ import {
   MenuOptions,
   MenuOption,
   Menu,
+  renderers,
 } from 'react-native-popup-menu'
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -32,6 +33,7 @@ import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
 const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[]
+const { SlideInMenu } = renderers;
 
 export function StoresList() {
   const navgation = useNavigation()
@@ -77,7 +79,7 @@ export function StoresList() {
   useEffect(() => {
     navgation.setOptions({
       headerRight: () => (
-        <Menu>
+        <Menu renderer={SlideInMenu}>
           <MenuTrigger
             children={
               <View pr={theme.space[1]}>
@@ -118,7 +120,7 @@ export function StoresList() {
           </TouchableOpacity>
         </View>
       ),
-    })
+    });
   }, [navgation])
 
   useEffect(() => {

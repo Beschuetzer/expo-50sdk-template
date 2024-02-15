@@ -18,6 +18,7 @@ import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
 import { SORTERS, SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
+import { EllipsisButton } from '../header/EllipsisButton'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
@@ -31,7 +32,6 @@ import {
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
-import { EllipsisButton } from '../header/EllipsisButton'
 
 type ItemsListProps = object
 
@@ -65,7 +65,7 @@ export function ItemsList(props: ItemsListProps) {
 
   function onAddItemPress() {
     closeMenu()
-    navigation.navigate(Routes.ItemModal)
+    navigation.navigate(Routes.ItemModal, { showBlank: true })
   }
 
   const onSortPress = useCallback(() => {

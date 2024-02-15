@@ -21,7 +21,11 @@ export default function ItemModal() {
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const route = useRoute()
-  const { key, showOverrideMsg } = (route.params || {}) as any
+  const {
+    key,
+    showOverrideMsg,
+    showBlank = false,
+  } = (route.params || {}) as any
   const { upcProduct, errorMsg } = useUpcProduct({
     upc: key,
   })
@@ -42,7 +46,7 @@ export default function ItemModal() {
   }
 
   function renderContent() {
-    if (!upcProduct && !itemInList) {
+    if (!upcProduct && !showBlank) {
       return (
         <Center height="100%">
           {errorMsg ? (

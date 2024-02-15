@@ -1,6 +1,6 @@
 ## MVP
 
--figure out + (add item) button in itemsList (may need to add a param to the route)
+-figure out pressing an item that doesn't have upc data (currently shows error msg)
 -add filter for all lists (make generic for use with other lists?)
 
 -use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):

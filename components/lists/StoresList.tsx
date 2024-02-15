@@ -31,6 +31,8 @@ import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
+import { AddButton } from '../header/AddButton'
+import { EllipsisButton } from '../header/EllipsisButton'
 
 const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[]
 const { NotAnimatedContextMenu } = renderers
@@ -97,19 +99,7 @@ export function StoresList() {
     navgation.setOptions({
       headerRight: () => (
         <Menu ref={menuRef} renderer={NotAnimatedContextMenu}>
-          <MenuTrigger
-            children={
-              <View pr={theme.space[1]}>
-                <View pl={theme.space[1]}>
-                  <FontAwesome
-                    name="ellipsis-v"
-                    size={20}
-                    color={theme.colors.black}
-                  />
-                </View>
-              </View>
-            }
-          />
+          <MenuTrigger children={<EllipsisButton />} />
           <MenuOptions
             customStyles={{
               optionsContainer: { backgroundColor: theme.colors.black },
@@ -130,14 +120,8 @@ export function StoresList() {
           </MenuOptions>
         </Menu>
       ),
-      headerLeft: () => (
-        <View ml={theme.space[1]}>
-          <TouchableOpacity onPress={onAddStorePress}>
-            <FontAwesome name="plus" size={20} color={theme.colors.black} />
-          </TouchableOpacity>
-        </View>
-      ),
-    })
+      headerLeft: () => <AddButton onPress={onAddStorePress} />,
+    });
   }, [navgation])
 
   useEffect(() => {

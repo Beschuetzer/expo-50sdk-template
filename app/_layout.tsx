@@ -5,11 +5,14 @@ import {
   ThemeProvider,
 } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
+import { Stack, useNavigation } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
-import { NativeBaseProvider } from 'native-base'
+import { NativeBaseProvider, View } from 'native-base'
 import { useEffect } from 'react'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import {
+  GestureHandlerRootView,
+  TouchableOpacity,
+} from 'react-native-gesture-handler'
 import { MenuProvider } from 'react-native-popup-menu'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
@@ -18,6 +21,7 @@ import { Text } from '@/components/Themed'
 import { useColorScheme } from '@/components/hooks/useColorScheme'
 import { Routes } from '@/constants/navigation'
 import { persistor, store } from '@/state/store'
+import { CloseButton } from '@/components/header/CloseButton'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -68,15 +72,25 @@ function RootLayoutNav() {
                 <Stack>
                   <Stack.Screen
                     name="(tabs)"
-                    options={{ headerShown: false }}
+                    options={{ headerShown: false, headerTitleAlign: 'center' }}
                   />
                   <Stack.Screen
                     name={Routes.ItemModal}
-                    options={{ presentation: 'modal', title: 'Item Details' }}
+                    options={{
+                      presentation: 'modal',
+                      title: 'Item Details',
+                      headerTitleAlign: 'center',
+                      headerLeft: () => <CloseButton />,
+                    }}
                   />
                   <Stack.Screen
                     name={Routes.StoreModal}
-                    options={{ presentation: 'modal', title: 'Store Details' }}
+                    options={{
+                      presentation: 'modal',
+                      title: 'Store Details',
+                      headerTitleAlign: 'center',
+                      headerLeft: () => <CloseButton />,
+                    }}
                   />
                 </Stack>
               </MenuProvider>
@@ -85,5 +99,5 @@ function RootLayoutNav() {
         </PersistGate>
       </Provider>
     </ThemeProvider>
-  )
+  );
 }

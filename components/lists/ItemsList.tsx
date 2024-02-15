@@ -4,7 +4,6 @@ import { useFocusEffect, useNavigation } from 'expo-router'
 import { View, Text, useTheme, Stack } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 import {
   Menu,
   MenuOption,
@@ -18,6 +17,7 @@ import { ItemTile } from './ItemTile'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
 import { SORTERS, SortType } from './sorters'
+import { AddButton } from '../header/AddButton'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
@@ -31,6 +31,7 @@ import {
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
+import { EllipsisButton } from '../header/EllipsisButton'
 
 type ItemsListProps = object
 
@@ -107,19 +108,7 @@ export function ItemsList(props: ItemsListProps) {
     navigation.setOptions({
       headerRight: () => (
         <Menu renderer={NotAnimatedContextMenu} ref={menuRef}>
-          <MenuTrigger
-            children={
-              <View pr={theme.space[1]}>
-                <View pl={theme.space[1]}>
-                  <FontAwesome
-                    name="ellipsis-v"
-                    size={20}
-                    color={theme.colors.black}
-                  />
-                </View>
-              </View>
-            }
-          />
+          <MenuTrigger children={<EllipsisButton />} />
           <MenuOptions
             customStyles={{
               optionsContainer: { backgroundColor: theme.colors.black },
@@ -140,13 +129,7 @@ export function ItemsList(props: ItemsListProps) {
           </MenuOptions>
         </Menu>
       ),
-      headerLeft: () => (
-        <View ml={theme.space[1]}>
-          <TouchableOpacity onPress={onAddItemPress}>
-            <FontAwesome name="plus" size={20} color={theme.colors.black} />
-          </TouchableOpacity>
-        </View>
-      ),
+      headerLeft: () => <AddButton onPress={onAddItemPress} />,
     })
   }, [navigation])
 

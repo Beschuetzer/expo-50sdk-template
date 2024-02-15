@@ -1,6 +1,7 @@
 ## MVP
 
--figure out pressing an item that doesn't have upc data (currently shows error msg)
+
+-need to figure out how to do ascending for descending for each sorter
 -add filter for all lists (make generic for use with other lists?)
 
 -use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):

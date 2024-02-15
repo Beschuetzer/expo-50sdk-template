@@ -46,7 +46,7 @@ export default function ItemModal() {
   }
 
   function renderContent() {
-    if (!upcProduct && !showBlank) {
+    if (!itemInList && !itemInListUsingName && !upcProduct && !showBlank) {
       return (
         <Center height="100%">
           {errorMsg ? (

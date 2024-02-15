@@ -25,7 +25,7 @@ import {
   removeStoresListItem,
   setCurrentStoreName,
   setStoresList,
-  storesListArraySelector,
+  storesListSelector,
 } from '@/state/slices/listsSlice'
 import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'
@@ -37,13 +37,14 @@ const { NotAnimatedContextMenu } = renderers
 
 export function StoresList() {
   const navgation = useNavigation()
-  const storesList = useSelector(storesListArraySelector)
+  const storesList = useSelector(storesListSelector)
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const listRef = useRef<FlashList<Store> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [listKey, setListKey] = useState(0)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const shouldSortOnMountRef = useRef(true)
   const lastStoresListLengthRef = useRef(storesList.length)
@@ -87,6 +88,10 @@ export function StoresList() {
     closeMenu()
     dispatch(setCurrentStoreName(key?.name))
   }, [])
+
+  useEffect(() => {
+    setListKey((current) => current + 1)
+  }, [currentStore])
 
   useEffect(() => {
     navgation.setOptions({
@@ -230,6 +235,7 @@ export function StoresList() {
     <>
       <FlashList
         ref={listRef}
+        key={listKey}
         refreshing={refreshing}
         onRefresh={() => {
           setRefreshing(true)

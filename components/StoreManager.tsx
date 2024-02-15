@@ -12,7 +12,7 @@ import { maxWidth } from "@/constants/styles";
 import {
   currentStoreSelector,
   setCurrentStoreName,
-  storesListArraySelector,
+  storesListSelector,
 } from "@/state/slices/listsSlice";
 import { HeadingTagProp } from "@/types/general";
 
@@ -30,7 +30,7 @@ export function StoreManager(props: StorageManagerProps) {
   } = props;
 
   const currentStore = useSelector(currentStoreSelector);
-  const storesListArray = useSelector(storesListArraySelector);
+  const storesListArray = useSelector(storesListSelector);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 

@@ -215,7 +215,7 @@ export const listsSlice = createSlice({
       state.storesList = getEmptyArray()
       state.currentStoreName = EMPTY_STRING
     },
-    resetCurrentStoreName: (state: ListsState) => {
+    resetCurrentStoreName: (state: ListsState) => {      
       state.currentStoreName = EMPTY_STRING
     },
     setCurrentLocation: (
@@ -236,6 +236,7 @@ export const listsSlice = createSlice({
       action: PayloadAction<string | undefined>,
     ) => {
       if (!action.payload) return
+      console.log({name: action.payload});
       state.currentStoreName = action.payload
     },
     setItemsList: (state: ListsState, action: PayloadAction<ItemsList>) => {

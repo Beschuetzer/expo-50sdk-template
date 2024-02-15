@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
-import { useNavigation } from 'expo-router'
+import { useFocusEffect, useNavigation } from 'expo-router'
 import { View, Text, useTheme, Stack } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
@@ -42,7 +42,7 @@ const itemsListSortTypes = [
   SortType.Frequency,
 ] as SortType[]
 
-const { SlideInMenu } = renderers;
+const { NotAnimatedContextMenu } = renderers
 
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation()
@@ -56,8 +56,14 @@ export function ItemsList(props: ItemsListProps) {
   const shouldSortOnMountRef = useRef(true)
   const lastItemsListLengthRef = useRef(itemsList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
+  const menuRef = useRef<Menu>(null)
+
+  const closeMenu = useCallback(() => {
+    menuRef.current?.close()
+  }, [menuRef])
 
   function onAddItemPress() {
+    closeMenu()
     navigation.navigate(Routes.ItemModal)
   }
 
@@ -76,6 +82,7 @@ export function ItemsList(props: ItemsListProps) {
   )
 
   function onSwipeRight(key: Key) {
+    closeMenu()
     setRefreshing(false)
     dispatch(
       updateStoreSpecificValues({
@@ -89,6 +96,7 @@ export function ItemsList(props: ItemsListProps) {
   }
 
   function onSwipeLeft(key: Key) {
+    closeMenu()
     dispatch(removeItemsListItem(key))
     list.current?.prepareForLayoutAnimationRender()
     // after removing the item, we start animation
@@ -98,7 +106,7 @@ export function ItemsList(props: ItemsListProps) {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Menu renderer={SlideInMenu}>
+        <Menu renderer={NotAnimatedContextMenu} ref={menuRef}>
           <MenuTrigger
             children={
               <View pr={theme.space[1]}>
@@ -139,13 +147,17 @@ export function ItemsList(props: ItemsListProps) {
           </TouchableOpacity>
         </View>
       ),
-    });
+    })
   }, [navigation])
 
   useEffect(() => {
     if (itemsList.length === lastItemsListLengthRef.current) return
     shouldSortOnMountRef.current = true
   }, [itemsList])
+
+  useFocusEffect(() => {
+    closeMenu()
+  })
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const key = {
@@ -154,6 +166,9 @@ export function ItemsList(props: ItemsListProps) {
     } as Key
     return (
       <SwipeableRow
+        swipeableProps={{
+          onBegan: closeMenu,
+        }}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -204,6 +219,7 @@ export function ItemsList(props: ItemsListProps) {
       <FlashList
         ref={list}
         refreshing={refreshing}
+        onTouchStart={closeMenu}
         onRefresh={() => {
           setRefreshing(true)
           setTimeout(() => {

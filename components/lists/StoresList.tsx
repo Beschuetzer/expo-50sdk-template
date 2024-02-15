@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
-import { useNavigation } from 'expo-router'
+import { useFocusEffect, useNavigation } from 'expo-router'
 import { useTheme, Row, View, Stack, Text, Button, Center } from 'native-base'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
@@ -33,7 +33,7 @@ import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
 const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[]
-const { SlideInMenu } = renderers;
+const { NotAnimatedContextMenu } = renderers
 
 export function StoresList() {
   const navgation = useNavigation()
@@ -48,6 +48,11 @@ export function StoresList() {
   const shouldSortOnMountRef = useRef(true)
   const lastStoresListLengthRef = useRef(storesList.length)
   const lastSortTypeRef = useRef(storesListSortTypes[0])
+  const menuRef = useRef<Menu>(null)
+
+  const closeMenu = useCallback(() => {
+    menuRef.current?.close()
+  }, [menuRef])
 
   function onAddStorePress() {
     navigation.navigate(Routes.StoreModal)
@@ -69,6 +74,7 @@ export function StoresList() {
 
   const onSwipeLeft = useCallback(
     (keyToUse: Key) => {
+      closeMenu()
       dispatch(removeStoresListItem(keyToUse))
       listRef.current?.prepareForLayoutAnimationRender()
       // after removing the item, we start animation
@@ -76,10 +82,16 @@ export function StoresList() {
     },
     [listRef],
   )
+
+  const onSwipeRight = useCallback((key: Key) => {
+    closeMenu()
+    dispatch(setCurrentStoreName(key?.name))
+  }, [])
+
   useEffect(() => {
     navgation.setOptions({
       headerRight: () => (
-        <Menu renderer={SlideInMenu}>
+        <Menu ref={menuRef} renderer={NotAnimatedContextMenu}>
           <MenuTrigger
             children={
               <View pr={theme.space[1]}>
@@ -120,13 +132,17 @@ export function StoresList() {
           </TouchableOpacity>
         </View>
       ),
-    });
+    })
   }, [navgation])
 
   useEffect(() => {
     if (storesList.length === lastStoresListLengthRef.current) return
     shouldSortOnMountRef.current = true
   }, [storesList])
+
+  useFocusEffect(() => {
+    closeMenu()
+  })
 
   function renderItem({ item, index }: ListRow<Store>) {
     const keyToUse = {
@@ -136,6 +152,9 @@ export function StoresList() {
 
     return (
       <SwipeableRow
+        swipeableProps={{
+          onBegan: closeMenu,
+        }}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -151,9 +170,7 @@ export function StoresList() {
         }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
-          onPress: () => {
-            dispatch(setCurrentStoreName(keyToUse?.name))
-          },
+          onPress: onSwipeRight.bind(null, keyToUse),
           title: (
             <Stack
               paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}

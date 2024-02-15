@@ -1,7 +1,7 @@
 import { View, Text, theme } from "native-base";
 import React, { ReactNode, useEffect, useRef } from "react";
 import { Animated, StyleSheet, I18nManager, Dimensions } from "react-native";
-import { RectButton, Swipeable } from "react-native-gesture-handler";
+import { RectButton, Swipeable, SwipeableProps } from "react-native-gesture-handler";
 import { useSelector } from "react-redux";
 
 import { EMPTY_STRING } from "@/constants/general";
@@ -22,7 +22,8 @@ type SwipeableRowProps = {
   children?: ReactNode | ReactNode[];
   width?: string | number;
   id?: any;
-};
+  swipeableProps?: SwipeableProps
+}
 
 export function SwipeableRow(props: SwipeableRowProps) {
   const windowDimensions = Dimensions.get("window");
@@ -34,6 +35,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
     id,
     leftSwipe,
     rightSwipe,
+    swipeableProps,
   } = props;
   const openThreshhold = useSelector(swipeableRowOpenThresholdSelector);
   const swipeableRef = useRef<Swipeable>(null);
@@ -137,6 +139,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
 
   return (
     <Swipeable
+      {...swipeableProps}
       key={id}
       ref={swipeableRef}
       friction={2}
@@ -145,7 +148,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
       onSwipeableOpen={async (direction) => {
-        if (direction === "left") {
+        if (direction === 'left') {
           rightSwipe?.onPress && rightSwipe.onPress();
         } else {
           leftSwipe?.onPress && leftSwipe.onPress();

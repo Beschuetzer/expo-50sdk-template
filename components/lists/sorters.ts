@@ -23,28 +23,28 @@ export enum SortType {
 }
 
 export type CompareFuntion = ((a: any, b: any) => number) | undefined
-type HasAisleField = Pick<
+export type HasAisleField = Pick<
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey.Aisle
 >
-type HasItemIdField = Pick<
+export type HasItemIdField = Pick<
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey.ItemId
 >;
-type HasPriceField = Pick<
+export type HasPriceField = Pick<
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey.Price
 >;
-type HasQuantityField = Pick<
+export type HasQuantityField = Pick<
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey.Quantity
 >;
-type HasDateAddedField = Required<Pick<Item, 'addedDate'>>
-type HasDateLastUpdatedField = Required<Pick<Item, 'lastUpdatedDate'>>
-type HasFrequencyField = Required<Pick<Item, 'frequency'>>
-type HasNameField = Required<Pick<Item, 'name'>>
-type HasUpcField = Required<Pick<Item, 'upc'>>
-type HasCalculatedDistanceField = Required<Pick<Store, 'calculatedDistance'>>
+export type HasDateAddedField = Required<Pick<Item, 'addedDate'>>
+export type HasDateLastUpdatedField = Required<Pick<Item, 'lastUpdatedDate'>>
+export type HasFrequencyField = Required<Pick<Item, 'frequency'>>
+export type HasNameField = Required<Pick<Item, 'name'>>
+export type HasUpcField = Required<Pick<Item, 'upc'>>
+export type HasCalculatedDistanceField = Required<Pick<Store, 'calculatedDistance'>>
 
 export const SORTERS: { [key in SortType]: CompareFuntion } = {
   [SortType.Aisle]: (current: HasAisleField, next: HasAisleField) => {

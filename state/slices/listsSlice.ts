@@ -20,7 +20,7 @@ import { GpsCoordinate, Store } from '@/types/Store'
 import {
   calculateDistance,
   getEmptyArray,
-  getItemFromItemsList,
+  getItemFromList,
   getKeyToUse,
 } from '@/utils/helpers'
 
@@ -90,7 +90,7 @@ export const listsSlice = createSlice({
         return
       }
 
-      const currentItem = getItemFromItemsList(state.itemsList, keyToUse) as any
+      const currentItem = getItemFromList(state.itemsList, keyToUse) as any
       const newItem = { ...item } as any
       const itemToUse = currentItem || newItem
 
@@ -253,10 +253,7 @@ export const listsSlice = createSlice({
       if (!action.payload) return
       const { storeSpecificValuesToUpdate, key } = action.payload
       const keyToUse = getKeyToUse(key)
-      const itemToUpdate = getItemFromItemsList(
-        state.itemsList,
-        keyToUse,
-      ) as any
+      const itemToUpdate = getItemFromList(state.itemsList, keyToUse) as any
       if (!itemToUpdate || !storeSpecificValuesToUpdate) {
         alert(
           `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
@@ -324,7 +321,7 @@ export const itemsListItemSelector = (id: string) =>
   createSelector(
     [(state: RootState) => (state[listsSlice.name] as ListsState).itemsList],
     (itemsList) => {
-      return getItemFromItemsList(itemsList, id)
+      return getItemFromList(itemsList, id)
     },
   )
 

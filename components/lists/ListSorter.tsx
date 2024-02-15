@@ -3,7 +3,7 @@ import { Button, FormControl, Row, Stack, useTheme } from 'native-base'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
 
-import { SortType } from './sorters'
+import { SORT_TYPE_DESCRIPTIONS, SortType } from './sorters'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { HeadingTagProp } from '@/types/general'
@@ -84,7 +84,7 @@ export function ListSorter(props: ListSorterProps) {
                 key={sortType}
                 onPress={() => onSortTypePress(sortType)}
               >
-                {sortType}
+                {SORT_TYPE_DESCRIPTIONS[sortType]}
               </Button>
             ))}
           </>
@@ -96,5 +96,5 @@ export function ListSorter(props: ListSorterProps) {
         onPress={onCloseModal}
       />
     </Dialog.Container>
-  )
+  );
 }

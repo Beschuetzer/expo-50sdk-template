@@ -1,5 +1,5 @@
 import { Picker } from '@react-native-picker/picker'
-import { Button, FormControl, Row, Stack, useTheme } from 'native-base'
+import { Button, FormControl, Row, Stack, useTheme, Text } from 'native-base'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
 import { useDispatch, useSelector } from 'react-redux'
@@ -108,11 +108,20 @@ export function ListSorter(props: ListSorterProps) {
           </>
         )}
       </Stack>
+      <Stack mt={theme.space[1]}>
+        <Text>
+          Currently{' '}
+          <Text fontWeight={900}>{sortOrder.sortOrder.toLowerCase()}</Text> by{' '}
+          <Text fontWeight={900}>
+            {SORT_TYPE_DESCRIPTIONS[sortOrder.sortBy].toLowerCase()}
+          </Text>
+        </Text>
+      </Stack>
       <Dialog.Button
         color={theme.colors.primary[900]}
         label="Close"
         onPress={onCloseModal}
       />
     </Dialog.Container>
-  )
+  );
 }

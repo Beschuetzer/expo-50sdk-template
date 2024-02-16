@@ -299,16 +299,24 @@ export const listsSlice = createSlice({
       action: PayloadAction<ToggleSortOrderPayload>,
     ) => {
       const { listName } = action.payload
+      const listToSort = state[listName]
+
       if (!state.sortOrders[listName]) return
+      const sortOrder =
+        state.sortOrders[listName]?.sortOrder === SortOrder.Ascending
+          ? SortOrder.Descending
+          : SortOrder.Ascending
+      if (listToSort) {
+        listToSort?.sort(
+          getSorter(state.sortOrders[listName].sortBy, sortOrder),
+        )
+      }
 
       state.sortOrders = {
         ...state.sortOrders,
         [listName]: {
           ...state.sortOrders[listName],
-          sortOrder:
-            state.sortOrders[listName]?.sortOrder === SortOrder.Ascending
-              ? SortOrder.Descending
-              : SortOrder.Ascending,
+          sortOrder,
         },
       }
     },

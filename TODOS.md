@@ -1,6 +1,6 @@
 ## MVP
--move sorting logic to a reducer called sortList with list, and key as payload (order can come from state.sortOrder)
--add POS called sortOrders where keys are {[key in ListName]: SortOrder} (currently the last selected sort type for each list isn't being stored); remove POS with sortOrder in name
+
+-add POS called sortOrders where keys are {[key in ListName]: {order: SortOrder, sortBy: SortType}} (currently the last selected sort type for each list isn't being stored); remove POS with sortOrder in name
 -add filter for all lists (make generic for use with other lists?)
 
 -use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):

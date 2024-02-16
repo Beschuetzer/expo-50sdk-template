@@ -5,7 +5,7 @@ export enum SortType {
   Aisle = 'aisle',
   AddedDate = 'addedDate',
   LastUpdatedDate = 'lastUpdatedDate',
-  Distance = 'distance',
+  Distance = 'calculatedDistance',
   Frequency = 'frequency',
   ItemId = 'itemId',
   Name = 'name',

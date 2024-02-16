@@ -33,6 +33,17 @@ export type AddItemsListItemPayload = {
   currentStore?: Store
 }
 
+export enum ListName {
+  ItemsList = 'itemsList',
+  LastPurchasedList = 'lastPurchasedList',
+  StoresList = 'storesList',
+}
+
+export type SortListPayload = {
+  listName: ListName
+  sortBy: SortType
+}
+
 export type UpdateStoreSpecificValuesPayload = {
   /**
    *The key to get the item from {@link ItemsList itemsList}
@@ -53,15 +64,15 @@ export type UpdateStoreSpecificValuesPayload = {
  * {@link ListsState.stores stores} is a list of the stores created
  **/
 export type ListsState = {
-  currentLocation: GpsCoordinate | null
-  currentStoreName: string
-  itemsList: ItemsList
-  itemsListSortType: SortType
-  lastPurchasedList: LastPurchasedList
-  storesList: StoreList
-  storesListSortType: SortType
-  sortOrder: SortOrder
-}
+  currentLocation: GpsCoordinate | null;
+  currentStoreName: string;
+  [ListName.ItemsList]: ItemsList;
+  itemsListSortType: SortType;
+  [ListName.LastPurchasedList]: LastPurchasedList;
+  [ListName.StoresList]: StoreList;
+  storesListSortType: SortType;
+  sortOrder: SortOrder;
+};
 
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
@@ -241,13 +252,13 @@ export const listsSlice = createSlice({
       if (!action.payload) return
       state.currentStoreName = action.payload
     },
-    setItemsList: (state: ListsState, action: PayloadAction<ItemsList>) => {
-      if (!action.payload) return
-      state.itemsList = action.payload
-    },
-    setStoresList: (state: ListsState, action: PayloadAction<StoreList>) => {
-      if (!action.payload) return
-      state.storesList = action.payload
+    sortList: (state: ListsState, action: PayloadAction<SortListPayload>) => {
+      const { listName, sortBy = SortType.Name } = action.payload;
+      const listToSort = state[listName];
+      if (!listToSort) {
+        alert(`Unable to find a list with name of '${listName}'.`)
+      }
+      listToSort.sort(getSorter(sortBy, state.sortOrder))
     },
     toggleSortOrder: (state: ListsState) => {
       state.sortOrder =
@@ -300,8 +311,7 @@ export const {
   resetStoresList,
   setCurrentLocation,
   setCurrentStoreName,
-  setItemsList,
-  setStoresList,
+  sortList,
   toggleSortOrder,
   updateStoreSpecificValues,
 } = listsSlice.actions

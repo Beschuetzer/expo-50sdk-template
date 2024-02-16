@@ -16,17 +16,18 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ItemTile } from './ItemTile'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
-import { SortType, getSorter } from './sorters'
+import { SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
 import { EllipsisButton } from '../header/EllipsisButton'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import {
+  ListName,
   currentStoreSelector,
   itemsListSelector,
   removeItemsListItem,
-  setItemsList,
+  sortList,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
@@ -75,9 +76,7 @@ export function ItemsList(props: ItemsListProps) {
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
       lastSortTypeRef.current = sortType
-      const sortedList = [...itemsList]
-      sortedList.sort(getSorter(sortType))
-      dispatch(setItemsList(sortedList))
+      dispatch(sortList({ listName: ListName.ItemsList, sortBy: sortType }))
     },
     [itemsList],
   )

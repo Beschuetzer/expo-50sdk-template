@@ -1,6 +1,7 @@
 ## MVP
 
 -add POS called sortOrders where keys are {[key in ListName]: {order: SortOrder, sortBy: SortType}} (currently the last selected sort type for each list isn't being stored); remove POS with sortOrder in name
+-use sortOrder POS to figure out the initial sorting of each list (where getSortOrder is called?)
 -add filter for all lists (make generic for use with other lists?)
 
 -use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):

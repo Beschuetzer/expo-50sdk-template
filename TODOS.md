@@ -1,5 +1,6 @@
 ## MVP
--add filter for all lists (make generic for use with other lists?)
+-finish ListFilter implementation (need to add POS, reducer, and selector)
+-add ListFilter to StoresList when done
 
 -use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):
 

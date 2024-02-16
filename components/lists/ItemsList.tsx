@@ -4,21 +4,15 @@ import { useFocusEffect, useNavigation } from 'expo-router'
 import { View, Text, useTheme, Stack } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
-import {
-  Menu,
-  MenuOption,
-  MenuOptions,
-  MenuTrigger,
-  renderers,
-} from 'react-native-popup-menu'
+import { Menu } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
+import { ListFilter } from './ListFilter'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
-import { EllipsisButton } from '../header/EllipsisButton'
 import { ListHeaderRight } from '../header/ListHeaderRight'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
@@ -54,6 +48,7 @@ export function ItemsList(props: ItemsListProps) {
   const list = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const shouldSortOnMountRef = useRef(true)
   const lastItemsListLengthRef = useRef(itemsList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
@@ -71,6 +66,20 @@ export function ItemsList(props: ItemsListProps) {
   const onSortPress = useCallback(() => {
     setIsSortModalOpen(true)
   }, [])
+
+  const onFilterPress = useCallback(() => {
+    setIsFilterModalOpen(true)
+  }, [])
+
+  const onFilterValueChange = useCallback(
+    (filterValue: string) => {
+      console.log({ filterValue })
+      //todo: add applyFilter reducer (may need another POS for this for each list with a selector and that is what is actually displayed)
+      //  lastSortTypeRef.current = sortType;
+      //  dispatch(sortList({ listName: ListName.ItemsList, sortBy: sortType }));
+    },
+    [itemsList],
+  )
 
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
@@ -105,7 +114,11 @@ export function ItemsList(props: ItemsListProps) {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <ListHeaderRight ref={menuRef} onSortPress={onSortPress} />
+        <ListHeaderRight
+          ref={menuRef}
+          onSortPress={onSortPress}
+          onFilterPress={onFilterPress}
+        />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
     })
@@ -207,6 +220,11 @@ export function ItemsList(props: ItemsListProps) {
         onValueChange={onSortTypeChange}
         sortTypes={itemsListSortTypes}
         viewSize="small"
+      />
+      <ListFilter
+        isVisible={isFilterModalOpen}
+        setIsVisible={setIsFilterModalOpen}
+        onValueChange={onFilterValueChange}
       />
     </>
   )

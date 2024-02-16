@@ -34,6 +34,7 @@ import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
+import { ListHeaderRight } from '../header/ListHeaderRight'
 
 const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[]
 const { NotAnimatedContextMenu } = renderers
@@ -97,30 +98,10 @@ export function StoresList() {
   useEffect(() => {
     navgation.setOptions({
       headerRight: () => (
-        <Menu ref={menuRef} renderer={NotAnimatedContextMenu}>
-          <MenuTrigger children={<EllipsisButton />} />
-          <MenuOptions
-            customStyles={{
-              optionsContainer: { backgroundColor: theme.colors.black },
-            }}
-          >
-            <MenuOption
-              customStyles={{
-                optionText: {
-                  color: theme.colors.white,
-                  fontWeight: '300',
-                  fontSize: 20,
-                  textAlign: 'center',
-                },
-              }}
-              onSelect={onSortPress}
-              text="Sort"
-            />
-          </MenuOptions>
-        </Menu>
+        <ListHeaderRight ref={menuRef} onSortPress={onSortPress} />
       ),
       headerLeft: () => <AddButton onPress={onAddStorePress} />,
-    })
+    });
   }, [navgation])
 
   useEffect(() => {

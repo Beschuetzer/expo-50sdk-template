@@ -19,6 +19,7 @@ import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
 import { EllipsisButton } from '../header/EllipsisButton'
+import { ListHeaderRight } from '../header/ListHeaderRight'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
@@ -43,8 +44,6 @@ const itemsListSortTypes = [
   SortType.LastUpdatedDate,
   SortType.Frequency,
 ] as SortType[]
-
-const { NotAnimatedContextMenu } = renderers
 
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation()
@@ -106,27 +105,7 @@ export function ItemsList(props: ItemsListProps) {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Menu renderer={NotAnimatedContextMenu} ref={menuRef}>
-          <MenuTrigger children={<EllipsisButton />} />
-          <MenuOptions
-            customStyles={{
-              optionsContainer: { backgroundColor: theme.colors.black },
-            }}
-          >
-            <MenuOption
-              customStyles={{
-                optionText: {
-                  color: theme.colors.white,
-                  fontWeight: '300',
-                  fontSize: 20,
-                  textAlign: 'center',
-                },
-              }}
-              onSelect={onSortPress}
-              text="Sort"
-            />
-          </MenuOptions>
-        </Menu>
+        <ListHeaderRight ref={menuRef} onSortPress={onSortPress} />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
     })

@@ -2,16 +2,18 @@ import { Picker } from '@react-native-picker/picker'
 import { Button, FormControl, Row, Stack, useTheme } from 'native-base'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { SORT_TYPE_DESCRIPTIONS, SortType } from './sorters'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { sortOrderSelector, toggleSortOrder } from '@/state/slices/listsSlice'
 import { HeadingTagProp } from '@/types/general'
 
 export type ListSortViewSize = 'large' | 'small'
 type ListSorterProps = {
-  isVisible: boolean;
-  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  isVisible: boolean
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>
   onMount?: () => void
   onUnmount?: () => void
   onValueChange: (SortType: SortType) => void
@@ -37,10 +39,12 @@ export function ListSorter(props: ListSorterProps) {
   )
   const [selectedSortType, setSelectedSortType] = useState(defaultSortType)
   const theme = useTheme()
-  
+  const dispatch = useDispatch()
+  const sortOrder = useSelector(sortOrderSelector)
+
   const onCloseModal = useCallback(() => {
-    setIsVisible && setIsVisible(false);
-  }, [setIsVisible]);
+    setIsVisible && setIsVisible(false)
+  }, [setIsVisible])
 
   const onSortTypePress = useCallback(
     (sortType: SortType) => {
@@ -59,7 +63,9 @@ export function ListSorter(props: ListSorterProps) {
 
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
-      <Dialog.Title style={{ textAlign: 'center' }}>Sort By</Dialog.Title>
+      <Dialog.Title style={{ textAlign: 'center' }}>
+        Sort {sortOrder} By
+      </Dialog.Title>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         {viewSize === 'large' ? (
           <>
@@ -78,6 +84,12 @@ export function ListSorter(props: ListSorterProps) {
           </>
         ) : (
           <>
+            <Button
+              variant="subtle"
+              onPress={() => dispatch(toggleSortOrder())}
+            >
+              Toggle Order
+            </Button>
             {sortTypes.map((sortType) => (
               <Button
                 variant="ghost"

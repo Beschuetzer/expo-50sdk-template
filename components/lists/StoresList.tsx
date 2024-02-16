@@ -221,10 +221,10 @@ export function StoresList() {
         key={listKey}
         refreshing={refreshing}
         onRefresh={() => {
-          setRefreshing(true)
+          setRefreshing(true);
           setTimeout(() => {
-            setRefreshing(false)
-          }, 2000)
+            setRefreshing(false);
+          }, 2000);
         }}
         data={storesList}
         estimatedItemSize={150}
@@ -240,19 +240,20 @@ export function StoresList() {
         renderItem={renderItem}
       />
       <ListSorter
+        listName={ListName.StoresList}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
         onMount={() => {
-          if (!shouldSortOnMountRef.current) return
-          shouldSortOnMountRef.current = false
-          onSortTypeChange(lastSortTypeRef.current)
+          if (!shouldSortOnMountRef.current) return;
+          shouldSortOnMountRef.current = false;
+          onSortTypeChange(lastSortTypeRef.current);
         }}
         onValueChange={onSortTypeChange}
         sortTypes={storesListSortTypes}
         viewSize="small"
       />
     </>
-  )
+  );
 }
 
 const styles = StyleSheet.create({

@@ -7,7 +7,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { SORT_TYPE_DESCRIPTIONS, SortType } from './sorters'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { sortOrderSelector, toggleSortOrder } from '@/state/slices/listsSlice'
+import {
+  SortListPayload,
+  sortOrderSelector,
+  toggleSortOrder,
+} from '@/state/slices/listsSlice'
 import { HeadingTagProp } from '@/types/general'
 
 export type ListSortViewSize = 'large' | 'small'
@@ -19,11 +23,13 @@ type ListSorterProps = {
   onValueChange: (SortType: SortType) => void
   sortTypes: SortType[]
   viewSize?: ListSortViewSize
-} & HeadingTagProp
+} & HeadingTagProp &
+  Pick<SortListPayload, 'listName'>
 
 export function ListSorter(props: ListSorterProps) {
   const {
     isVisible,
+    listName,
     setIsVisible,
     onMount,
     onUnmount,
@@ -40,7 +46,7 @@ export function ListSorter(props: ListSorterProps) {
   const [selectedSortType, setSelectedSortType] = useState(defaultSortType)
   const theme = useTheme()
   const dispatch = useDispatch()
-  const sortOrder = useSelector(sortOrderSelector)
+  const sortOrder = useSelector(sortOrderSelector(listName))
 
   const onCloseModal = useCallback(() => {
     setIsVisible && setIsVisible(false)
@@ -64,7 +70,7 @@ export function ListSorter(props: ListSorterProps) {
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
       <Dialog.Title style={{ textAlign: 'center' }}>
-        Sort {sortOrder} By
+        Sort {sortOrder.sortOrder} By
       </Dialog.Title>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         {viewSize === 'large' ? (
@@ -86,7 +92,7 @@ export function ListSorter(props: ListSorterProps) {
           <>
             <Button
               variant="subtle"
-              onPress={() => dispatch(toggleSortOrder())}
+              onPress={() => dispatch(toggleSortOrder({ listName }))}
             >
               Toggle Order
             </Button>
@@ -108,5 +114,5 @@ export function ListSorter(props: ListSorterProps) {
         onPress={onCloseModal}
       />
     </Dialog.Container>
-  );
+  )
 }

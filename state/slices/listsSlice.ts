@@ -24,25 +24,30 @@ import {
   getKeyToUse,
 } from '@/utils/helpers'
 
-const CURRENT_LOCATION_INITIAL = null
-const SORT_ORDER_INITIAL: SortOrder = SortOrder.Ascending
-
-export type AddItemsListItemPayload = {
-  item: Item
-  storeSpecificValues?: StoreSpecificValues
-  currentStore?: Store
-}
-
 export enum ListName {
   ItemsList = 'itemsList',
   LastPurchasedList = 'lastPurchasedList',
   StoresList = 'storesList',
 }
 
+export type SortOrders = {
+  [key in ListName]: SortOrderValue
+}
+export type SortOrderValue = { sortBy: SortType; sortOrder: SortOrder }
+
+//#region Payloads
+export type AddItemsListItemPayload = {
+  item: Item
+  storeSpecificValues?: StoreSpecificValues
+  currentStore?: Store
+}
+
 export type SortListPayload = {
   listName: ListName
   sortBy: SortType
 }
+
+export type ToggleSortOrderPayload = Pick<SortListPayload, 'listName'>
 
 export type UpdateStoreSpecificValuesPayload = {
   /**
@@ -56,6 +61,10 @@ export type UpdateStoreSpecificValuesPayload = {
     [key in StoreSpecificValueKey]: (currentValue: any) => any
   }>
 }
+//#endregion
+
+//#region State
+const CURRENT_LOCATION_INITIAL = null
 
 /**
  * {@link ListsState.itemsList itemsList} has all of the items that have been scanned (these can be added to any store)
@@ -64,15 +73,15 @@ export type UpdateStoreSpecificValuesPayload = {
  * {@link ListsState.stores stores} is a list of the stores created
  **/
 export type ListsState = {
-  currentLocation: GpsCoordinate | null;
-  currentStoreName: string;
-  [ListName.ItemsList]: ItemsList;
-  itemsListSortType: SortType;
-  [ListName.LastPurchasedList]: LastPurchasedList;
-  [ListName.StoresList]: StoreList;
-  storesListSortType: SortType;
-  sortOrder: SortOrder;
-};
+  currentLocation: GpsCoordinate | null
+  currentStoreName: string
+  [ListName.ItemsList]: ItemsList
+  itemsListSortType: SortType
+  [ListName.LastPurchasedList]: LastPurchasedList
+  [ListName.StoresList]: StoreList
+  storesListSortType: SortType
+  sortOrders: SortOrders
+}
 
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
@@ -82,8 +91,22 @@ const initialState: ListsState = {
   lastPurchasedList: getEmptyArray(),
   storesList: getEmptyArray(),
   storesListSortType: SortType.Name,
-  sortOrder: SORT_ORDER_INITIAL,
+  sortOrders: {
+    [ListName.ItemsList]: {
+      sortBy: SortType.Name,
+      sortOrder: SortOrder.Ascending,
+    },
+    [ListName.LastPurchasedList]: {
+      sortBy: SortType.Name,
+      sortOrder: SortOrder.Ascending,
+    },
+    [ListName.StoresList]: {
+      sortBy: SortType.Name,
+      sortOrder: SortOrder.Ascending,
+    },
+  },
 }
+//#endregion
 
 export const listsSlice = createSlice({
   name: 'lists',
@@ -253,18 +276,34 @@ export const listsSlice = createSlice({
       state.currentStoreName = action.payload
     },
     sortList: (state: ListsState, action: PayloadAction<SortListPayload>) => {
-      const { listName, sortBy = SortType.Name } = action.payload;
-      const listToSort = state[listName];
+      const { listName, sortBy = SortType.Name } = action.payload
+      const listToSort = state[listName]
       if (!listToSort) {
         alert(`Unable to find a list with name of '${listName}'.`)
+        return
       }
-      listToSort.sort(getSorter(sortBy, state.sortOrder))
+      listToSort?.sort(getSorter(sortBy, state.sortOrders[listName].sortOrder))
     },
-    toggleSortOrder: (state: ListsState) => {
-      state.sortOrder =
-        state.sortOrder === SortOrder.Ascending
-          ? SortOrder.Descending
-          : SortOrder.Ascending
+    toggleSortOrder: (
+      state: ListsState,
+      action: PayloadAction<ToggleSortOrderPayload>,
+    ) => {
+      const { listName } = action.payload
+      console.log({ listName, sortOrdersBefore: state.sortOrders })
+
+      if (!state.sortOrders[listName]) return
+
+      state.sortOrders = {
+        ...state.sortOrders,
+        [listName]: {
+          ...state.sortOrders[listName],
+          sortOrder:
+            state.sortOrders[listName]?.sortOrder === SortOrder.Ascending
+              ? SortOrder.Descending
+              : SortOrder.Ascending,
+        },
+      }
+      console.log({ listName, sortOrdersAfter: state.sortOrders })
     },
     updateStoreSpecificValues: (
       state: ListsState,
@@ -372,8 +411,16 @@ export const shoppingListSelector = createSelector(
   },
 )
 
-export const sortOrderSelector = (state: RootState) =>
-  state[listsSlice.name].sortOrder
+export const sortOrdersSelector = (state: RootState) =>
+  state[listsSlice.name].sortOrders
+
+export const sortOrderSelector = (listName: ListName) =>
+  createSelector(
+    [(state: RootState) => state[listsSlice.name].sortOrders],
+    (sortOrders) => {
+      return sortOrders[listName]
+    },
+  )
 
 export const storesListSelector = (state: RootState) =>
   state[listsSlice.name].storesList

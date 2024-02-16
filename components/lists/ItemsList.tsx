@@ -222,6 +222,7 @@ export function ItemsList(props: ItemsListProps) {
         )}
       />
       <ListSorter
+        listName={ListName.ItemsList}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
         onMount={() => {

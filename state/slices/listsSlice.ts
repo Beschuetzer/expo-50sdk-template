@@ -3,7 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 import { RootState } from '../store'
 
-import { SortType, getSorter } from '@/components/lists/sorters'
+import { SortOrder, SortType, getSorter } from '@/components/lists/sorters'
 import { EMPTY_STRING } from '@/constants/general'
 import {
   Item,
@@ -25,6 +25,7 @@ import {
 } from '@/utils/helpers'
 
 const CURRENT_LOCATION_INITIAL = null
+const SORT_ORDER_INITIAL: SortOrder = SortOrder.Ascending
 
 export type AddItemsListItemPayload = {
   item: Item
@@ -59,6 +60,7 @@ export type ListsState = {
   lastPurchasedList: LastPurchasedList
   storesList: StoreList
   storesListSortType: SortType
+  sortOrder: SortOrder
 }
 
 const initialState: ListsState = {
@@ -69,6 +71,7 @@ const initialState: ListsState = {
   lastPurchasedList: getEmptyArray(),
   storesList: getEmptyArray(),
   storesListSortType: SortType.Name,
+  sortOrder: SORT_ORDER_INITIAL,
 }
 
 export const listsSlice = createSlice({
@@ -246,6 +249,12 @@ export const listsSlice = createSlice({
       if (!action.payload) return
       state.storesList = action.payload
     },
+    toggleSortOrder: (state: ListsState) => {
+      state.sortOrder =
+        state.sortOrder === SortOrder.Ascending
+          ? SortOrder.Descending
+          : SortOrder.Ascending
+    },
     updateStoreSpecificValues: (
       state: ListsState,
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
@@ -293,6 +302,7 @@ export const {
   setCurrentStoreName,
   setItemsList,
   setStoresList,
+  toggleSortOrder,
   updateStoreSpecificValues,
 } = listsSlice.actions
 
@@ -351,6 +361,9 @@ export const shoppingListSelector = createSelector(
     return shoppingList
   },
 )
+
+export const sortOrderSelector = (state: RootState) =>
+  state[listsSlice.name].sortOrder
 
 export const storesListSelector = (state: RootState) =>
   state[listsSlice.name].storesList

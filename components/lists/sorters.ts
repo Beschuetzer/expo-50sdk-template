@@ -15,6 +15,11 @@ export enum SortType {
   Upc = 'upc',
 }
 
+export enum SortOrder {
+  Ascending = 'Ascending',
+  Descending = 'Descending',
+}
+
 export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
   [SortType.Aisle]: 'Aisle in Current Store',
   [SortType.AddedDate]: 'Date Added',
@@ -31,9 +36,9 @@ export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
 
 export function getSorter(
   key: SortType,
-  direction: 'ascending' | 'descending' = 'ascending',
+  direction: SortOrder = SortOrder.Ascending,
 ) {
-  if (direction === 'descending') {
+  if (direction === SortOrder.Descending) {
     return (next: any, current: any) => {
       if (!current[key] && next[key]) return 1
       if (current[key] && !next[key]) return -1

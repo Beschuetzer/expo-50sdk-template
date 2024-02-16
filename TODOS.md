@@ -1,6 +1,4 @@
 ## MVP
-
-
 -need to figure out how to do ascending for descending for each sorter
 -add filter for all lists (make generic for use with other lists?)
 

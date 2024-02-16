@@ -225,11 +225,6 @@ export function ItemsList(props: ItemsListProps) {
         listName={ListName.ItemsList}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
-        onMount={() => {
-          if (!shouldSortOnMountRef.current) return
-          shouldSortOnMountRef.current = false
-          onSortTypeChange(lastSortTypeRef.current)
-        }}
         onValueChange={onSortTypeChange}
         sortTypes={itemsListSortTypes}
         viewSize="small"

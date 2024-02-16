@@ -76,10 +76,8 @@ export type ListsState = {
   currentLocation: GpsCoordinate | null
   currentStoreName: string
   [ListName.ItemsList]: ItemsList
-  itemsListSortType: SortType
   [ListName.LastPurchasedList]: LastPurchasedList
   [ListName.StoresList]: StoreList
-  storesListSortType: SortType
   sortOrders: SortOrders
 }
 
@@ -87,10 +85,8 @@ const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
   itemsList: getEmptyArray(),
-  itemsListSortType: SortType.Name,
   lastPurchasedList: getEmptyArray(),
   storesList: getEmptyArray(),
-  storesListSortType: SortType.Name,
   sortOrders: {
     [ListName.ItemsList]: {
       sortBy: SortType.Name,
@@ -144,7 +140,9 @@ export const listsSlice = createSlice({
       if (!currentItem) {
         state.itemsList.push(newItem)
         state.itemsList = [
-          ...state.itemsList.sort(getSorter(state.itemsListSortType)),
+          ...state.itemsList.sort(
+            getSorter(state.sortOrders[ListName.ItemsList].sortBy),
+          ),
         ]
       } else {
         for (const [key, value] of Object.entries(item)) {
@@ -189,7 +187,9 @@ export const listsSlice = createSlice({
           state.currentLocation,
         ),
       })
-      state.storesList.sort(getSorter(state.storesListSortType))
+      state.storesList.sort(
+        getSorter(state.sortOrders[ListName.StoresList].sortBy),
+      )
 
       if (state.storesList.length === 1) {
         state.currentStoreName = store.name
@@ -283,14 +283,22 @@ export const listsSlice = createSlice({
         return
       }
       listToSort?.sort(getSorter(sortBy, state.sortOrders[listName].sortOrder))
+
+      if (!state.sortOrders[listName]) return
+
+      state.sortOrders = {
+        ...state.sortOrders,
+        [listName]: {
+          ...state.sortOrders[listName],
+          sortBy,
+        },
+      }
     },
     toggleSortOrder: (
       state: ListsState,
       action: PayloadAction<ToggleSortOrderPayload>,
     ) => {
       const { listName } = action.payload
-      console.log({ listName, sortOrdersBefore: state.sortOrders })
-
       if (!state.sortOrders[listName]) return
 
       state.sortOrders = {
@@ -303,7 +311,6 @@ export const listsSlice = createSlice({
               : SortOrder.Ascending,
         },
       }
-      console.log({ listName, sortOrdersAfter: state.sortOrders })
     },
     updateStoreSpecificValues: (
       state: ListsState,
@@ -439,6 +446,3 @@ export const storesListItemSelector = (storeName: string) =>
       return storesList?.find((store) => store.name === storeName) as Store
     },
   )
-
-export const storesListSortTypeSelector = (state: RootState) =>
-  state[listsSlice.name].storesListSortType

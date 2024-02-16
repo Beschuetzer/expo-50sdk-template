@@ -243,11 +243,6 @@ export function StoresList() {
         listName={ListName.StoresList}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
-        onMount={() => {
-          if (!shouldSortOnMountRef.current) return;
-          shouldSortOnMountRef.current = false;
-          onSortTypeChange(lastSortTypeRef.current);
-        }}
         onValueChange={onSortTypeChange}
         sortTypes={storesListSortTypes}
         viewSize="small"

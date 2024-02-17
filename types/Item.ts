@@ -79,6 +79,6 @@ export type LastPurchasedItem = Key & {
 }
 export type ListFilters = { [key in ListName]: ListFilterFilters<any> }
 export type ItemsList = ItemWithStoreSpecificValues[]
-export type ShoppingList = ItemWithStoreSpecificValues[] //todo: this should be removed?
+export type ShoppingList = ItemWithStoreSpecificValues[]
 export type LastPurchasedList = LastPurchasedItem[]
 export type StoreList = Store[]

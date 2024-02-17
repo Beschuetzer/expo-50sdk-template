@@ -1,29 +1,24 @@
-import { ScrollView } from "native-base";
-import { useDispatch } from "react-redux";
+import { useDispatch } from 'react-redux'
 
-import { Playground } from "@/components/Playground";
-import { StoreManager } from "@/components/StoreManager";
-import { useGpsCoordinate } from "@/components/hooks/useGeoLocation";
-import { ItemsList } from "@/components/lists/ItemsList";
-import { ShoppingList } from "@/components/lists/ShoppingLIst";
-import { ReduxViewer } from "@/components/mocks/ReduxViewer";
-import { setCurrentLocation } from "@/state/slices/listsSlice";
+import { useGpsCoordinate } from '@/components/hooks/useGeoLocation'
+import { ShoppingList } from '@/components/lists/ShoppingLIst'
+import { setCurrentLocation } from '@/state/slices/listsSlice'
+import { View, Text } from 'native-base'
 
 export default function TabOneScreen() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
   useGpsCoordinate({
     onSuccess: (gpsCoordinate) => {
-      dispatch(setCurrentLocation(gpsCoordinate));
+      dispatch(setCurrentLocation(gpsCoordinate))
     },
-  });
+  })
 
   return (
-    <ScrollView py={2} keyboardShouldPersistTaps="always">
-      {/* <ReduxViewer />
-      <StoreManager showAddStore showStoreList /> */}
+    <View>
+      <Text>
+        Test
+      </Text>
       {/* <ShoppingList /> */}
-      {/* <ItemsList /> */}
-      {/* <Playground /> */}
-    </ScrollView>
-  );
+    </View>
+  )
 }

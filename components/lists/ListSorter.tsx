@@ -36,7 +36,7 @@ export function ListSorter(props: ListSorterProps) {
     onUnmount,
     onValueChange,
     setIsVisible,
-    sortOrderValue: sortOrder,
+    sortOrderValue,
     sortTypes,
     viewSize = 'large',
   } = props
@@ -71,7 +71,7 @@ export function ListSorter(props: ListSorterProps) {
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
       <Dialog.Title style={{ textAlign: 'center' }}>
-        Sort {sortOrder.sortOrder} By
+        Sort {sortOrderValue.sortOrder} By
       </Dialog.Title>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         {viewSize === 'large' ? (
@@ -112,9 +112,9 @@ export function ListSorter(props: ListSorterProps) {
       <Stack mt={theme.space[1]}>
         <Text>
           Currently{' '}
-          <Text fontWeight={900}>{sortOrder.sortOrder.toLowerCase()}</Text> by{' '}
+          <Text fontWeight={900}>{sortOrderValue.sortOrder.toLowerCase()}</Text> by{' '}
           <Text fontWeight={900}>
-            {SORT_TYPE_DESCRIPTIONS[sortOrder.sortBy].toLowerCase()}
+            {SORT_TYPE_DESCRIPTIONS[sortOrderValue.sortBy].toLowerCase()}
           </Text>
         </Text>
       </Stack>

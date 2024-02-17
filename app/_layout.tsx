@@ -5,23 +5,20 @@ import {
   ThemeProvider,
 } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { Stack, useNavigation } from 'expo-router'
+import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
-import { NativeBaseProvider, View } from 'native-base'
+import { NativeBaseProvider } from 'native-base'
 import { useEffect } from 'react'
-import {
-  GestureHandlerRootView,
-  TouchableOpacity,
-} from 'react-native-gesture-handler'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { MenuProvider } from 'react-native-popup-menu'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import { Text } from '@/components/Themed'
+import { CloseButton } from '@/components/header/CloseButton'
 import { useColorScheme } from '@/components/hooks/useColorScheme'
 import { Routes } from '@/constants/navigation'
 import { persistor, store } from '@/state/store'
-import { CloseButton } from '@/components/header/CloseButton'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -99,5 +96,5 @@ function RootLayoutNav() {
         </PersistGate>
       </Provider>
     </ThemeProvider>
-  );
+  )
 }

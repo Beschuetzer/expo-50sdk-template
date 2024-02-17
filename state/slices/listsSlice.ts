@@ -14,6 +14,7 @@ import {
   LastPurchasedItem,
   LastPurchasedList,
   ListFilters,
+  ShoppingList,
   StoreList,
   StoreSpecificValueKey,
   StoreSpecificValues,
@@ -31,6 +32,7 @@ import {
 export enum ListName {
   ItemsList = 'itemsList',
   LastPurchasedList = 'lastPurchasedList',
+  ShoppingLIst = 'shoppingLIst',
   StoresList = 'storesList',
 }
 
@@ -87,6 +89,7 @@ export type ListsState = {
   filters: ListFilters
   [ListName.ItemsList]: ItemsList
   [ListName.LastPurchasedList]: LastPurchasedList
+  [ListName.ShoppingLIst]: ShoppingList
   [ListName.StoresList]: StoreList
   sortOrders: SortOrders
 }
@@ -95,15 +98,20 @@ const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
   filters: getEmptyObject(),
-  itemsList: getEmptyArray(),
-  lastPurchasedList: getEmptyArray(),
-  storesList: getEmptyArray(),
+  [ListName.ItemsList]: getEmptyArray(),
+  [ListName.LastPurchasedList]: getEmptyArray(),
+  [ListName.ShoppingLIst]: getEmptyArray(),
+  [ListName.StoresList]: getEmptyArray(),
   sortOrders: {
     [ListName.ItemsList]: {
       sortBy: SortType.Name,
       sortOrder: SortOrder.Ascending,
     },
     [ListName.LastPurchasedList]: {
+      sortBy: SortType.Name,
+      sortOrder: SortOrder.Ascending,
+    },
+    [ListName.ShoppingLIst]: {
       sortBy: SortType.Name,
       sortOrder: SortOrder.Ascending,
     },
@@ -484,6 +492,8 @@ export const sortOrderSelector = (listName: ListName) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].sortOrders],
     (sortOrders) => {
+      console.log({sortOrders, listName});
+      
       return sortOrders[listName]
     },
   )

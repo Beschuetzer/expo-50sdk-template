@@ -73,11 +73,21 @@ export function ItemsList(props: ItemsListProps) {
   }, [])
 
   const onFilterValueChange = useCallback(
-    (filters: ListFilterFilters) => {
+    (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
       console.log({ filters })
-      //todo: add applyFilter reducer (may need another POS for this for each list with a selector and that is what is actually displayed)
-      //  lastSortTypeRef.current = sortType;
-      //  dispatch(sortList({ listName: ListName.ItemsList, sortBy: sortType }));
+      const filteredList = itemsList.filter((item) => {
+        for (const [key, regex] of Object.entries(filters)) {
+          console.log({ key, regex })
+          const fieldValue = item?.[
+            key as keyof ItemWithStoreSpecificValues
+          ] as string
+          const isMatch = fieldValue.match(new RegExp(regex, 'i'))
+          console.log({ fieldValue, isMatch })
+          if (!isMatch) return false
+        }
+        return true
+      })
+      setListToDisplay(filteredList);
     },
     [itemsList],
   )
@@ -225,7 +235,7 @@ export function ItemsList(props: ItemsListProps) {
       />
       <ListFilter
         item={itemsList[0]}
-        filterNames={['name', 'upc', 'lastUpdatedDate']}
+        filterNames={['name', 'upc']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}
         onValueChange={onFilterValueChange}

@@ -44,7 +44,6 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
 
   const onChange = useCallback(
     (key: keyof T, value: string) => {
-      console.log({ value, key })
       setFilters((current) => ({
         ...current,
         [key]: value,

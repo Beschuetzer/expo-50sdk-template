@@ -1,6 +1,5 @@
 ## MVP
 -finish ListFilter implementation (need to add POS, reducer, and selector)
-    --add option in menu to "clear all" which clears filters
 
 -use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):
 

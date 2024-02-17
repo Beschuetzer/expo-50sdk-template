@@ -302,7 +302,10 @@ export const listsSlice = createSlice({
       action: PayloadAction<SetFiltersPayload>,
     ) => {
       const { filters, listName } = action.payload
-      if (!listName) return
+
+      if (!listName || Object.keys(filters || {}).length === 0) {
+        return
+      }
 
       for (const [key, value] of Object.entries(filters)) {
         if (!value) {
@@ -315,11 +318,13 @@ export const listsSlice = createSlice({
     sortList: (state: ListsState, action: PayloadAction<SortListPayload>) => {
       const { listName, sortBy = SortType.Name } = action.payload
       const listToSort = state[listName]
+
       if (!listToSort) {
         alert(`Unable to find a list with name of '${listName}'.`)
         return
       }
       listToSort?.sort(getSorter(sortBy, state.sortOrders[listName].sortOrder))
+
       if (!state.sortOrders[listName]) return
 
       state.sortOrders = {

@@ -32,7 +32,9 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     setIsVisible,
     sortOrderValue,
   } = props
-  const [filters, setFilters] = useState<ListFilterFilters<T>>(filtersInitial)
+  const [filters, setFilters] = useState<ListFilterFilters<T> | null>(
+    filtersInitial,
+  )
   const theme = useTheme()
   const debounceRef = useRef<any>(-1)
 
@@ -52,9 +54,16 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   )
 
   useEffect(() => {
+    if (Object.keys(filtersInitial).length === 0) {
+      setFilters(null)
+      onValueChange && onValueChange({})
+    }
+  }, [filtersInitial])
+
+  useEffect(() => {
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      onValueChange && onValueChange(filters)
+      onValueChange && onValueChange(filters || {})
     }, debounceTimeout)
   }, [filters, sortOrderValue])
 
@@ -75,7 +84,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
               {filterName.toString()}
             </Text>
             <Dialog.Input
-              value={filters[filterName] || EMPTY_STRING}
+              value={filters?.[filterName] || EMPTY_STRING}
               onChangeText={(value) => onChange(filterName, value)}
               placeholder="Term or regular expression"
             />

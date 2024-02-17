@@ -1,28 +1,27 @@
 import { useTheme, Text, View } from 'native-base'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
-import { useSelector } from 'react-redux'
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { SetFiltersPayload, filterSelector } from '@/state/slices/listsSlice'
 
 export type ListFilterFilters<T> = Partial<Record<keyof T, string>>
 
 type ListFilterProps<T> = {
   item: T
   debounceTimeout?: number
+  filtersInitial: ListFilterFilters<T>
   filterNames: (keyof T)[]
   isVisible: boolean
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>
   onMount?: () => void
   onUnmount?: () => void
   onValueChange: (filters: ListFilterFilters<T>) => void
-} & Pick<SetFiltersPayload, 'listName'>
+}
 
 export function ListFilter<T>(props: ListFilterProps<T>) {
   const {
     debounceTimeout = 500,
-    listName,
+    filtersInitial,
     filterNames,
     isVisible,
     setIsVisible,
@@ -30,8 +29,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     onUnmount,
     onValueChange,
   } = props
-  const filtersFound = useSelector(filterSelector(listName))
-  const [filters, setFilters] = useState<ListFilterFilters<T>>(filtersFound)
+  const [filters, setFilters] = useState<ListFilterFilters<T>>(filtersInitial)
   const theme = useTheme()
   const debounceRef = useRef<any>(-1)
 

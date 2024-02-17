@@ -20,6 +20,7 @@ import { Routes } from '@/constants/navigation'
 import {
   ListName,
   currentStoreSelector,
+  filterSelector,
   itemsListSelector,
   removeItemsListItem,
   setFilters,
@@ -40,9 +41,11 @@ const itemsListSortTypes = [
   SortType.Frequency,
 ] as SortType[]
 
+const listName: ListName = ListName.ItemsList;
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation()
   const itemsList = useSelector(itemsListSelector)
+  const filtersFound = useSelector(filterSelector(listName))
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -55,6 +58,7 @@ export function ItemsList(props: ItemsListProps) {
   const lastItemsListLengthRef = useRef(itemsList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
   const menuRef = useRef<Menu>(null)
+
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close()
@@ -75,7 +79,7 @@ export function ItemsList(props: ItemsListProps) {
 
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
-      dispatch(setFilters({ listName: ListName.ItemsList, filters }))
+      dispatch(setFilters({ listName, filters }))
       const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
         itemsList,
         filters,
@@ -88,7 +92,7 @@ export function ItemsList(props: ItemsListProps) {
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
       lastSortTypeRef.current = sortType
-      dispatch(sortList({ listName: ListName.ItemsList, sortBy: sortType }))
+      dispatch(sortList({ listName, sortBy: sortType }))
     },
     [itemsList],
   )
@@ -115,6 +119,8 @@ export function ItemsList(props: ItemsListProps) {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }
 
+  console.log({itemsListLength: itemsList.length});
+  
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -125,8 +131,9 @@ export function ItemsList(props: ItemsListProps) {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
-    })
-  }, [navigation])
+      headerTitle: `Items List${Object.keys(filtersFound || {}).length > 0 ? ' (filtered)' : ''}`,
+    });
+  }, [navigation, filtersFound])
 
   useEffect(() => {
     if (itemsList.length === lastItemsListLengthRef.current) return
@@ -219,7 +226,7 @@ export function ItemsList(props: ItemsListProps) {
         )}
       />
       <ListSorter
-        listName={ListName.ItemsList}
+        listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
         onValueChange={onSortTypeChange}
@@ -227,7 +234,7 @@ export function ItemsList(props: ItemsListProps) {
         viewSize="small"
       />
       <ListFilter
-        listName={ListName.ItemsList}
+        filtersInitial={filtersFound}
         item={itemsList[0]}
         filterNames={['name', 'upc']}
         isVisible={isFilterModalOpen}

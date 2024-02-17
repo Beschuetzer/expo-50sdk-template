@@ -292,7 +292,13 @@ export const listsSlice = createSlice({
     ) => {
       const { filters, listName } = action.payload
       if (!listName) return
-      console.log({ listName, filters })
+
+      for (const [key, value] of Object.entries(filters)) {
+        if (!value) {
+          delete filters[key]
+        }
+      }
+
       state.filters[listName] = filters
     },
     sortList: (state: ListsState, action: PayloadAction<SortListPayload>) => {

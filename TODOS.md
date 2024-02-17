@@ -1,6 +1,6 @@
 ## MVP
 -finish ListFilter implementation (need to add POS, reducer, and selector)
-    --change header title to reflect filtering happening
+    --fix issue where sorting when there is a filter actual sets the list to the filtered values
     --add option in menu to "clear all" which clears filters
 -add ListFilter to StoresList when done
 

@@ -24,7 +24,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   const {
     debounceTimeout = 500,
     filterNames,
-    filtersInitial,
+    filtersInitial = {},
     isVisible,
     onMount,
     onUnmount,

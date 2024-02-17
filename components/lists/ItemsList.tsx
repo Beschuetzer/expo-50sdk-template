@@ -48,10 +48,10 @@ export function ItemsList(props: ItemsListProps) {
   const itemsList = useSelector(itemsListSelector)
   const filtersFound = useSelector(filterSelector(listName))
   const currentStore = useSelector(currentStoreSelector)
-  const sortOrder = useSelector(sortOrderSelector(listName))
+  const sortOrderValue = useSelector(sortOrderSelector(listName))
   const theme = useTheme()
   const dispatch = useDispatch()
-  const list = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
+  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
@@ -115,7 +115,7 @@ export function ItemsList(props: ItemsListProps) {
   function onSwipeLeft(key: Key) {
     closeMenu()
     dispatch(removeItemsListItem(key))
-    list.current?.prepareForLayoutAnimationRender()
+    listRef.current?.prepareForLayoutAnimationRender()
     // after removing the item, we start animation
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }
@@ -127,6 +127,7 @@ export function ItemsList(props: ItemsListProps) {
           ref={menuRef}
           onSortPress={onSortPress}
           onFilterPress={onFilterPress}
+          listName={listName}
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
@@ -202,7 +203,7 @@ export function ItemsList(props: ItemsListProps) {
   return (
     <>
       <FlashList
-        ref={list}
+        ref={listRef}
         refreshing={refreshing}
         onTouchStart={closeMenu}
         onRefresh={() => {
@@ -225,7 +226,7 @@ export function ItemsList(props: ItemsListProps) {
         )}
       />
       <ListSorter
-        sortOrderValue={sortOrder}
+        sortOrderValue={sortOrderValue}
         listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
@@ -234,7 +235,7 @@ export function ItemsList(props: ItemsListProps) {
         viewSize="small"
       />
       <ListFilter
-        sortOrderValue={sortOrder}
+        sortOrderValue={sortOrderValue}
         filtersInitial={filtersFound}
         item={itemsList[0]}
         filterNames={['name', 'upc']}

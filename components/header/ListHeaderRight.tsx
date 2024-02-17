@@ -9,17 +9,23 @@ import {
   MenuTrigger,
   renderers,
 } from 'react-native-popup-menu'
+import { useDispatch } from 'react-redux'
 
 import { EllipsisButton } from './EllipsisButton'
+
+import { resetFilters } from '@/state/slices/listsSlice'
+import { ListNameProp } from '@/types/general'
 const { NotAnimatedContextMenu } = renderers
 
 type ListHeaderRightProps = {
   onSortPress: () => void
   onFilterPress: () => void
-}
+} & ListNameProp
 export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
   (props, ref) => {
-    const { onSortPress, onFilterPress } = props;
+    const { onSortPress, onFilterPress, listName } = props
+    const dispatch = useDispatch()
+
     return (
       <Menu renderer={NotAnimatedContextMenu} ref={ref}>
         <MenuTrigger children={<EllipsisButton />} />
@@ -33,6 +39,11 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
             customStyles={customOptionStyles}
             onSelect={onFilterPress}
             text="Filter"
+          />
+          <MenuOption
+            customStyles={customOptionStyles}
+            onSelect={() => dispatch(resetFilters({ listName }))}
+            text="Reset"
           />
         </MenuOptions>
       </Menu>

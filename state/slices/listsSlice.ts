@@ -19,11 +19,11 @@ import {
   StoreSpecificValues,
 } from '@/types/Item'
 import { GpsCoordinate, Store } from '@/types/Store'
+import { ListNameProp } from '@/types/general'
 import {
   calculateDistance,
   getEmptyArray,
   getEmptyObject,
-  getFilteredList,
   getItemFromList,
   getKeyToUse,
 } from '@/utils/helpers'
@@ -46,15 +46,15 @@ export type AddItemsListItemPayload = {
   currentStore?: Store
 }
 
+export type ResetFiltersPayload = object & ListNameProp
+
 export type SetFiltersPayload = {
-  listName: ListName
   filters: ListFilterFilters<any>
-}
+} & ListNameProp
 
 export type SortListPayload = {
-  listName: ListName
   sortBy: SortType
-}
+} & ListNameProp
 
 export type ToggleSortOrderPayload = Pick<SortListPayload, 'listName'>
 
@@ -253,6 +253,17 @@ export const listsSlice = createSlice({
         store.calculatedDistance = -1
       }
     },
+    resetFilters: (
+      state: ListsState,
+      action: PayloadAction<ResetFiltersPayload>,
+    ) => {
+      const { listName } = action.payload
+      if (!listName) return
+      state.filters = {
+        ...state.filters,
+        [listName]: getEmptyObject(),
+      }
+    },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyArray()
     },
@@ -385,6 +396,7 @@ export const {
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
+  resetFilters,
   resetItemsList,
   resetLastPurchasedList,
   resetStoresList,

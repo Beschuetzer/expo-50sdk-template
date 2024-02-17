@@ -3,6 +3,7 @@ import { ViewStyle } from "react-native";
 import { Item, ItemWithStoreSpecificValues } from "./Item";
 import { Store } from "./Store";
 import { UpcProduct } from "./UpcResponse";
+import { ListName } from "@/state/slices/listsSlice";
 
 export enum TimeSpan {
   Hour = "Hour",
@@ -23,6 +24,10 @@ export type HeadingTagProp = {
    *This is the component to use to render the header.
    **/
   headingTag?: any; //todo: figure out type here
+};
+
+export type ListNameProp = {
+  listName: ListName
 };
 
 export type ItemProp = {

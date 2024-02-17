@@ -1,4 +1,5 @@
 ## MVP
+-figure out how to clear filters
 -use StoresList approach to work on ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
 
 -convert ShoppingList to use Flashlist
@@ -12,8 +13,7 @@
 
 
 -Store details should have a way to view all of the isles and sort them in order
--Need to figure out how to drag and drop rows for easier custom sorting
-
+t-figure out 
 
  //todo: calculate FlashList estimatedItemSize for each instance
 
@@ -48,6 +48,8 @@ the ability to create a store layout and have a map/route be generated based on 
 
 ## Enhancements
 -Holding an item in a list should enter multi-selction mode, which allows selecting multiple items and then performing some action
+-Need to figure out how to drag and drop rows for easier custom sorting?
+
 
 ## Optimization Idea
 -Create a buton to add 500 or so items to itemsList.  Then try updating the quantity for a few items and see how quickly things render.  If there is slugglishness, separate storeSpecificValues from itemList.  It Would be a dictionary with Key as the key.  Would need to make a selector called itemWithStoreSpecificValuesSelector.  Would need to update the Item type wherever it is being used.  Same for current ItemWithStoreSpecificValues type use cases.  Would need to updat addItemsListItem and updateStoreSpecificValues reducers

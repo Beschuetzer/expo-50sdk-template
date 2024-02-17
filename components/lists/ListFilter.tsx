@@ -53,13 +53,6 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   )
 
   useEffect(() => {
-    if (Object.keys(filtersInitial).length === 0) {
-      setFilters(null)
-      onValueChange && onValueChange({})
-    }
-  }, [filtersInitial])
-
-  useEffect(() => {
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       onValueChange && onValueChange(filters || {})

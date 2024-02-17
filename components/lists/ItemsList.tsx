@@ -127,6 +127,15 @@ export function ItemsList(props: ItemsListProps) {
   )
 
   useEffect(() => {
+    if (
+      Object.keys(filtersFound || {}).length !== 0 ||
+      itemsList.length === listToDisplay.length
+    )
+      return
+    setListToDisplay(itemsList)
+  }, [filtersFound])
+
+  useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <ListHeaderRight

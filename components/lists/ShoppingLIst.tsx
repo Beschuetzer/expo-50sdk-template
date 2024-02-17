@@ -21,7 +21,6 @@ import {
   ListName,
   currentStoreSelector,
   filterSelector,
-  itemsListSelector,
   removeItemsListItem,
   setFilters,
   shoppingListSelector,
@@ -61,8 +60,6 @@ export function ShoppingList(props: ShoppingistProps) {
   const lastShoppingListLengthRef = useRef(shoppingList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
   const menuRef = useRef<Menu>(null)
-
-  console.log({shoppingList, sortOrderValue });
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close()
@@ -128,6 +125,15 @@ export function ShoppingList(props: ShoppingistProps) {
     },
     [listRef, closeMenu],
   )
+
+  useEffect(() => {
+    if (
+      Object.keys(filtersFound || {}).length !== 0 ||
+      shoppingList.length === listToDisplay.length
+    )
+      return
+    setListToDisplay(shoppingList)
+  }, [filtersFound])
 
   useEffect(() => {
     navigation.setOptions({

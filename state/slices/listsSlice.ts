@@ -492,8 +492,6 @@ export const sortOrderSelector = (listName: ListName) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].sortOrders],
     (sortOrders) => {
-      console.log({sortOrders, listName});
-      
       return sortOrders[listName]
     },
   )

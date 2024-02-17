@@ -109,6 +109,15 @@ export function StoresList() {
   )
 
   useEffect(() => {
+    if (
+      Object.keys(filtersFound || {}).length !== 0 ||
+      storesList.length === listToDisplay.length
+    )
+      return
+    setListToDisplay(storesList)
+  }, [filtersFound])
+
+  useEffect(() => {
     setListKey((current) => current + 1)
   }, [currentStore])
 

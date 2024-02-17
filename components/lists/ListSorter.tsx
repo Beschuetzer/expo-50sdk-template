@@ -2,14 +2,14 @@ import { Picker } from '@react-native-picker/picker'
 import { Button, FormControl, Row, Stack, useTheme, Text } from 'native-base'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
 import { SORT_TYPE_DESCRIPTIONS, SortType } from './sorters'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import {
   SortListPayload,
-  sortOrderSelector,
+  SortOrderValue,
   toggleSortOrder,
 } from '@/state/slices/listsSlice'
 import { HeadingTagProp } from '@/types/general'
@@ -17,10 +17,11 @@ import { HeadingTagProp } from '@/types/general'
 export type ListSortViewSize = 'large' | 'small'
 type ListSorterProps = {
   isVisible: boolean
-  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>
   onMount?: () => void
   onUnmount?: () => void
   onValueChange: (SortType: SortType) => void
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>
+  sortOrderValue: SortOrderValue
   sortTypes: SortType[]
   viewSize?: ListSortViewSize
 } & HeadingTagProp &
@@ -28,14 +29,15 @@ type ListSorterProps = {
 
 export function ListSorter(props: ListSorterProps) {
   const {
+    headingTag: Tag = FormControl.Label,
     isVisible,
     listName,
-    setIsVisible,
     onMount,
     onUnmount,
     onValueChange,
+    setIsVisible,
+    sortOrderValue: sortOrder,
     sortTypes,
-    headingTag: Tag = FormControl.Label,
     viewSize = 'large',
   } = props
   const ref = useRef<Picker<SortType>>(null)
@@ -46,7 +48,6 @@ export function ListSorter(props: ListSorterProps) {
   const [selectedSortType, setSelectedSortType] = useState(defaultSortType)
   const theme = useTheme()
   const dispatch = useDispatch()
-  const sortOrder = useSelector(sortOrderSelector(listName))
 
   const onCloseModal = useCallback(() => {
     setIsVisible && setIsVisible(false)
@@ -123,5 +124,5 @@ export function ListSorter(props: ListSorterProps) {
         onPress={onCloseModal}
       />
     </Dialog.Container>
-  );
+  )
 }

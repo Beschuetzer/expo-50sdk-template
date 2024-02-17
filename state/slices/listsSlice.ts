@@ -309,14 +309,6 @@ export const listsSlice = createSlice({
         return
       }
       listToSort?.sort(getSorter(sortBy, state.sortOrders[listName].sortOrder))
-      const filtersToUse = state.filters[listName]
-      console.log({ filtersToUse })
-      if (filtersToUse) {
-        const filteredList = getFilteredList<any>(listToSort, filtersToUse)
-        console.log({ filteredList })
-        state[listName] = filteredList
-      }
-
       if (!state.sortOrders[listName]) return
 
       state.sortOrders = {

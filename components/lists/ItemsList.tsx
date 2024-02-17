@@ -25,6 +25,7 @@ import {
   removeItemsListItem,
   setFilters,
   sortList,
+  sortOrderSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
@@ -41,12 +42,13 @@ const itemsListSortTypes = [
   SortType.Frequency,
 ] as SortType[]
 
-const listName: ListName = ListName.ItemsList;
+const listName: ListName = ListName.ItemsList
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation()
   const itemsList = useSelector(itemsListSelector)
   const filtersFound = useSelector(filterSelector(listName))
   const currentStore = useSelector(currentStoreSelector)
+  const sortOrder = useSelector(sortOrderSelector(listName))
   const theme = useTheme()
   const dispatch = useDispatch()
   const list = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
@@ -58,7 +60,6 @@ export function ItemsList(props: ItemsListProps) {
   const lastItemsListLengthRef = useRef(itemsList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
   const menuRef = useRef<Menu>(null)
-
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close()
@@ -119,8 +120,6 @@ export function ItemsList(props: ItemsListProps) {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
   }
 
-  console.log({itemsListLength: itemsList.length});
-  
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -132,7 +131,7 @@ export function ItemsList(props: ItemsListProps) {
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
       headerTitle: `Items List${Object.keys(filtersFound || {}).length > 0 ? ' (filtered)' : ''}`,
-    });
+    })
   }, [navigation, filtersFound])
 
   useEffect(() => {
@@ -226,6 +225,7 @@ export function ItemsList(props: ItemsListProps) {
         )}
       />
       <ListSorter
+        sortOrderValue={sortOrder}
         listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
@@ -234,6 +234,7 @@ export function ItemsList(props: ItemsListProps) {
         viewSize="small"
       />
       <ListFilter
+        sortOrderValue={sortOrder}
         filtersInitial={filtersFound}
         item={itemsList[0]}
         filterNames={['name', 'upc']}

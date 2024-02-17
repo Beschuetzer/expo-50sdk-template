@@ -1,10 +1,11 @@
 export enum Routes {
-  ShoppingList = "ShoppingList",
+  DevOptionsScreen = "DevOptionsScreen",
   ItemModal = "ItemModal",
+  ItemsScreen = "ItemsScreen",
+  OptionsScreen = "OptionsScreen",
+  ScannerScreen = "ScannerScreen",
+  ShoppingList = "ShoppingList",
+  ShoppingListScreen = "index",
   StoreModal = "StoreModal",
   StoreScreen = "StoreScreen",
-  ItemsScreen = "ItemsScreen",
-  ScannerScreen = "ScannerScreen",
-  OptionsScreen = "OptionsScreen",
-  ShoppingListScreen = "index",
 }

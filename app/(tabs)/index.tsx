@@ -19,8 +19,8 @@ export default function TabOneScreen() {
 
   return (
     <ScrollView py={2} keyboardShouldPersistTaps="always">
-      <ReduxViewer />
-      <StoreManager showAddStore showStoreList />
+      {/* <ReduxViewer />
+      <StoreManager showAddStore showStoreList /> */}
       {/* <ShoppingList /> */}
       {/* <ItemsList /> */}
       {/* <Playground /> */}

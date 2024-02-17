@@ -27,6 +27,7 @@ import {
 } from '@/state/slices/optionsSlice'
 import { getGpsCoordinate } from '@/utils/helpers'
 import { setCurrentLocation } from '@/state/slices/listsSlice'
+import { Routes } from '@/constants/navigation'
 
 const DEBOUNCE_TIMEOUT = 500
 
@@ -123,6 +124,11 @@ export default function OptionsScreen() {
           }}
         >
           Update Current Location
+        </Button>
+        <Button
+          onPress={() => navigation.navigate(Routes.DevOptionsScreen)}
+        >
+          Developer Options
         </Button>
       </Stack>
     </AbsolutePositionedScreen>

@@ -57,7 +57,6 @@ export function ItemsList(props: ItemsListProps) {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [listToDisplay, setListToDisplay] = useState(itemsList)
   const shouldSortOnMountRef = useRef(true)
-  const lastItemsListLengthRef = useRef(itemsList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
   const menuRef = useRef<Menu>(null)
 
@@ -151,7 +150,6 @@ export function ItemsList(props: ItemsListProps) {
   }, [navigation, filtersFound])
 
   useEffect(() => {
-    if (itemsList.length === lastItemsListLengthRef.current) return
     shouldSortOnMountRef.current = true
     setListToDisplay(itemsList)
   }, [itemsList])

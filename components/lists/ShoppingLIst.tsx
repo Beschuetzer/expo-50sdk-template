@@ -57,7 +57,6 @@ export function ShoppingList(props: ShoppingistProps) {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [listToDisplay, setListToDisplay] = useState(shoppingList)
   const shouldSortOnMountRef = useRef(true)
-  const lastShoppingListLengthRef = useRef(shoppingList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
   const menuRef = useRef<Menu>(null)
 
@@ -151,7 +150,6 @@ export function ShoppingList(props: ShoppingistProps) {
   }, [navigation, filtersFound])
 
   useEffect(() => {
-    if (shoppingList.length === lastShoppingListLengthRef.current) return
     shouldSortOnMountRef.current = true
     setListToDisplay(shoppingList)
   }, [shoppingList])

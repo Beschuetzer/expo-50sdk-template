@@ -53,9 +53,14 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   )
 
   useEffect(() => {
+    setFilters(null)
+  }, [filtersInitial])
+
+  useEffect(() => {
+    if (!filters) return
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      onValueChange && onValueChange(filters || {})
+      onValueChange && onValueChange(filters)
     }, debounceTimeout)
   }, [filters, sortOrderValue])
 

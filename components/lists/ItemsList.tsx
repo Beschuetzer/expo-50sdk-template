@@ -8,7 +8,7 @@ import { Menu } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
-import { ListFilter } from './ListFilter'
+import { ListFilter, ListFilterFilters } from './ListFilter'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
@@ -49,6 +49,7 @@ export function ItemsList(props: ItemsListProps) {
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+  const [listToDisplay, setListToDisplay] = useState(itemsList)
   const shouldSortOnMountRef = useRef(true)
   const lastItemsListLengthRef = useRef(itemsList.length)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
@@ -72,8 +73,8 @@ export function ItemsList(props: ItemsListProps) {
   }, [])
 
   const onFilterValueChange = useCallback(
-    (filterValue: string) => {
-      console.log({ filterValue })
+    (filters: ListFilterFilters) => {
+      console.log({ filters })
       //todo: add applyFilter reducer (may need another POS for this for each list with a selector and that is what is actually displayed)
       //  lastSortTypeRef.current = sortType;
       //  dispatch(sortList({ listName: ListName.ItemsList, sortBy: sortType }));
@@ -127,6 +128,7 @@ export function ItemsList(props: ItemsListProps) {
   useEffect(() => {
     if (itemsList.length === lastItemsListLengthRef.current) return
     shouldSortOnMountRef.current = true
+    setListToDisplay(itemsList)
   }, [itemsList])
 
   useFocusEffect(() => {
@@ -200,7 +202,7 @@ export function ItemsList(props: ItemsListProps) {
             setRefreshing(false)
           }, 2000)
         }}
-        data={itemsList}
+        data={listToDisplay}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
@@ -222,6 +224,8 @@ export function ItemsList(props: ItemsListProps) {
         viewSize="small"
       />
       <ListFilter
+        item={itemsList[0]}
+        filterNames={['name', 'upc', 'lastUpdatedDate']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}
         onValueChange={onFilterValueChange}

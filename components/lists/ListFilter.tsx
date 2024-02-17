@@ -1,31 +1,36 @@
-import { useTheme } from 'native-base'
+import { useTheme, Text } from 'native-base'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
 
-import { EMPTY_STRING } from '@/constants/general'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { ItemWithStoreSpecificValues } from '@/types/Item'
 
-export type ListSortViewSize = 'large' | 'small'
-type ListFilterProps = {
+export type ListFilterFilters<T> = Partial<
+  Record<keyof ItemWithStoreSpecificValues, string>
+>
+
+type ListFilterProps<T> = {
+  item: T
   debounceTimeout?: number
+  filterNames: (keyof T)[]
   isVisible: boolean
-  filterStringInitial?: string
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>
   onMount?: () => void
   onUnmount?: () => void
-  onValueChange: (filter: string) => void
+  onValueChange: (filters: ListFilterFilters<T>) => void
 }
 
-export function ListFilter(props: ListFilterProps) {
+export function ListFilter<T>(props: ListFilterProps<T>) {
   const {
     debounceTimeout = 500,
-    filterStringInitial = EMPTY_STRING,
+    filterNames,
     isVisible,
     setIsVisible,
     onMount,
     onUnmount,
     onValueChange,
   } = props
-  const [inputValue, setInputValue] = useState(filterStringInitial)
+  const [filters, setFilters] = useState<ListFilterFilters<T>>({})
   const theme = useTheme()
   const debounceRef = useRef<any>(-1)
 
@@ -33,16 +38,23 @@ export function ListFilter(props: ListFilterProps) {
     setIsVisible && setIsVisible(false)
   }, [setIsVisible])
 
-  const onChangeText = useCallback(
-    (filterValue: string) => {
-      setInputValue(filterValue)
-      clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => {
-        onValueChange && onValueChange(filterValue)
-      }, debounceTimeout)
+  const onChange = useCallback(
+    (key: keyof T, value: string) => {
+      console.log({ value, key })
+      setFilters((current) => ({
+        ...current,
+        [key]: value,
+      }))
     },
     [onValueChange],
   )
+
+  useEffect(() => {
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      onValueChange && onValueChange(filters)
+    }, debounceTimeout)
+  }, [filters])
 
   useEffect(() => {
     onMount && onMount()
@@ -54,11 +66,20 @@ export function ListFilter(props: ListFilterProps) {
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
       <Dialog.Title style={{ textAlign: 'center' }}>Filter</Dialog.Title>
-      <Dialog.Input
-        value={inputValue}
-        onChangeText={onChangeText}
-        placeholder="Term or regular expression"
-      />
+      {filterNames.map((filterName: keyof T) => {
+        return (
+          <>
+            <Text ml={theme.space[FORM_INTER_ITEM_SPACING]}>
+              {filterName.toString()}
+            </Text>
+            <Dialog.Input
+              value={filters[filterName] || EMPTY_STRING}
+              onChangeText={(value) => onChange(filterName, value)}
+              placeholder="Term or regular expression"
+            />
+          </>
+        )
+      })}
       <Dialog.Button
         color={theme.colors.primary[900]}
         label="Close"

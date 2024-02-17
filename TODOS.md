@@ -1,6 +1,5 @@
 ## MVP
 -finish ListFilter implementation (need to add POS, reducer, and selector)
-    --load current filters on load in ListFilter
     --change header title to reflect filtering happening
     --add option in menu to "clear all" which clears filters
 -add ListFilter to StoresList when done

@@ -227,6 +227,7 @@ export function ItemsList(props: ItemsListProps) {
         viewSize="small"
       />
       <ListFilter
+        listName={ListName.ItemsList}
         item={itemsList[0]}
         filterNames={['name', 'upc']}
         isVisible={isFilterModalOpen}

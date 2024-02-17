@@ -1,7 +1,5 @@
 ## MVP
--finish ListFilter implementation (need to add POS, reducer, and selector)
-
--use StoresList approach to rework lastPurchasedList (using array and all the reducers/selectors around it):
+-use StoresList approach to work on ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
 
 -convert ShoppingList to use Flashlist
 -Figure out how to style the shopping list tile
@@ -47,6 +45,9 @@ the ability to create a store layout and have a map/route be generated based on 
 -ability to start a "shopping run" and have it track where you are in the run and provide images of the current item and accept input to change to the next item (or go back)
 -voice commands like adding an item to the list
 -add ability to open google maps for directions to a store (would need to allow input of address or ability to get from GPS coords)
+
+## Enhancements
+-Holding an item in a list should enter multi-selction mode, which allows selecting multiple items and then performing some action
 
 ## Optimization Idea
 -Create a buton to add 500 or so items to itemsList.  Then try updating the quantity for a few items and see how quickly things render.  If there is slugglishness, separate storeSpecificValues from itemList.  It Would be a dictionary with Key as the key.  Would need to make a selector called itemWithStoreSpecificValuesSelector.  Would need to update the Item type wherever it is being used.  Same for current ItemWithStoreSpecificValues type use cases.  Would need to updat addItemsListItem and updateStoreSpecificValues reducers

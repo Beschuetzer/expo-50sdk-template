@@ -60,6 +60,7 @@ export function StoresList() {
   }, [menuRef])
 
   function onAddStorePress() {
+    closeMenu()
     navigation.navigate(Routes.StoreModal)
   }
 
@@ -88,6 +89,14 @@ export function StoresList() {
     [storesList],
   )
 
+  const onSwipeRight = useCallback(
+    (key: Key) => {
+      closeMenu()
+      dispatch(setCurrentStoreName(key?.name))
+    },
+    [closeMenu],
+  )
+
   const onSwipeLeft = useCallback(
     (keyToUse: Key) => {
       closeMenu()
@@ -96,13 +105,8 @@ export function StoresList() {
       // after removing the item, we start animation
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     },
-    [listRef],
+    [listRef, closeMenu],
   )
-
-  const onSwipeRight = useCallback((key: Key) => {
-    closeMenu()
-    dispatch(setCurrentStoreName(key?.name))
-  }, [])
 
   useEffect(() => {
     setListKey((current) => current + 1)
@@ -120,7 +124,7 @@ export function StoresList() {
       ),
       headerLeft: () => <AddButton onPress={onAddStorePress} />,
       headerTitle: `Stores List${Object.keys(filtersFound || {}).length > 0 ? ' (filtered)' : ''}`,
-    });
+    })
   }, [navigation, filtersFound])
 
   useEffect(() => {

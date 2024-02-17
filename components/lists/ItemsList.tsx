@@ -78,6 +78,14 @@ export function ItemsList(props: ItemsListProps) {
     setIsFilterModalOpen(true)
   }, [])
 
+  const onSortTypeChange = useCallback(
+    (sortType: SortType) => {
+      lastSortTypeRef.current = sortType
+      dispatch(sortList({ listName, sortBy: sortType }))
+    },
+    [itemsList],
+  )
+
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
       dispatch(setFilters({ listName, filters }))
@@ -90,35 +98,33 @@ export function ItemsList(props: ItemsListProps) {
     [itemsList],
   )
 
-  const onSortTypeChange = useCallback(
-    (sortType: SortType) => {
-      lastSortTypeRef.current = sortType
-      dispatch(sortList({ listName, sortBy: sortType }))
+  const onSwipeRight = useCallback(
+    (key: Key) => {
+      closeMenu()
+      setRefreshing(false)
+      dispatch(
+        updateStoreSpecificValues({
+          key,
+          storeSpecificValuesToUpdate: {
+            quantity: (currentQuantity: number) =>
+              currentQuantity > 0 ? currentQuantity + 1 : 1,
+          },
+        }),
+      )
     },
-    [itemsList],
+    [closeMenu],
   )
 
-  function onSwipeRight(key: Key) {
-    closeMenu()
-    setRefreshing(false)
-    dispatch(
-      updateStoreSpecificValues({
-        key,
-        storeSpecificValuesToUpdate: {
-          quantity: (currentQuantity: number) =>
-            currentQuantity > 0 ? currentQuantity + 1 : 1,
-        },
-      }),
-    )
-  }
-
-  function onSwipeLeft(key: Key) {
-    closeMenu()
-    dispatch(removeItemsListItem(key))
-    listRef.current?.prepareForLayoutAnimationRender()
-    // after removing the item, we start animation
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-  }
+  const onSwipeLeft = useCallback(
+    (key: Key) => {
+      closeMenu()
+      dispatch(removeItemsListItem(key))
+      listRef.current?.prepareForLayoutAnimationRender()
+      // after removing the item, we start animation
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+    },
+    [listRef, closeMenu],
+  )
 
   useEffect(() => {
     navigation.setOptions({

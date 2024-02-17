@@ -1,13 +1,10 @@
-import { useTheme, Text } from 'native-base'
+import { useTheme, Text, View } from 'native-base';
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { ItemWithStoreSpecificValues } from '@/types/Item'
 
-export type ListFilterFilters<T> = Partial<
-  Record<keyof ItemWithStoreSpecificValues, string>
->
+export type ListFilterFilters<T> = Partial<Record<keyof T, string>>
 
 type ListFilterProps<T> = {
   item: T
@@ -68,7 +65,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
       <Dialog.Title style={{ textAlign: 'center' }}>Filter</Dialog.Title>
       {filterNames.map((filterName: keyof T) => {
         return (
-          <>
+          <View key={filterName}>
             <Text ml={theme.space[FORM_INTER_ITEM_SPACING]}>
               {filterName.toString()}
             </Text>
@@ -77,7 +74,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
               onChangeText={(value) => onChange(filterName, value)}
               placeholder="Term or regular expression"
             />
-          </>
+          </View>
         )
       })}
       <Dialog.Button

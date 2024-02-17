@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 
 import { RootState } from '../store'
 
+import { ListFilterFilters } from '@/components/lists/ListFilter'
 import { SortOrder, SortType, getSorter } from '@/components/lists/sorters'
 import { EMPTY_STRING } from '@/constants/general'
 import {
@@ -12,6 +13,7 @@ import {
   Key,
   LastPurchasedItem,
   LastPurchasedList,
+  ListFilters,
   StoreList,
   StoreSpecificValueKey,
   StoreSpecificValues,
@@ -20,6 +22,8 @@ import { GpsCoordinate, Store } from '@/types/Store'
 import {
   calculateDistance,
   getEmptyArray,
+  getEmptyObject,
+  getFilteredList,
   getItemFromList,
   getKeyToUse,
 } from '@/utils/helpers'
@@ -40,6 +44,11 @@ export type AddItemsListItemPayload = {
   item: Item
   storeSpecificValues?: StoreSpecificValues
   currentStore?: Store
+}
+
+export type SetFiltersPayload = {
+  listName: ListName
+  filters: ListFilterFilters<any>
 }
 
 export type SortListPayload = {
@@ -75,6 +84,7 @@ const CURRENT_LOCATION_INITIAL = null
 export type ListsState = {
   currentLocation: GpsCoordinate | null
   currentStoreName: string
+  filters: ListFilters
   [ListName.ItemsList]: ItemsList
   [ListName.LastPurchasedList]: LastPurchasedList
   [ListName.StoresList]: StoreList
@@ -84,6 +94,7 @@ export type ListsState = {
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
+  filters: getEmptyObject(),
   itemsList: getEmptyArray(),
   lastPurchasedList: getEmptyArray(),
   storesList: getEmptyArray(),
@@ -275,6 +286,15 @@ export const listsSlice = createSlice({
       if (!action.payload) return
       state.currentStoreName = action.payload
     },
+    setFilters: (
+      state: ListsState,
+      action: PayloadAction<SetFiltersPayload>,
+    ) => {
+      const { filters, listName } = action.payload
+      if (!listName) return
+      console.log({ listName, filters })
+      state.filters[listName] = filters
+    },
     sortList: (state: ListsState, action: PayloadAction<SortListPayload>) => {
       const { listName, sortBy = SortType.Name } = action.payload
       const listToSort = state[listName]
@@ -283,6 +303,13 @@ export const listsSlice = createSlice({
         return
       }
       listToSort?.sort(getSorter(sortBy, state.sortOrders[listName].sortOrder))
+      const filtersToUse = state.filters[listName]
+      console.log({ filtersToUse })
+      if (filtersToUse) {
+        const filteredList = getFilteredList<any>(listToSort, filtersToUse)
+        console.log({ filteredList })
+        state[listName] = filteredList
+      }
 
       if (!state.sortOrders[listName]) return
 
@@ -365,6 +392,7 @@ export const {
   resetStoresList,
   setCurrentLocation,
   setCurrentStoreName,
+  setFilters,
   sortList,
   toggleSortOrder,
   updateStoreSpecificValues,
@@ -391,9 +419,17 @@ export const currentStoreSelector = createSelector(
   },
 )
 
+export const filterSelector = (listName: ListName) =>
+  createSelector(
+    [(state: RootState) => state[listsSlice.name].filters],
+    (filters) => {
+      return filters[listName]
+    },
+  )
+
 export const itemsListItemSelector = (id: string) =>
   createSelector(
-    [(state: RootState) => (state[listsSlice.name] as ListsState).itemsList],
+    [(state: RootState) => state[listsSlice.name].itemsList],
     (itemsList) => {
       return getItemFromList(itemsList, id)
     },

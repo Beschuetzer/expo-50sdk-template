@@ -2,6 +2,9 @@ import { XOR } from 'ts-xor'
 
 import { Store } from './Store'
 
+import { ListFilterFilters } from '@/components/lists/ListFilter'
+import { ListName } from '@/state/slices/listsSlice'
+
 export enum ItemUnit {
   Bar = 'bar',
   Bunch = 'bunch',
@@ -74,7 +77,7 @@ export type StoreSpecificValue<T> = { [storeId: string]: T } | null | undefined
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number
 }
-
+export type ListFilters = { [key in ListName]: ListFilterFilters<any> }
 export type ItemsList = ItemWithStoreSpecificValues[]
 export type ShoppingList = ItemWithStoreSpecificValues[] //todo: this should be removed?
 export type LastPurchasedList = LastPurchasedItem[]

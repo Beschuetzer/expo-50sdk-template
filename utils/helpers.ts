@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system'
 import * as ImagePicker from 'expo-image-picker'
 import * as Location from 'expo-location'
 
-import { HasNameField, HasUpcField } from '@/components/lists/sorters'
+import { ListFilterFilters } from '@/components/lists/ListFilter'
 import {
   DAY_IN_MS,
   EMPTY_STRING,
@@ -13,7 +13,7 @@ import {
   IMAGE_PRIORITY_MAPPING,
   WEEK_IN_MS,
 } from '@/constants/general'
-import { ItemWithStoreSpecificValues, ItemsList, Key } from '@/types/Item'
+import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { GpsCoordinate } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
 import { Frequency, TimeSpan } from '@/types/general'
@@ -85,6 +85,17 @@ export function getEmptyObject<T>() {
   return {} as T
 }
 
+export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {
+  return list.filter((item) => {
+    for (const [key, regex] of Object.entries(filters)) {
+      const fieldValue = item?.[key as keyof T] as string
+      const isMatch = fieldValue.match(new RegExp(regex as string, 'i'))
+      if (!isMatch) return false
+    }
+    return true
+  })
+}
+
 export function getKeyToUse(key: string | Key, displayAlert = true) {
   if (typeof key === 'string') return key
   const toReturn = key?.upc || key?.name || EMPTY_STRING
@@ -141,10 +152,7 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   }
 }
 
-export function getItemFromList(
-  list: Partial<HasUpcField & HasNameField>[],
-  key: string | Key,
-) {
+export function getItemFromList(list: Key[], key: string | Key) {
   const keyToUse = getKeyToUse(key)
   const itemFound =
     list.find((item) => {

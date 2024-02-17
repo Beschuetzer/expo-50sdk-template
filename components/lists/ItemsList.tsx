@@ -22,12 +22,13 @@ import {
   currentStoreSelector,
   itemsListSelector,
   removeItemsListItem,
+  setFilters,
   sortList,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
-import { getKeyToUse } from '@/utils/helpers'
+import { getFilteredList, getKeyToUse } from '@/utils/helpers'
 
 type ItemsListProps = object
 
@@ -74,20 +75,12 @@ export function ItemsList(props: ItemsListProps) {
 
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
-      console.log({ filters })
-      const filteredList = itemsList.filter((item) => {
-        for (const [key, regex] of Object.entries(filters)) {
-          console.log({ key, regex })
-          const fieldValue = item?.[
-            key as keyof ItemWithStoreSpecificValues
-          ] as string
-          const isMatch = fieldValue.match(new RegExp(regex, 'i'))
-          console.log({ fieldValue, isMatch })
-          if (!isMatch) return false
-        }
-        return true
-      })
-      setListToDisplay(filteredList);
+      dispatch(setFilters({ listName: ListName.ItemsList, filters }))
+      const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
+        itemsList,
+        filters,
+      )
+      setListToDisplay(filteredList)
     },
     [itemsList],
   )

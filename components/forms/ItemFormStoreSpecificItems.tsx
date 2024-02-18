@@ -11,7 +11,7 @@ import {
 } from '@/constants/general'
 import {
   currentStoreSelector,
-  itemsListItemSelector,
+  itemsListWithStoreSpecificValuesSelector,
 } from '@/state/slices/listsSlice'
 import { StoreSpecificValues } from '@/types/Item'
 import { ItemProp } from '@/types/general'
@@ -33,7 +33,9 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
     [item],
   )
   const currentStore = useSelector(currentStoreSelector)
-  const itemInList = useSelector(itemsListItemSelector(keyToUse))
+  const itemInList = useSelector(
+    itemsListWithStoreSpecificValuesSelector(keyToUse),
+  )
 
   //if adding new state, be sure to update in useEffect below too.
   const [aisle, setAisle] = useState(

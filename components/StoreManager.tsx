@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { Picker } from '@react-native-picker/picker'
 import { useNavigation } from 'expo-router'
-import { FormControl, Row, Stack, Text } from 'native-base'
+import { FormControl, Row, Stack } from 'native-base'
 import { useCallback } from 'react'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,10 +10,12 @@ import { EMPTY_STRING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import { maxWidth } from '@/constants/styles'
 import {
+  ListName,
   currentStoreSelector,
+  listToDisplaySelector,
   setCurrentStoreName,
-  storesListSelector,
 } from '@/state/slices/listsSlice'
+import { Store } from '@/types/Store'
 import { HeadingTagProp } from '@/types/general'
 
 type StorageManagerProps = {
@@ -30,7 +32,9 @@ export function StoreManager(props: StorageManagerProps) {
   } = props
 
   const currentStore = useSelector(currentStoreSelector)
-  const storesList = useSelector(storesListSelector)
+  const storesList = useSelector(
+    listToDisplaySelector(ListName.StoresList),
+  ) as Store[]
   const navigation = useNavigation()
   const dispatch = useDispatch()
 
@@ -60,7 +64,7 @@ export function StoreManager(props: StorageManagerProps) {
           selectedValue={currentStore?.name || EMPTY_STRING}
           onValueChange={onChangeStore}
         >
-          {storesList.data.map((store) => (
+          {storesList.map((store) => (
             <Picker.Item
               key={store?.name}
               label={`${store?.name} (lat: ${store?.gpsCoordinates?.lat}, long: ${store?.gpsCoordinates?.lon})`}

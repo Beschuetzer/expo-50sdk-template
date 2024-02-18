@@ -224,8 +224,7 @@ export function ItemsList(props: ItemsListProps) {
         viewSize="small"
       />
       <ListFilter
-        filtersInitial={itemsList.filters}
-        item={itemsList.data[0]}
+        list={itemsList}
         filterNames={['name', 'upc']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}

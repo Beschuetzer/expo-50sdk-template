@@ -3,15 +3,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { List } from '@/types/Item'
 
 export type ListFilterFilters<T> = Partial<Record<keyof T, string>>
 
 type ListFilterProps<T> = {
   debounceTimeout?: number
   filterNames: (keyof T)[]
-  filtersInitial: ListFilterFilters<T>
   isVisible: boolean
-  item: T
+  list: List<T>
   onMount?: () => void
   onUnmount?: () => void
   onValueChange: (filters: ListFilterFilters<T>) => void
@@ -22,7 +22,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   const {
     debounceTimeout = 500,
     filterNames,
-    filtersInitial = {},
+    list,
     isVisible,
     onMount,
     onUnmount,
@@ -30,7 +30,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     setIsVisible,
   } = props
   const [filters, setFilters] = useState<ListFilterFilters<T> | null>(
-    filtersInitial,
+    list.filters,
   )
   const theme = useTheme()
   const debounceRef = useRef<any>(-1)

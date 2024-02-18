@@ -20,7 +20,6 @@ import { Routes } from '@/constants/navigation'
 import {
   ListName,
   currentStoreSelector,
-  filterSelector,
   removeItemsListItem,
   setFilters,
   shoppingListSelector,
@@ -45,9 +44,7 @@ const listName: ListName = ListName.ShoppingLIst
 export function ShoppingList(props: ShoppingistProps) {
   const navigation = useNavigation()
   const shoppingList = useSelector(shoppingListSelector)
-  const filtersFound = useSelector(filterSelector(listName))
   const currentStore = useSelector(currentStoreSelector)
-  const sortOrderValue = useSelector(sortOrderSelector(listName))
   const theme = useTheme()
   const dispatch = useDispatch()
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)

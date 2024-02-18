@@ -1,16 +1,9 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
-import { View, useTheme } from "native-base";
-import { useEffect } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { useDispatch } from "react-redux";
+import { View, useTheme } from 'native-base'
 
-import { StoreManager } from "@/components/StoreManager";
-import { StoresList } from "@/components/lists/StoresList";
-import { Routes } from "@/constants/navigation";
+import { StoresList } from '@/components/lists/StoresList'
 
 export default function StoreScreen() {
-  const theme = useTheme();
+  const theme = useTheme()
 
   return (
     <View
@@ -20,5 +13,5 @@ export default function StoreScreen() {
     >
       <StoresList />
     </View>
-  );
+  )
 }

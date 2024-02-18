@@ -1,5 +1,5 @@
 ## MVP
--Re-work StoresLIst and ShoppingLIst for new approach
+-figure out StoresList addition screen where typing in form causes error
 
 
 -use StoresList approach to work on ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):

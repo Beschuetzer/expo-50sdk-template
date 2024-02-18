@@ -1,12 +1,12 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
 import { useFocusEffect, useNavigation } from 'expo-router'
-import { View, Text, useTheme, Stack, Row } from 'native-base'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useTheme, Row, View, Stack, Text } from 'native-base'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation, StyleSheet } from 'react-native'
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler'
 import { Menu } from 'react-native-popup-menu'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { ListFilter, ListFilterFilters } from './ListFilter'
 import { ListSorter } from './ListSorter'
@@ -15,42 +15,38 @@ import { SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
 import { ListHeaderRight } from '../header/ListHeaderRight'
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { FORM_INTER_ITEM_SPACING, EMPTY_STRING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import {
   ListName,
   currentStoreSelector,
-  listToDisplaySelector,
   removeStoresListItem,
+  setCurrentStoreName,
   setFilters,
   setSortOrder,
   storesListSelector,
-  setCurrentStoreName,
 } from '@/state/slices/listsSlice'
 import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
-import { displayAlert, getKeyToUse } from '@/utils/helpers'
-
-type StoresListProps = object
+import { getFilteredList, getKeyToUse } from '@/utils/helpers'
 
 const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[]
 
 const listName: ListName = ListName.StoresList
-export function StoresList(props: StoresListProps) {
+export function StoresListCopy() {
   const navigation = useNavigation()
   const storesList = useSelector(storesListSelector)
-  const storesListToDisplay = useSelector(
-    listToDisplaySelector(listName),
-  ) as Store[]
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
   const listRef = useRef<FlashList<Store> | null>(null)
-  const [listKey, setListKey] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
+  const [listKey, setListKey] = useState(0)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+  const [listToDisplay, setListToDisplay] = useState(storesList)
+  const shouldSortOnMountRef = useRef(true)
   const lastSortTypeRef = useRef(storesListSortTypes[0])
   const menuRef = useRef<Menu>(null)
 
@@ -71,16 +67,21 @@ export function StoresList(props: StoresListProps) {
     setIsFilterModalOpen(true)
   }, [])
 
-  const onSortTypeChange = useCallback((sortType: SortType) => {
-    lastSortTypeRef.current = sortType
-    dispatch(setSortOrder({ listName, sortBy: sortType }))
-  }, [])
+  const onSortTypeChange = useCallback(
+    (sortType: SortType) => {
+      lastSortTypeRef.current = sortType
+      dispatch(setSortOrder({ listName, sortBy: sortType }))
+    },
+    [storesList],
+  )
 
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<Store>) => {
       dispatch(setFilters({ listName, filters }))
+      const filteredList = getFilteredList<Store>(storesList, filters)
+      setListToDisplay(filteredList)
     },
-    [listName],
+    [storesList],
   )
 
   const onSwipeRight = useCallback(
@@ -117,9 +118,14 @@ export function StoresList(props: StoresListProps) {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddStorePress} />,
-      headerTitle: `Stores List${Object.keys(storesList.filters || {}).length > 0 ? ' (filtered)' : ''}`,
+      headerTitle: `Stores List${Object.keys(filtersFound || {}).length > 0 ? ' (filtered)' : ''}`,
     })
-  }, [navigation])
+  }, [navigation, filtersFound])
+
+  useEffect(() => {
+    shouldSortOnMountRef.current = true
+    setListToDisplay(storesList)
+  }, [storesList])
 
   useFocusEffect(() => {
     closeMenu()
@@ -206,32 +212,34 @@ export function StoresList(props: StoresListProps) {
       </SwipeableRow>
     )
   }
+
   return (
     <>
       <FlashList
         ref={listRef}
         key={listKey}
         refreshing={refreshing}
-        onTouchStart={closeMenu}
         onRefresh={() => {
           setRefreshing(true)
           setTimeout(() => {
             setRefreshing(false)
           }, 2000)
         }}
-        data={storesListToDisplay}
-        renderItem={renderItem}
-        keyExtractor={(item: Store, index: number) => getKeyToUse(item)}
-        estimatedItemSize={120}
+        data={listToDisplay}
+        estimatedItemSize={150}
+        keyExtractor={(item: Store, index: number) =>
+          getKeyToUse({ name: item.name, upc: EMPTY_STRING })
+        }
         ItemSeparatorComponent={() => (
           <View
             height={StyleSheet.hairlineWidth}
             backgroundColor={theme.colors.gray[500]}
           />
         )}
+        renderItem={renderItem}
       />
       <ListSorter
-        sortOrderValue={storesList.sortOrderValue}
+        sortOrderValue={sortOrderValue}
         listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
@@ -240,8 +248,10 @@ export function StoresList(props: StoresListProps) {
         viewSize="small"
       />
       <ListFilter
-        list={storesList}
-        filterNames={['name', 'calculatedDistance']}
+        sortOrderValue={sortOrderValue}
+        filtersInitial={filtersFound}
+        item={storesList[0]}
+        filterNames={['name']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}
         onValueChange={onFilterValueChange}

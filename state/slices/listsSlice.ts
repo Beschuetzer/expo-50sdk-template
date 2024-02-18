@@ -23,7 +23,6 @@ import { ListNameProp } from '@/types/general'
 import {
   calculateDistance,
   getEmptyList,
-  getEmptyObject,
   getFilteredList,
   getItemFromList,
   getKeyToUse,
@@ -407,14 +406,6 @@ export const currentStoreSelector = createSelector(
   },
 )
 
-export const filterSelector = (listName: ListName) =>
-  createSelector(
-    [(state: RootState) => state[listsSlice.name].filters],
-    (filters) => {
-      return filters[listName]
-    },
-  )
-
 export const itemsListItemSelector = (id: string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].itemsList.data],
@@ -431,6 +422,7 @@ export const listToDisplaySelector = (listName: ListName) =>
     [(state: RootState) => state[listsSlice.name]?.[listName]],
     (list) => {
       const { filters, sortOrderValue, data } = list
+
       const filteredList = getFilteredList<unknown>(data, filters)
       filteredList.sort(
         getSorter(sortOrderValue.sortBy, sortOrderValue.sortOrder),
@@ -464,7 +456,7 @@ export const shoppingListSelector = createSelector(
 )
 
 export const storesListSelector = (state: RootState) =>
-  state[listsSlice.name].storesList.data
+  state[listsSlice.name].storesList
 
 export const storesListItemSelector = (storeName: string) =>
   createSelector(

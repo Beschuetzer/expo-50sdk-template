@@ -1,16 +1,11 @@
 import { Button, FlatList, Heading, Row, Stack, Text, View } from 'native-base'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { getRandomEnumValue, getRandomInt, getRandomItem } from './helpers'
+import { getRandomItem } from './helpers'
 import { MOCK_STORES } from './mockStores'
 import { MOCKS_UPCS } from './mockUpcData'
 
-import {
-  EMPTY_STRING,
-  TIME_SPAN_TO_MILLISECONDS_MAPPING,
-} from '@/constants/general'
-import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs'
 import {
   addItemsListItem,
   addMockItems,
@@ -26,18 +21,15 @@ import {
   resetUpcProducts,
   upcProductsSelector,
 } from '@/state/slices/scannerSlice'
-import { ItemsList, StoreSpecificValueKey } from '@/types/Item'
-import { TimeSpan } from '@/types/general'
 import {
-  calculateDistance,
-  displayAlert,
-  getFrequencyValue,
-} from '@/utils/helpers'
+  ItemWithStoreSpecificValues,
+  StoreSpecificValueKey,
+} from '@/types/Item'
+import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers'
 
 const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500
 const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000
 export function ReduxViewer() {
-  const [selectedUrl, setSelectedUrl] = useState(EMPTY_STRING)
   const lastUpcIndexRef = useRef(0)
   const lastUpcNumberRef = useRef(1)
   const lastStoreIndexRef = useRef(0)
@@ -146,7 +138,7 @@ export function ReduxViewer() {
                     lastUpcIndexRef.current += 1
                   }
 
-                  const randomItem = getRandomItem(lastUpcIndexRef.current);
+                  const randomItem = getRandomItem(lastUpcIndexRef.current)
                   dispatch(
                     addItemsListItem({
                       item: {
@@ -176,9 +168,9 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const itemsList = [] as ItemsList
+                  const itemsList = getEmptyList<ItemWithStoreSpecificValues>()
                   for (let index = 0; index < numberOfMockItems; index++) {
-                    itemsList.push(getRandomItem(lastUpcNumberRef.current))
+                    itemsList.data.push(getRandomItem(lastUpcNumberRef.current))
                     lastUpcNumberRef.current += 1
                   }
                   dispatch(addMockItems(itemsList))

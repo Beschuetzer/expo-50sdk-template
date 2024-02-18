@@ -58,9 +58,6 @@ export function ItemsList(props: ItemsListProps) {
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
   const menuRef = useRef<Menu>(null)
 
-  console.log({itemsList, itemsListToDisplay});
-  
-
   const closeMenu = useCallback(() => {
     menuRef.current?.close()
   }, [menuRef])
@@ -85,7 +82,6 @@ export function ItemsList(props: ItemsListProps) {
 
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
-      console.log("onFilterValueChange");
       dispatch(setFilters({ listName, filters }))
     },
     [listName],

@@ -243,7 +243,6 @@ export const listsSlice = createSlice({
       const emptyList = getEmptyList<any>()
       emptyList.data = state[listName].data
       state[listName] = emptyList
-      console.log({list: state[listName]});
     },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyList()
@@ -432,7 +431,6 @@ export const listToDisplaySelector = (listName: ListName) =>
     [(state: RootState) => state[listsSlice.name]?.[listName]],
     (list) => {
       const { filters, sortOrderValue, data } = list
-      console.log({ data, filters, sortOrderValue })
       const filteredList = getFilteredList<unknown>(data, filters)
       filteredList.sort(
         getSorter(sortOrderValue.sortBy, sortOrderValue.sortOrder),

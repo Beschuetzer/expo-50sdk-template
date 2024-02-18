@@ -59,7 +59,7 @@ export default function RootLayout() {
 }
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
-  // useFlushRedux();
+  // useFlushRedux()
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

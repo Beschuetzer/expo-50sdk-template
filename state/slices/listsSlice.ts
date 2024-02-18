@@ -48,7 +48,9 @@ export type AddItemsListItemPayload = {
   currentStore?: Store
 }
 
-export type ResetFiltersPayload = object & ListNameProp
+export type ResetListToDisplayFiltersPayload = ListNameProp
+
+export type ResetListToDisplayPayload = ListNameProp
 
 export type SetFiltersPayload = {
   filters: ListFilterFilters<any>
@@ -238,12 +240,23 @@ export const listsSlice = createSlice({
     },
     resetListToDisplay: (
       state: ListsState,
-      action: PayloadAction<ResetFiltersPayload>,
+      action: PayloadAction<ResetListToDisplayPayload>,
     ) => {
       const { listName } = action.payload
       if (!listName) return
       const emptyList = getEmptyList<any>()
       emptyList.data = state[listName].data
+      state[listName] = emptyList
+    },
+    resetListToDisplayFilters: (
+      state: ListsState,
+      action: PayloadAction<ResetListToDisplayFiltersPayload>,
+    ) => {
+      const { listName } = action.payload
+      if (!listName) return
+      const emptyList = getEmptyList<any>()
+      emptyList.data = state[listName].data
+      emptyList.sortOrderValue = state[listName].sortOrderValue
       state[listName] = emptyList
     },
     resetItemsList: (state: ListsState) => {
@@ -372,11 +385,12 @@ export const {
   addMockItems,
   addStoresListItem,
   removeItemsListItem,
-  removeLastPurchasedListItem: removeLastPurchasedList,
+  removeLastPurchasedListItem,
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
   resetListToDisplay,
+  resetListToDisplayFilters,
   resetItemsList,
   resetLastPurchasedList,
   resetStoresList,

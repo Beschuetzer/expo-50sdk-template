@@ -30,7 +30,7 @@ import {
 import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'
 import { ListRow } from '@/types/general'
-import { displayAlert, getKeyToUse } from '@/utils/helpers'
+import { getKeyToUse } from '@/utils/helpers'
 
 type StoresListProps = object
 
@@ -241,7 +241,8 @@ export function StoresList(props: StoresListProps) {
       />
       <ListFilter
         list={storesList}
-        filterNames={['name', 'calculatedDistance']}
+        listName={listName}
+        filterNames={['name']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}
         onValueChange={onFilterValueChange}
@@ -258,21 +259,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'column',
     backgroundColor: 'white',
-  },
-  fromText: {
-    fontWeight: 'bold',
-    backgroundColor: 'transparent',
-  },
-  messageText: {
-    color: '#999',
-    backgroundColor: 'transparent',
-  },
-  dateText: {
-    backgroundColor: 'transparent',
-    position: 'absolute',
-    right: 20,
-    top: 10,
-    color: '#999',
-    fontWeight: 'bold',
   },
 })

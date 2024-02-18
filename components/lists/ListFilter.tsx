@@ -1,8 +1,10 @@
 import { useTheme, Text, View } from 'native-base'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
+import { useDispatch } from 'react-redux'
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { ListName, resetListToDisplayFilters } from '@/state/slices/listsSlice'
 import { List } from '@/types/Item'
 
 export type ListFilterFilters<T> = Partial<Record<keyof T, string>>
@@ -12,6 +14,7 @@ type ListFilterProps<T> = {
   filterNames: (keyof T)[]
   isVisible: boolean
   list: List<T>
+  listName: ListName
   onMount?: () => void
   onUnmount?: () => void
   onValueChange: (filters: ListFilterFilters<T>) => void
@@ -23,6 +26,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     debounceTimeout = 500,
     filterNames,
     list,
+    listName,
     isVisible,
     onMount,
     onUnmount,
@@ -34,6 +38,11 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   )
   const theme = useTheme()
   const debounceRef = useRef<any>(-1)
+  const dispatch = useDispatch()
+
+  const onClearPress = useCallback(() => {
+    dispatch(resetListToDisplayFilters({ listName }))
+  }, [])
 
   const onCloseModal = useCallback(() => {
     setIsVisible && setIsVisible(false)
@@ -84,6 +93,11 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
           </View>
         )
       })}
+      <Dialog.Button
+        color={theme.colors.primary[900]}
+        label="Clear"
+        onPress={onClearPress}
+      />
       <Dialog.Button
         color={theme.colors.primary[900]}
         label="Close"

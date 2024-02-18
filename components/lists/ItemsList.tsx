@@ -225,6 +225,7 @@ export function ItemsList(props: ItemsListProps) {
       />
       <ListFilter
         list={itemsList}
+        listName={listName}
         filterNames={['name', 'upc']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}

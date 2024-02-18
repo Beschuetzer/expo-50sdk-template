@@ -385,7 +385,15 @@ export const listsSlice = createSlice({
         const currentItem = state.storeSpecificValuesMap?.[keyToUse] as any
         const currentValue = currentItem?.[valueName]?.[state.currentStoreName]
         const newValue = value?.(currentValue)
-        if (currentItem && valueName && newValue) {
+
+        if (!currentItem || !currentValue) {
+          state.storeSpecificValuesMap[keyToUse] = {
+            ...state.storeSpecificValuesMap[keyToUse],
+            [valueName]: {
+              [state.currentStoreName]: newValue,
+            },
+          } as StoreSpecificValues
+        } else {
           currentItem[valueName][state.currentStoreName] = newValue
         }
       }

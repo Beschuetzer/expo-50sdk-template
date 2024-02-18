@@ -28,7 +28,7 @@ import {
   setSortOrder,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
-import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
+import { Item, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
@@ -48,11 +48,11 @@ export function ItemsList(props: ItemsListProps) {
   const itemsList = useSelector(itemsListSelector)
   const itemsListToDisplay = useSelector(
     listToDisplaySelector(listName),
-  ) as ItemWithStoreSpecificValues[]
+  ) as Item[]
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
-  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
+  const listRef = useRef<FlashList<Item> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
@@ -83,7 +83,7 @@ export function ItemsList(props: ItemsListProps) {
   }, [])
 
   const onFilterValueChange = useCallback(
-    (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
+    (filters: ListFilterFilters<Item>) => {
       dispatch(setFilters({ listName, filters }))
     },
     [listName],
@@ -135,7 +135,7 @@ export function ItemsList(props: ItemsListProps) {
     closeMenu()
   })
 
-  function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
+  function renderItem({ item, index }: ListRow<Item>) {
     const key = {
       name: item.name,
       upc: item.upc,
@@ -185,7 +185,7 @@ export function ItemsList(props: ItemsListProps) {
           ),
         }}
       >
-        <ItemTile itemWithStoreSpecificValues={item} />
+        <ItemTile item={item} />
       </SwipeableRow>
     )
   }
@@ -204,9 +204,7 @@ export function ItemsList(props: ItemsListProps) {
         }}
         data={itemsListToDisplay}
         renderItem={renderItem}
-        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
-          getKeyToUse(item)
-        }
+        keyExtractor={(item: Item, index: number) => getKeyToUse(item)}
         estimatedItemSize={120}
         ItemSeparatorComponent={() => (
           <View

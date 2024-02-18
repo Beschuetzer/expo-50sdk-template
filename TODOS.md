@@ -2,7 +2,7 @@
 -test item form thoroughly
 -test store form thoroughly
 
--use StoresList approach to work on ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
+finish ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
 
 -convert ShoppingList to use Flashlist
 -Figure out how to style the shopping list tile

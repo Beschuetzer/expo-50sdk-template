@@ -62,6 +62,12 @@ export enum StoreSpecificValueKey {
   Price = 'price',
   Quantity = 'quantity',
 }
+
+/**
+ *Maps the item key to the store specific values
+ **/
+export type StoreSpecificValuesMap = { [key: string]: StoreSpecificValues }
+
 /**
  *These are fields which vary based on the store
  **/

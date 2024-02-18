@@ -17,6 +17,7 @@ import {
   StoreList,
   StoreSpecificValueKey,
   StoreSpecificValues,
+  StoreSpecificValuesMap,
 } from '@/types/Item'
 import { GpsCoordinate, Store } from '@/types/Store'
 import { ListNameProp } from '@/types/general'
@@ -24,6 +25,7 @@ import {
   calculateDistance,
   displayAlert,
   getEmptyList,
+  getEmptyObject,
   getFilteredList,
   getItemFromList,
   getKeyToUse,
@@ -93,6 +95,7 @@ export type ListsState = {
   [ListName.LastPurchasedList]: LastPurchasedList
   [ListName.ShoppingLIst]: ShoppingList
   [ListName.StoresList]: StoreList
+  storeSpecificValuesMap: StoreSpecificValuesMap
 }
 
 const initialState: ListsState = {
@@ -102,6 +105,7 @@ const initialState: ListsState = {
   [ListName.LastPurchasedList]: getEmptyList(),
   [ListName.ShoppingLIst]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
+  storeSpecificValuesMap: getEmptyObject(),
 }
 //#endregion
 
@@ -126,16 +130,10 @@ export const listsSlice = createSlice({
 
       const currentItem = getItemFromList(state.itemsList.data, keyToUse) as any
       const newItem = { ...item } as any
-      const itemToUse = currentItem || newItem
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
-        for (const [valueName, value] of Object.entries(storeSpecificValues)) {
-          itemToUse[valueName] = {
-            ...itemToUse?.[valueName],
-            [currentStore.name]: value?.[currentStore.name],
-          }
-        }
+        state.storeSpecificValuesMap[keyToUse] = storeSpecificValues
       }
 
       if (!currentItem) {
@@ -450,6 +448,23 @@ export const itemsListItemSelector = (id: string) =>
     [(state: RootState) => state[listsSlice.name].itemsList.data],
     (itemsList) => {
       return getItemFromList(itemsList, id)
+    },
+  )
+
+export const itemsListWithStoreSpecificValuesSelector = (id: string) =>
+  createSelector(
+    [
+      (state: RootState) => state[listsSlice.name].itemsList.data,
+      (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
+    ],
+    (itemsListData, storeSpecificValuesMap) => {
+      const itemToUse = getItemFromList(itemsListData, id)
+      const storeSpecificValuesToUse = storeSpecificValuesMap[id]
+
+      return {
+        ...itemToUse,
+        ...storeSpecificValuesToUse,
+      } as ItemWithStoreSpecificValues
     },
   )
 

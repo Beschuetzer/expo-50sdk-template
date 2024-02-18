@@ -15,7 +15,7 @@ import {
   WEEK_IN_MS,
 } from '@/constants/general'
 import { ItemWithStoreSpecificValues, Key, List } from '@/types/Item'
-import { GpsCoordinate } from '@/types/Store'
+import { GpsCoordinate, Store } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
 import { Frequency, TimeSpan } from '@/types/general'
 
@@ -178,6 +178,19 @@ export function getImagesFromUpcProduct(upcProduct?: UpcProduct | null) {
   return Object.values(IMAGE_PRIORITY_MAPPING).map(
     (key) => upcProduct?.[key] || EMPTY_STRING,
   )
+}
+
+export function getStoreWithDistance(
+  store: Store,
+  currentLocation: GpsCoordinate | null,
+) {
+  return {
+    ...store,
+    calculatedDistance: calculateDistance(
+      store.gpsCoordinates,
+      currentLocation,
+    ),
+  }
 }
 
 export async function captureImage() {

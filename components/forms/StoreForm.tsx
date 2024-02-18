@@ -55,11 +55,11 @@ export function StoreForm(props: StoreFormProps) {
   }
 
   function onSavePress() {
-    const itmeToSave = {
+    const itemToSave = {
       name: storeName,
       gpsCoordinates,
     } as Store
-    onSave && onSave(itmeToSave)
+    onSave && onSave(itemToSave)
     onClose && onClose()
   }
 
@@ -94,7 +94,7 @@ export function StoreForm(props: StoreFormProps) {
           <InputValidationMessage
             isValid={
               !getItemFromList(storesList.data, {
-                name: store || EMPTY_STRING,
+                name: storeName || EMPTY_STRING,
                 upc: EMPTY_STRING,
               })
             }

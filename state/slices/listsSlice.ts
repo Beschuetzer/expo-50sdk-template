@@ -26,6 +26,7 @@ import {
   getFilteredList,
   getItemFromList,
   getKeyToUse,
+  getStoreWithDistance,
 } from '@/utils/helpers'
 
 export enum ListName {
@@ -166,19 +167,21 @@ export const listsSlice = createSlice({
         return
       }
 
-      if (
-        state.storesList.data.find((store) => {
-          return store.name === keyToUse
-        })
+      console.log({ storesList: state.storesList.data, store })
+      const storeIndex = state.storesList.data.findIndex(
+        (store) => store.name === keyToUse,
       )
-        return
-      state.storesList.data.push({
-        ...store,
-        calculatedDistance: calculateDistance(
-          store.gpsCoordinates,
+
+      if (storeIndex !== -1) {
+        state.storesList.data[storeIndex] = getStoreWithDistance(
+          store,
           state.currentLocation,
-        ),
-      })
+        )
+        return
+      }
+      state.storesList.data.push(
+        getStoreWithDistance(store, state.currentLocation),
+      )
 
       if (state.storesList.data.length === 1) {
         state.currentStoreName = store.name

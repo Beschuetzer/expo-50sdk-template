@@ -1,6 +1,7 @@
 ## MVP
--figure out StoresList addition screen where typing in form causes error
-
+-fix issue with saving custom images
+-test item form thoroughly
+-test store form thoroughly
 
 -use StoresList approach to work on ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
 

@@ -63,6 +63,10 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     }
   }, [])
 
+  useEffect(() => {
+    setFilters(list.filters)
+  }, [list])
+
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
       <Dialog.Title style={{ textAlign: 'center' }}>Filter</Dialog.Title>

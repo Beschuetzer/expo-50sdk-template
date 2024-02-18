@@ -1,5 +1,4 @@
 ## MVP
--fix ListFilter not resetting when resetListToDisplay is dispatched
 -Re-work StoresLIst and ShoppingLIst for new approach
 
 

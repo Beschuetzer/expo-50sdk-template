@@ -1,5 +1,6 @@
 ## MVP
 ShoppingList
+    --create POS called storeSpecificValues and create selector called ItemWithStoreSpecificValues which is used when viewing/updating an item in itemModal modal 
     --figure out onAddItemPress (add param to route called addToShoppingList?)
     --figure out swipe right
 

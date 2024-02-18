@@ -169,7 +169,7 @@ export function ShoppingList(props: ShoppingListProps) {
                 color={theme.colors.white}
                 size={theme.sizes[8]}
               />
-              <Text color={theme.colors.white}>Shopping List</Text>
+              <Text color={theme.colors.white}>In Cart</Text>
             </Stack>
           ) : (
             <Text

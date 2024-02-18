@@ -14,6 +14,7 @@ import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
 import { ListHeaderRight } from '../header/ListHeaderRight'
+import { useUpdatedListTitle } from '../hooks/useUpdateListTitle'
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
@@ -53,6 +54,7 @@ export function StoresList(props: StoresListProps) {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const lastSortTypeRef = useRef(storesListSortTypes[0])
   const menuRef = useRef<Menu>(null)
+  useUpdatedListTitle({ list: storesList, title: 'Stores List' })
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close()
@@ -117,7 +119,6 @@ export function StoresList(props: StoresListProps) {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddStorePress} />,
-      headerTitle: `Stores List${Object.keys(storesList.filters || {}).length > 0 ? ' (filtered)' : ''}`,
     })
   }, [navigation])
 

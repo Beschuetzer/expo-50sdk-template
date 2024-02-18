@@ -164,14 +164,14 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   }
 }
 
-export function getItemFromList(list: Key[], key: string | Key) {
+export function getItemFromList<T extends Key>(list: T[], key: string | Key) {
   const keyToUse = getKeyToUse(key)
   const itemFound =
     list.find((item) => {
       if (item?.name && item?.upc) return item.upc === keyToUse
       return item?.name === keyToUse
     }) || null
-  return itemFound ? (itemFound as ItemWithStoreSpecificValues) : null
+  return itemFound ? (itemFound as T) : null
 }
 
 export function getImagesFromUpcProduct(upcProduct?: UpcProduct | null) {

@@ -35,7 +35,7 @@ import {
 export enum ListName {
   ItemsList = 'itemsList',
   LastPurchasedList = 'lastPurchasedList',
-  ShoppingLIst = 'shoppingLIst',
+  ShoppingList = 'shoppingLIst',
   StoresList = 'storesList',
 }
 
@@ -93,7 +93,7 @@ export type ListsState = {
   currentStoreName: string
   [ListName.ItemsList]: ItemsList
   [ListName.LastPurchasedList]: LastPurchasedList
-  [ListName.ShoppingLIst]: ShoppingList
+  [ListName.ShoppingList]: ShoppingList
   [ListName.StoresList]: StoreList
   storeSpecificValuesMap: StoreSpecificValuesMap
 }
@@ -103,7 +103,7 @@ const initialState: ListsState = {
   currentStoreName: EMPTY_STRING,
   [ListName.ItemsList]: getEmptyList(),
   [ListName.LastPurchasedList]: getEmptyList(),
-  [ListName.ShoppingLIst]: getEmptyList(),
+  [ListName.ShoppingList]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
   storeSpecificValuesMap: getEmptyObject(),
 }
@@ -489,32 +489,68 @@ export const listToDisplaySelector = (listName: ListName) =>
     },
   )
 
+/**
+ *The way this is written, the shopping list will update when the storeList changes when really it should only change when the current store changes
+ *This may not be an issue though
+ **/
 export const shoppingListItemsSelector = createSelector(
   [
-    (state: RootState) => state[listsSlice.name].itemsList.data,
+    (state: RootState) => state[listsSlice.name][ListName.ShoppingList],
+    (state: RootState) => state[listsSlice.name][ListName.ItemsList],
+    (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
     (state: RootState) => state[listsSlice.name].storesList.data,
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
-  (itemsList, storesList, currentStoreName) => {
+  (
+    shoppingList,
+    itemsList,
+    storeSpecificValuesMap,
+    storesList,
+    currentStoreName,
+  ) => {
     const currentStore = storesList.find(
       (store) => store.name === currentStoreName,
     )
-    const shoppingList: ItemWithStoreSpecificValues[] = []
-    for (const item of Object.values(itemsList)) {
+    console.log({ shoppingList })
+    console.log({ currentStore })
+    console.log({ storeSpecificValuesMap })
+
+    if (!currentStore?.name) return []
+
+    const listToDisplay = [] as ItemWithStoreSpecificValues[]
+    for (const [key, values] of Object.entries(storeSpecificValuesMap)) {
+      console.log({ valueName: key, values })
+      const currentQuantityForItemAndStoreCombination =
+        values?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]
       if (
-        item?.[StoreSpecificValueKey.Quantity]?.[
-          currentStore?.name || EMPTY_STRING
-        ]
+        currentQuantityForItemAndStoreCombination &&
+        currentQuantityForItemAndStoreCombination > 0
       ) {
-        shoppingList.push(item)
+        const currentItem = getItemFromList(itemsList.data, key)
+        console.log({ currentItem })
+        listToDisplay.push({
+          ...currentItem,
+          ...values,
+        } as ItemWithStoreSpecificValues)
       }
     }
-    return shoppingList
+
+    const filteredList = getFilteredList<unknown>(
+      listToDisplay,
+      shoppingList.filters,
+    )
+    filteredList.sort(
+      getSorter(
+        shoppingList.sortOrderValue.sortBy,
+        shoppingList.sortOrderValue.sortOrder,
+      ),
+    )
+    return filteredList
   },
 )
 
 export const shoppingListSelector = (state: RootState) =>
-  state[listsSlice.name][ListName.ShoppingLIst]
+  state[listsSlice.name][ListName.ShoppingList]
 
 export const storesListItemSelector = (storeName: string) =>
   createSelector(

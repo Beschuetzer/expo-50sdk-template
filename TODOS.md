@@ -4,6 +4,7 @@ ShoppingList
     --figure out onAddItemPress (add param to route called addToShoppingList?)
     --figure out swipe right
     --need to remove the storeSpecificValues entry when removing an itemslist item
+    --test adding an item to shopping list them removing it from items list
 
 
 finish ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):

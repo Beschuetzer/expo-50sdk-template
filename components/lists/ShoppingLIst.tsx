@@ -42,7 +42,7 @@ const shoppingListSortTypes = [
   SortType.Frequency,
 ] as SortType[]
 
-const listName: ListName = ListName.ShoppingLIst
+const listName: ListName = ListName.ShoppingList
 export function ShoppingList(props: ShoppingListProps) {
   const navigation = useNavigation()
   const shoppingList = useSelector(shoppingListSelector)

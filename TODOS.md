@@ -1,5 +1,4 @@
 ## MVP
--fix issue with saving custom images
 -test item form thoroughly
 -test store form thoroughly
 

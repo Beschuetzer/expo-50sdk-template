@@ -1,4 +1,4 @@
-import { Stack, Text, Input, Row, useTheme, Button } from 'native-base'
+import { Stack, Input, Row, useTheme, Button } from 'native-base'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { FrequencyInput } from './FrequencyInput'
@@ -20,11 +20,7 @@ import {
   UPC_REGEX,
   UPC_REQUIRED_CHAR_LENGTH,
 } from '@/constants/regexs'
-import {
-  AddItemsListItemPayload,
-  currentStoreSelector,
-  itemsListItemSelector,
-} from '@/state/slices/listsSlice'
+import { AddItemsListItemPayload } from '@/state/slices/listsSlice'
 import { Item, StoreSpecificValues } from '@/types/Item'
 import { Store } from '@/types/Store'
 import { ItemProp } from '@/types/general'
@@ -64,7 +60,10 @@ export function ItemForm(props: ItemFormProps) {
     [item],
   )
 
-  const itemToUse = useMemo(() => itemInList || item, [item, itemInList])
+  const itemToUse = useMemo(
+    () => ({ ...(itemInList || item || ({} as Item)) }),
+    [item, itemInList],
+  )
 
   const [selectedUrl, setSelectedUrl] = useState(
     itemToUse?.images[itemToUse?.imageToUseIndex] || EMPTY_STRING,

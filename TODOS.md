@@ -1,6 +1,8 @@
 ## MVP
--test item form thoroughly
--test store form thoroughly
+ShoppingList
+    --figure out onAddItemPress (add param to route called addToShoppingList?)
+    --figure out swipe right
+
 
 finish ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
 

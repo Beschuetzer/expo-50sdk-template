@@ -14,25 +14,27 @@ import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
 import { ListHeaderRight } from '../header/ListHeaderRight'
+import { useUpdatedListTitle } from '../hooks/useUpdateListTitle'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import {
   ListName,
   currentStoreSelector,
-  removeItemsListItem,
+  removeShoppingListItem,
   setFilters,
-  shoppingListSelector,
   setSortOrder,
+  shoppingListItemsSelector,
+  shoppingListSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
-import { getFilteredList, getKeyToUse } from '@/utils/helpers'
+import { getKeyToUse } from '@/utils/helpers'
 
-type ShoppingistProps = object
+type ShoppingListProps = object
 
-const itemsListSortTypes = [
+const shoppingListSortTypes = [
   SortType.Name,
   SortType.Upc,
   SortType.AddedDate,
@@ -41,9 +43,10 @@ const itemsListSortTypes = [
 ] as SortType[]
 
 const listName: ListName = ListName.ShoppingLIst
-export function ShoppingList(props: ShoppingistProps) {
+export function ShoppingList(props: ShoppingListProps) {
   const navigation = useNavigation()
   const shoppingList = useSelector(shoppingListSelector)
+  const shoppingListToDisplay = useSelector(shoppingListItemsSelector)
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -51,10 +54,9 @@ export function ShoppingList(props: ShoppingistProps) {
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const [listToDisplay, setListToDisplay] = useState(shoppingList)
-  const shouldSortOnMountRef = useRef(true)
-  const lastSortTypeRef = useRef(itemsListSortTypes[0])
+  const lastSortTypeRef = useRef(shoppingListSortTypes[0])
   const menuRef = useRef<Menu>(null)
+  useUpdatedListTitle({ list: shoppingList, title: 'Shopping List' })
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close()
@@ -73,24 +75,16 @@ export function ShoppingList(props: ShoppingistProps) {
     setIsFilterModalOpen(true)
   }, [])
 
-  const onSortTypeChange = useCallback(
-    (sortType: SortType) => {
-      lastSortTypeRef.current = sortType
-      dispatch(setSortOrder({ listName, sortBy: sortType }))
-    },
-    [shoppingList],
-  )
+  const onSortTypeChange = useCallback((sortType: SortType) => {
+    lastSortTypeRef.current = sortType
+    dispatch(setSortOrder({ listName, sortBy: sortType }))
+  }, [])
 
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
       dispatch(setFilters({ listName, filters }))
-      const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
-        shoppingList,
-        filters,
-      )
-      setListToDisplay(filteredList)
     },
-    [shoppingList],
+    [listName],
   )
 
   const onSwipeRight = useCallback(
@@ -113,22 +107,13 @@ export function ShoppingList(props: ShoppingistProps) {
   const onSwipeLeft = useCallback(
     (key: Key) => {
       closeMenu()
-      dispatch(removeItemsListItem(key))
+      dispatch(removeShoppingListItem(key))
       listRef.current?.prepareForLayoutAnimationRender()
       // after removing the item, we start animation
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     },
     [listRef, closeMenu],
   )
-
-  useEffect(() => {
-    if (
-      Object.keys(filtersFound || {}).length !== 0 ||
-      shoppingList.length === listToDisplay.length
-    )
-      return
-    setListToDisplay(shoppingList)
-  }, [filtersFound])
 
   useEffect(() => {
     navigation.setOptions({
@@ -141,14 +126,8 @@ export function ShoppingList(props: ShoppingistProps) {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
-      headerTitle: `Shopping List${Object.keys(filtersFound || {}).length > 0 ? ' (filtered)' : ''}`,
     })
-  }, [navigation, filtersFound])
-
-  useEffect(() => {
-    shouldSortOnMountRef.current = true
-    setListToDisplay(shoppingList)
-  }, [shoppingList])
+  }, [navigation])
 
   useFocusEffect(() => {
     closeMenu()
@@ -221,7 +200,7 @@ export function ShoppingList(props: ShoppingistProps) {
             setRefreshing(false)
           }, 2000)
         }}
-        data={listToDisplay}
+        data={shoppingListToDisplay}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
@@ -235,17 +214,17 @@ export function ShoppingList(props: ShoppingistProps) {
         )}
       />
       <ListSorter
-        sortOrderValue={sortOrderValue}
+        sortOrderValue={shoppingList.sortOrderValue}
         listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
         onValueChange={onSortTypeChange}
-        sortTypes={itemsListSortTypes}
+        sortTypes={shoppingListSortTypes}
         viewSize="small"
       />
       <ListFilter
-        filtersInitial={filtersFound}
-        item={shoppingList[0]}
+        list={shoppingList}
+        listName={listName}
         filterNames={['name', 'upc']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}

@@ -22,6 +22,7 @@ import { GpsCoordinate, Store } from '@/types/Store'
 import { ListNameProp } from '@/types/general'
 import {
   calculateDistance,
+  displayAlert,
   getEmptyList,
   getFilteredList,
   getItemFromList,
@@ -220,6 +221,26 @@ export const listsSlice = createSlice({
         },
       )
     },
+    removeShoppingListItem: (state: ListsState, action: PayloadAction<Key>) => {
+      const currentItem = getItemFromList(
+        state[ListName.ItemsList].data,
+        action.payload,
+      )
+
+      if (!currentItem) {
+        displayAlert({
+          errorMessage: 'Unable to find key',
+          key: action.payload,
+        })
+        return
+      }
+
+      if (!currentItem[StoreSpecificValueKey.Quantity]) {
+        currentItem[StoreSpecificValueKey.Quantity] = {}
+      }
+
+      currentItem[StoreSpecificValueKey.Quantity][state.currentStoreName] = 0
+    },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload)
       if (!keyToUse) {
@@ -386,6 +407,7 @@ export const {
   addStoresListItem,
   removeItemsListItem,
   removeLastPurchasedListItem,
+  removeShoppingListItem,
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
@@ -448,7 +470,7 @@ export const listToDisplaySelector = (listName: ListName) =>
     },
   )
 
-export const shoppingListSelector = createSelector(
+export const shoppingListItemsSelector = createSelector(
   [
     (state: RootState) => state[listsSlice.name].itemsList.data,
     (state: RootState) => state[listsSlice.name].storesList.data,
@@ -472,8 +494,8 @@ export const shoppingListSelector = createSelector(
   },
 )
 
-export const storesListSelector = (state: RootState) =>
-  state[listsSlice.name].storesList
+export const shoppingListSelector = (state: RootState) =>
+  state[listsSlice.name][ListName.ShoppingLIst]
 
 export const storesListItemSelector = (storeName: string) =>
   createSelector(

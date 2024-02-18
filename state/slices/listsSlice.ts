@@ -23,7 +23,6 @@ import { GpsCoordinate, Store } from '@/types/Store'
 import { ListNameProp } from '@/types/general'
 import {
   calculateDistance,
-  displayAlert,
   getEmptyList,
   getEmptyObject,
   getFilteredList,
@@ -221,24 +220,37 @@ export const listsSlice = createSlice({
       )
     },
     removeShoppingListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const currentItem = getItemFromList(
-        state[ListName.ItemsList].data,
-        action.payload,
-      )
-
-      if (!currentItem) {
-        displayAlert({
-          errorMessage: 'Unable to find key',
-          key: action.payload,
-        })
+      const keyToUse = getKeyToUse(action.payload)
+      if (!state.storeSpecificValuesMap[keyToUse]) {
+        state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues
         return
       }
-
-      if (!currentItem[StoreSpecificValueKey.Quantity]) {
-        currentItem[StoreSpecificValueKey.Quantity] = {}
+      state.storeSpecificValuesMap[keyToUse] = {
+        ...((state.storeSpecificValuesMap[keyToUse] || {}) as any),
+        [StoreSpecificValueKey.Quantity]: {
+          ...(state.storeSpecificValuesMap[keyToUse]?.[
+            StoreSpecificValueKey.Quantity
+          ] || {}),
+          [state.currentStoreName]: 0,
+        },
       }
 
-      currentItem[StoreSpecificValueKey.Quantity][state.currentStoreName] = 0
+      // if (!currentValue) {
+      //   displayAlert({
+      //     errorMessage: `Unable to find value in storeSpecificValuesMap for ${keyToUse}.`,
+      //     keyToUse,
+      //   })
+      //   return
+      // }
+
+      console.log({ currentValue: state.storeSpecificValuesMap[keyToUse] })
+
+      // if (!(currentItem)?.[StoreSpecificValueKey.Quantity]) {
+      //   currentItem[StoreSpecificValueKey.Quantity] = {}
+      // }
+
+      // currentItem[StoreSpecificValueKey.Quantity][state.currentStoreName] = 0
+      // console.log({currentItemAfter: currentItem});
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload)

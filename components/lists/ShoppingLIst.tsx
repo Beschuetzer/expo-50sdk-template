@@ -150,10 +150,11 @@ export function ShoppingList(props: ShoppingListProps) {
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
               <FontAwesome
-                name="trash"
+                name="remove"
                 color={theme.colors.white}
                 size={theme.sizes[8]}
               />
+              <Text color={theme.colors.white}>Remove</Text>
             </Stack>
           ),
           backgroundColor: theme.colors.red[900],
@@ -172,7 +173,7 @@ export function ShoppingList(props: ShoppingListProps) {
                 color={theme.colors.white}
                 size={theme.sizes[8]}
               />
-              <Text color={theme.colors.white}>In Cart</Text>
+              <Text color={theme.colors.white}>To Cart</Text>
             </Stack>
           ) : (
             <Text

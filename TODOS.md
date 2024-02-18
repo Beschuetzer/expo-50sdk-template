@@ -1,9 +1,9 @@
 ## MVP
 -adjust ListFilter props to accept a List<T>
+-fix ListFilter not resetting when resetListToDisplay is dispatched
 -Re-work StoresLIst and ShoppingLIst for new approach
 
 
--add buttion "OK" and "Clear" to ListFilter and remove the debouncing
 -use StoresList approach to work on ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
 
 -convert ShoppingList to use Flashlist

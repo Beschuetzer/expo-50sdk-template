@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux'
 
 import { EllipsisButton } from './EllipsisButton'
 
-import { resetFilters } from '@/state/slices/listsSlice'
+import { resetListToDisplay } from '@/state/slices/listsSlice'
 import { ListNameProp } from '@/types/general'
 const { NotAnimatedContextMenu } = renderers
 
@@ -42,7 +42,7 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
           />
           <MenuOption
             customStyles={customOptionStyles}
-            onSelect={() => dispatch(resetFilters({ listName }))}
+            onSelect={() => dispatch(resetListToDisplay({ listName }))}
             text="Reset"
           />
         </MenuOptions>

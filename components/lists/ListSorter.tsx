@@ -8,7 +8,7 @@ import { SORT_TYPE_DESCRIPTIONS, SortType } from './sorters'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import {
-  SortListPayload,
+  SetSortOrderPayload,
   SortOrderValue,
   toggleSortOrder,
 } from '@/state/slices/listsSlice'
@@ -25,7 +25,7 @@ type ListSorterProps = {
   sortTypes: SortType[]
   viewSize?: ListSortViewSize
 } & HeadingTagProp &
-  Pick<SortListPayload, 'listName'>
+  Pick<SetSortOrderPayload, 'listName'>
 
 export function ListSorter(props: ListSorterProps) {
   const {
@@ -112,9 +112,9 @@ export function ListSorter(props: ListSorterProps) {
       <Stack mt={theme.space[1]}>
         <Text>
           Currently{' '}
-          <Text fontWeight={900}>{sortOrderValue.sortOrder.toLowerCase()}</Text> by{' '}
+          <Text fontWeight={900}>{sortOrderValue.sortOrder?.toLowerCase()}</Text> by{' '}
           <Text fontWeight={900}>
-            {SORT_TYPE_DESCRIPTIONS[sortOrderValue.sortBy].toLowerCase()}
+            {SORT_TYPE_DESCRIPTIONS[sortOrderValue.sortBy]?.toLowerCase()}
           </Text>
         </Text>
       </Stack>

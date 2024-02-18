@@ -3,7 +3,7 @@ import { XOR } from 'ts-xor'
 import { Store } from './Store'
 
 import { ListFilterFilters } from '@/components/lists/ListFilter'
-import { ListName } from '@/state/slices/listsSlice'
+import { ListName, SortOrderValue } from '@/state/slices/listsSlice'
 
 export enum ItemUnit {
   Bar = 'bar',
@@ -77,8 +77,14 @@ export type StoreSpecificValue<T> = { [storeId: string]: T } | null | undefined
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number
 }
+
+export type List<T> = {
+  data: T[]
+  sortOrderValue: SortOrderValue
+  filters: ListFilterFilters<T>
+}
 export type ListFilters = { [key in ListName]: ListFilterFilters<any> }
-export type ItemsList = ItemWithStoreSpecificValues[]
-export type ShoppingList = ItemWithStoreSpecificValues[]
-export type LastPurchasedList = LastPurchasedItem[]
-export type StoreList = Store[]
+export type ItemsList = List<ItemWithStoreSpecificValues>
+export type ShoppingList = List<ItemWithStoreSpecificValues>
+export type LastPurchasedList = List<LastPurchasedItem>
+export type StoreList = List<Store>

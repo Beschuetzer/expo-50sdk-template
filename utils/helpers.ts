@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker'
 import * as Location from 'expo-location'
 
 import { ListFilterFilters } from '@/components/lists/ListFilter'
+import { SortType, SortOrder } from '@/components/lists/sorters'
 import {
   DAY_IN_MS,
   EMPTY_STRING,
@@ -13,7 +14,7 @@ import {
   IMAGE_PRIORITY_MAPPING,
   WEEK_IN_MS,
 } from '@/constants/general'
-import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
+import { ItemWithStoreSpecificValues, Key, List } from '@/types/Item'
 import { GpsCoordinate } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
 import { Frequency, TimeSpan } from '@/types/general'
@@ -79,6 +80,17 @@ export function displayAlert(object: object | null) {
 
 export function getEmptyArray<T>() {
   return [] as T
+}
+
+export function getEmptyList<T>() {
+  return {
+    data: getEmptyArray<T>(),
+    filters: getEmptyObject<T>(),
+    sortOrderValue: {
+      sortBy: SortType.Name,
+      sortOrder: SortOrder.Ascending,
+    },
+  } as List<T>
 }
 
 export function getEmptyObject<T>() {

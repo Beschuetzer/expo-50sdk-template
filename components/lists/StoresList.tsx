@@ -24,7 +24,7 @@ import {
   removeStoresListItem,
   setCurrentStoreName,
   setFilters,
-  sortList,
+  setSortOrder,
   sortOrderSelector,
   storesListSelector,
 } from '@/state/slices/listsSlice'
@@ -74,7 +74,7 @@ export function StoresList() {
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
       lastSortTypeRef.current = sortType
-      dispatch(sortList({ listName, sortBy: sortType }))
+      dispatch(setSortOrder({ listName, sortBy: sortType }))
     },
     [storesList],
   )

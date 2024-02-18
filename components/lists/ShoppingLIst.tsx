@@ -24,8 +24,7 @@ import {
   removeItemsListItem,
   setFilters,
   shoppingListSelector,
-  sortList,
-  sortOrderSelector,
+  setSortOrder,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
@@ -80,7 +79,7 @@ export function ShoppingList(props: ShoppingistProps) {
   const onSortTypeChange = useCallback(
     (sortType: SortType) => {
       lastSortTypeRef.current = sortType
-      dispatch(sortList({ listName, sortBy: sortType }))
+      dispatch(setSortOrder({ listName, sortBy: sortType }))
     },
     [shoppingList],
   )
@@ -248,7 +247,6 @@ export function ShoppingList(props: ShoppingistProps) {
         viewSize="small"
       />
       <ListFilter
-        sortOrderValue={sortOrderValue}
         filtersInitial={filtersFound}
         item={shoppingList[0]}
         filterNames={['name', 'upc']}

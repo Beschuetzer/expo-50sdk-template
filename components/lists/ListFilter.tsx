@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Dialog from 'react-native-dialog'
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { SortOrderValue } from '@/state/slices/listsSlice'
 
 export type ListFilterFilters<T> = Partial<Record<keyof T, string>>
 
@@ -17,7 +16,6 @@ type ListFilterProps<T> = {
   onUnmount?: () => void
   onValueChange: (filters: ListFilterFilters<T>) => void
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>
-  sortOrderValue: SortOrderValue
 }
 
 export function ListFilter<T>(props: ListFilterProps<T>) {
@@ -30,7 +28,6 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     onUnmount,
     onValueChange,
     setIsVisible,
-    sortOrderValue,
   } = props
   const [filters, setFilters] = useState<ListFilterFilters<T> | null>(
     filtersInitial,
@@ -53,16 +50,11 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   )
 
   useEffect(() => {
-    setFilters(null)
-  }, [filtersInitial])
-
-  useEffect(() => {
-    if (!filters) return
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      onValueChange && onValueChange(filters)
+      onValueChange && onValueChange(filters || {})
     }, debounceTimeout)
-  }, [filters, sortOrderValue])
+  }, [filters])
 
   useEffect(() => {
     onMount && onMount()

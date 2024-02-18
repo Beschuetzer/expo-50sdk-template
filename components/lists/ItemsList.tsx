@@ -20,17 +20,16 @@ import { Routes } from '@/constants/navigation'
 import {
   ListName,
   currentStoreSelector,
-  filterSelector,
   itemsListSelector,
+  listToDisplaySelector,
   removeItemsListItem,
   setFilters,
-  sortList,
-  sortOrderSelector,
+  setSortOrder,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
-import { getFilteredList, getKeyToUse } from '@/utils/helpers'
+import { getKeyToUse } from '@/utils/helpers'
 
 type ItemsListProps = object
 
@@ -46,19 +45,21 @@ const listName: ListName = ListName.ItemsList
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation()
   const itemsList = useSelector(itemsListSelector)
-  const filtersFound = useSelector(filterSelector(listName))
+  const itemsListToDisplay = useSelector(
+    listToDisplaySelector(listName),
+  ) as ItemWithStoreSpecificValues[]
   const currentStore = useSelector(currentStoreSelector)
-  const sortOrderValue = useSelector(sortOrderSelector(listName))
   const theme = useTheme()
   const dispatch = useDispatch()
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const [listToDisplay, setListToDisplay] = useState(itemsList)
-  const shouldSortOnMountRef = useRef(true)
   const lastSortTypeRef = useRef(itemsListSortTypes[0])
   const menuRef = useRef<Menu>(null)
+
+  console.log({itemsList, itemsListToDisplay});
+  
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close()
@@ -77,24 +78,17 @@ export function ItemsList(props: ItemsListProps) {
     setIsFilterModalOpen(true)
   }, [])
 
-  const onSortTypeChange = useCallback(
-    (sortType: SortType) => {
-      lastSortTypeRef.current = sortType
-      dispatch(sortList({ listName, sortBy: sortType }))
-    },
-    [itemsList],
-  )
+  const onSortTypeChange = useCallback((sortType: SortType) => {
+    lastSortTypeRef.current = sortType
+    dispatch(setSortOrder({ listName, sortBy: sortType }))
+  }, [])
 
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<ItemWithStoreSpecificValues>) => {
+      console.log("onFilterValueChange");
       dispatch(setFilters({ listName, filters }))
-      const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
-        itemsList,
-        filters,
-      )
-      setListToDisplay(filteredList)
     },
-    [itemsList],
+    [listName],
   )
 
   const onSwipeRight = useCallback(
@@ -126,15 +120,6 @@ export function ItemsList(props: ItemsListProps) {
   )
 
   useEffect(() => {
-    if (
-      Object.keys(filtersFound || {}).length !== 0 ||
-      itemsList.length === listToDisplay.length
-    )
-      return
-    setListToDisplay(itemsList)
-  }, [filtersFound])
-
-  useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <ListHeaderRight
@@ -145,14 +130,9 @@ export function ItemsList(props: ItemsListProps) {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
-      headerTitle: `Items List${Object.keys(filtersFound || {}).length > 0 ? ' (filtered)' : ''}`,
+      headerTitle: `Items List${Object.keys(itemsList.filters || {}).length > 0 ? ' (filtered)' : ''}`,
     })
-  }, [navigation, filtersFound])
-
-  useEffect(() => {
-    shouldSortOnMountRef.current = true
-    setListToDisplay(itemsList)
-  }, [itemsList])
+  }, [navigation])
 
   useFocusEffect(() => {
     closeMenu()
@@ -225,7 +205,7 @@ export function ItemsList(props: ItemsListProps) {
             setRefreshing(false)
           }, 2000)
         }}
-        data={listToDisplay}
+        data={itemsListToDisplay}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
@@ -239,7 +219,7 @@ export function ItemsList(props: ItemsListProps) {
         )}
       />
       <ListSorter
-        sortOrderValue={sortOrderValue}
+        sortOrderValue={itemsList.sortOrderValue}
         listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}
@@ -248,9 +228,8 @@ export function ItemsList(props: ItemsListProps) {
         viewSize="small"
       />
       <ListFilter
-        sortOrderValue={sortOrderValue}
-        filtersInitial={filtersFound}
-        item={itemsList[0]}
+        filtersInitial={itemsList.filters}
+        item={itemsList.data[0]}
         filterNames={['name', 'upc']}
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}

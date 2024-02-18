@@ -13,7 +13,6 @@ import {
   Key,
   LastPurchasedItem,
   LastPurchasedList,
-  ListFilters,
   ShoppingList,
   StoreList,
   StoreSpecificValueKey,
@@ -23,8 +22,9 @@ import { GpsCoordinate, Store } from '@/types/Store'
 import { ListNameProp } from '@/types/general'
 import {
   calculateDistance,
-  getEmptyArray,
+  getEmptyList,
   getEmptyObject,
+  getFilteredList,
   getItemFromList,
   getKeyToUse,
 } from '@/utils/helpers'
@@ -54,11 +54,11 @@ export type SetFiltersPayload = {
   filters: ListFilterFilters<any>
 } & ListNameProp
 
-export type SortListPayload = {
-  sortBy: SortType
-} & ListNameProp
+export type SetSortOrderPayload = object &
+  ListNameProp &
+  Pick<SortOrderValue, 'sortBy'>
 
-export type ToggleSortOrderPayload = Pick<SortListPayload, 'listName'>
+export type ToggleSortOrderPayload = Pick<SetSortOrderPayload, 'listName'>
 
 export type UpdateStoreSpecificValuesPayload = {
   /**
@@ -86,40 +86,19 @@ const CURRENT_LOCATION_INITIAL = null
 export type ListsState = {
   currentLocation: GpsCoordinate | null
   currentStoreName: string
-  filters: ListFilters
   [ListName.ItemsList]: ItemsList
   [ListName.LastPurchasedList]: LastPurchasedList
   [ListName.ShoppingLIst]: ShoppingList
   [ListName.StoresList]: StoreList
-  sortOrders: SortOrders
 }
 
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
-  filters: getEmptyObject(),
-  [ListName.ItemsList]: getEmptyArray(),
-  [ListName.LastPurchasedList]: getEmptyArray(),
-  [ListName.ShoppingLIst]: getEmptyArray(),
-  [ListName.StoresList]: getEmptyArray(),
-  sortOrders: {
-    [ListName.ItemsList]: {
-      sortBy: SortType.Name,
-      sortOrder: SortOrder.Ascending,
-    },
-    [ListName.LastPurchasedList]: {
-      sortBy: SortType.Name,
-      sortOrder: SortOrder.Ascending,
-    },
-    [ListName.ShoppingLIst]: {
-      sortBy: SortType.Name,
-      sortOrder: SortOrder.Ascending,
-    },
-    [ListName.StoresList]: {
-      sortBy: SortType.Name,
-      sortOrder: SortOrder.Ascending,
-    },
-  },
+  [ListName.ItemsList]: getEmptyList(),
+  [ListName.LastPurchasedList]: getEmptyList(),
+  [ListName.ShoppingLIst]: getEmptyList(),
+  [ListName.StoresList]: getEmptyList(),
 }
 //#endregion
 
@@ -142,7 +121,7 @@ export const listsSlice = createSlice({
         return
       }
 
-      const currentItem = getItemFromList(state.itemsList, keyToUse) as any
+      const currentItem = getItemFromList(state.itemsList.data, keyToUse) as any
       const newItem = { ...item } as any
       const itemToUse = currentItem || newItem
 
@@ -157,12 +136,7 @@ export const listsSlice = createSlice({
       }
 
       if (!currentItem) {
-        state.itemsList.push(newItem)
-        state.itemsList = [
-          ...state.itemsList.sort(
-            getSorter(state.sortOrders[ListName.ItemsList].sortBy),
-          ),
-        ]
+        state.itemsList.data.push(newItem)
       } else {
         for (const [key, value] of Object.entries(item)) {
           currentItem[key] = value
@@ -194,23 +168,20 @@ export const listsSlice = createSlice({
       }
 
       if (
-        state.storesList.find((store) => {
+        state.storesList.data.find((store) => {
           return store.name === keyToUse
         })
       )
         return
-      state.storesList.push({
+      state.storesList.data.push({
         ...store,
         calculatedDistance: calculateDistance(
           store.gpsCoordinates,
           state.currentLocation,
         ),
       })
-      state.storesList.sort(
-        getSorter(state.sortOrders[ListName.StoresList].sortBy),
-      )
 
-      if (state.storesList.length === 1) {
+      if (state.storesList.data.length === 1) {
         state.currentStoreName = store.name
       }
     },
@@ -222,12 +193,12 @@ export const listsSlice = createSlice({
         )
         return
       }
-      state.itemsList = state.itemsList.filter((item) => {
+      state.itemsList.data = state.itemsList.data.filter((item) => {
         if (item.upc && item.name) return item.upc !== keyToUse
         return item.name !== keyToUse
       })
     },
-    removeLastPurchasedList: (
+    removeLastPurchasedListItem: (
       state: ListsState,
       action: PayloadAction<Key>,
     ) => {
@@ -238,10 +209,12 @@ export const listsSlice = createSlice({
         )
         return
       }
-      state.lastPurchasedList = state.lastPurchasedList.filter((item) => {
-        if (item.upc && item.name) return item.upc !== keyToUse
-        return item.name !== keyToUse
-      })
+      state.lastPurchasedList.data = state.lastPurchasedList.data.filter(
+        (item) => {
+          if (item.upc && item.name) return item.upc !== keyToUse
+          return item.name !== keyToUse
+        },
+      )
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload)
@@ -251,35 +224,35 @@ export const listsSlice = createSlice({
         )
         return
       }
-      state.storesList = state.storesList.filter(
+      state.storesList.data = state.storesList.data.filter(
         (store) => store.name !== keyToUse,
       )
     },
     resetCurrentLocation: (state: ListsState) => {
       state.currentLocation = CURRENT_LOCATION_INITIAL
-      for (const store of state.storesList) {
+      for (const store of state.storesList.data) {
         store.calculatedDistance = -1
       }
     },
-    resetFilters: (
+    resetListToDisplay: (
       state: ListsState,
       action: PayloadAction<ResetFiltersPayload>,
     ) => {
       const { listName } = action.payload
       if (!listName) return
-      state.filters = {
-        ...state.filters,
-        [listName]: getEmptyObject(),
-      }
+      const emptyList = getEmptyList<any>()
+      emptyList.data = state[listName].data
+      state[listName] = emptyList
+      console.log({list: state[listName]});
     },
     resetItemsList: (state: ListsState) => {
-      state.itemsList = getEmptyArray()
+      state.itemsList = getEmptyList()
     },
     resetLastPurchasedList: (state: ListsState) => {
-      state.lastPurchasedList = getEmptyArray()
+      state.lastPurchasedList = getEmptyList()
     },
     resetStoresList: (state: ListsState) => {
-      state.storesList = getEmptyArray()
+      state.storesList = getEmptyList()
       state.currentStoreName = EMPTY_STRING
     },
     resetCurrentStoreName: (state: ListsState) => {
@@ -291,7 +264,7 @@ export const listsSlice = createSlice({
     ) => {
       if (!action.payload) return
       state.currentLocation = action.payload
-      for (const store of state.storesList) {
+      for (const store of state.storesList.data) {
         store.calculatedDistance = calculateDistance(
           state.currentLocation,
           store.gpsCoordinates,
@@ -321,9 +294,12 @@ export const listsSlice = createSlice({
         }
       }
 
-      state.filters[listName] = filters
+      state[listName].filters = filters
     },
-    sortList: (state: ListsState, action: PayloadAction<SortListPayload>) => {
+    setSortOrder: (
+      state: ListsState,
+      action: PayloadAction<SetSortOrderPayload>,
+    ) => {
       const { listName, sortBy = SortType.Name } = action.payload
       const listToSort = state[listName]
 
@@ -331,16 +307,15 @@ export const listsSlice = createSlice({
         alert(`Unable to find a list with name of '${listName}'.`)
         return
       }
-      listToSort?.sort(getSorter(sortBy, state.sortOrders[listName].sortOrder))
+      listToSort.data?.sort(
+        getSorter(sortBy, state[listName].sortOrderValue.sortOrder),
+      )
 
-      if (!state.sortOrders[listName]) return
+      if (!state[listName].sortOrderValue.sortOrder) return
 
-      state.sortOrders = {
-        ...state.sortOrders,
-        [listName]: {
-          ...state.sortOrders[listName],
-          sortBy,
-        },
+      state[listName].sortOrderValue = {
+        sortBy,
+        sortOrder: state[listName].sortOrderValue.sortOrder,
       }
     },
     toggleSortOrder: (
@@ -348,26 +323,14 @@ export const listsSlice = createSlice({
       action: PayloadAction<ToggleSortOrderPayload>,
     ) => {
       const { listName } = action.payload
-      const listToSort = state[listName]
 
-      if (!state.sortOrders[listName]) return
+      if (!state[listName].sortOrderValue) return
       const sortOrder =
-        state.sortOrders[listName]?.sortOrder === SortOrder.Ascending
+        state[listName].sortOrderValue?.sortOrder === SortOrder.Ascending
           ? SortOrder.Descending
           : SortOrder.Ascending
-      if (listToSort) {
-        listToSort?.sort(
-          getSorter(state.sortOrders[listName].sortBy, sortOrder),
-        )
-      }
 
-      state.sortOrders = {
-        ...state.sortOrders,
-        [listName]: {
-          ...state.sortOrders[listName],
-          sortOrder,
-        },
-      }
+      state[listName].sortOrderValue.sortOrder = sortOrder
     },
     updateStoreSpecificValues: (
       state: ListsState,
@@ -376,7 +339,10 @@ export const listsSlice = createSlice({
       if (!action.payload) return
       const { storeSpecificValuesToUpdate, key } = action.payload
       const keyToUse = getKeyToUse(key)
-      const itemToUpdate = getItemFromList(state.itemsList, keyToUse) as any
+      const itemToUpdate = getItemFromList(
+        state.itemsList.data,
+        keyToUse,
+      ) as any
       if (!itemToUpdate || !storeSpecificValuesToUpdate) {
         alert(
           `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
@@ -405,18 +371,18 @@ export const {
   addMockItems,
   addStoresListItem,
   removeItemsListItem,
-  removeLastPurchasedList,
+  removeLastPurchasedListItem: removeLastPurchasedList,
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
-  resetFilters,
+  resetListToDisplay,
   resetItemsList,
   resetLastPurchasedList,
   resetStoresList,
   setCurrentLocation,
   setCurrentStoreName,
   setFilters,
-  sortList,
+  setSortOrder,
   toggleSortOrder,
   updateStoreSpecificValues,
 } = listsSlice.actions
@@ -428,7 +394,7 @@ export const currentLocationSelector = (state: RootState) =>
 
 export const currentStoreSelector = createSelector(
   [
-    (state: RootState) => state[listsSlice.name].storesList,
+    (state: RootState) => state[listsSlice.name].storesList.data,
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (storesList, currentStoreName) => {
@@ -452,19 +418,33 @@ export const filterSelector = (listName: ListName) =>
 
 export const itemsListItemSelector = (id: string) =>
   createSelector(
-    [(state: RootState) => state[listsSlice.name].itemsList],
+    [(state: RootState) => state[listsSlice.name].itemsList.data],
     (itemsList) => {
       return getItemFromList(itemsList, id)
     },
   )
 
 export const itemsListSelector = (state: RootState) =>
-  state[listsSlice.name].itemsList
+  state[listsSlice.name][ListName.ItemsList]
+
+export const listToDisplaySelector = (listName: ListName) =>
+  createSelector(
+    [(state: RootState) => state[listsSlice.name]?.[listName]],
+    (list) => {
+      const { filters, sortOrderValue, data } = list
+      console.log({ data, filters, sortOrderValue })
+      const filteredList = getFilteredList<unknown>(data, filters)
+      filteredList.sort(
+        getSorter(sortOrderValue.sortBy, sortOrderValue.sortOrder),
+      )
+      return filteredList
+    },
+  )
 
 export const shoppingListSelector = createSelector(
   [
-    (state: RootState) => state[listsSlice.name].itemsList,
-    (state: RootState) => state[listsSlice.name].storesList,
+    (state: RootState) => state[listsSlice.name].itemsList.data,
+    (state: RootState) => state[listsSlice.name].storesList.data,
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (itemsList, storesList, currentStoreName) => {
@@ -485,30 +465,12 @@ export const shoppingListSelector = createSelector(
   },
 )
 
-export const sortOrdersSelector = (state: RootState) =>
-  state[listsSlice.name].sortOrders
-
-export const sortOrderSelector = (listName: ListName) =>
-  createSelector(
-    [(state: RootState) => state[listsSlice.name].sortOrders],
-    (sortOrders) => {
-      return sortOrders[listName]
-    },
-  )
-
 export const storesListSelector = (state: RootState) =>
-  state[listsSlice.name].storesList
-
-export const storesListArraySelector = createSelector(
-  [(state: RootState) => state[listsSlice.name].storesList],
-  (storesList) => {
-    return Object.values(storesList)
-  },
-)
+  state[listsSlice.name].storesList.data
 
 export const storesListItemSelector = (storeName: string) =>
   createSelector(
-    [(state: RootState) => state[listsSlice.name].storesList],
+    [(state: RootState) => state[listsSlice.name].storesList.data],
     (storesList) => {
       return storesList?.find((store) => store.name === storeName) as Store
     },

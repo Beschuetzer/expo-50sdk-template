@@ -372,11 +372,7 @@ export const listsSlice = createSlice({
       if (!action.payload) return
       const { storeSpecificValuesToUpdate, key } = action.payload
       const keyToUse = getKeyToUse(key)
-      const itemToUpdate = getItemFromList(
-        state.itemsList.data,
-        keyToUse,
-      ) as any
-      if (!itemToUpdate || !storeSpecificValuesToUpdate) {
+      if (!keyToUse || !storeSpecificValuesToUpdate) {
         alert(
           `A key, storeName, and storeSpecificValuesToUpdate must be provided in order to update an item.`,
         )
@@ -386,11 +382,11 @@ export const listsSlice = createSlice({
       for (const [valueName, value] of Object.entries(
         storeSpecificValuesToUpdate,
       )) {
-        itemToUpdate[valueName] = {
-          ...itemToUpdate[valueName],
-          [state.currentStoreName]: value(
-            itemToUpdate[valueName][state.currentStoreName],
-          ),
+        const currentItem = state.storeSpecificValuesMap?.[keyToUse] as any
+        const currentValue = currentItem?.[valueName]?.[state.currentStoreName]
+        const newValue = value?.(currentValue)
+        if (currentItem && valueName && newValue) {
+          currentItem[valueName][state.currentStoreName] = newValue
         }
       }
     },

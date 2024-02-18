@@ -56,7 +56,10 @@ export function ShoppingList(props: ShoppingListProps) {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const lastSortTypeRef = useRef(shoppingListSortTypes[0])
   const menuRef = useRef<Menu>(null)
-  useUpdatedListTitle({ list: shoppingList, title: 'Shopping List' })
+  useUpdatedListTitle({
+    list: shoppingList,
+    title: `Shopping List for ${currentStore.name}`,
+  })
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close()

@@ -200,6 +200,7 @@ export const listsSlice = createSlice({
         if (item.upc && item.name) return item.upc !== keyToUse
         return item.name !== keyToUse
       })
+      state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues
     },
     removeLastPurchasedListItem: (
       state: ListsState,
@@ -527,7 +528,7 @@ export const shoppingListItemsSelector = createSelector(
         currentQuantityForItemAndStoreCombination > 0
       ) {
         const currentItem = getItemFromList(itemsList.data, key)
-        console.log({ currentItem })
+        if (!currentItem) continue
         listToDisplay.push({
           ...currentItem,
           ...values,
@@ -535,6 +536,7 @@ export const shoppingListItemsSelector = createSelector(
       }
     }
 
+    console.log({ listToDisplayPopulated: listToDisplay })
     const filteredList = getFilteredList<unknown>(
       listToDisplay,
       shoppingList.filters,

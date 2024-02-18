@@ -1,10 +1,11 @@
 ## MVP
 ShoppingList
+    --figure out swipe right (remove the quantity for storeSpecific value for the key and change label to remove or icon for remove)
     --create POS called storeSpecificValues and create selector called ItemWithStoreSpecificValues which is used when viewing/updating an item in itemModal modal 
     --figure out onAddItemPress (add param to route called addToShoppingList?)
-    --figure out swipe right
     --need to remove the storeSpecificValues entry when removing an itemslist item
     --test adding an item to shopping list them removing it from items list
+    --stores list is broken (fix)
 
 
 finish ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):

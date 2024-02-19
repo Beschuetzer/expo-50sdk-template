@@ -1,5 +1,7 @@
 ## MVP
 ShoppingList
+    --adding an item from shopping list not working correctly (try just image and then just upc; it recognizes as same it for some reason)
+    --adding custom images not working with items that already have images?
     --figure out how adding to cart look and works (how to sort and filter too?)
 
 

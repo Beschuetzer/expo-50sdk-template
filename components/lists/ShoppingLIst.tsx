@@ -16,7 +16,7 @@ import { AddButton } from '../header/AddButton'
 import { ListHeaderRight } from '../header/ListHeaderRight'
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle'
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import {
   ListName,
@@ -67,7 +67,11 @@ export function ShoppingList(props: ShoppingListProps) {
 
   function onAddItemPress() {
     closeMenu()
-    navigation.navigate(Routes.ItemModal, { showBlank: true, callerList: ListName.ShoppingList })
+    navigation.navigate(Routes.ItemModal, {
+      showBlank: true,
+      callerList: ListName.ShoppingList,
+      key: EMPTY_STRING,
+    })
   }
 
   const onSortPress = useCallback(() => {

@@ -1,6 +1,6 @@
 export enum Routes {
   DevOptionsScreen = "DevOptionsScreen",
-  ItemModal = "ItemModal",
+  ItemModal = "itemModal",
   ItemsScreen = "ItemsScreen",
   OptionsScreen = "OptionsScreen",
   ScannerScreen = "ScannerScreen",

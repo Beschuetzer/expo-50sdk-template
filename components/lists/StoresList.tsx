@@ -25,8 +25,8 @@ import {
   removeStoresListItem,
   setFilters,
   setSortOrder,
-  storesListSelector,
   setCurrentStoreName,
+  storesListSelector,
 } from '@/state/slices/listsSlice'
 import { Key } from '@/types/Item'
 import { Store } from '@/types/Store'

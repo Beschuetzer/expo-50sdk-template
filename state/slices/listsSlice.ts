@@ -543,6 +543,9 @@ export const shoppingListItemsSelector = createSelector(
 export const shoppingListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.ShoppingList]
 
+export const storesListSelector = (state: RootState) =>
+  state[listsSlice.name][ListName.StoresList]
+
 export const storesListItemSelector = (storeName: string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].storesList.data],

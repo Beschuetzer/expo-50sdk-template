@@ -1,6 +1,6 @@
 ## MVP
 ShoppingList
-    --stores list is broken (fix)
+    --figure out how adding to cart look and works (how to sort and filter too?)
 
 
 finish ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):

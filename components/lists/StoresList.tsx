@@ -97,8 +97,6 @@ export function StoresList(props: StoresListProps) {
     (keyToUse: Key) => {
       closeMenu()
       dispatch(removeStoresListItem(keyToUse))
-      listRef.current?.prepareForLayoutAnimationRender()
-      // after removing the item, we start animation
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     },
     [listRef, closeMenu],

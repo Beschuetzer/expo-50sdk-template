@@ -111,8 +111,6 @@ export function ShoppingList(props: ShoppingListProps) {
     (key: Key) => {
       closeMenu()
       dispatch(removeShoppingListItem(key))
-      listRef.current?.prepareForLayoutAnimationRender()
-      // after removing the item, we start animation
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     },
     [listRef, closeMenu],

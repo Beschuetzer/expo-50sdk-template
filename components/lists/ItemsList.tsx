@@ -110,8 +110,6 @@ export function ItemsList(props: ItemsListProps) {
     (key: Key) => {
       closeMenu()
       dispatch(removeItemsListItem(key))
-      listRef.current?.prepareForLayoutAnimationRender()
-      // after removing the item, we start animation
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     },
     [listRef, closeMenu],

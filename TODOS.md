@@ -1,7 +1,5 @@
 ## MVP
 ShoppingList
-    --need to remove the storeSpecificValues entry when removing an itemslist item
-    --test adding an item to shopping list them removing it from items list
     --stores list is broken (fix)
 
 

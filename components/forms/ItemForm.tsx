@@ -212,7 +212,7 @@ export function ItemForm(props: ItemFormProps) {
         />
         <InputValidationMessage
           isValid={isUpcValid}
-          message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${upcValue.length} chars)`}
+          message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} or ${UPC_REQUIRED_CHAR_LENGTH + 1} numbers (currently ${upcValue.length})`}
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>

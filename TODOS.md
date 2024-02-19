@@ -1,7 +1,5 @@
 ## MVP
 ShoppingList
-    --create POS called storeSpecificValues and create selector called ItemWithStoreSpecificValues which is used when viewing/updating an item in itemModal modal 
-    --figure out onAddItemPress (add param to route called addToShoppingList?)
     --need to remove the storeSpecificValues entry when removing an itemslist item
     --test adding an item to shopping list them removing it from items list
     --stores list is broken (fix)

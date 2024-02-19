@@ -46,7 +46,7 @@ const listName: ListName = ListName.ShoppingList
 export function ShoppingList(props: ShoppingListProps) {
   const navigation = useNavigation()
   const shoppingList = useSelector(shoppingListSelector)
-  const shoppingListToDisplay = useSelector(shoppingListItemsSelector)
+  const shoppingListToDisplay = useSelector(shoppingListItemsSelector) as Item[]
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -67,7 +67,7 @@ export function ShoppingList(props: ShoppingListProps) {
 
   function onAddItemPress() {
     closeMenu()
-    navigation.navigate(Routes.ItemModal, { showBlank: true })
+    navigation.navigate(Routes.ItemModal, { showBlank: true, callerList: ListName.ShoppingList })
   }
 
   const onSortPress = useCallback(() => {

@@ -31,24 +31,27 @@ type ItemFormValdation = {
   message: string
 }
 
-type ItemFormProps = {
+export type ItemFormProps = {
   itemInListUsingName?: Item | null
   itemInList?: Item | null
   currentStore?: Store
   onClose: () => void
   onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void
   showOverrideMsg?: boolean
+  shouldAddQuantity?: boolean
 } & Partial<ItemProp>
+
 
 export function ItemForm(props: ItemFormProps) {
   const {
-    onClose,
-    onSave,
+    currentStore,
     item,
-    showOverrideMsg = true,
     itemInList,
     itemInListUsingName,
-    currentStore,
+    onClose,
+    onSave,
+    shouldAddQuantity = false,
+    showOverrideMsg = true,
   } = props
   const theme = useTheme()
   const keyToUse = useMemo(
@@ -269,6 +272,7 @@ export function ItemForm(props: ItemFormProps) {
       <ItemFormStoreSpecific
         item={itemToUse}
         onValueChange={onItemSpecificValueChange}
+        shouldAddQuantity={shouldAddQuantity}
       />
     </AbsolutePositionedScreen>
   )

@@ -234,23 +234,6 @@ export const listsSlice = createSlice({
           [state.currentStoreName]: 0,
         },
       }
-
-      // if (!currentValue) {
-      //   displayAlert({
-      //     errorMessage: `Unable to find value in storeSpecificValuesMap for ${keyToUse}.`,
-      //     keyToUse,
-      //   })
-      //   return
-      // }
-
-      console.log({ currentValue: state.storeSpecificValuesMap[keyToUse] })
-
-      // if (!(currentItem)?.[StoreSpecificValueKey.Quantity]) {
-      //   currentItem[StoreSpecificValueKey.Quantity] = {}
-      // }
-
-      // currentItem[StoreSpecificValueKey.Quantity][state.currentStoreName] = 0
-      // console.log({currentItemAfter: currentItem});
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload)
@@ -524,15 +507,10 @@ export const shoppingListItemsSelector = createSelector(
     const currentStore = storesList.find(
       (store) => store.name === currentStoreName,
     )
-    console.log({ shoppingList })
-    console.log({ currentStore })
-    console.log({ storeSpecificValuesMap })
-
     if (!currentStore?.name) return []
 
     const listToDisplay = [] as ItemWithStoreSpecificValues[]
     for (const [key, values] of Object.entries(storeSpecificValuesMap)) {
-      console.log({ valueName: key, values })
       const currentQuantityForItemAndStoreCombination =
         values?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]
       if (
@@ -548,7 +526,6 @@ export const shoppingListItemsSelector = createSelector(
       }
     }
 
-    console.log({ listToDisplayPopulated: listToDisplay })
     const filteredList = getFilteredList<unknown>(
       listToDisplay,
       shoppingList.filters,

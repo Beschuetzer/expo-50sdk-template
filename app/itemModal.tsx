@@ -10,6 +10,7 @@ import { useUpcProduct } from '@/components/hooks/useUpcProduct'
 import { EMPTY_STRING } from '@/constants/general'
 import {
   AddItemsListItemPayload,
+  ListName,
   addItemsListItem,
   currentStoreSelector,
   itemsListItemSelector,
@@ -25,6 +26,7 @@ export default function ItemModal() {
     key,
     showOverrideMsg,
     showBlank = false,
+    callerList,
   } = (route.params || {}) as any
   const { upcProduct, errorMsg } = useUpcProduct({
     upc: key,
@@ -74,6 +76,7 @@ export default function ItemModal() {
         itemInList={itemInList}
         currentStore={currentStore}
         showOverrideMsg={showOverrideMsg}
+        shouldAddQuantity={callerList === ListName.ShoppingList}
       />
     )
   }

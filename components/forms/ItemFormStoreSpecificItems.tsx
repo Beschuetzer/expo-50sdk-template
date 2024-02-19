@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { InputText } from './InputText'
+import { ItemFormProps } from './ItemForm'
 
 import {
   EMPTY_NUMBER,
@@ -17,12 +18,13 @@ import { StoreSpecificValues } from '@/types/Item'
 import { ItemProp } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
-type ItemFormProps = {
+type ItemFormStoreSpecificProps = {
   onValueChange: (storeSpecificValues: StoreSpecificValues) => void
-} & Partial<ItemProp>
+} & Partial<ItemProp> &
+  Pick<ItemFormProps, 'shouldAddQuantity'>
 
-export function ItemFormStoreSpecific(props: ItemFormProps) {
-  const { item, onValueChange } = props
+export function ItemFormStoreSpecific(props: ItemFormStoreSpecificProps) {
+  const { item, onValueChange, shouldAddQuantity } = props
   const theme = useTheme()
   const keyToUse = useMemo(
     () =>
@@ -37,19 +39,11 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
     itemsListWithStoreSpecificValuesSelector(keyToUse),
   )
 
-  //if adding new state, be sure to update in useEffect below too.
-  const [aisle, setAisle] = useState(
-    itemInList?.aisle?.[currentStore.name] || EMPTY_STRING,
-  )
-  const [itemId, setItemId] = useState(
-    itemInList?.itemId?.[currentStore.name] || EMPTY_STRING,
-  )
-  const [price, setPrice] = useState(
-    itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING,
-  )
-  const [quantity, setQuantity] = useState(
-    itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER,
-  )
+  //initial values are set in useEffect below
+  const [aisle, setAisle] = useState(EMPTY_STRING)
+  const [itemId, setItemId] = useState(EMPTY_STRING)
+  const [price, setPrice] = useState(EMPTY_STRING)
+  const [quantity, setQuantity] = useState(EMPTY_NUMBER)
 
   useEffect(() => {
     if (!currentStore?.name) return
@@ -74,7 +68,10 @@ export function ItemFormStoreSpecific(props: ItemFormProps) {
     setAisle(itemInList?.aisle?.[currentStore.name] || EMPTY_STRING)
     setItemId(itemInList?.itemId?.[currentStore.name] || EMPTY_STRING)
     setPrice(itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING)
-    setQuantity(itemInList?.quantity?.[currentStore.name] || EMPTY_NUMBER)
+    setQuantity(
+      itemInList?.quantity?.[currentStore.name] ||
+        (shouldAddQuantity ? 1 : EMPTY_NUMBER),
+    )
   }, [currentStore])
 
   if (!currentStore.name) return null

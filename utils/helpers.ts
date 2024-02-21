@@ -10,11 +10,11 @@ import {
   EMPTY_STRING,
   FREQUENCY_INITIAL,
   HOUR_IN_MS,
-  IMAGE_PICKER_OPTIONS,
+  IMAGE_PICKER_QUALITY_INITIAL,
   IMAGE_PRIORITY_MAPPING,
   WEEK_IN_MS,
 } from '@/constants/general'
-import { ItemWithStoreSpecificValues, Key, List } from '@/types/Item'
+import { Key, List } from '@/types/Item'
 import { GpsCoordinate, Store } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
 import { Frequency, TimeSpan } from '@/types/general'
@@ -164,6 +164,16 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   }
 }
 
+export function getImagePickerOptions(quality = IMAGE_PICKER_QUALITY_INITIAL) {
+  return {
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [3, 4],
+    quality,
+    selectionLimit: 1,
+  } as ImagePicker.ImagePickerOptions
+}
+
 export function getItemFromList<T extends Key>(list: T[], key: string | Key) {
   const keyToUse = getKeyToUse(key)
   const itemFound =
@@ -195,7 +205,7 @@ export function getStoreWithDistance(
 
 export async function captureImage() {
   try {
-    const result = await ImagePicker.launchCameraAsync(IMAGE_PICKER_OPTIONS)
+    const result = await ImagePicker.launchCameraAsync(getImagePickerOptions())
 
     if (!result.canceled) {
       return result.assets[0].uri
@@ -208,8 +218,9 @@ export async function captureImage() {
 export async function pickImage() {
   try {
     // No permissions request is necessary for launching the image library
-    const result =
-      await ImagePicker.launchImageLibraryAsync(IMAGE_PICKER_OPTIONS)
+    const result = await ImagePicker.launchImageLibraryAsync(
+      getImagePickerOptions(),
+    )
 
     if (!result.canceled) {
       return result.assets[0].uri

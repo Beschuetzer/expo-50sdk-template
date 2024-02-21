@@ -1,43 +1,58 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
 
-import { RootState } from "../store";
+import { RootState } from '../store'
 
 import {
-  EMPTY_STRING,
+  IMAGE_PICKER_QUALITY_INITIAL,
   SWIPEABLE_ROW_OPEN_THRESHOLD,
-} from "@/constants/general";
+} from '@/constants/general'
 
 export type OptionsState = {
-  swipeableRowOpenThreshold: number;
-};
+  customImageQuality: number
+  swipeableRowOpenThreshold: number
+}
 
 const initialState: OptionsState = {
+  customImageQuality: IMAGE_PICKER_QUALITY_INITIAL,
   swipeableRowOpenThreshold: SWIPEABLE_ROW_OPEN_THRESHOLD,
-};
+}
 
 export const optionsSlice = createSlice({
-  name: "options",
+  name: 'options',
   initialState,
   reducers: {
+    setCustomImageQuality: (
+      state: OptionsState,
+      action: PayloadAction<OptionsState['customImageQuality']>,
+    ) => {
+      if (!action.payload) return
+      state.customImageQuality = action.payload
+    },
     setSwipeableRowOpenThreshold: (
       state: OptionsState,
-      action: PayloadAction<OptionsState["swipeableRowOpenThreshold"]>,
+      action: PayloadAction<OptionsState['swipeableRowOpenThreshold']>,
     ) => {
-      if (!action.payload) return;
-      state.swipeableRowOpenThreshold = action.payload;
+      if (!action.payload) return
+      state.swipeableRowOpenThreshold = action.payload
     },
     resetOptions: (state: OptionsState) => {
-      state = initialState;
+      state = initialState
     },
   },
-});
+})
 
 // Action creators are generated for each case reducer function
-export const { resetOptions, setSwipeableRowOpenThreshold } =
-  optionsSlice.actions;
+export const {
+  resetOptions,
+  setSwipeableRowOpenThreshold,
+  setCustomImageQuality,
+} = optionsSlice.actions
+
+export const customImageQualitySelector = (state: RootState) =>
+  state[optionsSlice.name].customImageQuality
 
 export const swipeableRowOpenThresholdSelector = (state: RootState) =>
-  state[optionsSlice.name].swipeableRowOpenThreshold;
+  state[optionsSlice.name].swipeableRowOpenThreshold
 
-export default optionsSlice.reducer;
+export default optionsSlice.reducer

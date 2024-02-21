@@ -1,16 +1,6 @@
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit'
 import { useNavigation } from 'expo-router'
-import {
-  Button,
-  Row,
-  View,
-  Text,
-  FormControl,
-  Input,
-  theme,
-  useTheme,
-  Stack,
-} from 'native-base'
+import { Button, Row, FormControl, Input, useTheme, Stack } from 'native-base'
 import { useEffect, useState, useRef } from 'react'
 import { Dimensions } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -21,18 +11,21 @@ import {
   FORM_INTER_ITEM_SPACING,
   SWIPEABLE_ROW_OPEN_THRESHOLD,
 } from '@/constants/general'
+import { Routes } from '@/constants/navigation'
+import { setCurrentLocation } from '@/state/slices/listsSlice'
 import {
+  customImageQualitySelector,
   setSwipeableRowOpenThreshold,
   swipeableRowOpenThresholdSelector,
 } from '@/state/slices/optionsSlice'
 import { getGpsCoordinate } from '@/utils/helpers'
-import { setCurrentLocation } from '@/state/slices/listsSlice'
-import { Routes } from '@/constants/navigation'
+import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider'
 
 const DEBOUNCE_TIMEOUT = 500
 
 export default function OptionsScreen() {
   const openThreshhold = useSelector(swipeableRowOpenThresholdSelector)
+  const customImageQuality = useSelector(customImageQualitySelector)
   const navigation = useNavigation()
   const dispatch = useDispatch()
   const theme = useTheme()
@@ -115,6 +108,7 @@ export default function OptionsScreen() {
           isValid={Math.round(openThreshhold) < maxAllowableSwipeThreshold}
           message={`The current value will be set to ${maxAllowableSwipeThreshold}, since that is the max allowed for this device.`}
         />
+        <CustomImageQualitySlider />
       </Stack>
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Button
@@ -125,9 +119,7 @@ export default function OptionsScreen() {
         >
           Update Current Location
         </Button>
-        <Button
-          onPress={() => navigation.navigate(Routes.DevOptionsScreen)}
-        >
+        <Button onPress={() => navigation.navigate(Routes.DevOptionsScreen)}>
           Developer Options
         </Button>
       </Stack>

@@ -12,18 +12,27 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "photosPermission": "Allow $(PRODUCT_NAME) to access your photos for selecting items",
       "cameraPermission": "Allow $(PRODUCT_NAME) to access your photos for taking pictures of items",
-      "locationAlwaysAndWhenInUsePermission":"Allow $(PRODUCT_NAME) to use your location to easily create new stores"
+      "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to easily create new stores"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.FOREGROUND_SERVICE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -53,6 +62,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6914f581-20f3-47fa-a4c5-1b93ae208114"
+      }
     }
   }
 }

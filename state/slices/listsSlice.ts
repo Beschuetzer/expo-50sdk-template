@@ -112,7 +112,7 @@ export const listsSlice = createSlice({
   name: 'lists',
   initialState,
   reducers: {
-    addMockItems: (
+    setItemsList: (
       state: ListsState,
       action: PayloadAction<ListsState['itemsList']>,
     ) => {
@@ -404,7 +404,7 @@ export const listsSlice = createSlice({
 export const {
   addItemsListItem,
   addLastPurchasedList,
-  addMockItems,
+  setItemsList,
   addStoresListItem,
   removeItemsListItem,
   removeLastPurchasedListItem,

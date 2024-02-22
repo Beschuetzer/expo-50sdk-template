@@ -8,7 +8,7 @@ import { MOCKS_UPCS } from './mockUpcData'
 
 import {
   addItemsListItem,
-  addMockItems,
+  setItemsList,
   addStoresListItem,
   currentLocationSelector,
   currentStoreSelector,
@@ -173,7 +173,7 @@ export function ReduxViewer() {
                     itemsList.data.push(getRandomItem(lastUpcNumberRef.current))
                     lastUpcNumberRef.current += 1
                   }
-                  dispatch(addMockItems(itemsList))
+                  dispatch(setItemsList(itemsList))
                 }}
               >
                 Add {numberOfMockItems} items

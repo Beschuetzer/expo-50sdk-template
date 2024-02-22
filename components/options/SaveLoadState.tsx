@@ -1,28 +1,49 @@
-import { Row, useTheme, Button } from 'native-base'
-import React, { useCallback } from 'react'
-import { useSelector } from 'react-redux'
+import { FontAwesome } from '@expo/vector-icons'
+import { Row, useTheme, Stack, FormControl } from 'native-base'
+import React, { useCallback, useMemo } from 'react'
+import { TouchableOpacity } from 'react-native-gesture-handler'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { itemsListSelector } from '@/state/slices/listsSlice'
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { itemsListSelector, setItemsList } from '@/state/slices/listsSlice'
+import { loadAppStateFromFile, saveAppStateToFile } from '@/utils/helpers'
 
 type SaveLoadStateProps = object
+
+const FILE_NAMES = {
+  items: 'items'
+}
 
 export const SaveLoadState = (props: SaveLoadStateProps) => {
   const {} = props
   const theme = useTheme()
   const items = useSelector(itemsListSelector)
+  const dispatch = useDispatch();
+  const iconSize = useMemo(() => theme.sizes[6], [theme])
 
-  const onLoadItemsPress = useCallback(() => {
-    console.log('loading')
+  const onLoadItemsPress = useCallback(async () => {
+    const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items)
+    console.log({itemsLoaded});
+    dispatch(setItemsList(itemsLoaded))
+    //todo:
   }, [])
 
-  const onSaveItemsPress = useCallback(() => {
-    console.log('saving')
-  }, [])
+  const onSaveItemsPress = useCallback(async () => {
+    
+    await saveAppStateToFile(FILE_NAMES.items, items)
+  }, [items])
 
   return (
-    <Row space={theme.space[1]}>
-      <Button onPress={onLoadItemsPress}>Load Items</Button>
-      <Button onPress={onSaveItemsPress}>Save Items</Button>
-    </Row>
+    <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
+      <Row space={theme.space[5]} alignItems="center">
+        <FormControl.Label>Items:</FormControl.Label>
+        <TouchableOpacity onPress={onLoadItemsPress}>
+          <FontAwesome name="download" size={iconSize} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onSaveItemsPress}>
+          <FontAwesome name="save" size={iconSize} />
+        </TouchableOpacity>
+      </Row>
+    </Stack>
   )
 }

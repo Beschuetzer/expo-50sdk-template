@@ -20,6 +20,7 @@ import {
 } from '@/state/slices/optionsSlice'
 import { getGpsCoordinate } from '@/utils/helpers'
 import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider'
+import { SaveLoadState } from '@/components/options/SaveLoadState'
 
 const DEBOUNCE_TIMEOUT = 500
 
@@ -74,6 +75,7 @@ export default function OptionsScreen() {
       }
     >
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <SaveLoadState />
         <FormControl.Label>
           Item Row Open Threshold (default = {SWIPEABLE_ROW_OPEN_THRESHOLD}):
         </FormControl.Label>

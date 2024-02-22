@@ -271,3 +271,29 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
     console.log('Error storing image path in AsyncStorage', error)
   }
 }
+
+export async function saveAppStateToFile(fileName: string, toSave: object) {
+  try {
+    const content = JSON.stringify(toSave)
+    const filePath = `${FileSystem.documentDirectory}${fileName}.json`
+
+    await FileSystem.writeAsStringAsync(filePath, content)
+  } catch (error) {
+    displayAlert({ message: 'Error saving app state:', error })
+  }
+}
+
+export async function loadAppStateFromFile(fileName: string) {
+  try {
+    const filePath = `${FileSystem.documentDirectory}${fileName}.json`
+    const content = await FileSystem.readAsStringAsync(filePath)
+
+    if (content) {
+      const state = JSON.parse(content)
+      return state
+    }
+  } catch (error) {
+    displayAlert({ message: 'Error loading app state:', error })
+  }
+  return null
+}

@@ -29,6 +29,11 @@ export function useUpcProduct(props: UseUpcProductProps) {
     try {
       setIsLoading(true)
       setErrorMsg(null)
+
+      if (shouldMockResponse) {
+        alert('Fetching data...')
+      }
+
       const response = shouldMockResponse
         ? await handleMockResponse(upc)
         : await fetch(url)
@@ -64,7 +69,7 @@ export function useUpcProduct(props: UseUpcProductProps) {
     } else if (upc?.match(UPC_REGEX)) {
       fetchUpcData()
     }
-  }, [upc])
+  }, [upc, upcProduct])
 
   return {
     upcProduct: product,

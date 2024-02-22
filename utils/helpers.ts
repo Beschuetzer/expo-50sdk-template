@@ -278,7 +278,6 @@ export async function saveAppStateToFile(fileName: string, toSave: object) {
     const filePath = `${FileSystem.documentDirectory}${fileName}.json`
 
     await FileSystem.writeAsStringAsync(filePath, content)
-    displayAlert({ message: `Successfully saved to ${filePath}` })
   } catch (error) {
     displayAlert({ message: 'Error saving app state:', error })
   }
@@ -291,8 +290,6 @@ export async function loadAppStateFromFile(fileName: string) {
 
     if (content) {
       const state = JSON.parse(content)
-      displayAlert({ message: `Successfully loaded from ${filePath}` })
-
       return state
     }
   } catch (error) {

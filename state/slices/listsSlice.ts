@@ -326,6 +326,7 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<ListsState['itemsList']>,
     ) => {
+      if (!action.payload) return
       state.itemsList = action.payload
     },
     setSortOrder: (
@@ -354,6 +355,7 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<ListsState['storesList']>,
     ) => {
+      if (!action.payload) return
       state[ListName.StoresList] = action.payload
     },
     toggleSortOrder: (

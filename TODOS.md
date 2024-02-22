@@ -1,5 +1,4 @@
 ## MVP
--save upcData as well when saving items?
 
 
 ShoppingList

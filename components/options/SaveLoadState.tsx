@@ -1,8 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { Row, useTheme, Stack, FormControl } from 'native-base'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useDispatch, useSelector } from 'react-redux'
+
+import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import {
@@ -11,6 +13,10 @@ import {
   setStoresList,
   storesListSelector,
 } from '@/state/slices/listsSlice'
+import {
+  setUpcProducts,
+  upcProductsSelector,
+} from '@/state/slices/scannerSlice'
 import { loadAppStateFromFile, saveAppStateToFile } from '@/utils/helpers'
 
 type SaveLoadStateProps = object
@@ -18,32 +24,74 @@ type SaveLoadStateProps = object
 const FILE_NAMES = {
   items: 'items',
   stores: 'stores',
+  upcProducts: 'upcProducts',
 }
 
 export const SaveLoadState = (props: SaveLoadStateProps) => {
   const theme = useTheme()
   const items = useSelector(itemsListSelector)
+  const upcProducts = useSelector(upcProductsSelector)
   const stores = useSelector(storesListSelector)
   const dispatch = useDispatch()
   const iconSize = useMemo(() => theme.sizes[6], [theme])
+  const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
+    {},
+  )
 
   const onLoadItemsPress = useCallback(async () => {
-    const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items)
-    dispatch(setItemsList(itemsLoaded))
+    setConfirmModalProps({
+      isVisible: true,
+      message:
+        'Loading items will delete all of your current items.  Continue?',
+      onCancel: () => null,
+      onConfirm: async () => {
+        const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items)
+        const upcProducts = await loadAppStateFromFile(FILE_NAMES.upcProducts)
+        dispatch(setItemsList(itemsLoaded))
+        dispatch(setUpcProducts(upcProducts))
+        setConfirmModalProps({ isVisible: false })
+      },
+    })
   }, [])
 
   const onSaveItemsPress = useCallback(async () => {
-    await saveAppStateToFile(FILE_NAMES.items, items)
-  }, [items])
+    setConfirmModalProps({
+      isVisible: true,
+      message: 'Are you sure you wan to save items?',
+      onCancel: () => null,
+      onConfirm: async () => {
+        await saveAppStateToFile(FILE_NAMES.items, items)
+        await saveAppStateToFile(FILE_NAMES.upcProducts, upcProducts)
+        setConfirmModalProps({ isVisible: false })
+      },
+    })
+  }, [upcProducts, items])
 
   const onLoadStoresPress = useCallback(async () => {
-    const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores)
-    dispatch(setStoresList(storesLoaded))
+    setConfirmModalProps({
+      isVisible: true,
+      message:
+        'Loading stores will delete all of your current stores.  Continue?',
+      onCancel: () => null,
+      onConfirm: async () => {
+        const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores)
+        dispatch(setStoresList(storesLoaded))
+        setConfirmModalProps({ isVisible: false })
+      },
+    })
   }, [])
 
   const onSaveStoresPress = useCallback(async () => {
-    await saveAppStateToFile(FILE_NAMES.stores, stores)
-  }, [items])
+    setConfirmModalProps({
+      isVisible: true,
+      message: 'Are you sure you wan to save stores?',
+      onCancel: () => null,
+      onConfirm: async () => {
+        await saveAppStateToFile(FILE_NAMES.stores, stores)
+        setConfirmModalProps({ isVisible: false })
+      },
+    })
+  }, [stores])
 
   return (
     <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -65,6 +113,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
           <FontAwesome name="save" size={iconSize} />
         </TouchableOpacity>
       </Row>
+      <ConfirmModal {...confirmModalProps} />
     </Stack>
   )
 }

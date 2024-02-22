@@ -1,4 +1,7 @@
 ## MVP
+-save upcData as well when saving items?
+
+
 ShoppingList
     --make a name value required before submitting the form
     --add the ability to change upc for an item and have it update rather than add a new item

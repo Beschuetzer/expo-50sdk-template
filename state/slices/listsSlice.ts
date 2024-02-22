@@ -112,12 +112,6 @@ export const listsSlice = createSlice({
   name: 'lists',
   initialState,
   reducers: {
-    setItemsList: (
-      state: ListsState,
-      action: PayloadAction<ListsState['itemsList']>,
-    ) => {
-      state.itemsList = action.payload
-    },
     addItemsListItem: (
       state: ListsState,
       action: PayloadAction<AddItemsListItemPayload>,
@@ -328,6 +322,12 @@ export const listsSlice = createSlice({
 
       state[listName].filters = filters
     },
+    setItemsList: (
+      state: ListsState,
+      action: PayloadAction<ListsState['itemsList']>,
+    ) => {
+      state.itemsList = action.payload
+    },
     setSortOrder: (
       state: ListsState,
       action: PayloadAction<SetSortOrderPayload>,
@@ -349,6 +349,12 @@ export const listsSlice = createSlice({
         sortBy,
         sortOrder: state[listName].sortOrderValue.sortOrder,
       }
+    },
+    setStoresList: (
+      state: ListsState,
+      action: PayloadAction<ListsState['storesList']>,
+    ) => {
+      state[ListName.StoresList] = action.payload
     },
     toggleSortOrder: (
       state: ListsState,
@@ -420,6 +426,7 @@ export const {
   setCurrentLocation,
   setCurrentStoreName,
   setFilters,
+  setStoresList,
   setSortOrder,
   toggleSortOrder,
   updateStoreSpecificValues,

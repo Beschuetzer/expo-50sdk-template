@@ -2,7 +2,6 @@
 
 
 ShoppingList
-    --make a name value required before submitting the form
     --add the ability to change upc for an item and have it update rather than add a new item
     --adding custom images not working with items that already have images?
     --figure out how adding to cart look and works (how to sort and filter too?)

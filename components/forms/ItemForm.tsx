@@ -38,9 +38,9 @@ export type ItemFormProps = {
   onClose: () => void
   onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void
   showOverrideMsg?: boolean
+  shouldFocusFirstField?: boolean;
   shouldAddQuantity?: boolean
 } & Partial<ItemProp>
-
 
 export function ItemForm(props: ItemFormProps) {
   const {
@@ -51,6 +51,7 @@ export function ItemForm(props: ItemFormProps) {
     onClose,
     onSave,
     shouldAddQuantity = false,
+    shouldFocusFirstField = true,
     showOverrideMsg = true,
   } = props
   const theme = useTheme()
@@ -63,6 +64,7 @@ export function ItemForm(props: ItemFormProps) {
     [item],
   )
 
+  const nameRef = useRef<HTMLInputElement>(null)
   const itemToUse = useMemo(
     () => ({ ...(itemInList || item || ({} as Item)) }),
     [item, itemInList],
@@ -83,12 +85,10 @@ export function ItemForm(props: ItemFormProps) {
   )
   const storeSpecificValuesRef = useRef<StoreSpecificValues>(null)
   const formValidation: ItemFormValdation = useMemo(() => {
-    const isValid = (isUpcValid && upcValue.length > 0) || !!productNameValue
+    const isValid = !!productNameValue
     return {
       isValid,
-      message: isValid
-        ? EMPTY_STRING
-        : "A unique key must be given for each item.  Please enter either a 'Upc' or a 'Name'",
+      message: isValid ? EMPTY_STRING : 'Please enter a name',
     }
   }, [isUpcValid, upcValue, productNameValue])
   const customImagesToDeleteOnUnloadRef = useRef<string[]>([])
@@ -149,6 +149,10 @@ export function ItemForm(props: ItemFormProps) {
   }, [])
 
   useEffect(() => {
+    if (shouldFocusFirstField) {
+      nameRef.current?.focus()
+    }
+
     return () => {
       for (
         let index = 0;
@@ -172,7 +176,7 @@ export function ItemForm(props: ItemFormProps) {
         <>
           <Row space={3}>
             <Button
-              isDisabled={!formValidation.isValid}
+              isDisabled={!formValidation.isValid || !productNameValue}
               flex={1}
               onPress={onSavePress}
             >
@@ -195,6 +199,18 @@ export function ItemForm(props: ItemFormProps) {
         </>
       }
     >
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <InputText>Name</InputText>
+        <Input
+          ref={nameRef}
+          variant="outline"
+          p={theme.space[1]}
+          placeholder="Product Name"
+          value={productNameValue}
+          onChangeText={(newText) => setProductNameValue(newText)}
+          isInvalid={productNameValue.length <= 0}
+        />
+      </Stack>
       <Stack>
         <InputText>Upc</InputText>
         <Input
@@ -205,25 +221,12 @@ export function ItemForm(props: ItemFormProps) {
           value={upcValue}
           onChangeText={(newText) => setUpcValue(newText)}
           isInvalid={
-            (!UPC_REGEX.test(upcValue || EMPTY_STRING) &&
-              upcValue.length !== 0) ||
-            productNameValue.length === 0
+            !UPC_REGEX.test(upcValue || EMPTY_STRING) && upcValue.length !== 0
           }
         />
         <InputValidationMessage
           isValid={isUpcValid}
           message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} or ${UPC_REQUIRED_CHAR_LENGTH + 1} numbers (currently ${upcValue.length})`}
-        />
-      </Stack>
-      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <InputText>Name</InputText>
-        <Input
-          variant="outline"
-          p={theme.space[1]}
-          placeholder="Product Name"
-          value={productNameValue}
-          onChangeText={(newText) => setProductNameValue(newText)}
-          isInvalid={productNameValue.length <= 0}
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>

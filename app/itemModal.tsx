@@ -76,6 +76,7 @@ export default function ItemModal() {
         itemInList={itemInList}
         currentStore={currentStore}
         showOverrideMsg={showOverrideMsg}
+        shouldFocusFirstField={!itemInList && !itemInListUsingName}
         shouldAddQuantity={callerList === ListName.ShoppingList}
       />
     )

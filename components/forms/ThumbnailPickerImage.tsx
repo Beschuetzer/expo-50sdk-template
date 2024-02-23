@@ -1,18 +1,28 @@
-import { View } from 'native-base'
+import { View, useTheme } from 'native-base'
 import { TouchableOpacity } from 'react-native'
 
 import { ImageRenderer } from '../ImageRenderer'
 
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+
 type ThumbnailPickerImageProps = {
   borderColor: string
   imageUrl: string
+  index: number
   onPress: (imageUrl: string) => void
 }
 
 export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
-  const { imageUrl, borderColor, onPress } = props
+  const { imageUrl, index, borderColor, onPress } = props
+  const theme = useTheme()
+
   return (
-    <View key={imageUrl} borderWidth={2} borderColor={borderColor}>
+    <View
+      ml={index > 0 ? theme.space[FORM_INTER_ITEM_SPACING] / 4 : 0}
+      key={imageUrl}
+      borderWidth={2}
+      borderColor={borderColor}
+    >
       <TouchableOpacity onPress={() => onPress && onPress(imageUrl)}>
         <ImageRenderer
           source={imageUrl}

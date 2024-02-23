@@ -1,5 +1,5 @@
 ## MVP
-
+-need to delete custom images on item removal
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item
@@ -19,7 +19,6 @@ finish ShoppingList and lastPurchasedList (using array and all the reducers/sele
 -if sorting with 500+ items is slow, may need to rethink data structure for lists (make array and save the sort type (would need to add .None as an option too))
 
 -Custom thumbnail images:
-    --use FlatList do make the images array be scrollable
     --add ability to long press an image which enters delete mode (trash bin show up in headerRight)
 
 -Store details should have a way to view all of the isles and sort them in order

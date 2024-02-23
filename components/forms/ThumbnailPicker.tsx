@@ -2,6 +2,7 @@ import { FontAwesome } from '@expo/vector-icons'
 import { Center, Column, Row, theme } from 'native-base'
 import { useCallback, useMemo, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
+import { FlatList } from 'react-native-gesture-handler'
 
 import { ThumbnailPickerImage } from './ThumbnailPickerImage'
 import { useIsDarkMode } from '../hooks/useIsDarkTheme'
@@ -19,7 +20,7 @@ type ThumbnailPickerProps = {
   SpacingProp
 
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
-  const { imagesToRender, selectedUrl, onSelectImage, style, spacing } = props
+  const { imagesToRender, selectedUrl, onSelectImage, spacing } = props
   const [customImageUri, setCustomImageUri] = useState(
     selectedUrl?.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
   )
@@ -52,8 +53,11 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
 
   return (
     <Column mt={spacing}>
-      <Row space={spacing} style={style}>
-        {Array.from(imagesToRender.add(customImageUri)).map((imageUrl) => {
+      <FlatList
+        horizontal
+        data={Array.from(imagesToRender.add(customImageUri))}
+        renderItem={(item) => {
+          const imageUrl = item.item
           if (!imageUrl) return null
 
           const isSelected = imageUrl === selectedUrl
@@ -67,10 +71,11 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
               borderColor={borderColor}
               imageUrl={imageUrl}
               onPress={(imageUrl) => handleSelect(imageUrl)}
+              index={item.index}
             />
           )
-        })}
-      </Row>
+        }}
+      />
       <Row space={spacing} mt={spacing}>
         <TouchableOpacity onPress={() => getCustomImage(captureImage)}>
           <Center borderColor={modeColor} width={75} height={50}>

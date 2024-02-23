@@ -38,7 +38,7 @@ export type ItemFormProps = {
   onClose: () => void
   onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void
   showOverrideMsg?: boolean
-  shouldFocusFirstField?: boolean;
+  shouldFocusFirstField?: boolean
   shouldAddQuantity?: boolean
 } & Partial<ItemProp>
 
@@ -116,7 +116,7 @@ export function ItemForm(props: ItemFormProps) {
     } as Item
 
     if (!itemToSave.images.includes(selectedUrl)) {
-      itemToSave.images.push(selectedUrl)
+      itemToSave.images = [...itemToSave.images, selectedUrl]
       itemToSave.imageToUseIndex = itemToSave.images.length - 1
     }
 

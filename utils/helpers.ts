@@ -14,6 +14,7 @@ import {
   IMAGE_PRIORITY_MAPPING,
   WEEK_IN_MS,
 } from '@/constants/general'
+import { LOCAL_FILE_REGEX } from '@/constants/regexs'
 import { Key, List } from '@/types/Item'
 import { GpsCoordinate, Store } from '@/types/Store'
 import { UpcProduct } from '@/types/UpcResponse'
@@ -60,6 +61,16 @@ export async function delay(ms: number) {
       resolve(null)
     }, ms)
   })
+}
+
+export async function deleteImages(imageUrls: string[]) {
+  for (const imageUrl of imageUrls) {
+    if (!imageUrl.match(LOCAL_FILE_REGEX)) {
+      continue
+    }
+    console.log('deleting ' + imageUrl)
+    deleteFile(imageUrl)
+  }
 }
 
 export async function deleteFile(path: string) {
@@ -273,7 +284,7 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
 }
 
 export async function saveAppStateToFile(fileName: string, toSave: object) {
-  try {
+  try {    
     const content = JSON.stringify(toSave)
     const filePath = `${FileSystem.documentDirectory}${fileName}.json`
 

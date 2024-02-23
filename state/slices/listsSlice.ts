@@ -23,6 +23,7 @@ import { GpsCoordinate, Store } from '@/types/Store'
 import { ListNameProp } from '@/types/general'
 import {
   calculateDistance,
+  deleteImages,
   getEmptyList,
   getEmptyObject,
   getFilteredList,
@@ -192,9 +193,20 @@ export const listsSlice = createSlice({
         )
         return
       }
+
       state.itemsList.data = state.itemsList.data.filter((item) => {
-        if (item.upc && item.name) return item.upc !== keyToUse
-        return item.name !== keyToUse
+        if (item.upc && item.name) {
+          const isMatch = item.upc !== keyToUse
+          if (!isMatch) {
+            deleteImages(item.images)
+          }
+          return isMatch
+        }
+        const isMatch = item.name !== keyToUse
+        if (!isMatch) {
+          deleteImages(item.images)
+        }
+        return isMatch
       })
       state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues
     },

@@ -1,5 +1,5 @@
 ## MVP
--need to delete custom images on item removal
+
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item

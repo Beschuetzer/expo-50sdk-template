@@ -25,7 +25,8 @@ import {
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey,
 } from '@/types/Item'
-import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers'
+import { calculateDistance, displayAlert, getEmptyList, getImagesFromUpcProduct } from '@/utils/helpers'
+import { ThumbnailPicker } from '../forms/ThumbnailPicker'
 
 const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500
 const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000
@@ -71,9 +72,7 @@ export function ReduxViewer() {
             )}
             {renderFieldAndText("Selected Image", selectedUrl)} */}
             {/* <ThumbnailPicker
-              upcProduct={item}
-              setSelectedUrl={setSelectedUrl}
-              selectedUrl={selectedUrl}
+              imagesToRender={new Set(getImagesFromUpcProduct(item))}
             /> */}
           </View>
         )

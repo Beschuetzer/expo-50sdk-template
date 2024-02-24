@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
 import { useFocusEffect, useNavigation } from 'expo-router'
-import { Text, useTheme, Stack } from 'native-base'
+import { Text, useTheme, Stack, Heading } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation } from 'react-native'
 import { FlatList } from 'react-native-gesture-handler'
@@ -201,14 +201,18 @@ export function ShoppingList(props: ShoppingListProps) {
           }, 2000)
         }}
         ListHeaderComponent={
-          <FlatList
-            data={itemsInCart}
-            renderItem={(itemToRender) => {
-              const { item } = itemToRender
-              return <ItemTile item={item} />
-            }}
-            ItemSeparatorComponent={() => <ListItemSeparator />}
-          />
+          <Stack backgroundColor={theme.colors.white} justifyContent={'center'}>
+            <Heading marginLeft={'auto'} marginRight={'auto'}>In Cart</Heading>
+            <FlatList
+              data={itemsInCart}
+              renderItem={(itemToRender) => {
+                const { item } = itemToRender
+                return <ItemTile item={item} />
+              }}
+              ItemSeparatorComponent={() => <ListItemSeparator />}
+            />
+            <Heading>Shopping List</Heading>
+          </Stack>
         }
         data={shoppingListToDisplay}
         renderItem={renderItem}

@@ -4,12 +4,13 @@ import { SceneMap, TabView } from 'react-native-tab-view'
 import { useDispatch } from 'react-redux'
 
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation'
+import { ItemsList } from '@/components/lists/ItemsList'
 import { ShoppingList } from '@/components/lists/ShoppingLIst'
 import { setCurrentLocation } from '@/state/slices/listsSlice'
 
 const renderScene = SceneMap({
   first: () => <ShoppingList />,
-  // second: () => <ItemsList />,
+  second: () => <ItemsList />,
 })
 
 export default function TabOneScreen() {

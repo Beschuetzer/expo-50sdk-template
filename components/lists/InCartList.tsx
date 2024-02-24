@@ -21,10 +21,9 @@ import {
   ListName,
   addItemToCart,
   currentStoreSelector,
+  inCartListSelector,
   removeShoppingListItem,
   setSortOrder,
-  shoppingListItemsSelector,
-  shoppingListSelector,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
@@ -43,8 +42,7 @@ const shoppingListSortTypes = [
 const listName: ListName = ListName.InCartList
 export function InCartList(props: InCartListProps) {
   const navigation = useNavigation()
-  const shoppingList = useSelector(shoppingListSelector)
-  const shoppingListToDisplay = useSelector(shoppingListItemsSelector)
+  const inCartList = useSelector(inCartListSelector)
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
@@ -179,7 +177,7 @@ export function InCartList(props: InCartListProps) {
             setRefreshing(false)
           }, 2000)
         }}
-        data={shoppingListToDisplay}
+        data={inCartList.data}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
@@ -188,7 +186,7 @@ export function InCartList(props: InCartListProps) {
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />
       <ListSorter
-        sortOrderValue={shoppingList.sortOrderValue}
+        sortOrderValue={inCartList.sortOrderValue}
         listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}

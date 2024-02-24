@@ -306,6 +306,9 @@ export const listsSlice = createSlice({
       emptyList.sortOrderValue = state[listName].sortOrderValue
       state[listName] = emptyList
     },
+    resetInCartList: (state: ListsState) => {
+      state[ListName.InCartList] = getEmptyList()
+    },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyList()
     },
@@ -356,6 +359,13 @@ export const listsSlice = createSlice({
       }
 
       state[listName].filters = filters
+    },
+    setInCartList: (
+      state: ListsState,
+      action: PayloadAction<ListsState['inCartList']>,
+    ) => {
+      if (!action.payload) return
+      state[ListName.InCartList] = action.payload
     },
     setItemsList: (
       state: ListsState,
@@ -462,6 +472,7 @@ export const {
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
+  resetInCartList,
   resetItemsList,
   resetLastPurchasedList,
   resetListToDisplay,
@@ -469,6 +480,7 @@ export const {
   resetStoresList,
   setCurrentLocation,
   setCurrentStoreName,
+  setInCartList,
   setFilters,
   setItemsList,
   setSortOrder,

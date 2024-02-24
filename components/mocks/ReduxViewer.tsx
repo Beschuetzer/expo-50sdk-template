@@ -16,6 +16,7 @@ import {
   resetCurrentStoreName,
   resetItemsList,
   resetStoresList,
+  resetInCartList,
 } from '@/state/slices/listsSlice'
 import {
   resetUpcProducts,
@@ -25,8 +26,7 @@ import {
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey,
 } from '@/types/Item'
-import { calculateDistance, displayAlert, getEmptyList, getImagesFromUpcProduct } from '@/utils/helpers'
-import { ThumbnailPicker } from '../forms/ThumbnailPicker'
+import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers'
 
 const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500
 const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000
@@ -89,9 +89,10 @@ export function ReduxViewer() {
                 onPress={() => {
                   lastUpcIndexRef.current = 0
                   dispatch(resetItemsList())
+                  dispatch(resetInCartList())
                 }}
               >
-                itemsList
+                Lists
               </Button>
               <Button onPress={() => dispatch(resetCurrentLocation())}>
                 currentLocation

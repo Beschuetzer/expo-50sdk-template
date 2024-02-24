@@ -8,7 +8,9 @@ import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal'
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import {
+  inCartListSelector,
   itemsListSelector,
+  setInCartList,
   setItemsList,
   setStoresList,
   setStoreSpecificValues,
@@ -25,6 +27,7 @@ type SaveLoadStateProps = object
 
 const FILE_NAMES = {
   items: 'items',
+  inCart: 'inCart',
   stores: 'stores',
   storeSpecificValues: 'storeSpecificValues',
   upcProducts: 'upcProducts',
@@ -32,7 +35,8 @@ const FILE_NAMES = {
 
 export const SaveLoadState = (props: SaveLoadStateProps) => {
   const theme = useTheme()
-  const items = useSelector(itemsListSelector)
+  const itemsList = useSelector(itemsListSelector)
+  const inCartList = useSelector(inCartListSelector)
   const storeSpecificValues = useSelector(storeSpecificValuesSelector)
   const upcProducts = useSelector(upcProductsSelector)
   const stores = useSelector(storesListSelector)
@@ -53,7 +57,9 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         const storeSpecificValues = await loadAppStateFromFile(
           FILE_NAMES.storeSpecificValues,
         )
+        const inCartList = await loadAppStateFromFile(FILE_NAMES.inCart)
         const upcProducts = await loadAppStateFromFile(FILE_NAMES.upcProducts)
+        dispatch(setInCartList(inCartList))
         dispatch(setStoreSpecificValues(storeSpecificValues))
         dispatch(setItemsList(itemsLoaded))
         dispatch(setUpcProducts(upcProducts))
@@ -68,7 +74,8 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       message: 'Are you sure you wan to save items?',
       onCancel: () => null,
       onConfirm: async () => {
-        await saveAppStateToFile(FILE_NAMES.items, items)
+        await saveAppStateToFile(FILE_NAMES.items, itemsList)
+        await saveAppStateToFile(FILE_NAMES.inCart, inCartList)
         await saveAppStateToFile(
           FILE_NAMES.storeSpecificValues,
           storeSpecificValues,
@@ -77,7 +84,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         setConfirmModalProps({ isVisible: false })
       },
     })
-  }, [upcProducts, items])
+  }, [upcProducts, itemsList])
 
   const onLoadStoresPress = useCallback(async () => {
     setConfirmModalProps({

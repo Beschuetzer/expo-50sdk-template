@@ -11,7 +11,9 @@ import {
   itemsListSelector,
   setItemsList,
   setStoresList,
+  setStoreSpecificValues,
   storesListSelector,
+  storeSpecificValuesSelector,
 } from '@/state/slices/listsSlice'
 import {
   setUpcProducts,
@@ -24,12 +26,14 @@ type SaveLoadStateProps = object
 const FILE_NAMES = {
   items: 'items',
   stores: 'stores',
+  storeSpecificValues: 'storeSpecificValues',
   upcProducts: 'upcProducts',
 }
 
 export const SaveLoadState = (props: SaveLoadStateProps) => {
   const theme = useTheme()
   const items = useSelector(itemsListSelector)
+  const storeSpecificValues = useSelector(storeSpecificValuesSelector)
   const upcProducts = useSelector(upcProductsSelector)
   const stores = useSelector(storesListSelector)
   const dispatch = useDispatch()
@@ -46,7 +50,11 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       onCancel: () => null,
       onConfirm: async () => {
         const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items)
+        const storeSpecificValues = await loadAppStateFromFile(
+          FILE_NAMES.storeSpecificValues,
+        )
         const upcProducts = await loadAppStateFromFile(FILE_NAMES.upcProducts)
+        dispatch(setStoreSpecificValues(storeSpecificValues))
         dispatch(setItemsList(itemsLoaded))
         dispatch(setUpcProducts(upcProducts))
         setConfirmModalProps({ isVisible: false })
@@ -61,6 +69,10 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       onCancel: () => null,
       onConfirm: async () => {
         await saveAppStateToFile(FILE_NAMES.items, items)
+        await saveAppStateToFile(
+          FILE_NAMES.storeSpecificValues,
+          storeSpecificValues,
+        )
         await saveAppStateToFile(FILE_NAMES.upcProducts, upcProducts)
         setConfirmModalProps({ isVisible: false })
       },

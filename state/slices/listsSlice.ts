@@ -370,6 +370,13 @@ export const listsSlice = createSlice({
       if (!action.payload) return
       state[ListName.StoresList] = action.payload
     },
+    setStoreSpecificValues: (
+      state: ListsState,
+      action: PayloadAction<ListsState['storeSpecificValuesMap']>,
+    ) => {
+      if (!action.payload) return
+      state.storeSpecificValuesMap = action.payload
+    },
     toggleSortOrder: (
       state: ListsState,
       action: PayloadAction<ToggleSortOrderPayload>,
@@ -424,7 +431,6 @@ export const listsSlice = createSlice({
 export const {
   addItemsListItem,
   addLastPurchasedList,
-  setItemsList,
   addStoresListItem,
   removeItemsListItem,
   removeLastPurchasedListItem,
@@ -432,16 +438,18 @@ export const {
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
-  resetListToDisplay,
-  resetListToDisplayFilters,
   resetItemsList,
   resetLastPurchasedList,
+  resetListToDisplay,
+  resetListToDisplayFilters,
   resetStoresList,
   setCurrentLocation,
   setCurrentStoreName,
   setFilters,
-  setStoresList,
+  setItemsList,
   setSortOrder,
+  setStoresList,
+  setStoreSpecificValues,
   toggleSortOrder,
   updateStoreSpecificValues,
 } = listsSlice.actions
@@ -577,3 +585,6 @@ export const storesListItemSelector = (storeName: string) =>
       return storesList?.find((store) => store.name === storeName) as Store
     },
   )
+
+export const storeSpecificValuesSelector = (state: RootState) =>
+  state[listsSlice.name].storeSpecificValuesMap

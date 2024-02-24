@@ -18,8 +18,8 @@ import { ListNameProp } from '@/types/general'
 const { NotAnimatedContextMenu } = renderers
 
 type ListHeaderRightProps = {
-  onSortPress: () => void
-  onFilterPress: () => void
+  onSortPress?: () => void
+  onFilterPress?: () => void
 } & ListNameProp
 export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
   (props, ref) => {
@@ -30,16 +30,20 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
       <Menu renderer={NotAnimatedContextMenu} ref={ref}>
         <MenuTrigger children={<EllipsisButton />} />
         <MenuOptions customStyles={customMenuOptionsStyle}>
-          <MenuOption
-            customStyles={customOptionStyles}
-            onSelect={onSortPress}
-            text="Sort"
-          />
-          <MenuOption
-            customStyles={customOptionStyles}
-            onSelect={onFilterPress}
-            text="Filter"
-          />
+          {onSortPress ? (
+            <MenuOption
+              customStyles={customOptionStyles}
+              onSelect={onSortPress}
+              text="Sort"
+            />
+          ) : null}
+          {onFilterPress ? (
+            <MenuOption
+              customStyles={customOptionStyles}
+              onSelect={onFilterPress}
+              text="Filter"
+            />
+          ) : null}
           <MenuOption
             customStyles={customOptionStyles}
             onSelect={() => dispatch(resetListToDisplay({ listName }))}

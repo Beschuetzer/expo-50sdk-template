@@ -499,6 +499,9 @@ export const currentStoreSelector = createSelector(
   },
 )
 
+export const inCartListSelector = (state: RootState) =>
+  state[listsSlice.name][ListName.InCartList]
+
 export const itemsListItemSelector = (id: string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].itemsList.data],

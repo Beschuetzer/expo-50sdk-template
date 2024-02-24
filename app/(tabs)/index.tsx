@@ -1,16 +1,17 @@
+import { View } from 'native-base'
 import { useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { SceneMap, TabView } from 'react-native-tab-view'
 import { useDispatch } from 'react-redux'
 
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation'
-import { ItemsList } from '@/components/lists/ItemsList'
+import { InCartList } from '@/components/lists/InCartList'
 import { ShoppingList } from '@/components/lists/ShoppingLIst'
 import { setCurrentLocation } from '@/state/slices/listsSlice'
 
 const renderScene = SceneMap({
   first: () => <ShoppingList />,
-  second: () => <ItemsList />,
+  second: () => <InCartList />,
 })
 
 export default function TabOneScreen() {
@@ -24,7 +25,7 @@ export default function TabOneScreen() {
 
   const [index, setIndex] = useState(0)
   const [routes] = useState([
-    { key: 'first', title: 'Shopping' },
+    { key: 'first', title: 'Need' },
     { key: 'second', title: 'In Cart' },
   ])
 

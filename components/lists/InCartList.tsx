@@ -30,7 +30,7 @@ import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
-type ShoppingListProps = object
+type InCartListProps = object
 
 const shoppingListSortTypes = [
   SortType.Name,
@@ -40,8 +40,8 @@ const shoppingListSortTypes = [
   SortType.Frequency,
 ] as SortType[]
 
-const listName: ListName = ListName.ShoppingList
-export function ShoppingList(props: ShoppingListProps) {
+const listName: ListName = ListName.InCartList
+export function InCartList(props: InCartListProps) {
   const navigation = useNavigation()
   const shoppingList = useSelector(shoppingListSelector)
   const shoppingListToDisplay = useSelector(shoppingListItemsSelector)

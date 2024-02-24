@@ -61,6 +61,7 @@ export enum StoreSpecificValueKey {
   ItemId = 'itemId',
   Price = 'price',
   Quantity = 'quantity',
+  IsInCart = 'isInCart',
 }
 
 /**
@@ -73,6 +74,7 @@ export type StoreSpecificValuesMap = { [key: string]: StoreSpecificValues }
  **/
 export type StoreSpecificValues = {
   [StoreSpecificValueKey.Aisle]: StoreSpecificValue<string>
+  [StoreSpecificValueKey.IsInCart]: StoreSpecificValue<boolean>
   [StoreSpecificValueKey.ItemId]: StoreSpecificValue<string>
   [StoreSpecificValueKey.Price]: StoreSpecificValue<number>
   [StoreSpecificValueKey.Quantity]: StoreSpecificValue<number>

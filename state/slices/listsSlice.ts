@@ -153,7 +153,12 @@ export const listsSlice = createSlice({
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
-        state.storeSpecificValuesMap[keyToUse] = storeSpecificValues
+        state.storeSpecificValuesMap[keyToUse] = {
+          ...storeSpecificValues,
+          isInCart: {
+            [state.currentStoreName]: false,
+          },
+        }
       }
 
       if (!currentItem) {
@@ -582,6 +587,13 @@ export const shoppingListItemsSelector = createSelector(
 
     const listToDisplay = [] as ItemWithStoreSpecificValues[]
     for (const [key, values] of Object.entries(storeSpecificValuesMap)) {
+      const isInCartForCurrentStore =
+        values?.[StoreSpecificValueKey.IsInCart]?.[currentStore.name]
+      console.log({ isInCartForCurrentStore })
+
+      //todo: this will vary depending on list name given
+      if (isInCartForCurrentStore) continue
+
       const currentQuantityForItemAndStoreCombination =
         values?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]
       if (

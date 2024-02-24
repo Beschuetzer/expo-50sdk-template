@@ -1,5 +1,6 @@
 ## MVP
-
+-remove InCart list and all things associated with it
+-generalize shoppingListItemsSelector to take in a listname (and use in shopping list and incart list)
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item

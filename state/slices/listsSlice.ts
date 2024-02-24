@@ -558,7 +558,7 @@ export const shoppingListItemsSelector = createSelector(
       }
     }
 
-    const filteredList = getFilteredList<unknown>(
+    const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
       listToDisplay,
       shoppingList.filters,
     )

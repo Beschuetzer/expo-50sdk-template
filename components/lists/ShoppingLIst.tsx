@@ -1,10 +1,9 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
 import { useFocusEffect, useNavigation } from 'expo-router'
-import { Text, useTheme, Stack, Heading } from 'native-base'
+import { Text, useTheme, Stack } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { LayoutAnimation } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler'
 import { Menu } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -29,7 +28,7 @@ import {
   shoppingListItemsSelector,
   shoppingListSelector,
 } from '@/state/slices/listsSlice'
-import { Item, Key } from '@/types/Item'
+import { Item, ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
 import { getKeyToUse } from '@/utils/helpers'
 
@@ -47,15 +46,14 @@ const listName: ListName = ListName.ShoppingList
 export function ShoppingList(props: ShoppingListProps) {
   const navigation = useNavigation()
   const shoppingList = useSelector(shoppingListSelector)
-  const shoppingListToDisplay = useSelector(shoppingListItemsSelector) as Item[]
+  const shoppingListToDisplay = useSelector(shoppingListItemsSelector)
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
-  const listRef = useRef<FlashList<Item> | null>(null)
+  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const [itemsInCart, setItemsInCart] = useState<Item[]>([])
   const lastSortTypeRef = useRef(shoppingListSortTypes[0])
   const menuRef = useRef<Menu>(null)
   useUpdatedListTitle({
@@ -97,10 +95,11 @@ export function ShoppingList(props: ShoppingListProps) {
   )
 
   const onSwipeRight = useCallback(
-    (item: Item) => {
+    (item: ItemWithStoreSpecificValues) => {
       closeMenu()
       setRefreshing(false)
-      setItemsInCart((current) => [...current, item])
+      //todo: add this in redux
+      // dispatch(addItemToCart((current) => [...current, item])
     },
     [closeMenu],
   )
@@ -132,7 +131,7 @@ export function ShoppingList(props: ShoppingListProps) {
     closeMenu()
   })
 
-  function renderItem({ item, index }: ListRow<Item>) {
+  function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const key = {
       name: item.name,
       upc: item.upc,
@@ -200,23 +199,11 @@ export function ShoppingList(props: ShoppingListProps) {
             setRefreshing(false)
           }, 2000)
         }}
-        ListHeaderComponent={
-          <Stack backgroundColor={theme.colors.white} justifyContent={'center'}>
-            <Heading marginLeft={'auto'} marginRight={'auto'}>In Cart</Heading>
-            <FlatList
-              data={itemsInCart}
-              renderItem={(itemToRender) => {
-                const { item } = itemToRender
-                return <ItemTile item={item} />
-              }}
-              ItemSeparatorComponent={() => <ListItemSeparator />}
-            />
-            <Heading>Shopping List</Heading>
-          </Stack>
-        }
         data={shoppingListToDisplay}
         renderItem={renderItem}
-        keyExtractor={(item: Item, index: number) => getKeyToUse(item)}
+        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
+          getKeyToUse(item)
+        }
         estimatedItemSize={120}
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />

@@ -1,14 +1,16 @@
 import { FontAwesome } from '@expo/vector-icons'
 import { FlashList } from '@shopify/flash-list'
 import { useFocusEffect, useNavigation } from 'expo-router'
-import { View, Text, useTheme, Stack } from 'native-base'
+import { Text, useTheme, Stack } from 'native-base'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { LayoutAnimation, StyleSheet } from 'react-native'
+import { LayoutAnimation } from 'react-native'
+import { FlatList } from 'react-native-gesture-handler'
 import { Menu } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
 import { ListFilter, ListFilterFilters } from './ListFilter'
+import { ListItemSeparator } from './ListItemSeparator'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
@@ -26,7 +28,6 @@ import {
   setSortOrder,
   shoppingListItemsSelector,
   shoppingListSelector,
-  updateStoreSpecificValues,
 } from '@/state/slices/listsSlice'
 import { Item, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
@@ -54,6 +55,7 @@ export function ShoppingList(props: ShoppingListProps) {
   const [refreshing, setRefreshing] = useState(false)
   const [isSortModalOpen, setIsSortModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+  const [itemsInCart, setItemsInCart] = useState<Item[]>([])
   const lastSortTypeRef = useRef(shoppingListSortTypes[0])
   const menuRef = useRef<Menu>(null)
   useUpdatedListTitle({
@@ -95,18 +97,10 @@ export function ShoppingList(props: ShoppingListProps) {
   )
 
   const onSwipeRight = useCallback(
-    (key: Key) => {
+    (item: Item) => {
       closeMenu()
       setRefreshing(false)
-      dispatch(
-        updateStoreSpecificValues({
-          key,
-          storeSpecificValuesToUpdate: {
-            quantity: (currentQuantity: number) =>
-              currentQuantity > 0 ? currentQuantity + 1 : 1,
-          },
-        }),
-      )
+      setItemsInCart((current) => [...current, item])
     },
     [closeMenu],
   )
@@ -164,7 +158,7 @@ export function ShoppingList(props: ShoppingListProps) {
         }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
-          onPress: onSwipeRight.bind(null, key),
+          onPress: onSwipeRight.bind(null, item),
           title: currentStore.name ? (
             <Stack
               paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
@@ -206,16 +200,21 @@ export function ShoppingList(props: ShoppingListProps) {
             setRefreshing(false)
           }, 2000)
         }}
+        ListHeaderComponent={
+          <FlatList
+            data={itemsInCart}
+            renderItem={(itemToRender) => {
+              const { item } = itemToRender
+              return <ItemTile item={item} />
+            }}
+            ItemSeparatorComponent={() => <ListItemSeparator />}
+          />
+        }
         data={shoppingListToDisplay}
         renderItem={renderItem}
         keyExtractor={(item: Item, index: number) => getKeyToUse(item)}
         estimatedItemSize={120}
-        ItemSeparatorComponent={() => (
-          <View
-            height={StyleSheet.hairlineWidth}
-            backgroundColor={theme.colors.gray[500]}
-          />
-        )}
+        ItemSeparatorComponent={() => <ListItemSeparator />}
       />
       <ListSorter
         sortOrderValue={shoppingList.sortOrderValue}

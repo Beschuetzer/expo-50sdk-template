@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
 import { ListFilter, ListFilterFilters } from './ListFilter'
+import { ListItemSeparator } from './ListItemSeparator'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
@@ -207,12 +208,7 @@ export function ItemsList(props: ItemsListProps) {
         renderItem={renderItem}
         keyExtractor={(item: Item, index: number) => getKeyToUse(item)}
         estimatedItemSize={120}
-        ItemSeparatorComponent={() => (
-          <View
-            height={StyleSheet.hairlineWidth}
-            backgroundColor={theme.colors.gray[500]}
-          />
-        )}
+        ItemSeparatorComponent={() => <ListItemSeparator />}
       />
       <ListSorter
         sortOrderValue={itemsList.sortOrderValue}

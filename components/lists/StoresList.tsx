@@ -9,6 +9,7 @@ import { Menu } from 'react-native-popup-menu'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { ListFilter, ListFilterFilters } from './ListFilter'
+import { ListItemSeparator } from './ListItemSeparator'
 import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
 import { SortType } from './sorters'
@@ -222,12 +223,7 @@ export function StoresList(props: StoresListProps) {
         renderItem={renderItem}
         keyExtractor={(item: Store, index: number) => getKeyToUse(item)}
         estimatedItemSize={120}
-        ItemSeparatorComponent={() => (
-          <View
-            height={StyleSheet.hairlineWidth}
-            backgroundColor={theme.colors.gray[500]}
-          />
-        )}
+        ItemSeparatorComponent={() => <ListItemSeparator />}
       />
       <ListSorter
         sortOrderValue={storesList.sortOrderValue}

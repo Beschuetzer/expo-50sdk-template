@@ -92,5 +92,6 @@ export type List<T> = {
 export type ListFilters = { [key in ListName]: ListFilterFilters<any> }
 export type ItemsList = List<Item>
 export type ShoppingList = List<ItemWithStoreSpecificValues>
+export type InCartList = List<ItemWithStoreSpecificValues>
 export type LastPurchasedList = List<LastPurchasedItem>
 export type StoreList = List<Store>

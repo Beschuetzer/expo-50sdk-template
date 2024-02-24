@@ -21,6 +21,7 @@ import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
 import { Routes } from '@/constants/navigation'
 import {
   ListName,
+  addItemToCart,
   currentStoreSelector,
   removeShoppingListItem,
   setFilters,
@@ -98,8 +99,7 @@ export function ShoppingList(props: ShoppingListProps) {
     (item: ItemWithStoreSpecificValues) => {
       closeMenu()
       setRefreshing(false)
-      //todo: add this in redux
-      // dispatch(addItemToCart((current) => [...current, item])
+      dispatch(addItemToCart(item))
     },
     [closeMenu],
   )

@@ -7,6 +7,7 @@ import { ListFilterFilters } from '@/components/lists/ListFilter'
 import { SortOrder, SortType, getSorter } from '@/components/lists/sorters'
 import { EMPTY_STRING } from '@/constants/general'
 import {
+  InCartList,
   Item,
   ItemWithStoreSpecificValues,
   ItemsList,
@@ -33,6 +34,7 @@ import {
 } from '@/utils/helpers'
 
 export enum ListName {
+  InCartList = 'inCartList',
   ItemsList = 'itemsList',
   LastPurchasedList = 'lastPurchasedList',
   ShoppingList = 'shoppingLIst',
@@ -91,6 +93,7 @@ const CURRENT_LOCATION_INITIAL = null
 export type ListsState = {
   currentLocation: GpsCoordinate | null
   currentStoreName: string
+  [ListName.InCartList]: InCartList
   [ListName.ItemsList]: ItemsList
   [ListName.LastPurchasedList]: LastPurchasedList
   [ListName.ShoppingList]: ShoppingList
@@ -101,6 +104,7 @@ export type ListsState = {
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
+  [ListName.InCartList]: getEmptyList(),
   [ListName.ItemsList]: getEmptyList(),
   [ListName.LastPurchasedList]: getEmptyList(),
   [ListName.ShoppingList]: getEmptyList(),
@@ -113,6 +117,25 @@ export const listsSlice = createSlice({
   name: 'lists',
   initialState,
   reducers: {
+    addItemToCart: (
+      state: ListsState,
+      action: PayloadAction<ItemWithStoreSpecificValues>,
+    ) => {
+      const itemToAdd = action.payload
+      const keyToUse = getKeyToUse(itemToAdd)
+      if (!itemToAdd) return
+      const indexOfItemInList = state[ListName.InCartList].data.find(
+        (item: ItemWithStoreSpecificValues) => {
+          const keyToUseLocal = getKeyToUse(item)
+          return keyToUse === keyToUseLocal
+        },
+      )
+      if (indexOfItemInList) return
+      state[ListName.InCartList].data = [
+        ...state[ListName.InCartList].data,
+        itemToAdd,
+      ]
+    },
     addItemsListItem: (
       state: ListsState,
       action: PayloadAction<AddItemsListItemPayload>,
@@ -430,6 +453,7 @@ export const listsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   addItemsListItem,
+  addItemToCart,
   addLastPurchasedList,
   addStoresListItem,
   removeItemsListItem,

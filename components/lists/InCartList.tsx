@@ -1,78 +1,78 @@
-import { FontAwesome } from '@expo/vector-icons'
-import { FlashList } from '@shopify/flash-list'
-import { useFocusEffect, useNavigation } from 'expo-router'
-import { Text, useTheme, Stack } from 'native-base'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { LayoutAnimation } from 'react-native'
-import { Menu } from 'react-native-popup-menu'
-import { useDispatch, useSelector } from 'react-redux'
+import { FontAwesome } from '@expo/vector-icons';
+import { FlashList } from '@shopify/flash-list';
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { Text, useTheme, Stack } from 'native-base';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { LayoutAnimation } from 'react-native';
+import { Menu } from 'react-native-popup-menu';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTile } from './ItemTile'
-import { ListItemSeparator } from './ListItemSeparator'
-import { SwipeableRow } from './SwipeableRow'
-import { AddButton } from '../header/AddButton'
-import { ListHeaderRight } from '../header/ListHeaderRight'
+import { ItemTile } from './ItemTile';
+import { ListItemSeparator } from './ListItemSeparator';
+import { SwipeableRow } from './SwipeableRow';
+import { AddButton } from '../header/AddButton';
+import { ListHeaderRight } from '../header/ListHeaderRight';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { Routes } from '@/constants/navigation'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import {
   ListName,
   addItemToCart,
   currentStoreSelector,
   removeShoppingListItem,
   storeSpecificListSelector,
-} from '@/state/slices/listsSlice'
-import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
-import { ListRow } from '@/types/general'
-import { getKeyToUse } from '@/utils/helpers'
+} from '@/state/slices/listsSlice';
+import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
+import { ListRow } from '@/types/general';
+import { getKeyToUse } from '@/utils/helpers';
 
-type InCartListProps = object
+type InCartListProps = object;
 
-const listName: ListName = ListName.InCartList
+const listName: ListName = ListName.InCartList;
 export function InCartList(props: InCartListProps) {
-  const navigation = useNavigation()
-  const inCartList = useSelector(storeSpecificListSelector(listName))
-  const currentStore = useSelector(currentStoreSelector)
-  const theme = useTheme()
-  const dispatch = useDispatch()
-  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
-  const menuRef = useRef<Menu>(null)
+  const navigation = useNavigation();
+  const inCartList = useSelector(storeSpecificListSelector(listName));
+  const currentStore = useSelector(currentStoreSelector);
+  const theme = useTheme();
+  const dispatch = useDispatch();
+  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const menuRef = useRef<Menu>(null);
 
   const closeMenu = useCallback(() => {
-    menuRef.current?.close()
-  }, [menuRef])
+    menuRef.current?.close();
+  }, [menuRef]);
 
   function onAddItemPress() {
-    closeMenu()
+    closeMenu();
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
       callerList: ListName.ShoppingList,
       key: EMPTY_STRING,
-    })
+    });
   }
 
   const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true)
-  }, [])
+    setIsSortModalOpen(true);
+  }, []);
 
   const onSwipeRight = useCallback(
     (item: ItemWithStoreSpecificValues) => {
-      closeMenu()
-      setRefreshing(false)
-      dispatch(addItemToCart(item))
+      closeMenu();
+      setRefreshing(false);
+      dispatch(addItemToCart(item));
     },
     [closeMenu],
-  )
+  );
 
   const onSwipeLeft = useCallback(
     (key: Key) => {
-      closeMenu()
-      dispatch(removeShoppingListItem(key))
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+      closeMenu();
+      dispatch(removeShoppingListItem(key));
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [listRef, closeMenu],
-  )
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -84,18 +84,18 @@ export function InCartList(props: InCartListProps) {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
-    })
-  }, [navigation])
+    });
+  }, [navigation]);
 
   useFocusEffect(() => {
-    closeMenu()
-  })
+    closeMenu();
+  });
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const key = {
       name: item.name,
       upc: item.upc,
-    } as Key
+    } as Key;
     return (
       <SwipeableRow
         swipeableProps={{
@@ -144,7 +144,7 @@ export function InCartList(props: InCartListProps) {
       >
         <ItemTile item={item} />
       </SwipeableRow>
-    )
+    );
   }
 
   return (
@@ -154,10 +154,10 @@ export function InCartList(props: InCartListProps) {
         refreshing={refreshing}
         onTouchStart={closeMenu}
         onRefresh={() => {
-          setRefreshing(true)
+          setRefreshing(true);
           setTimeout(() => {
-            setRefreshing(false)
-          }, 2000)
+            setRefreshing(false);
+          }, 2000);
         }}
         data={inCartList}
         renderItem={renderItem}
@@ -168,5 +168,5 @@ export function InCartList(props: InCartListProps) {
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />
     </>
-  )
+  );
 }

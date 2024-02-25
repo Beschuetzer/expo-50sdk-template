@@ -1,22 +1,22 @@
-import { FontAwesome } from '@expo/vector-icons'
-import { FlashList } from '@shopify/flash-list'
-import { useFocusEffect, useNavigation } from 'expo-router'
-import { Text, useTheme, Stack } from 'native-base'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { LayoutAnimation } from 'react-native'
-import { Menu } from 'react-native-popup-menu'
-import { useDispatch, useSelector } from 'react-redux'
+import { FontAwesome } from '@expo/vector-icons';
+import { FlashList } from '@shopify/flash-list';
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { Text, useTheme, Stack } from 'native-base';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { LayoutAnimation } from 'react-native';
+import { Menu } from 'react-native-popup-menu';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTile } from './ItemTile'
-import { ListItemSeparator } from './ListItemSeparator'
-import { ListSorter } from './ListSorter'
-import { SwipeableRow } from './SwipeableRow'
-import { SortType } from './sorters'
-import { AddButton } from '../header/AddButton'
-import { ListHeaderRight } from '../header/ListHeaderRight'
+import { ItemTile } from './ItemTile';
+import { ListItemSeparator } from './ListItemSeparator';
+import { ListSorter } from './ListSorter';
+import { SwipeableRow } from './SwipeableRow';
+import { SortType } from './sorters';
+import { AddButton } from '../header/AddButton';
+import { ListHeaderRight } from '../header/ListHeaderRight';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { Routes } from '@/constants/navigation'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import {
   ListName,
   addItemToCart,
@@ -25,12 +25,12 @@ import {
   setSortOrder,
   storeSpecificListSelector,
   shoppingListSelector,
-} from '@/state/slices/listsSlice'
-import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
-import { ListRow } from '@/types/general'
-import { getKeyToUse } from '@/utils/helpers'
+} from '@/state/slices/listsSlice';
+import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
+import { ListRow } from '@/types/general';
+import { getKeyToUse } from '@/utils/helpers';
 
-type ShoppingListProps = object
+type ShoppingListProps = object;
 
 const shoppingListSortTypes = [
   SortType.Name,
@@ -38,61 +38,63 @@ const shoppingListSortTypes = [
   SortType.AddedDate,
   SortType.LastUpdatedDate,
   SortType.Frequency,
-] as SortType[]
+] as SortType[];
 
-const listName: ListName = ListName.ShoppingList
+const listName: ListName = ListName.ShoppingList;
 export function ShoppingList(props: ShoppingListProps) {
-  const navigation = useNavigation()
-  const shoppingList = useSelector(shoppingListSelector)
-  const shoppingListToDisplay = useSelector(storeSpecificListSelector(listName))
-  const currentStore = useSelector(currentStoreSelector)
-  const theme = useTheme()
-  const dispatch = useDispatch()
-  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false)
-  const lastSortTypeRef = useRef(shoppingListSortTypes[0])
-  const menuRef = useRef<Menu>(null)
+  const navigation = useNavigation();
+  const shoppingList = useSelector(shoppingListSelector);
+  const shoppingListToDisplay = useSelector(
+    storeSpecificListSelector(listName),
+  );
+  const currentStore = useSelector(currentStoreSelector);
+  const theme = useTheme();
+  const dispatch = useDispatch();
+  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+  const lastSortTypeRef = useRef(shoppingListSortTypes[0]);
+  const menuRef = useRef<Menu>(null);
 
   const closeMenu = useCallback(() => {
-    menuRef.current?.close()
-  }, [menuRef])
+    menuRef.current?.close();
+  }, [menuRef]);
 
   function onAddItemPress() {
-    closeMenu()
+    closeMenu();
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
       callerList: ListName.ShoppingList,
       key: EMPTY_STRING,
-    })
+    });
   }
 
   const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true)
-  }, [])
+    setIsSortModalOpen(true);
+  }, []);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
-    lastSortTypeRef.current = sortType
-    dispatch(setSortOrder({ listName, sortBy: sortType }))
-  }, [])
+    lastSortTypeRef.current = sortType;
+    dispatch(setSortOrder({ listName, sortBy: sortType }));
+  }, []);
 
   const onSwipeRight = useCallback(
     (item: ItemWithStoreSpecificValues) => {
-      closeMenu()
-      setRefreshing(false)
-      dispatch(addItemToCart(item))
+      closeMenu();
+      setRefreshing(false);
+      dispatch(addItemToCart(item));
     },
     [closeMenu],
-  )
+  );
 
   const onSwipeLeft = useCallback(
     (key: Key) => {
-      closeMenu()
-      dispatch(removeShoppingListItem(key))
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+      closeMenu();
+      dispatch(removeShoppingListItem(key));
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [listRef, closeMenu],
-  )
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -104,18 +106,18 @@ export function ShoppingList(props: ShoppingListProps) {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
-    })
-  }, [navigation])
+    });
+  }, [navigation]);
 
   useFocusEffect(() => {
-    closeMenu()
-  })
+    closeMenu();
+  });
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const key = {
       name: item.name,
       upc: item.upc,
-    } as Key
+    } as Key;
     return (
       <SwipeableRow
         swipeableProps={{
@@ -164,7 +166,7 @@ export function ShoppingList(props: ShoppingListProps) {
       >
         <ItemTile item={item} />
       </SwipeableRow>
-    )
+    );
   }
 
   return (
@@ -174,10 +176,10 @@ export function ShoppingList(props: ShoppingListProps) {
         refreshing={refreshing}
         onTouchStart={closeMenu}
         onRefresh={() => {
-          setRefreshing(true)
+          setRefreshing(true);
           setTimeout(() => {
-            setRefreshing(false)
-          }, 2000)
+            setRefreshing(false);
+          }, 2000);
         }}
         data={shoppingListToDisplay}
         renderItem={renderItem}
@@ -197,5 +199,5 @@ export function ShoppingList(props: ShoppingListProps) {
         viewSize="small"
       />
     </>
-  )
+  );
 }

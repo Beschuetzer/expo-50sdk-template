@@ -1,4 +1,5 @@
 ## MVP
+-add button to purchase items in the cart (this will set the last purchased value and reset the items in the cart (rest quantity and isInCart storeSpecificValues))
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { SceneMap, TabView } from 'react-native-tab-view';
 import { useDispatch, useSelector } from 'react-redux';
@@ -50,6 +50,14 @@ export default function TabOneScreen() {
     ],
     [inCartList.length, shoppingList.length],
   );
+
+  useLayoutEffect(() => {
+    if (inCartList.length <= 0) {
+      setIndex(0);
+    } else if (shoppingList.length === 0) {
+      setIndex(1);
+    }
+  }, [inCartList.length]);
 
   return (
     <TabView

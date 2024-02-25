@@ -7,7 +7,6 @@ import { ListFilterFilters } from '@/components/lists/ListFilter'
 import { SortOrder, SortType, getSorter } from '@/components/lists/sorters'
 import { EMPTY_STRING } from '@/constants/general'
 import {
-  InCartList,
   Item,
   ItemWithStoreSpecificValues,
   ItemsList,
@@ -94,7 +93,6 @@ const CURRENT_LOCATION_INITIAL = null
 export type ListsState = {
   currentLocation: GpsCoordinate | null
   currentStoreName: string
-  [ListName.InCartList]: InCartList
   [ListName.ItemsList]: ItemsList
   [ListName.LastPurchasedList]: LastPurchasedList
   [ListName.ShoppingList]: ShoppingList
@@ -105,7 +103,6 @@ export type ListsState = {
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
-  [ListName.InCartList]: getEmptyList(),
   [ListName.ItemsList]: getEmptyList(),
   [ListName.LastPurchasedList]: getEmptyList(),
   [ListName.ShoppingList]: getEmptyList(),
@@ -316,9 +313,9 @@ export const listsSlice = createSlice({
       action: PayloadAction<ResetListToDisplayPayload>,
     ) => {
       const { listName } = action.payload
-      if (!listName) return
+      if (!listName || listName === ListName.InCartList) return
       const emptyList = getEmptyList<any>()
-      emptyList.data = state[listName].data
+      emptyList.data = state[listName]?.data || []
       state[listName] = emptyList
     },
     resetListToDisplayFilters: (
@@ -326,14 +323,11 @@ export const listsSlice = createSlice({
       action: PayloadAction<ResetListToDisplayFiltersPayload>,
     ) => {
       const { listName } = action.payload
-      if (!listName) return
+      if (!listName || listName === ListName.InCartList) return
       const emptyList = getEmptyList<any>()
-      emptyList.data = state[listName].data
+      emptyList.data = state[listName].data || []
       emptyList.sortOrderValue = state[listName].sortOrderValue
       state[listName] = emptyList
-    },
-    resetInCartList: (state: ListsState) => {
-      state[ListName.InCartList] = getEmptyList()
     },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyList()
@@ -375,7 +369,11 @@ export const listsSlice = createSlice({
     ) => {
       const { filters, listName } = action.payload
 
-      if (!listName || Object.keys(filters || {}).length === 0) {
+      if (
+        !listName ||
+        listName === ListName.InCartList ||
+        Object.keys(filters || {}).length === 0
+      ) {
         return
       }
 
@@ -386,13 +384,6 @@ export const listsSlice = createSlice({
       }
 
       state[listName].filters = filters
-    },
-    setInCartList: (
-      state: ListsState,
-      action: PayloadAction<ListsState['inCartList']>,
-    ) => {
-      if (!action.payload) return
-      state[ListName.InCartList] = action.payload
     },
     setItemsList: (
       state: ListsState,
@@ -406,6 +397,7 @@ export const listsSlice = createSlice({
       action: PayloadAction<SetSortOrderPayload>,
     ) => {
       const { listName, sortBy = SortType.Name } = action.payload
+      if (listName === ListName.InCartList) return
       const listToSort = state[listName]
 
       if (!listToSort) {
@@ -442,6 +434,7 @@ export const listsSlice = createSlice({
       action: PayloadAction<ToggleSortOrderPayload>,
     ) => {
       const { listName } = action.payload
+      if (listName === ListName.InCartList) return
 
       if (!state[listName].sortOrderValue) return
       const sortOrder =
@@ -499,7 +492,6 @@ export const {
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
-  resetInCartList,
   resetItemsList,
   resetLastPurchasedList,
   resetListToDisplay,
@@ -507,7 +499,6 @@ export const {
   resetStoresList,
   setCurrentLocation,
   setCurrentStoreName,
-  setInCartList,
   setFilters,
   setItemsList,
   setSortOrder,
@@ -537,9 +528,6 @@ export const currentStoreSelector = createSelector(
     return foundStore
   },
 )
-
-export const inCartListSelector = (state: RootState) =>
-  state[listsSlice.name][ListName.InCartList]
 
 export const itemsListItemSelector = (id: string) =>
   createSelector(

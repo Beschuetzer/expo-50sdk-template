@@ -16,7 +16,6 @@ import {
   resetCurrentStoreName,
   resetItemsList,
   resetStoresList,
-  resetInCartList,
 } from '@/state/slices/listsSlice'
 import {
   resetUpcProducts,
@@ -89,7 +88,6 @@ export function ReduxViewer() {
                 onPress={() => {
                   lastUpcIndexRef.current = 0
                   dispatch(resetItemsList())
-                  dispatch(resetInCartList())
                 }}
               >
                 Lists

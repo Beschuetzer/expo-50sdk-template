@@ -1,7 +1,5 @@
 ## MVP
 
--remove InCart list and all things associated with it
-
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item
     --figure out how adding to cart look and works (how to sort and filter too?)

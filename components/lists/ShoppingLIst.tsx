@@ -23,7 +23,7 @@ import {
   currentStoreSelector,
   removeShoppingListItem,
   setSortOrder,
-  shoppingListItemsSelector,
+  storeSpecificListSelector,
   shoppingListSelector,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
@@ -44,7 +44,7 @@ const listName: ListName = ListName.ShoppingList
 export function ShoppingList(props: ShoppingListProps) {
   const navigation = useNavigation()
   const shoppingList = useSelector(shoppingListSelector)
-  const shoppingListToDisplay = useSelector(shoppingListItemsSelector)
+  const shoppingListToDisplay = useSelector(storeSpecificListSelector(listName))
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()

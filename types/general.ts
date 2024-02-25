@@ -1,57 +1,58 @@
-import { ViewStyle } from "react-native";
+import { ViewStyle } from 'react-native'
 
-import { Item, ItemWithStoreSpecificValues } from "./Item";
-import { Store } from "./Store";
-import { UpcProduct } from "./UpcResponse";
-import { ListName } from "@/state/slices/listsSlice";
+import { Item, ItemWithStoreSpecificValues } from './Item'
+import { Store } from './Store'
+import { UpcProduct } from './UpcResponse'
+
+import { ListName } from '@/state/slices/listsSlice'
 
 export enum TimeSpan {
-  Hour = "Hour",
-  Day = "Day",
-  Week = "Week",
+  Hour = 'Hour',
+  Day = 'Day',
+  Week = 'Week',
 }
 export type Frequency = {
-  number: number;
-  timeSpan: TimeSpan;
-};
+  number: number
+  timeSpan: TimeSpan
+}
 
 export type SpacingProp = {
-  spacing?: number | string;
-};
+  spacing?: number | string
+}
 
 export type HeadingTagProp = {
   /**
    *This is the component to use to render the header.
    **/
-  headingTag?: any; //todo: figure out type here
-};
+  headingTag?: any //todo: figure out type here
+}
 
 export type ListNameProp = {
   listName: ListName
-};
+}
 
 export type ItemProp = {
-  item: Item;
-};
+  item: Item
+}
 
 export type ItemWithStoreSpecificValuesProp = {
-  itemWithStoreSpecificValues: ItemWithStoreSpecificValues;
-};
+  itemWithStoreSpecificValues: ItemWithStoreSpecificValues
+}
 
 export type UpcProp = {
-  upc: string;
-};
+  upc: string
+}
 
 export type StoreProp = {
-  store?: Store | null | undefined;
-};
+  store?: Store | null | undefined
+}
 
 export type UpcProductProp = {
-  upcProduct: UpcProduct;
-};
+  upcProduct: UpcProduct
+}
 
 export type StyleProp = {
-  style?: ViewStyle;
-};
+  style?: ViewStyle
+}
 
-export type ListRow<T> = { item: T; index: number };
+export type ListRow<T> = { item: T; index: number }

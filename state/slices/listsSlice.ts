@@ -124,17 +124,32 @@ export const listsSlice = createSlice({
       const itemToAdd = action.payload
       const keyToUse = getKeyToUse(itemToAdd)
       if (!itemToAdd) return
-      const indexOfItemInList = state[ListName.InCartList].data.find(
-        (item: ItemWithStoreSpecificValues) => {
-          const keyToUseLocal = getKeyToUse(item)
-          return keyToUse === keyToUseLocal
-        },
-      )
-      if (indexOfItemInList) return
-      state[ListName.InCartList].data = [
-        ...state[ListName.InCartList].data,
-        itemToAdd,
-      ]
+      // console.log({
+      //   keyToUse,
+      //   item: state.storeSpecificValuesMap[keyToUse],
+      //   entry:
+      //     state.storeSpecificValuesMap[keyToUse]?.[
+      //       StoreSpecificValueKey.IsInCart
+      //     ],
+      // })
+
+      if (!state.storeSpecificValuesMap?.[keyToUse]) {
+        state.storeSpecificValuesMap[keyToUse] = {} as any
+      }
+      if (
+        !state.storeSpecificValuesMap?.[keyToUse]?.[
+          StoreSpecificValueKey.IsInCart
+        ]
+      ) {
+        state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.IsInCart] =
+          {} as any
+      }
+
+      ;(
+        (state.storeSpecificValuesMap[keyToUse] as any)[
+          StoreSpecificValueKey.IsInCart
+        ] as any
+      )[state.currentStoreName] = true
     },
     addItemsListItem: (
       state: ListsState,
@@ -316,6 +331,7 @@ export const listsSlice = createSlice({
     },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyList()
+      state.storeSpecificValuesMap = {}
     },
     resetLastPurchasedList: (state: ListsState) => {
       state.lastPurchasedList = getEmptyList()
@@ -565,63 +581,71 @@ export const listToDisplaySelector = (listName: ListName) =>
  *The way this is written, the shopping list will update when the storeList changes when really it should only change when the current store changes
  *This may not be an issue though
  **/
-export const shoppingListItemsSelector = createSelector(
-  [
-    (state: RootState) => state[listsSlice.name][ListName.ShoppingList],
-    (state: RootState) => state[listsSlice.name][ListName.ItemsList],
-    (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
-    (state: RootState) => state[listsSlice.name].storesList.data,
-    (state: RootState) => state[listsSlice.name].currentStoreName,
-  ],
-  (
-    shoppingList,
-    itemsList,
-    storeSpecificValuesMap,
-    storesList,
-    currentStoreName,
-  ) => {
-    const currentStore = storesList.find(
-      (store) => store.name === currentStoreName,
-    )
-    if (!currentStore?.name) return []
+export const storeSpecificListSelector = (listname: ListName) =>
+  createSelector(
+    [
+      (state: RootState) => state[listsSlice.name][ListName.ShoppingList],
+      (state: RootState) => state[listsSlice.name][ListName.ItemsList],
+      (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
+      (state: RootState) => state[listsSlice.name].storesList.data,
+      (state: RootState) => state[listsSlice.name].currentStoreName,
+    ],
+    (
+      shoppingList,
+      itemsList,
+      storeSpecificValuesMap,
+      storesList,
+      currentStoreName,
+    ) => {
+      const currentStore = storesList.find(
+        (store) => store.name === currentStoreName,
+      )
+      if (!currentStore?.name) return []
 
-    const listToDisplay = [] as ItemWithStoreSpecificValues[]
-    for (const [key, values] of Object.entries(storeSpecificValuesMap)) {
-      const isInCartForCurrentStore =
-        values?.[StoreSpecificValueKey.IsInCart]?.[currentStore.name]
-      console.log({ isInCartForCurrentStore })
+      const listToDisplay = [] as ItemWithStoreSpecificValues[]
+      for (const [key, values] of Object.entries(storeSpecificValuesMap)) {
+        const isInCartForCurrentStore =
+          values?.[StoreSpecificValueKey.IsInCart]?.[currentStore.name]
 
-      //todo: this will vary depending on list name given
-      if (isInCartForCurrentStore) continue
+        //todo: this will vary depending on list name given
+        if (
+          (listname === ListName.ShoppingList && isInCartForCurrentStore) ||
+          (listname === ListName.InCartList && !isInCartForCurrentStore)
+        )
+          continue
 
-      const currentQuantityForItemAndStoreCombination =
-        values?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]
-      if (
-        currentQuantityForItemAndStoreCombination &&
-        currentQuantityForItemAndStoreCombination > 0
-      ) {
-        const currentItem = getItemFromList(itemsList.data, key)
-        if (!currentItem) continue
-        listToDisplay.push({
-          ...currentItem,
-          ...values,
-        } as ItemWithStoreSpecificValues)
+
+        const currentQuantityForItemAndStoreCombination =
+          values?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]
+
+        console.log({currentQuantityForItemAndStoreCombination , listname })
+
+        if (
+          currentQuantityForItemAndStoreCombination &&
+          currentQuantityForItemAndStoreCombination > 0
+        ) {
+          const currentItem = getItemFromList(itemsList.data, key)
+          if (!currentItem) continue
+          listToDisplay.push({
+            ...currentItem,
+            ...values,
+          } as ItemWithStoreSpecificValues)
+        }
       }
-    }
 
-    const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
-      listToDisplay,
-      shoppingList.filters,
-    )
-    filteredList.sort(
-      getSorter(
-        shoppingList.sortOrderValue.sortBy,
-        shoppingList.sortOrderValue.sortOrder,
-      ),
-    )
-    return filteredList
-  },
-)
+      const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
+        listToDisplay,
+        shoppingList.filters,
+      )
+      filteredList.sort(
+        getSorter(
+          shoppingList.sortOrderValue.sortBy,
+          shoppingList.sortOrderValue.sortOrder,
+        ),
+      )
+      return filteredList
+    },
+  )
 
 export const shoppingListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.ShoppingList]

@@ -9,9 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { ItemTile } from './ItemTile'
 import { ListItemSeparator } from './ListItemSeparator'
-import { ListSorter } from './ListSorter'
 import { SwipeableRow } from './SwipeableRow'
-import { SortType } from './sorters'
 import { AddButton } from '../header/AddButton'
 import { ListHeaderRight } from '../header/ListHeaderRight'
 
@@ -21,9 +19,8 @@ import {
   ListName,
   addItemToCart,
   currentStoreSelector,
-  inCartListSelector,
   removeShoppingListItem,
-  setSortOrder,
+  storeSpecificListSelector,
 } from '@/state/slices/listsSlice'
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item'
 import { ListRow } from '@/types/general'
@@ -31,25 +28,15 @@ import { getKeyToUse } from '@/utils/helpers'
 
 type InCartListProps = object
 
-const shoppingListSortTypes = [
-  SortType.Name,
-  SortType.Upc,
-  SortType.AddedDate,
-  SortType.LastUpdatedDate,
-  SortType.Frequency,
-] as SortType[]
-
 const listName: ListName = ListName.InCartList
 export function InCartList(props: InCartListProps) {
   const navigation = useNavigation()
-  const inCartList = useSelector(inCartListSelector)
+  const inCartList = useSelector(storeSpecificListSelector(listName))
   const currentStore = useSelector(currentStoreSelector)
   const theme = useTheme()
   const dispatch = useDispatch()
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null)
   const [refreshing, setRefreshing] = useState(false)
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false)
-  const lastSortTypeRef = useRef(shoppingListSortTypes[0])
   const menuRef = useRef<Menu>(null)
 
   const closeMenu = useCallback(() => {
@@ -67,11 +54,6 @@ export function InCartList(props: InCartListProps) {
 
   const onSortPress = useCallback(() => {
     setIsSortModalOpen(true)
-  }, [])
-
-  const onSortTypeChange = useCallback((sortType: SortType) => {
-    lastSortTypeRef.current = sortType
-    dispatch(setSortOrder({ listName, sortBy: sortType }))
   }, [])
 
   const onSwipeRight = useCallback(
@@ -177,22 +159,13 @@ export function InCartList(props: InCartListProps) {
             setRefreshing(false)
           }, 2000)
         }}
-        data={inCartList.data}
+        data={inCartList}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
         }
         estimatedItemSize={120}
         ItemSeparatorComponent={() => <ListItemSeparator />}
-      />
-      <ListSorter
-        sortOrderValue={inCartList.sortOrderValue}
-        listName={listName}
-        isVisible={isSortModalOpen}
-        setIsVisible={setIsSortModalOpen}
-        onValueChange={onSortTypeChange}
-        sortTypes={shoppingListSortTypes}
-        viewSize="small"
       />
     </>
   )

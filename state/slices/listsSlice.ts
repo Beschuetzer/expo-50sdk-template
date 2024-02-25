@@ -16,6 +16,7 @@ import {
   LastPurchasedList,
   ShoppingList,
   StoreList,
+  StoreSpecificValue,
   StoreSpecificValueKey,
   StoreSpecificValues,
   StoreSpecificValuesMap,
@@ -134,7 +135,7 @@ export const listsSlice = createSlice({
       // })
 
       if (!state.storeSpecificValuesMap?.[keyToUse]) {
-        state.storeSpecificValuesMap[keyToUse] = {} as any
+        state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues
       }
       if (
         !state.storeSpecificValuesMap?.[keyToUse]?.[
@@ -142,7 +143,7 @@ export const listsSlice = createSlice({
         ]
       ) {
         state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.IsInCart] =
-          {} as any
+          {} as StoreSpecificValue<boolean>
       }
 
       ;(
@@ -273,19 +274,21 @@ export const listsSlice = createSlice({
     },
     removeShoppingListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload)
-      if (!state.storeSpecificValuesMap[keyToUse]) {
+      if (!state.storeSpecificValuesMap?.[keyToUse]) {
         state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues
-        return
       }
-      state.storeSpecificValuesMap[keyToUse] = {
-        ...((state.storeSpecificValuesMap[keyToUse] || {}) as any),
-        [StoreSpecificValueKey.Quantity]: {
-          ...(state.storeSpecificValuesMap[keyToUse]?.[
-            StoreSpecificValueKey.Quantity
-          ] || {}),
-          [state.currentStoreName]: 0,
-        },
+      if (
+        !state.storeSpecificValuesMap?.[keyToUse]?.[
+          StoreSpecificValueKey.IsInCart
+        ]
+      ) {
+        state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.IsInCart] =
+          {} as StoreSpecificValue<boolean>
       }
+
+      state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.IsInCart][
+        state.currentStoreName
+      ] = false
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload)
@@ -614,11 +617,10 @@ export const storeSpecificListSelector = (listname: ListName) =>
         )
           continue
 
-
         const currentQuantityForItemAndStoreCombination =
           values?.[StoreSpecificValueKey.Quantity]?.[currentStore.name]
 
-        console.log({currentQuantityForItemAndStoreCombination , listname })
+        console.log({ currentQuantityForItemAndStoreCombination, listname })
 
         if (
           currentQuantityForItemAndStoreCombination &&

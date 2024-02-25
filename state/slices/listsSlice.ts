@@ -167,8 +167,6 @@ export const listsSlice = createSlice({
       const currentItem = getItemFromList(state.itemsList.data, keyToUse) as any
       const newItem = { ...item } as any
 
-      console.log({ storeSpecificValues, currentItem, currentStore })
-
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
         state.storeSpecificValuesMap[keyToUse] = {

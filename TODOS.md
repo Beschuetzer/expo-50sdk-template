@@ -1,4 +1,5 @@
 ## MVP
+
 -remove InCart list and all things associated with it
 -generalize shoppingListItemsSelector to take in a listname (and use in shopping list and incart list)
 

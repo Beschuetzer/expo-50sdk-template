@@ -61,6 +61,9 @@ export function ItemFormStoreSpecific(props: ItemFormStoreSpecificProps) {
         quantity: {
           [currentStore.name]: quantity,
         },
+        isInCart: {
+          [currentStore.name]: false,
+        },
       })
   }, [aisle, itemId, price, quantity, currentStore, onValueChange])
 

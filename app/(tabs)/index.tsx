@@ -1,4 +1,3 @@
-import { View } from 'native-base'
 import { useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { SceneMap, TabView } from 'react-native-tab-view'

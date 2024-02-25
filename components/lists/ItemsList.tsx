@@ -1,39 +1,40 @@
-import { FontAwesome } from '@expo/vector-icons'
-import { FlashList } from '@shopify/flash-list'
-import { useFocusEffect, useNavigation } from 'expo-router'
-import { View, Text, useTheme, Stack } from 'native-base'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { LayoutAnimation, StyleSheet } from 'react-native'
-import { Menu } from 'react-native-popup-menu'
-import { useDispatch, useSelector } from 'react-redux'
+import { FontAwesome } from '@expo/vector-icons';
+import { FlashList } from '@shopify/flash-list';
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { Text, useTheme, Stack } from 'native-base';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { LayoutAnimation } from 'react-native';
+import { Menu } from 'react-native-popup-menu';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTile } from './ItemTile'
-import { ListFilter, ListFilterFilters } from './ListFilter'
-import { ListItemSeparator } from './ListItemSeparator'
-import { ListSorter } from './ListSorter'
-import { SwipeableRow } from './SwipeableRow'
-import { SortType } from './sorters'
-import { AddButton } from '../header/AddButton'
-import { ListHeaderRight } from '../header/ListHeaderRight'
-import { useUpdatedListTitle } from '../hooks/useUpdateListTitle'
+import { ItemTile } from './ItemTile';
+import { ListFilter, ListFilterFilters } from './ListFilter';
+import { ListItemSeparator } from './ListItemSeparator';
+import { ListSorter } from './ListSorter';
+import { SwipeableRow } from './SwipeableRow';
+import { SortType } from './sorters';
+import { AddButton } from '../header/AddButton';
+import { ListHeaderRight } from '../header/ListHeaderRight';
+import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { Routes } from '@/constants/navigation'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import {
   ListName,
   currentStoreSelector,
   itemsListSelector,
   listToDisplaySelector,
   removeItemsListItem,
+  resetListToDisplay,
   setFilters,
   setSortOrder,
   updateStoreSpecificValues,
-} from '@/state/slices/listsSlice'
-import { Item, Key } from '@/types/Item'
-import { ListRow } from '@/types/general'
-import { getKeyToUse } from '@/utils/helpers'
+} from '@/state/slices/listsSlice';
+import { Item, Key } from '@/types/Item';
+import { ListRow } from '@/types/general';
+import { getKeyToUse } from '@/utils/helpers';
 
-type ItemsListProps = object
+type ItemsListProps = object;
 
 const itemsListSortTypes = [
   SortType.Name,
@@ -41,62 +42,66 @@ const itemsListSortTypes = [
   SortType.AddedDate,
   SortType.LastUpdatedDate,
   SortType.Frequency,
-] as SortType[]
+] as SortType[];
 
-const listName: ListName = ListName.ItemsList
+const listName: ListName = ListName.ItemsList;
 export function ItemsList(props: ItemsListProps) {
-  const navigation = useNavigation()
-  const itemsList = useSelector(itemsListSelector)
+  const navigation = useNavigation();
+  const itemsList = useSelector(itemsListSelector);
   const itemsListToDisplay = useSelector(
     listToDisplaySelector(listName),
-  ) as Item[]
-  const currentStore = useSelector(currentStoreSelector)
-  const theme = useTheme()
-  const dispatch = useDispatch()
-  const listRef = useRef<FlashList<Item> | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false)
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const lastSortTypeRef = useRef(itemsListSortTypes[0])
-  const menuRef = useRef<Menu>(null)
-  useUpdatedListTitle({ list: itemsList, title: 'Items List' })
+  ) as Item[];
+  const currentStore = useSelector(currentStoreSelector);
+  const theme = useTheme();
+  const dispatch = useDispatch();
+  const listRef = useRef<FlashList<Item> | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const lastSortTypeRef = useRef(itemsListSortTypes[0]);
+  const menuRef = useRef<Menu>(null);
+  useUpdatedListTitle({ list: itemsList, title: 'Items List' });
 
   const closeMenu = useCallback(() => {
-    menuRef.current?.close()
-  }, [menuRef])
+    menuRef.current?.close();
+  }, [menuRef]);
 
   function onAddItemPress() {
-    closeMenu()
+    closeMenu();
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
       key: EMPTY_STRING,
-    })
+    });
   }
 
   const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true)
-  }, [])
+    setIsSortModalOpen(true);
+  }, []);
 
   const onFilterPress = useCallback(() => {
-    setIsFilterModalOpen(true)
-  }, [])
+    setIsFilterModalOpen(true);
+  }, []);
+
+  const onResetPress = useCallback(() => {
+    dispatch(resetListToDisplay({ listName }));
+  }, []);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
-    lastSortTypeRef.current = sortType
-    dispatch(setSortOrder({ listName, sortBy: sortType }))
-  }, [])
+    lastSortTypeRef.current = sortType;
+    dispatch(setSortOrder({ listName, sortBy: sortType }));
+  }, []);
 
   const onFilterValueChange = useCallback(
     (filters: ListFilterFilters<Item>) => {
-      dispatch(setFilters({ listName, filters }))
+      dispatch(setFilters({ listName, filters }));
     },
     [listName],
-  )
+  );
 
   const onSwipeRight = useCallback(
     (key: Key) => {
-      closeMenu()
-      setRefreshing(false)
+      closeMenu();
+      setRefreshing(false);
       dispatch(
         updateStoreSpecificValues({
           key,
@@ -105,19 +110,19 @@ export function ItemsList(props: ItemsListProps) {
               currentQuantity > 0 ? currentQuantity + 1 : 1,
           },
         }),
-      )
+      );
     },
     [closeMenu],
-  )
+  );
 
   const onSwipeLeft = useCallback(
     (key: Key) => {
-      closeMenu()
-      dispatch(removeItemsListItem(key))
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+      closeMenu();
+      dispatch(removeItemsListItem(key));
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [listRef, closeMenu],
-  )
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -126,22 +131,23 @@ export function ItemsList(props: ItemsListProps) {
           ref={menuRef}
           onSortPress={onSortPress}
           onFilterPress={onFilterPress}
+          onResetPress={onResetPress}
           listName={listName}
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
-    })
-  }, [navigation])
+    });
+  }, [navigation]);
 
   useFocusEffect(() => {
-    closeMenu()
-  })
+    closeMenu();
+  });
 
   function renderItem({ item, index }: ListRow<Item>) {
     const key = {
       name: item.name,
       upc: item.upc,
-    } as Key
+    } as Key;
     return (
       <SwipeableRow
         swipeableProps={{
@@ -189,7 +195,7 @@ export function ItemsList(props: ItemsListProps) {
       >
         <ItemTile item={item} />
       </SwipeableRow>
-    )
+    );
   }
 
   return (
@@ -199,10 +205,10 @@ export function ItemsList(props: ItemsListProps) {
         refreshing={refreshing}
         onTouchStart={closeMenu}
         onRefresh={() => {
-          setRefreshing(true)
+          setRefreshing(true);
           setTimeout(() => {
-            setRefreshing(false)
-          }, 2000)
+            setRefreshing(false);
+          }, 2000);
         }}
         data={itemsListToDisplay}
         renderItem={renderItem}
@@ -228,5 +234,5 @@ export function ItemsList(props: ItemsListProps) {
         onValueChange={onFilterValueChange}
       />
     </>
-  )
+  );
 }

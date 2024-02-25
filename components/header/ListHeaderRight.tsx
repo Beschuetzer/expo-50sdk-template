@@ -1,5 +1,5 @@
-import { theme } from 'native-base'
-import { forwardRef } from 'react'
+import { theme } from 'native-base';
+import { forwardRef } from 'react';
 import {
   Menu,
   MenuOption,
@@ -8,23 +8,21 @@ import {
   MenuOptionsCustomStyle,
   MenuTrigger,
   renderers,
-} from 'react-native-popup-menu'
-import { useDispatch } from 'react-redux'
+} from 'react-native-popup-menu';
 
-import { EllipsisButton } from './EllipsisButton'
+import { EllipsisButton } from './EllipsisButton';
 
-import { resetListToDisplay } from '@/state/slices/listsSlice'
-import { ListNameProp } from '@/types/general'
-const { NotAnimatedContextMenu } = renderers
+import { ListNameProp } from '@/types/general';
+const { NotAnimatedContextMenu } = renderers;
 
 type ListHeaderRightProps = {
-  onSortPress?: () => void
-  onFilterPress?: () => void
-} & ListNameProp
+  onSortPress?: () => void;
+  onFilterPress?: () => void;
+  onResetPress?: () => void;
+} & ListNameProp;
 export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
   (props, ref) => {
-    const { onSortPress, onFilterPress, listName } = props
-    const dispatch = useDispatch()
+    const { onSortPress, onFilterPress, onResetPress } = props;
 
     return (
       <Menu renderer={NotAnimatedContextMenu} ref={ref}>
@@ -44,16 +42,18 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
               text="Filter"
             />
           ) : null}
-          <MenuOption
-            customStyles={customOptionStyles}
-            onSelect={() => dispatch(resetListToDisplay({ listName }))}
-            text="Reset"
-          />
+          {onResetPress ? (
+            <MenuOption
+              customStyles={customOptionStyles}
+              onSelect={onResetPress}
+              text="Reset"
+            />
+          ) : null}
         </MenuOptions>
       </Menu>
-    )
+    );
   },
-)
+);
 
 const customOptionStyles: MenuOptionCustomStyle = {
   optionText: {
@@ -62,8 +62,8 @@ const customOptionStyles: MenuOptionCustomStyle = {
     fontSize: 20,
     textAlign: 'center',
   },
-}
+};
 
 const customMenuOptionsStyle: MenuOptionsCustomStyle = {
   optionsContainer: { backgroundColor: theme.colors.black },
-}
+};

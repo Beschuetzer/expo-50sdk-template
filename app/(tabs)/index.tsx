@@ -33,22 +33,39 @@ export default function TabOneScreen() {
   );
 
   const [index, setIndex] = useState(0);
+
+  const firstTabTitle = useMemo(() => {
+    const main = 'Need';
+    if (shoppingList.length === 0 && inCartList.length === 0) {
+      return main;
+    }
+    return shoppingList.length > 0
+      ? `${main} ${shoppingList.length}`
+      : `Finished`;
+  }, [shoppingList.length, inCartList.length]);
+
+  const secondTabTitle = useMemo(() => {
+    const main = 'In Cart';
+    if (shoppingList.length === 0 && inCartList.length === 0) {
+      return main;
+    }
+    return inCartList.length > 0
+      ? `${main} (${inCartList.length})`
+      : `Cart Empty`;
+  }, [shoppingList.length, inCartList.length]);
+
   const routes = useMemo(
     () => [
       {
         key: 'first',
-        title:
-          shoppingList.length > 0 ? `Need ${shoppingList.length}` : `Finished`,
+        title: firstTabTitle,
       },
       {
         key: 'second',
-        title:
-          inCartList.length > 0
-            ? `In Cart (${inCartList.length})`
-            : `Cart Empty`,
+        title: secondTabTitle,
       },
     ],
-    [inCartList.length, shoppingList.length],
+    [firstTabTitle, secondTabTitle],
   );
 
   useLayoutEffect(() => {

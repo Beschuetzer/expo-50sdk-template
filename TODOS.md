@@ -1,4 +1,6 @@
 ## MVP
+-bug: add item to in cart, then remove from shopping list altogether, then go to item in items tab and set the quantity to 1.  Notice how the item is put into the cart instead of in the shopping list
+
 -add button to purchase items in the cart (this will set the last purchased value and reset the items in the cart (rest quantity and isInCart storeSpecificValues))
 -figure out sort/filter for shopping and in cart list (in cart should either disable those options or setup a local way to do it?)
 

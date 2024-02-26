@@ -21,10 +21,10 @@ import {
   ListName,
   addItemToCart,
   currentStoreSelector,
-  removeShoppingListItem,
   setSortOrder,
   storeSpecificListSelector,
   shoppingListSelector,
+  updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
@@ -90,7 +90,15 @@ export function ShoppingList(props: ShoppingListProps) {
   const onSwipeLeft = useCallback(
     (key: Key) => {
       closeMenu();
-      dispatch(removeShoppingListItem(key));
+      dispatch(
+        updateStoreSpecificValues({
+          key,
+          storeSpecificValuesToUpdate: {
+            isInCart: (current) => false,
+            quantity: (current) => 0,
+          },
+        }),
+      );
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [listRef, closeMenu],

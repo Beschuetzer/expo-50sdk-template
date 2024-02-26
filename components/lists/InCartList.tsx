@@ -19,7 +19,7 @@ import {
   ListName,
   addItemToCart,
   currentStoreSelector,
-  removeShoppingListItem,
+  moveItemToShoppingList,
   storeSpecificListSelector,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
@@ -68,7 +68,7 @@ export function InCartList(props: InCartListProps) {
   const onSwipeLeft = useCallback(
     (key: Key) => {
       closeMenu();
-      dispatch(removeShoppingListItem(key));
+      dispatch(moveItemToShoppingList(key));
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [listRef, closeMenu],

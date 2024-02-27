@@ -25,6 +25,7 @@ import {
   storeSpecificListSelector,
   shoppingListSelector,
   updateStoreSpecificValues,
+  resetListToDisplay,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
@@ -68,6 +69,10 @@ export function ShoppingList(props: ShoppingListProps) {
       key: EMPTY_STRING,
     });
   }
+  
+  const onResetPress = useCallback(() => {
+    dispatch(resetListToDisplay({ listName }));
+  }, []);
 
   const onSortPress = useCallback(() => {
     setIsSortModalOpen(true);
@@ -110,6 +115,7 @@ export function ShoppingList(props: ShoppingListProps) {
         <ListHeaderRight
           ref={menuRef}
           onSortPress={onSortPress}
+          onResetPress={onResetPress}
           listName={listName}
         />
       ),

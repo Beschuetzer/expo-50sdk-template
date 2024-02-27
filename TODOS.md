@@ -2,6 +2,7 @@
 -add button for Shopping list to move all to in cart
 -add button to purchase items in the cart (this will set the last purchased value and reset the items in the cart (rest quantity and isInCart storeSpecificValues))
 -figure out how to select multiple items for a list and do some action
+-figure out issue where opening an item and changing stores then saving, causes all other store data to be lost
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item

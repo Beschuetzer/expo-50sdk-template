@@ -234,7 +234,28 @@ export const listsSlice = createSlice({
         state.currentStoreName = store.name;
       }
     },
-    completePurchase: (state: ListsState) => {},
+    completePurchase: (state: ListsState) => {
+      const { currentStoreName, storeSpecificValuesMap } = state;
+      for (const key of Object.keys(storeSpecificValuesMap)) {
+        if (
+          storeSpecificValuesMap[key]?.[StoreSpecificValueKey.IsInCart]?.[
+            currentStoreName
+          ]
+        ) {
+          storeSpecificValuesMap[key] = {
+            ...storeSpecificValuesMap[key],
+            [StoreSpecificValueKey.IsInCart]: {
+              ...storeSpecificValuesMap[key][StoreSpecificValueKey.IsInCart],
+              [currentStoreName]: false,
+            },
+            [StoreSpecificValueKey.Quantity]: {
+              ...storeSpecificValuesMap[key][StoreSpecificValueKey.Quantity],
+              [currentStoreName]: 0,
+            },
+          };
+        }
+      }
+    },
     moveAllToInCart: (state: ListsState) => {
       const { currentStoreName, storeSpecificValuesMap } = state;
       console.log({ currentStoreName });

@@ -1,10 +1,8 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { useFocusEffect, useNavigation } from 'expo-router';
 import { Text, useTheme, Stack } from 'native-base';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
-import { Menu } from 'react-native-popup-menu';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTile } from './ItemTile';
@@ -13,11 +11,8 @@ import { ListSorter } from './ListSorter';
 import { shoppingListSortTypes } from './ShoppingLIst';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
-import { AddButton } from '../header/AddButton';
-import { ListHeaderRight } from '../header/ListHeaderRight';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   ListName,
   addItemToCart,
@@ -35,7 +30,6 @@ type InCartListProps = object;
 
 const listName: ListName = ListName.InCartList;
 export function InCartList(props: InCartListProps) {
-  const navigation = useNavigation();
   const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(storeSpecificListSelector(listName));
   const currentStore = useSelector(currentStoreSelector);
@@ -44,77 +38,25 @@ export function InCartList(props: InCartListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-  const menuRef = useRef<Menu>(null);
-
-  const closeMenu = useCallback(() => {
-    menuRef.current?.close();
-  }, [menuRef]);
-
-  function onAddItemPress() {
-    closeMenu();
-    navigation.navigate(Routes.ItemModal, {
-      showBlank: true,
-      callerList: ListName.ShoppingList,
-      key: EMPTY_STRING,
-    });
-  }
-
-  const onCompletePurchasePress = useCallback(() => {
-    console.log('complete');
-  }, []);
-
-  const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true);
-  }, []);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
-    console.log({sortType});
-    
     dispatch(
       setSortOrder({ listName: ListName.ShoppingList, sortBy: sortType }),
     );
   }, []);
 
-  const onSwipeRight = useCallback(
-    (item: ItemWithStoreSpecificValues) => {
-      closeMenu();
-      setRefreshing(false);
-      dispatch(addItemToCart(item));
-    },
-    [closeMenu],
-  );
+  const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
+    setRefreshing(false);
+    dispatch(addItemToCart(item));
+  }, []);
 
   const onSwipeLeft = useCallback(
     (key: Key) => {
-      closeMenu();
       dispatch(moveItemToShoppingList(key));
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
-    [listRef, closeMenu],
+    [listRef],
   );
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <ListHeaderRight
-          ref={menuRef}
-          listName={listName}
-          onSortPress={onSortPress}
-          options={[
-            {
-              onPress: onCompletePurchasePress,
-              text: 'Mark all as Purchased',
-            },
-          ]}
-        />
-      ),
-      headerLeft: () => <AddButton onPress={onAddItemPress} />,
-    });
-  }, [navigation]);
-
-  useFocusEffect(() => {
-    closeMenu();
-  });
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const key = {
@@ -123,9 +65,6 @@ export function InCartList(props: InCartListProps) {
     } as Key;
     return (
       <SwipeableRow
-        swipeableProps={{
-          onBegan: closeMenu,
-        }}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -177,7 +116,6 @@ export function InCartList(props: InCartListProps) {
       <FlashList
         ref={listRef}
         refreshing={refreshing}
-        onTouchStart={closeMenu}
         onRefresh={() => {
           setRefreshing(true);
           setTimeout(() => {

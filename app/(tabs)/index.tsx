@@ -1,14 +1,28 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
+import { Menu } from 'react-native-popup-menu';
 import { SceneMap, TabView } from 'react-native-tab-view';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { AddButton } from '@/components/header/AddButton';
+import { ListHeaderRight } from '@/components/header/ListHeaderRight';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { InCartList } from '@/components/lists/InCartList';
-import { ShoppingList } from '@/components/lists/ShoppingLIst';
+import { ListSorter } from '@/components/lists/ListSorter';
+import {
+  ShoppingList,
+  shoppingListSortTypes,
+} from '@/components/lists/ShoppingLIst';
+import { SortType } from '@/components/lists/sorters';
+import { EMPTY_STRING } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import {
   ListName,
+  resetListToDisplay,
   setCurrentLocation,
+  setSortOrder,
+  shoppingListSelector,
   storeSpecificListSelector,
 } from '@/state/slices/listsSlice';
 
@@ -25,35 +39,38 @@ export default function TabOneScreen() {
     },
   });
   const layout = useWindowDimensions();
-  const shoppingList = useSelector(
+  const shoppingList = useSelector(shoppingListSelector);
+  const shoppingListItems = useSelector(
     storeSpecificListSelector(ListName.ShoppingList),
   );
   const inCartList = useSelector(
     storeSpecificListSelector(ListName.InCartList),
   );
 
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [index, setIndex] = useState(0);
-
+  const menuRef = useRef<Menu>(null);
+  const navigation = useNavigation();
+  const listName = ListName.ShoppingList;
   const firstTabTitle = useMemo(() => {
     const main = 'Need';
-    if (shoppingList.length === 0 && inCartList.length === 0) {
+    if (shoppingListItems.length === 0 && inCartList.length === 0) {
       return main;
     }
-    return shoppingList.length > 0
-      ? `${main} ${shoppingList.length}`
+    return shoppingListItems.length > 0
+      ? `${main} ${shoppingListItems.length}`
       : `Finished`;
-  }, [shoppingList.length, inCartList.length]);
+  }, [shoppingListItems.length, inCartList.length]);
 
   const secondTabTitle = useMemo(() => {
     const main = 'In Cart';
-    if (shoppingList.length === 0 && inCartList.length === 0) {
+    if (shoppingListItems.length === 0 && inCartList.length === 0) {
       return main;
     }
     return inCartList.length > 0
       ? `${main} (${inCartList.length})`
       : `Cart Empty`;
-  }, [shoppingList.length, inCartList.length]);
-
+  }, [shoppingListItems.length, inCartList.length]);
   const routes = useMemo(
     () => [
       {
@@ -68,20 +85,87 @@ export default function TabOneScreen() {
     [firstTabTitle, secondTabTitle],
   );
 
+  const closeMenu = useCallback(() => {
+    menuRef.current?.close();
+  }, [menuRef]);
+
+  const onAddItemPress = useCallback(() => {
+    closeMenu();
+    navigation.navigate(Routes.ItemModal, {
+      showBlank: true,
+      callerList: ListName.ShoppingList,
+      key: EMPTY_STRING,
+    });
+  }, [closeMenu]);
+
+  const onCompletePurchasePress = useCallback(() => {
+    console.log('complete');
+  }, []);
+
+  const onResetPress = useCallback(() => {
+    dispatch(resetListToDisplay({ listName }));
+  }, []);
+
+  const onSortPress = useCallback(() => {
+    setIsSortModalOpen(true);
+  }, []);
+
+  const onSortTypeChange = useCallback((sortType: SortType) => {
+    dispatch(setSortOrder({ listName, sortBy: sortType }));
+  }, []);
+
   useLayoutEffect(() => {
     if (inCartList.length <= 0) {
       setIndex(0);
-    } else if (shoppingList.length === 0) {
+    } else if (shoppingListItems.length === 0) {
       setIndex(1);
     }
   }, [inCartList.length]);
 
+  useFocusEffect(() => {
+    closeMenu();
+    console.log({index});
+    
+    navigation.setOptions({
+      headerRight: () => (
+        <ListHeaderRight
+          ref={menuRef}
+          onSortPress={onSortPress}
+          onResetPress={onResetPress}
+          listName={listName}
+          options={
+            index === 1
+              ? [
+                  {
+                    onPress: onCompletePurchasePress,
+                    text: 'Mark all as Purchased',
+                  },
+                ]
+              : []
+          }
+        />
+      ),
+      headerLeft: () => <AddButton onPress={onAddItemPress} />,
+    });
+  });
+
   return (
-    <TabView
-      navigationState={{ index, routes }}
-      renderScene={renderScene}
-      onIndexChange={setIndex}
-      initialLayout={{ width: layout.width }}
-    />
+    <>
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+      />
+      <ListSorter
+        sortOrderValue={shoppingList.sortOrderValue}
+        listName={listName}
+        isVisible={isSortModalOpen}
+        setIsVisible={setIsSortModalOpen}
+        onValueChange={onSortTypeChange}
+        sortTypes={shoppingListSortTypes}
+        viewSize="small"
+      />
+    </>
   );
 }

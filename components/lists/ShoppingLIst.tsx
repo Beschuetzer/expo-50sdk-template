@@ -1,31 +1,23 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { useFocusEffect, useNavigation } from 'expo-router';
 import { Text, useTheme, Stack } from 'native-base';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
-import { Menu } from 'react-native-popup-menu';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTile } from './ItemTile';
 import { ListItemSeparator } from './ListItemSeparator';
-import { ListSorter } from './ListSorter';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
-import { AddButton } from '../header/AddButton';
-import { ListHeaderRight } from '../header/ListHeaderRight';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   ListName,
   addItemToCart,
   currentStoreSelector,
-  setSortOrder,
   storeSpecificListSelector,
   shoppingListSelector,
   updateStoreSpecificValues,
-  resetListToDisplay,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
@@ -43,8 +35,6 @@ export const shoppingListSortTypes = [
 
 const listName: ListName = ListName.ShoppingList;
 export function ShoppingList(props: ShoppingListProps) {
-  const navigation = useNavigation();
-  const shoppingList = useSelector(shoppingListSelector);
   const shoppingListToDisplay = useSelector(
     storeSpecificListSelector(listName),
   );
@@ -53,46 +43,14 @@ export function ShoppingList(props: ShoppingListProps) {
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-  const menuRef = useRef<Menu>(null);
 
-  const closeMenu = useCallback(() => {
-    menuRef.current?.close();
-  }, [menuRef]);
-
-  function onAddItemPress() {
-    closeMenu();
-    navigation.navigate(Routes.ItemModal, {
-      showBlank: true,
-      callerList: ListName.ShoppingList,
-      key: EMPTY_STRING,
-    });
-  }
-
-  const onResetPress = useCallback(() => {
-    dispatch(resetListToDisplay({ listName }));
+  const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
+    setRefreshing(false);
+    dispatch(addItemToCart(item));
   }, []);
-
-  const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true);
-  }, []);
-
-  const onSortTypeChange = useCallback((sortType: SortType) => {
-    dispatch(setSortOrder({ listName, sortBy: sortType }));
-  }, []);
-
-  const onSwipeRight = useCallback(
-    (item: ItemWithStoreSpecificValues) => {
-      closeMenu();
-      setRefreshing(false);
-      dispatch(addItemToCart(item));
-    },
-    [closeMenu],
-  );
 
   const onSwipeLeft = useCallback(
     (key: Key) => {
-      closeMenu();
       dispatch(
         updateStoreSpecificValues({
           key,
@@ -104,26 +62,8 @@ export function ShoppingList(props: ShoppingListProps) {
       );
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
-    [listRef, closeMenu],
+    [listRef],
   );
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <ListHeaderRight
-          ref={menuRef}
-          onSortPress={onSortPress}
-          onResetPress={onResetPress}
-          listName={listName}
-        />
-      ),
-      headerLeft: () => <AddButton onPress={onAddItemPress} />,
-    });
-  }, [navigation]);
-
-  useFocusEffect(() => {
-    closeMenu();
-  });
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const key = {
@@ -132,9 +72,6 @@ export function ShoppingList(props: ShoppingListProps) {
     } as Key;
     return (
       <SwipeableRow
-        swipeableProps={{
-          onBegan: closeMenu,
-        }}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -186,7 +123,6 @@ export function ShoppingList(props: ShoppingListProps) {
       <FlashList
         ref={listRef}
         refreshing={refreshing}
-        onTouchStart={closeMenu}
         onRefresh={() => {
           setRefreshing(true);
           setTimeout(() => {
@@ -200,15 +136,6 @@ export function ShoppingList(props: ShoppingListProps) {
         }
         estimatedItemSize={120}
         ItemSeparatorComponent={() => <ListItemSeparator />}
-      />
-      <ListSorter
-        sortOrderValue={shoppingList.sortOrderValue}
-        listName={listName}
-        isVisible={isSortModalOpen}
-        setIsVisible={setIsSortModalOpen}
-        onValueChange={onSortTypeChange}
-        sortTypes={shoppingListSortTypes}
-        viewSize="small"
       />
     </>
   );

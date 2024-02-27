@@ -1,6 +1,7 @@
 ## MVP
+-add button for Shopping list to move all to in cart
 -add button to purchase items in the cart (this will set the last purchased value and reset the items in the cart (rest quantity and isInCart storeSpecificValues))
--figure out sort/filter for shopping and in cart list (in cart should either disable those options or setup a local way to do it?)
+-figure out how to select multiple items for a list and do some action
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item

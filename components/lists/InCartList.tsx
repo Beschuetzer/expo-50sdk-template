@@ -9,7 +9,10 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTile } from './ItemTile';
 import { ListItemSeparator } from './ListItemSeparator';
+import { ListSorter } from './ListSorter';
+import { shoppingListSortTypes } from './ShoppingLIst';
 import { SwipeableRow } from './SwipeableRow';
+import { SortType } from './sorters';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 
@@ -20,6 +23,8 @@ import {
   addItemToCart,
   currentStoreSelector,
   moveItemToShoppingList,
+  setSortOrder,
+  shoppingListSelector,
   storeSpecificListSelector,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
@@ -31,12 +36,14 @@ type InCartListProps = object;
 const listName: ListName = ListName.InCartList;
 export function InCartList(props: InCartListProps) {
   const navigation = useNavigation();
+  const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(storeSpecificListSelector(listName));
   const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const menuRef = useRef<Menu>(null);
 
   const closeMenu = useCallback(() => {
@@ -52,8 +59,20 @@ export function InCartList(props: InCartListProps) {
     });
   }
 
+  const onCompletePurchasePress = useCallback(() => {
+    console.log('complete');
+  }, []);
+
   const onSortPress = useCallback(() => {
     setIsSortModalOpen(true);
+  }, []);
+
+  const onSortTypeChange = useCallback((sortType: SortType) => {
+    console.log({sortType});
+    
+    dispatch(
+      setSortOrder({ listName: ListName.ShoppingList, sortBy: sortType }),
+    );
   }, []);
 
   const onSwipeRight = useCallback(
@@ -79,8 +98,14 @@ export function InCartList(props: InCartListProps) {
       headerRight: () => (
         <ListHeaderRight
           ref={menuRef}
-          onSortPress={onSortPress}
           listName={listName}
+          onSortPress={onSortPress}
+          options={[
+            {
+              onPress: onCompletePurchasePress,
+              text: 'Mark all as Purchased',
+            },
+          ]}
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
@@ -166,6 +191,15 @@ export function InCartList(props: InCartListProps) {
         }
         estimatedItemSize={120}
         ItemSeparatorComponent={() => <ListItemSeparator />}
+      />
+      <ListSorter
+        sortOrderValue={shoppingList.sortOrderValue}
+        listName={ListName.ShoppingList}
+        isVisible={isSortModalOpen}
+        setIsVisible={setIsSortModalOpen}
+        onValueChange={onSortTypeChange}
+        sortTypes={shoppingListSortTypes}
+        viewSize="small"
       />
     </>
   );

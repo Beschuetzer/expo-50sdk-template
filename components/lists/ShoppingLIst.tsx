@@ -33,7 +33,7 @@ import { getKeyToUse } from '@/utils/helpers';
 
 type ShoppingListProps = object;
 
-const shoppingListSortTypes = [
+export const shoppingListSortTypes = [
   SortType.Name,
   SortType.Upc,
   SortType.AddedDate,
@@ -54,7 +54,6 @@ export function ShoppingList(props: ShoppingListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-  const lastSortTypeRef = useRef(shoppingListSortTypes[0]);
   const menuRef = useRef<Menu>(null);
 
   const closeMenu = useCallback(() => {
@@ -69,7 +68,7 @@ export function ShoppingList(props: ShoppingListProps) {
       key: EMPTY_STRING,
     });
   }
-  
+
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));
   }, []);
@@ -79,7 +78,6 @@ export function ShoppingList(props: ShoppingListProps) {
   }, []);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
-    lastSortTypeRef.current = sortType;
     dispatch(setSortOrder({ listName, sortBy: sortType }));
   }, []);
 

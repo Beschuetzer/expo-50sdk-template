@@ -20,6 +20,7 @@ import { Routes } from '@/constants/navigation';
 import {
   ListName,
   completePurchase,
+  moveAllToInCart,
   resetListToDisplay,
   setCurrentLocation,
   setSortOrder,
@@ -103,6 +104,10 @@ export default function TabOneScreen() {
     dispatch(completePurchase());
   }, []);
 
+  const onMoveAllToInCartPress = useCallback(() => {
+    dispatch(moveAllToInCart());
+  }, []);
+
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));
   }, []);
@@ -140,7 +145,12 @@ export default function TabOneScreen() {
                     text: 'Mark all as Purchased',
                   },
                 ]
-              : []
+              : [
+                  {
+                    onPress: onMoveAllToInCartPress,
+                    text: 'Move all to In Cart',
+                  },
+                ]
           }
         />
       ),

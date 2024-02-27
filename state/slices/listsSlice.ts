@@ -235,6 +235,22 @@ export const listsSlice = createSlice({
       }
     },
     completePurchase: (state: ListsState) => {},
+    moveAllToInCart: (state: ListsState) => {
+      const { currentStoreName, storeSpecificValuesMap } = state;
+      console.log({ currentStoreName });
+      for (const key of Object.keys(storeSpecificValuesMap)) {
+        if (
+          storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Quantity]?.[
+            currentStoreName
+          ]
+        ) {
+          storeSpecificValuesMap[key][StoreSpecificValueKey.IsInCart] = {
+            ...storeSpecificValuesMap[key][StoreSpecificValueKey.IsInCart],
+            [currentStoreName]: true,
+          };
+        }
+      }
+    },
     moveItemToShoppingList: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
       if (!state.storeSpecificValuesMap?.[keyToUse]) {
@@ -643,9 +659,10 @@ export const {
   addLastPurchasedList,
   addStoresListItem,
   completePurchase,
+  moveAllToInCart,
+  moveItemToShoppingList,
   removeItemsListItem,
   removeLastPurchasedListItem,
-  moveItemToShoppingList,
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,

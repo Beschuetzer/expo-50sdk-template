@@ -19,6 +19,7 @@ import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
   ListName,
+  completePurchase,
   resetListToDisplay,
   setCurrentLocation,
   setSortOrder,
@@ -99,7 +100,7 @@ export default function TabOneScreen() {
   }, [closeMenu]);
 
   const onCompletePurchasePress = useCallback(() => {
-    console.log('complete');
+    dispatch(completePurchase());
   }, []);
 
   const onResetPress = useCallback(() => {
@@ -124,8 +125,6 @@ export default function TabOneScreen() {
 
   useFocusEffect(() => {
     closeMenu();
-    console.log({index});
-    
     navigation.setOptions({
       headerRight: () => (
         <ListHeaderRight

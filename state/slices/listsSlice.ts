@@ -234,6 +234,7 @@ export const listsSlice = createSlice({
         state.currentStoreName = store.name;
       }
     },
+    completePurchase: (state: ListsState) => {},
     moveItemToShoppingList: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
       if (!state.storeSpecificValuesMap?.[keyToUse]) {
@@ -485,36 +486,6 @@ export const listsSlice = createSlice({
   },
 });
 
-// Action creators are generated for each case reducer function
-export const {
-  addItemsListItem,
-  addItemToCart,
-  addLastPurchasedList,
-  addStoresListItem,
-  removeItemsListItem,
-  removeLastPurchasedListItem,
-  moveItemToShoppingList,
-  removeStoresListItem,
-  resetCurrentLocation,
-  resetCurrentStoreName,
-  resetItemsList,
-  resetLastPurchasedList,
-  resetListToDisplay,
-  resetListToDisplayFilters,
-  resetStoresList,
-  setCurrentLocation,
-  setCurrentStoreName,
-  setFilters,
-  setItemsList,
-  setSortOrder,
-  setStoresList,
-  setStoreSpecificValues,
-  toggleSortOrder,
-  updateStoreSpecificValues,
-} = listsSlice.actions;
-
-export default listsSlice.reducer;
-
 export const currentLocationSelector = (state: RootState) =>
   state[listsSlice.name].currentLocation;
 
@@ -564,8 +535,14 @@ export const itemsListSelector = (state: RootState) =>
 
 export const listToDisplaySelector = (listName: ListName) =>
   createSelector(
-    [(state: RootState) => state[listsSlice.name]?.[listName]],
+    [
+      (state: RootState) => {
+        if (listName === ListName.InCartList) return null;
+        return state[listsSlice.name]?.[listName];
+      },
+    ],
     (list) => {
+      if (!list) return [];
       const { filters, sortOrderValue, data } = list;
 
       const filteredList = getFilteredList<unknown>(data, filters);
@@ -658,3 +635,34 @@ export const storesListItemSelector = (storeName: string) =>
 
 export const storeSpecificValuesSelector = (state: RootState) =>
   state[listsSlice.name].storeSpecificValuesMap;
+
+// Action creators are generated for each case reducer function
+export const {
+  addItemsListItem,
+  addItemToCart,
+  addLastPurchasedList,
+  addStoresListItem,
+  completePurchase,
+  removeItemsListItem,
+  removeLastPurchasedListItem,
+  moveItemToShoppingList,
+  removeStoresListItem,
+  resetCurrentLocation,
+  resetCurrentStoreName,
+  resetItemsList,
+  resetLastPurchasedList,
+  resetListToDisplay,
+  resetListToDisplayFilters,
+  resetStoresList,
+  setCurrentLocation,
+  setCurrentStoreName,
+  setFilters,
+  setItemsList,
+  setSortOrder,
+  setStoresList,
+  setStoreSpecificValues,
+  toggleSortOrder,
+  updateStoreSpecificValues,
+} = listsSlice.actions;
+
+export default listsSlice.reducer;

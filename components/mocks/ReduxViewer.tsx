@@ -1,10 +1,10 @@
-import { Button, FlatList, Heading, Row, Stack, Text, View } from 'native-base'
-import React, { useRef, useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { Button, FlatList, Heading, Row, Stack, Text, View } from 'native-base';
+import React, { useRef, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { getRandomItem } from './helpers'
-import { MOCK_STORES } from './mockStores'
-import { MOCKS_UPCS } from './mockUpcData'
+import { getRandomItem } from './helpers';
+import { MOCK_STORES } from './mockStores';
+import { MOCKS_UPCS } from './mockUpcData';
 
 import {
   addItemsListItem,
@@ -16,30 +16,30 @@ import {
   resetCurrentStoreName,
   resetItemsList,
   resetStoresList,
-} from '@/state/slices/listsSlice'
+} from '@/state/slices/listsSlice';
 import {
   resetUpcProducts,
   upcProductsSelector,
-} from '@/state/slices/scannerSlice'
+} from '@/state/slices/scannerSlice';
 import {
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey,
-} from '@/types/Item'
-import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers'
+} from '@/types/Item';
+import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers';
 
-const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500
-const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000
+const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500;
+const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000;
 export function ReduxViewer() {
-  const lastUpcIndexRef = useRef(0)
-  const lastUpcNumberRef = useRef(1)
-  const lastStoreIndexRef = useRef(0)
+  const lastUpcIndexRef = useRef(0);
+  const lastUpcNumberRef = useRef(1);
+  const lastStoreIndexRef = useRef(0);
   const [numberOfMockItems, setNumberOfMockItems] = useState(
     NUMBER_OF_ITEM_TO_MOCK_INITIAL,
-  )
-  const upcProducts = useSelector(upcProductsSelector)
-  const currentLocation = useSelector(currentLocationSelector)
-  const currentStore = useSelector(currentStoreSelector)
-  const dispatch = useDispatch()
+  );
+  const upcProducts = useSelector(upcProductsSelector);
+  const currentLocation = useSelector(currentLocationSelector);
+  const currentStore = useSelector(currentStoreSelector);
+  const dispatch = useDispatch();
 
   // useEffect(() => {
   //   dispatch(resetItemsList())
@@ -51,14 +51,14 @@ export function ReduxViewer() {
       <Text fontWeight="bold">
         {key}: <Text fontWeight="normal">{value}</Text>
       </Text>
-    )
+    );
   }
 
   return (
     <FlatList
       data={Object.values(upcProducts || {})}
       renderItem={(data) => {
-        const { item, index } = data
+        const { item, index } = data;
         return (
           <View key={`${index}-${item.id}`}>
             <Heading size="sm" mt={3}>
@@ -74,7 +74,7 @@ export function ReduxViewer() {
               imagesToRender={new Set(getImagesFromUpcProduct(item))}
             /> */}
           </View>
-        )
+        );
       }}
       ListHeaderComponent={
         <>
@@ -86,8 +86,8 @@ export function ReduxViewer() {
               </Button>
               <Button
                 onPress={() => {
-                  lastUpcIndexRef.current = 0
-                  dispatch(resetItemsList())
+                  lastUpcIndexRef.current = 0;
+                  dispatch(resetItemsList());
                 }}
               >
                 Lists
@@ -102,9 +102,9 @@ export function ReduxViewer() {
               </Button>
               <Button
                 onPress={() => {
-                  lastStoreIndexRef.current = 0
-                  dispatch(resetStoresList())
-                  dispatch(resetCurrentStoreName())
+                  lastStoreIndexRef.current = 0;
+                  dispatch(resetStoresList());
+                  dispatch(resetCurrentStoreName());
                 }}
               >
                 storeList
@@ -116,27 +116,27 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current]
+                  const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current];
                   if (lastStoreIndexRef.current >= MOCK_STORES.length - 1) {
-                    lastStoreIndexRef.current = 0
+                    lastStoreIndexRef.current = 0;
                   } else {
-                    lastStoreIndexRef.current += 1
+                    lastStoreIndexRef.current += 1;
                   }
-                  dispatch(addStoresListItem(storeToUse))
+                  dispatch(addStoresListItem(storeToUse));
                 }}
               >
                 Store
               </Button>
               <Button
                 onPress={() => {
-                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current]
+                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current];
                   if (lastUpcIndexRef.current >= MOCKS_UPCS.length - 1) {
-                    lastUpcIndexRef.current = 0
+                    lastUpcIndexRef.current = 0;
                   } else {
-                    lastUpcIndexRef.current += 1
+                    lastUpcIndexRef.current += 1;
                   }
 
-                  const randomItem = getRandomItem(lastUpcIndexRef.current)
+                  const randomItem = getRandomItem(lastUpcIndexRef.current);
                   dispatch(
                     addItemsListItem({
                       item: {
@@ -157,7 +157,7 @@ export function ReduxViewer() {
                       },
                       currentStore: MOCK_STORES[1],
                     }),
-                  )
+                  );
                 }}
               >
                 Item
@@ -166,12 +166,14 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const itemsList = getEmptyList<ItemWithStoreSpecificValues>()
+                  const itemsList = getEmptyList<ItemWithStoreSpecificValues>();
                   for (let index = 0; index < numberOfMockItems; index++) {
-                    itemsList.data.push(getRandomItem(lastUpcNumberRef.current))
-                    lastUpcNumberRef.current += 1
+                    itemsList.data.push(
+                      getRandomItem(lastUpcNumberRef.current),
+                    );
+                    lastUpcNumberRef.current += 1;
                   }
-                  dispatch(setItemsList(itemsList))
+                  dispatch(setItemsList(itemsList));
                 }}
               >
                 Add {numberOfMockItems} items
@@ -179,7 +181,7 @@ export function ReduxViewer() {
             </Row>
             <Button
               onPress={() => {
-                const items = []
+                const items = [];
                 for (
                   let index = 0;
                   index < NUMBER_OF_ITEMS_TO_SORT_INITIAL;
@@ -190,14 +192,14 @@ export function ReduxViewer() {
                     users: Array(50)
                       .fill()
                       .map((_, index) => index + 1),
-                  })
+                  });
                 }
-                const start = performance.now()
-                items.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
-                const end = performance.now()
+                const start = performance.now();
+                items.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+                const end = performance.now();
                 displayAlert({
                   [`timeToSort${NUMBER_OF_ITEMS_TO_SORT_INITIAL}`]: end - start,
-                })
+                });
               }}
             >
               Test Sort
@@ -215,5 +217,5 @@ export function ReduxViewer() {
         </>
       }
     />
-  )
+  );
 }

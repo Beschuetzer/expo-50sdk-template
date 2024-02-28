@@ -1,6 +1,5 @@
 ## MVP
--add button for Shopping list to move all to in cart
--add button to purchase items in the cart (this will set the last purchased value and reset the items in the cart (rest quantity and isInCart storeSpecificValues))
+
 -figure out how to select multiple items for a list and do some action
 
 ShoppingList

@@ -12,7 +12,7 @@ import {
   ItemsList,
   Key,
   LastPurchasedItem,
-  LastPurchasedList,
+  LastPurchasedMap,
   ShoppingList,
   StoreList,
   StoreSpecificValue,
@@ -36,7 +36,6 @@ import {
 export enum ListName {
   InCartList = 'inCartList',
   ItemsList = 'itemsList',
-  LastPurchasedList = 'lastPurchasedList',
   ShoppingList = 'shoppingLIst',
   StoresList = 'storesList',
 }
@@ -94,9 +93,9 @@ export type ListsState = {
   currentLocation: GpsCoordinate | null;
   currentStoreName: string;
   [ListName.ItemsList]: ItemsList;
-  [ListName.LastPurchasedList]: LastPurchasedList;
   [ListName.ShoppingList]: ShoppingList;
   [ListName.StoresList]: StoreList;
+  lastPurchasedMap: LastPurchasedMap;
   storeSpecificValuesMap: StoreSpecificValuesMap;
 };
 
@@ -104,9 +103,9 @@ const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
   [ListName.ItemsList]: getEmptyList(),
-  [ListName.LastPurchasedList]: getEmptyList(),
   [ListName.ShoppingList]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
+  lastPurchasedMap: getEmptyObject(),
   storeSpecificValuesMap: getEmptyObject(),
 };
 //#endregion
@@ -261,6 +260,11 @@ export const listsSlice = createSlice({
             currentStoreName
           ]
         ) {
+          state.lastPurchasedMap[key] = {
+            ...state.lastPurchasedMap[key],
+            [state.currentStoreName]: Date.now(),
+          };
+
           (storeSpecificValuesMap[key] as any) = {
             ...(storeSpecificValuesMap[key] as any),
             [StoreSpecificValueKey.IsInCart]: {
@@ -281,7 +285,6 @@ export const listsSlice = createSlice({
     },
     moveAllToInCart: (state: ListsState) => {
       const { currentStoreName, storeSpecificValuesMap } = state;
-      console.log({ currentStoreName });
       for (const key of Object.keys(storeSpecificValuesMap)) {
         if (
           storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Quantity]?.[

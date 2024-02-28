@@ -1,21 +1,12 @@
 ## MVP
 
+//todo: figure out types for useRouter/useNavigation (expo-router)
 -figure out how to select multiple items for a list and do some action
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item
-    --figure out how adding to cart look and works (how to sort and filter too?)
 
-
-finish ShoppingList and lastPurchasedList (using array and all the reducers/selectors around it):
-
--convert ShoppingList to use Flashlist
--Figure out how to style the shopping list tile
--figure out how to handle in cart vs in shopping list
 -figure out how to auto-select store if the difference in current location is <= 1 mile?
--figure out how to handl lastPurchasedList
-
--if sorting with 500+ items is slow, may need to rethink data structure for lists (make array and save the sort type (would need to add .None as an option too))
 
 -Custom thumbnail images:
     --add ability to long press an image which enters delete mode (trash bin show up in headerRight)
@@ -25,7 +16,6 @@ t-figure out
 
  //todo: calculate FlashList estimatedItemSize for each instance
 
-//todo: figure out types for useRouter/useNavigation (expo-router)
 //todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/
 //todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
 -UpcDetails rendering:

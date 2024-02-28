@@ -1,30 +1,52 @@
-import { useNavigation } from 'expo-router'
-import { Row, Column, Text } from 'native-base'
-import { useMemo } from 'react'
-import { StyleSheet } from 'react-native'
-import { RectButton } from 'react-native-gesture-handler'
+import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+import { Row, Column, Text, useTheme } from 'native-base';
+import { useMemo } from 'react';
+import { StyleSheet } from 'react-native';
+import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 
-import { ImageRenderer } from '../ImageRenderer'
+import { ImageRenderer } from '../ImageRenderer';
 
-import { Routes } from '@/constants/navigation'
-import { ItemProp } from '@/types/general'
-import { getFrequencyValue } from '@/utils/helpers'
+import { Routes } from '@/constants/navigation';
+import { Item } from '@/types/Item';
+import { ItemProp } from '@/types/general';
+import { getFrequencyValue } from '@/utils/helpers';
 
-type ItemTileProps = ItemProp
+type ItemTileProps = {
+  buttonProps?: RectButtonProps;
+  isMultiSelectMode?: boolean;
+  isSelected?: boolean;
+  onSelect?: (item: Item) => void;
+} & ItemProp;
 
 export function ItemTile(props: ItemTileProps) {
-  const navigation = useNavigation()
-  const { item } = props
-  const frequencyObj = useMemo(() => getFrequencyValue(item?.frequency), [item])
+  const theme = useTheme();
+  const navigation = useNavigation();
+  const {
+    isSelected = false,
+    isMultiSelectMode = false,
+    buttonProps,
+    item,
+    onSelect,
+  } = props;
+  const frequencyObj = useMemo(
+    () => getFrequencyValue(item?.frequency),
+    [item],
+  );
 
   return (
     <RectButton
+      {...buttonProps}
       style={styles.rectButton}
       onPress={() => {
-        navigation.navigate(Routes.ItemModal, {
-          key: item.upc || item.name,
-          showOverrideMsg: false,
-        })
+        if (isMultiSelectMode) {
+          onSelect && onSelect(item);
+        } else {
+          navigation.navigate(Routes.ItemModal, {
+            key: item.upc || item.name,
+            showOverrideMsg: false,
+          });
+        }
       }}
     >
       <Row space={2}>
@@ -42,9 +64,18 @@ export function ItemTile(props: ItemTileProps) {
             Updated: {new Date(item.lastUpdatedDate).toLocaleString()}
           </Text>
         </Column>
+        {isMultiSelectMode ? (
+          <Column justifyContent="center" alignItems="flex-end" flex={1}>
+            <FontAwesome
+              name={`${isSelected ? 'circle' : 'circle-o'}`}
+              color={theme.colors.primary[900]}
+              size={theme.sizes[5]}
+            />
+          </Column>
+        ) : null}
       </Row>
     </RectButton>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -56,4 +87,4 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: 'white',
   },
-})
+});

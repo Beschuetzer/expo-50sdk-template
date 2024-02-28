@@ -43,6 +43,8 @@ export function ShoppingList(props: ShoppingListProps) {
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
 
   const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
     setRefreshing(false);
@@ -113,7 +115,37 @@ export function ShoppingList(props: ShoppingListProps) {
           ),
         }}
       >
-        <ItemTile item={item} />
+        <ItemTile
+          isMultiSelectMode={isMultiSelectMode}
+          item={item}
+          buttonProps={{
+            onLongPress: () => {
+              setSelectedItems(isMultiSelectMode ? [] : [item]);
+              setIsMultiSelectMode((current) => !current);
+            },
+          }}
+          onSelect={(item) => {
+            const isSelected = !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            );
+            if (isSelected) {
+              setSelectedItems((current) =>
+                current.filter(
+                  (itemLocal) => getKeyToUse(item) !== getKeyToUse(itemLocal),
+                ),
+              );
+            } else {
+              setSelectedItems((current) => {
+                return [...current, item];
+              });
+            }
+          }}
+          isSelected={
+            !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            )
+          }
+        />
       </SwipeableRow>
     );
   }

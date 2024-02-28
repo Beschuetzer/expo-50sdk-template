@@ -1,7 +1,7 @@
 ## MVP
 
-//todo: figure out types for useRouter/useNavigation (expo-router)
--figure out how to select multiple items for a list and do some action
+-figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
+-add multi-select store list?
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item
@@ -16,6 +16,7 @@ t-figure out
 
  //todo: calculate FlashList estimatedItemSize for each instance
 
+//todo: figure out types for useRouter/useNavigation (expo-router)
 //todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/
 //todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
 -UpcDetails rendering:

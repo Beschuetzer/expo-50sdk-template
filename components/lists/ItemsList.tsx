@@ -58,6 +58,8 @@ export function ItemsList(props: ItemsListProps) {
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const lastSortTypeRef = useRef(itemsListSortTypes[0]);
   const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: itemsList, title: 'Items List' });
@@ -193,7 +195,37 @@ export function ItemsList(props: ItemsListProps) {
           ),
         }}
       >
-        <ItemTile item={item} />
+        <ItemTile
+          isMultiSelectMode={isMultiSelectMode}
+          item={item}
+          buttonProps={{
+            onLongPress: () => {
+              setSelectedItems(isMultiSelectMode ? [] : [item]);
+              setIsMultiSelectMode((current) => !current);
+            },
+          }}
+          onSelect={(item) => {
+            const isSelected = !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            );
+            if (isSelected) {
+              setSelectedItems((current) =>
+                current.filter(
+                  (itemLocal) => getKeyToUse(item) !== getKeyToUse(itemLocal),
+                ),
+              );
+            } else {
+              setSelectedItems((current) => {
+                return [...current, item];
+              });
+            }
+          }}
+          isSelected={
+            !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            )
+          }
+        />
       </SwipeableRow>
     );
   }

@@ -9,9 +9,12 @@ import { useSelector } from 'react-redux';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { Routes } from '@/constants/navigation';
-import { lastPurchasedSelector } from '@/state/slices/listsSlice';
-import { Item } from '@/types/Item';
-import { ItemOrItemWithStoreSpecificValuesProp } from '@/types/general';
+import {
+  lastPurchasedSelector,
+  storeSpecificValuesSelector,
+} from '@/state/slices/listsSlice';
+import { Item, StoreSpecificValueKey } from '@/types/Item';
+import { ItemProp } from '@/types/general';
 import { getFrequencyValue } from '@/utils/helpers';
 
 type ItemTileProps = {
@@ -19,7 +22,7 @@ type ItemTileProps = {
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
   onSelect?: (item: Item) => void;
-} & ItemOrItemWithStoreSpecificValuesProp;
+} & ItemProp;
 
 export function ItemTile(props: ItemTileProps) {
   const theme = useTheme();
@@ -32,6 +35,15 @@ export function ItemTile(props: ItemTileProps) {
     onSelect,
   } = props;
   const lastPurchased = useSelector(lastPurchasedSelector(item)) || 0;
+  const quantityAtStore = useSelector(
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.Quantity),
+  );
+  const priceAtStore = useSelector(
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.Price),
+  );
+  const aisleAtStore = useSelector(
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.Aisle),
+  );
   const frequencyObj = useMemo(
     () => getFrequencyValue(item?.frequency),
     [item],
@@ -53,20 +65,29 @@ export function ItemTile(props: ItemTileProps) {
       }}
     >
       <Row space={2}>
-        <ImageRenderer source={item.images[item.imageToUseIndex]} />
+        <Column>
+          <ImageRenderer source={item.images[item.imageToUseIndex]} />
+          <Text>
+            {quantityAtStore} {item.unit}
+            {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
+              ? 's'
+              : ''}
+          </Text>
+        </Column>
         <Column>
           <Text>{item.name}</Text>
           <Text>{item.upc}</Text>
-          <Text>
+          {aisleAtStore ? <Text>Aisle: {aisleAtStore}</Text> : null}
+          {priceAtStore ? <Text>${priceAtStore}</Text> : null}
+          {/* <Text>
             Frequency: {frequencyObj?.number} {frequencyObj?.timeSpan}
             {frequencyObj?.number > 1 ? 's' : ''}
           </Text>
-          <Text>Unit: {item?.unit}</Text>
           {lastPurchased ? (
             <Text>
               Last Purchased: {new Date(lastPurchased).toLocaleString()}
             </Text>
-          ) : null}
+          ) : null} */}
         </Column>
         {isMultiSelectMode ? (
           <Column justifyContent="center" alignItems="flex-end" flex={1}>

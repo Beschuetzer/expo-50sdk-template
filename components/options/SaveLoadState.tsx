@@ -13,7 +13,7 @@ import {
   setStoresList,
   setStoreSpecificValues,
   storesListSelector,
-  storeSpecificValuesSelector,
+  storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice'
 import {
   setUpcProducts,
@@ -33,7 +33,7 @@ const FILE_NAMES = {
 export const SaveLoadState = (props: SaveLoadStateProps) => {
   const theme = useTheme()
   const itemsList = useSelector(itemsListSelector)
-  const storeSpecificValues = useSelector(storeSpecificValuesSelector)
+  const storeSpecificValues = useSelector(storeSpecificValuesMapSelector)
   const upcProducts = useSelector(upcProductsSelector)
   const stores = useSelector(storesListSelector)
   const dispatch = useDispatch()

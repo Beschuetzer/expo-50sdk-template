@@ -1,5 +1,5 @@
 ## MVP
--Add quantity ability to view store specific details for items in shoppinglist
+-Create separate ItemTileWithStoreSpecificValues for shopping list and in cart?
 -figureo out how to allow sorting based on store-specific (for all item-based lists)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 -add a "Add all to Shopping" option when multiple selection mode

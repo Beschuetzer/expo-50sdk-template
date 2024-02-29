@@ -2,10 +2,11 @@ import { Button, FlatList, Heading, Row, Stack, Text, View } from 'native-base';
 import React, { useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { getRandomItem } from './helpers';
+import { getRandomItem, getRandomStoreSpecificValues } from './helpers';
 import { MOCK_STORES } from './mockStores';
 import { MOCKS_UPCS } from './mockUpcData';
 
+import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import {
   addItemsListItem,
   setItemsList,
@@ -16,15 +17,13 @@ import {
   resetCurrentStoreName,
   resetItemsList,
   resetStoresList,
+  setStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import {
   resetUpcProducts,
   upcProductsSelector,
 } from '@/state/slices/scannerSlice';
-import {
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey,
-} from '@/types/Item';
+import { Item, StoreSpecificValuesMap } from '@/types/Item';
 import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers';
 
 const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500;
@@ -135,26 +134,10 @@ export function ReduxViewer() {
                   } else {
                     lastUpcIndexRef.current += 1;
                   }
-
-                  const randomItem = getRandomItem(lastUpcIndexRef.current);
                   dispatch(
                     addItemsListItem({
-                      item: {
-                        addedDate: randomItem.addedDate,
-                        frequency: randomItem.frequency,
-                        images: randomItem.images,
-                        imageToUseIndex: 0,
-                        lastUpdatedDate: randomItem.lastUpdatedDate,
-                        name: randomItem.name,
-                        unit: randomItem.unit,
-                        upc: upcToUse,
-                      },
-                      storeSpecificValues: {
-                        aisle: randomItem[StoreSpecificValueKey.Aisle],
-                        itemId: randomItem[StoreSpecificValueKey.ItemId],
-                        price: randomItem[StoreSpecificValueKey.Price],
-                        quantity: randomItem[StoreSpecificValueKey.Quantity],
-                      },
+                      item: getRandomItem(lastUpcIndexRef.current),
+                      storeSpecificValues: getRandomStoreSpecificValues(),
                       currentStore: MOCK_STORES[1],
                     }),
                   );
@@ -166,14 +149,25 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const itemsList = getEmptyList<ItemWithStoreSpecificValues>();
+                  const itemsList = getEmptyList<Item>();
+                  const storeSpecificValuesMap: StoreSpecificValuesMap = {};
+
                   for (let index = 0; index < numberOfMockItems; index++) {
+                    const upcToUse = lastUpcNumberRef.current
+                      .toString()
+                      .padStart(UPC_REQUIRED_CHAR_LENGTH, '0');
+
                     itemsList.data.push(
                       getRandomItem(lastUpcNumberRef.current),
                     );
+                    storeSpecificValuesMap[upcToUse] =
+                      getRandomStoreSpecificValues();
+                    console.log({ storeSpecificValuesMap });
+
                     lastUpcNumberRef.current += 1;
                   }
                   dispatch(setItemsList(itemsList));
+                  dispatch(setStoreSpecificValues(storeSpecificValuesMap));
                 }}
               >
                 Add {numberOfMockItems} items

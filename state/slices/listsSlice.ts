@@ -698,8 +698,26 @@ export const storesListItemSelector = (storeName: string) =>
     },
   );
 
-export const storeSpecificValuesSelector = (state: RootState) =>
+export const storeSpecificValuesMapSelector = (state: RootState) =>
   state[listsSlice.name].storeSpecificValuesMap;
+
+export const storeSpecificValuesSelector = (
+  key: Key,
+  fieldName: StoreSpecificValueKey,
+) =>
+  createSelector(
+    [
+      (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
+      (state: RootState) => state[listsSlice.name].currentStoreName,
+    ],
+    (storeSpecificValuesMap, currentStoreName) => {
+      console.log({currentItem: storeSpecificValuesMap?.[getKeyToUse(key)]});
+      
+      return storeSpecificValuesMap?.[getKeyToUse(key)]?.[fieldName]?.[
+        currentStoreName
+      ];
+    },
+  );
 
 // Action creators are generated for each case reducer function
 export const {

@@ -1,12 +1,12 @@
-import { MOCK_STORES } from './mockStores'
+import { MOCK_STORES } from './mockStores';
 
 import {
   TIME_SPAN_TO_MILLISECONDS_MAPPING,
   WEEK_IN_MS,
-} from '@/constants/general'
-import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs'
-import { ItemUnit, ItemWithStoreSpecificValues } from '@/types/Item'
-import { TimeSpan } from '@/types/general'
+} from '@/constants/general';
+import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import { Item, ItemUnit, StoreSpecificValues } from '@/types/Item';
+import { TimeSpan } from '@/types/general';
 
 const MOCK_NAMES = [
   'Apple',
@@ -18,7 +18,7 @@ const MOCK_NAMES = [
   'Chocolate',
   'Duck',
   'Turkey',
-]
+];
 
 const MOCK_IMAGES = [
   'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
@@ -34,32 +34,51 @@ const MOCK_IMAGES = [
   'https://images.openfoodfacts.org/images/products/004/300/005/4017/ingredients_en.35.200.jpg',
   'https://images.openfoodfacts.org/images/products/004/300/005/4017/nutrition_en.22.200.jpg',
   'https://images.openfoodfacts.org/images/products/004/300/005/4017/front_en.26.100.jpg',
-]
+];
 
 export function getRandomEnumValue<T>(enumeration: any): T {
-  const values = Object.values(enumeration) as T[]
-  const randomIndex = Math.floor(Math.random() * values.length)
-  return (values as any)[randomIndex] as T
+  const values = Object.values(enumeration) as T[];
+  const randomIndex = Math.floor(Math.random() * values.length);
+  return (values as any)[randomIndex] as T;
 }
 
 export function getRandomInt(min: number, max: number) {
   // Ensure that min is less than or equal to max
   if (min > max) {
-    throw new Error('Min must be less than or equal to max')
+    throw new Error('Min must be less than or equal to max');
   }
 
   // Generate a random number between min (inclusive) and max (exclusive)
 
-  const randomInt = min + Math.floor(Math.random() * max)
-  return randomInt
+  const randomInt = min + Math.floor(Math.random() * max);
+  return randomInt;
 }
 
-export function getRandomItem(
-  lastUpcNumber: number,
-): ItemWithStoreSpecificValues {
+export function getRandomStoreSpecificValues(): StoreSpecificValues {
+  return {
+    itemId: {
+      [MOCK_STORES[0].name]:
+        `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
+      [MOCK_STORES[1].name]:
+        `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
+    },
+    aisle: {
+      [MOCK_STORES[1].name]: `A${getRandomInt(0, 20)}`,
+    },
+    price: {
+      [MOCK_STORES[1].name]: getRandomInt(1, 1000),
+    },
+    isInCart: {
+      [MOCK_STORES[1].name]: false,
+    },
+    quantity: {},
+  };
+}
+
+export function getRandomItem(lastUpcNumber: number): Item {
   const upcToUse = lastUpcNumber
     .toString()
-    .padStart(UPC_REQUIRED_CHAR_LENGTH, '0')
+    .padStart(UPC_REQUIRED_CHAR_LENGTH, '0');
 
   return {
     addedDate: Date.now() - getRandomInt(0, WEEK_IN_MS * 52),
@@ -73,22 +92,11 @@ export function getRandomItem(
       MOCK_IMAGES[getRandomInt(0, MOCK_IMAGES.length - 1)],
     ),
     name: `${MOCK_NAMES[getRandomInt(0, MOCK_NAMES.length - 1)]}-${Math.random()}`,
-    unit: Object.values(ItemUnit || {}).find(
-      (item) => item === getRandomEnumValue<ItemUnit>(ItemUnit),
-    ) as any,
+    unit: Object.values(ItemUnit || {}).find((item) => {
+      let randomValue = getRandomEnumValue<ItemUnit>(ItemUnit);
+      if (randomValue === ItemUnit.Custom) randomValue = ItemUnit.Package;
+      return item === randomValue;
+    }) as any,
     upc: upcToUse,
-    itemId: {
-      [MOCK_STORES[0].name]:
-        `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
-      [MOCK_STORES[1].name]:
-        `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
-    },
-    aisle: {
-      [MOCK_STORES[1].name]: `A${getRandomInt(0, 20)}`,
-    },
-    price: {
-      [MOCK_STORES[1].name]: getRandomInt(1, 1000),
-    },
-    quantity: {},
-  }
+  };
 }

@@ -4,12 +4,14 @@ import { Row, Column, Text, useTheme } from 'native-base';
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
 
 import { ImageRenderer } from '../ImageRenderer';
 
 import { Routes } from '@/constants/navigation';
+import { lastPurchasedSelector } from '@/state/slices/listsSlice';
 import { Item } from '@/types/Item';
-import { ItemProp } from '@/types/general';
+import { ItemOrItemWithStoreSpecificValuesProp } from '@/types/general';
 import { getFrequencyValue } from '@/utils/helpers';
 
 type ItemTileProps = {
@@ -17,7 +19,7 @@ type ItemTileProps = {
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
   onSelect?: (item: Item) => void;
-} & ItemProp;
+} & ItemOrItemWithStoreSpecificValuesProp;
 
 export function ItemTile(props: ItemTileProps) {
   const theme = useTheme();
@@ -29,6 +31,7 @@ export function ItemTile(props: ItemTileProps) {
     item,
     onSelect,
   } = props;
+  const lastPurchased = useSelector(lastPurchasedSelector(item)) || 0;
   const frequencyObj = useMemo(
     () => getFrequencyValue(item?.frequency),
     [item],
@@ -59,10 +62,11 @@ export function ItemTile(props: ItemTileProps) {
             {frequencyObj?.number > 1 ? 's' : ''}
           </Text>
           <Text>Unit: {item?.unit}</Text>
-          <Text>Added: {new Date(item.addedDate).toLocaleString()}</Text>
-          <Text>
-            Updated: {new Date(item.lastUpdatedDate).toLocaleString()}
-          </Text>
+          {lastPurchased ? (
+            <Text>
+              Last Purchased: {new Date(lastPurchased).toLocaleString()}
+            </Text>
+          ) : null}
         </Column>
         {isMultiSelectMode ? (
           <Column justifyContent="center" alignItems="flex-end" flex={1}>

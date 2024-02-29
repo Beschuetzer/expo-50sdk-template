@@ -587,6 +587,17 @@ export const itemsListWithStoreSpecificValuesSelector = (id: string) =>
 export const itemsListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.ItemsList];
 
+export const lastPurchasedSelector = (key: Key) =>
+  createSelector(
+    [
+      (state: RootState) => state[listsSlice.name].lastPurchasedMap,
+      (state: RootState) => state[listsSlice.name].currentStoreName,
+    ],
+    (lastPurchasedMap, currentStoreName) => {
+      return lastPurchasedMap?.[getKeyToUse(key)]?.[currentStoreName];
+    },
+  );
+
 export const listToDisplaySelector = (listName: ListName) =>
   createSelector(
     [

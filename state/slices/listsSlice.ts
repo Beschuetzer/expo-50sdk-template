@@ -320,30 +320,39 @@ export const listsSlice = createSlice({
         StoreSpecificValueKey.IsInCart
       ][state.currentStoreName] = false;
     },
-    removeItemsListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action.payload);
-      if (!keyToUse) {
+    removeItemsListItems: (
+      state: ListsState,
+      action: PayloadAction<Item[]>,
+    ) => {
+      const keysToUse = action.payload.map((item) => getKeyToUse(item));
+      if (!keysToUse) {
         alert(
-          'A key must be provided in order to remove an item from the itemsList.',
+          'A list ofkey must be provided in order to remove them from the itemsList.',
         );
         return;
       }
 
+      console.log({keysToUse});
+      
       state.itemsList.data = state.itemsList.data.filter((item) => {
+        console.log({item});
         if (item.upc && item.name) {
-          const isMatch = item.upc !== keyToUse;
+          const isMatch = !keysToUse.includes(item.upc);
           if (!isMatch) {
             deleteImages(item.images);
           }
           return isMatch;
         }
-        const isMatch = item.name !== keyToUse;
+        const isMatch = !keysToUse.includes(item?.name || EMPTY_STRING);
         if (!isMatch) {
           deleteImages(item.images);
         }
         return isMatch;
       });
-      state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
+
+      for (const keyToUse of keysToUse) {
+        state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
+      }
     },
     removeLastPurchasedListItem: (
       state: ListsState,
@@ -712,7 +721,7 @@ export const {
   completePurchase,
   moveAllToInCart,
   moveItemToShoppingList,
-  removeItemsListItem,
+  removeItemsListItems,
   removeLastPurchasedListItem,
   removeStoresListItem,
   resetCurrentLocation,

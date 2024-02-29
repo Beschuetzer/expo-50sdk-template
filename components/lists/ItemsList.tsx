@@ -24,7 +24,7 @@ import {
   currentStoreSelector,
   itemsListSelector,
   listToDisplaySelector,
-  removeItemsListItem,
+  removeItemsListItems,
   resetListToDisplay,
   setFilters,
   setSortOrder,
@@ -84,6 +84,10 @@ export function ItemsList(props: ItemsListProps) {
     setIsFilterModalOpen(true);
   }, []);
 
+  const onDeleteAll = useCallback(() => {
+    dispatch(removeItemsListItems(selectedItems));
+  }, [selectedItems]);
+
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));
   }, []);
@@ -118,9 +122,9 @@ export function ItemsList(props: ItemsListProps) {
   );
 
   const onSwipeLeft = useCallback(
-    (key: Key) => {
+    (item: Item) => {
       closeMenu();
-      dispatch(removeItemsListItem(key));
+      dispatch(removeItemsListItems([item]));
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
     [listRef, closeMenu],
@@ -135,11 +139,17 @@ export function ItemsList(props: ItemsListProps) {
           onFilterPress={onFilterPress}
           onResetPress={onResetPress}
           listName={listName}
+          options={[
+            {
+              text: 'Delete All',
+              onPress: onDeleteAll,
+            },
+          ]}
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
     });
-  }, [navigation]);
+  }, [navigation, isMultiSelectMode]);
 
   useFocusEffect(() => {
     closeMenu();
@@ -166,7 +176,7 @@ export function ItemsList(props: ItemsListProps) {
             </Stack>
           ),
           backgroundColor: theme.colors.red[900],
-          onPress: onSwipeLeft.bind(null, key),
+          onPress: onSwipeLeft.bind(null, item),
         }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],

@@ -149,7 +149,7 @@ export function ItemsList(props: ItemsListProps) {
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
     });
-  }, [navigation, isMultiSelectMode]);
+  }, [navigation, isMultiSelectMode, selectedItems]);
 
   useFocusEffect(() => {
     closeMenu();

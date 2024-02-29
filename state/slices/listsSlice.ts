@@ -232,7 +232,6 @@ export const listsSlice = createSlice({
         return;
       }
 
-      console.log({ storesList: state.storesList.data, store });
       const storeIndex = state.storesList.data.findIndex(
         (store) => store.name === keyToUse,
       );
@@ -332,10 +331,7 @@ export const listsSlice = createSlice({
         return;
       }
 
-      console.log({keysToUse});
-      
       state.itemsList.data = state.itemsList.data.filter((item) => {
-        console.log({item});
         if (item.upc && item.name) {
           const isMatch = !keysToUse.includes(item.upc);
           if (!isMatch) {
@@ -353,24 +349,6 @@ export const listsSlice = createSlice({
       for (const keyToUse of keysToUse) {
         state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
       }
-    },
-    removeLastPurchasedListItem: (
-      state: ListsState,
-      action: PayloadAction<Key>,
-    ) => {
-      const keyToUse = getKeyToUse(action.payload);
-      if (!keyToUse) {
-        alert(
-          'A key must be provided in order to remove an item from the lastPurchasedList.',
-        );
-        return;
-      }
-      state.lastPurchasedList.data = state.lastPurchasedList.data.filter(
-        (item) => {
-          if (item.upc && item.name) return item.upc !== keyToUse;
-          return item.name !== keyToUse;
-        },
-      );
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -722,7 +700,6 @@ export const {
   moveAllToInCart,
   moveItemToShoppingList,
   removeItemsListItems,
-  removeLastPurchasedListItem,
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,

@@ -1,7 +1,8 @@
 ## MVP
 
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
--add multi-select store list?
+-add a "Add all to Shopping" option when multiple selection mode
+-how to add multiple selection options to shopping list and in cart list?
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item

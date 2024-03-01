@@ -5,7 +5,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTile } from './ItemTile';
+import { ItemTileWithStoreSpecificValues } from './ItemTileWithStoreSpecificValues';
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
@@ -16,7 +16,6 @@ import {
   addItemToCart,
   currentStoreSelector,
   storeSpecificListSelector,
-  shoppingListSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
@@ -44,7 +43,9 @@ export function ShoppingList(props: ShoppingListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const [selectedItems, setSelectedItems] = useState<
+    ItemWithStoreSpecificValues[]
+  >([]);
 
   const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
     setRefreshing(false);
@@ -115,7 +116,7 @@ export function ShoppingList(props: ShoppingListProps) {
           ),
         }}
       >
-        <ItemTile
+        <ItemTileWithStoreSpecificValues
           isMultiSelectMode={isMultiSelectMode}
           item={item}
           buttonProps={{

@@ -6,6 +6,7 @@ import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTile } from './ItemTile';
+import { ItemTileWithStoreSpecificValues } from './ItemTileWithStoreSpecificValues';
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
 import { shoppingListSortTypes } from './ShoppingLIst';
@@ -38,6 +39,10 @@ export function InCartList(props: InCartListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<
+    ItemWithStoreSpecificValues[]
+  >([]);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
     dispatch(
@@ -106,7 +111,37 @@ export function InCartList(props: InCartListProps) {
           ),
         }}
       >
-        <ItemTile item={item} />
+        <ItemTileWithStoreSpecificValues
+          isMultiSelectMode={isMultiSelectMode}
+          item={item}
+          buttonProps={{
+            onLongPress: () => {
+              setSelectedItems(isMultiSelectMode ? [] : [item]);
+              setIsMultiSelectMode((current) => !current);
+            },
+          }}
+          onSelect={(item) => {
+            const isSelected = !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            );
+            if (isSelected) {
+              setSelectedItems((current) =>
+                current.filter(
+                  (itemLocal) => getKeyToUse(item) !== getKeyToUse(itemLocal),
+                ),
+              );
+            } else {
+              setSelectedItems((current) => {
+                return [...current, item];
+              });
+            }
+          }}
+          isSelected={
+            !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            )
+          }
+        />
       </SwipeableRow>
     );
   }

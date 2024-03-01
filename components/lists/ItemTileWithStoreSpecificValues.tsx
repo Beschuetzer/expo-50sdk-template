@@ -1,7 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme } from 'native-base';
-import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
@@ -9,19 +8,22 @@ import { useSelector } from 'react-redux';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { Routes } from '@/constants/navigation';
-import { lastPurchasedSelector } from '@/state/slices/listsSlice';
-import { Item, ItemUnit } from '@/types/Item';
+import { storeSpecificValuesSelector } from '@/state/slices/listsSlice';
+import {
+  ItemUnit,
+  ItemWithStoreSpecificValues,
+  StoreSpecificValueKey,
+} from '@/types/Item';
 import { ItemProp } from '@/types/general';
-import { getFrequencyValue } from '@/utils/helpers';
 
 type ItemTileProps = {
   buttonProps?: RectButtonProps;
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
-  onSelect?: (item: Item) => void;
+  onSelect?: (item: ItemWithStoreSpecificValues) => void;
 } & ItemProp;
 
-export function ItemTile(props: ItemTileProps) {
+export function ItemTileWithStoreSpecificValues(props: ItemTileProps) {
   const theme = useTheme();
   const navigation = useNavigation();
   const {
@@ -31,10 +33,14 @@ export function ItemTile(props: ItemTileProps) {
     item,
     onSelect,
   } = props;
-  const lastPurchased = useSelector(lastPurchasedSelector(item)) || 0;
-  const frequencyObj = useMemo(
-    () => getFrequencyValue(item?.frequency),
-    [item],
+  const quantityAtStore = useSelector(
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.Quantity),
+  );
+  const priceAtStore = useSelector(
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.Price),
+  );
+  const aisleAtStore = useSelector(
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.Aisle),
   );
 
   return (
@@ -55,20 +61,18 @@ export function ItemTile(props: ItemTileProps) {
       <Row space={2}>
         <Column>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
+          <Text>
+            {quantityAtStore} {item.unit || ItemUnit.Package}
+            {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
+              ? 's'
+              : ''}
+          </Text>
         </Column>
         <Column>
           <Text>{item.name}</Text>
           <Text>{item.upc}</Text>
-          <Text>
-            1 {item.unit || ItemUnit.Package} every {frequencyObj?.number}{' '}
-            {frequencyObj?.timeSpan}
-            {frequencyObj?.number > 1 ? 's' : ''}
-          </Text>
-          {lastPurchased ? (
-            <Text>
-              Last Purchased: {new Date(lastPurchased).toLocaleString()}
-            </Text>
-          ) : null}
+          {aisleAtStore ? <Text>Aisle: {aisleAtStore}</Text> : null}
+          {priceAtStore ? <Text>${priceAtStore}</Text> : null}
         </Column>
         {isMultiSelectMode ? (
           <Column justifyContent="center" alignItems="flex-end" flex={1}>

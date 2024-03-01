@@ -11,7 +11,6 @@ import {
   ItemWithStoreSpecificValues,
   ItemsList,
   Key,
-  LastPurchasedItem,
   LastPurchasedMap,
   ShoppingList,
   StoreList,
@@ -450,7 +449,7 @@ export const listsSlice = createSlice({
         return;
       }
       listToSort.data?.sort(
-        getSorter(sortBy, state[listName].sortOrderValue.sortOrder),
+        getSorter(sortBy, state.currentStoreName, state[listName].sortOrderValue.sortOrder),
       );
 
       if (!state[listName].sortOrderValue.sortOrder) return;
@@ -597,7 +596,7 @@ export const listToDisplaySelector = (listName: ListName) =>
 
       const filteredList = getFilteredList<unknown>(data, filters);
       filteredList.sort(
-        getSorter(sortOrderValue.sortBy, sortOrderValue.sortOrder),
+        getSorter(sortOrderValue.sortBy, state.currentStoreName, sortOrderValue.sortOrder),
       );
       return filteredList;
     },
@@ -662,6 +661,7 @@ export const storeSpecificListSelector = (listname: ListName) =>
       filteredList.sort(
         getSorter(
           shoppingList.sortOrderValue.sortBy,
+          currentStoreName,
           shoppingList.sortOrderValue.sortOrder,
         ),
       );

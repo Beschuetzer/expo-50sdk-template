@@ -36,25 +36,25 @@ export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
 
 export function getSorter(
   key: SortType,
+  currentStoreName: string,
   direction: SortOrder = SortOrder.Ascending,
 ) {
-  if (direction === SortOrder.Descending) {
-    return (next: any, current: any) => {
-      console.log({ current: current[key] });
+  return (next: any, current: any) => {
+    let currentItem = current[key];
+    let nextItem = next[key];
+    if (
+      current?.[key][currentStoreName] !== undefined &&
+      next[key]?.[currentStoreName] !== undefined
+    ) {
+      currentItem = currentItem[currentStoreName];
+      nextItem = nextItem[currentStoreName];
+    }
 
-      if (!current[key] && next[key]) return 1;
-      if (current[key] && !next[key]) return -1;
-      if (current[key] === next[key]) return 0;
-      if (current[key] <= next[key]) return -1;
-      return 1;
-    };
-  } else {
-    return (next: any, current: any) => {
-      if (!current[key] && next[key]) return -1;
-      if (current[key] && !next[key]) return 1;
-      if (current[key] === next[key]) return 0;
-      if (current[key] <= next[key]) return 1;
-      return -1;
-    };
-  }
+    const isDescending = direction === SortOrder.Descending;
+    if (!currentItem && nextItem) return isDescending ? 1 : -1;
+    if (currentItem && !nextItem) return isDescending ? -1 : 1;
+    if (currentItem === nextItem) return 0;
+    if (currentItem <= nextItem) return isDescending ? -1 : 1;
+    return isDescending ? 1 : -1;
+  };
 }

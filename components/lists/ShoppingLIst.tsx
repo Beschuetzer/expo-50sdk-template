@@ -27,6 +27,10 @@ type ShoppingListProps = object;
 export const shoppingListSortTypes = [
   SortType.Name,
   SortType.Upc,
+  SortType.Aisle,
+  SortType.ItemId,
+  SortType.Price,
+  SortType.Quantity,
   SortType.AddedDate,
   SortType.LastUpdatedDate,
   SortType.Frequency,

@@ -138,8 +138,9 @@ export const listsSlice = createSlice({
           StoreSpecificValueKey.IsInCart
         ]
       ) {
-        state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.IsInCart] =
-          {} as StoreSpecificValue<boolean>;
+        (state.storeSpecificValuesMap[keyToUse] as any)[
+          StoreSpecificValueKey.IsInCart
+        ] = {} as StoreSpecificValue<boolean>;
       }
 
       (
@@ -207,22 +208,6 @@ export const listsSlice = createSlice({
           currentItem[key] = value;
         }
       }
-    },
-    addLastPurchasedList: (
-      state: ListsState,
-      action: PayloadAction<LastPurchasedItem>,
-    ) => {
-      const keyToUse = getKeyToUse(action.payload);
-      if (!keyToUse) {
-        alert(
-          'Unable to add an item with no name and no upc to the lastPurchasedList.',
-        );
-        return;
-      }
-      state.lastPurchasedList = {
-        ...state.lastPurchasedList,
-        [keyToUse]: action.payload,
-      };
     },
     addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
       const store = action.payload;
@@ -393,8 +378,8 @@ export const listsSlice = createSlice({
       state.itemsList = getEmptyList();
       state.storeSpecificValuesMap = {};
     },
-    resetLastPurchasedList: (state: ListsState) => {
-      state.lastPurchasedList = getEmptyList();
+    resetLastPurchasedMap: (state: ListsState) => {
+      state.lastPurchasedMap = getEmptyObject();
     },
     resetStoresList: (state: ListsState) => {
       state.storesList = getEmptyList();
@@ -711,8 +696,6 @@ export const storeSpecificValuesSelector = (
       (state: RootState) => state[listsSlice.name].currentStoreName,
     ],
     (storeSpecificValuesMap, currentStoreName) => {
-      console.log({currentItem: storeSpecificValuesMap?.[getKeyToUse(key)]});
-      
       return storeSpecificValuesMap?.[getKeyToUse(key)]?.[fieldName]?.[
         currentStoreName
       ];
@@ -723,7 +706,6 @@ export const storeSpecificValuesSelector = (
 export const {
   addItemsListItem,
   addItemToCart,
-  addLastPurchasedList,
   addStoresListItem,
   completePurchase,
   moveAllToInCart,
@@ -733,7 +715,7 @@ export const {
   resetCurrentLocation,
   resetCurrentStoreName,
   resetItemsList,
-  resetLastPurchasedList,
+  resetLastPurchasedMap,
   resetListToDisplay,
   resetListToDisplayFilters,
   resetStoresList,

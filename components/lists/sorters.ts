@@ -32,7 +32,7 @@ export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
   [SortType.Price]: 'Price in Current Store',
   [SortType.Quantity]: 'Quantity in Current Store',
   [SortType.Upc]: 'Upc',
-}
+};
 
 export function getSorter(
   key: SortType,
@@ -40,19 +40,21 @@ export function getSorter(
 ) {
   if (direction === SortOrder.Descending) {
     return (next: any, current: any) => {
-      if (!current[key] && next[key]) return 1
-      if (current[key] && !next[key]) return -1
-      if (current[key] === next[key]) return 0
-      if (current[key] <= next[key]) return -1
-      return 1
-    }
+      console.log({ current: current[key] });
+
+      if (!current[key] && next[key]) return 1;
+      if (current[key] && !next[key]) return -1;
+      if (current[key] === next[key]) return 0;
+      if (current[key] <= next[key]) return -1;
+      return 1;
+    };
   } else {
     return (next: any, current: any) => {
-      if (!current[key] && next[key]) return -1
-      if (current[key] && !next[key]) return 1
-      if (current[key] === next[key]) return 0
-      if (current[key] <= next[key]) return 1
-      return -1
-    }
+      if (!current[key] && next[key]) return -1;
+      if (current[key] && !next[key]) return 1;
+      if (current[key] === next[key]) return 0;
+      if (current[key] <= next[key]) return 1;
+      return -1;
+    };
   }
 }

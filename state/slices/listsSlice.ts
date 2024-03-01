@@ -449,7 +449,11 @@ export const listsSlice = createSlice({
         return;
       }
       listToSort.data?.sort(
-        getSorter(sortBy, state.currentStoreName, state[listName].sortOrderValue.sortOrder),
+        getSorter(
+          sortBy,
+          state.currentStoreName,
+          state[listName].sortOrderValue.sortOrder,
+        ),
       );
 
       if (!state[listName].sortOrderValue.sortOrder) return;
@@ -582,6 +586,9 @@ export const lastPurchasedSelector = (key: Key) =>
     },
   );
 
+/**
+*This should only be used for lists that don't use store specific value sorting
+**/
 export const listToDisplaySelector = (listName: ListName) =>
   createSelector(
     [
@@ -596,7 +603,7 @@ export const listToDisplaySelector = (listName: ListName) =>
 
       const filteredList = getFilteredList<unknown>(data, filters);
       filteredList.sort(
-        getSorter(sortOrderValue.sortBy, state.currentStoreName, sortOrderValue.sortOrder),
+        getSorter(sortOrderValue.sortBy, '', sortOrderValue.sortOrder),
       );
       return filteredList;
     },

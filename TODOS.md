@@ -1,5 +1,7 @@
 ## MVP
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
+-Add the store name to shopping list header title
+-add modal to check ask if you want to change store if it detects you are at the store on load
 -add a "Add all to Shopping" option when multiple selection mode
 -how to add multiple selection options to shopping list and in cart list?
 -use frequency and last purchase date to show recommended items needed

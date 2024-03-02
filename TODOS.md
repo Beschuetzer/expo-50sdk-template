@@ -1,5 +1,4 @@
 ## MVP
--add toggle to auto-select closest store within range
 -Scanner should open an existing item if it exists and not make any calls (try manually adding an item with a upc)
 -add a "Add all to Shopping" option when multiple selection mode
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])

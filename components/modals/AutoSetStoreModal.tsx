@@ -15,6 +15,7 @@ import {
   setCurrentStoreName,
   storesListSelector,
 } from '@/state/slices/listsSlice';
+import { autoSetStoreWhenCloseEnoughSelector } from '@/state/slices/optionsSlice';
 import { Store } from '@/types/Store';
 import { getButtonHitSlop } from '@/utils/helpers';
 
@@ -26,6 +27,7 @@ export type AutoSetStoreModalProps = object;
 export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
   const currentLocation = useSelector(currentLocationSelector);
   const currentStore = useSelector(currentStoreSelector);
+  const shouldAutoSetStore = useSelector(autoSetStoreWhenCloseEnoughSelector);
   const storesList = useSelector(storesListSelector);
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -35,10 +37,10 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
     setStoreToAskAbout(null);
   }, []);
 
-  const onConfirmPress = useCallback(() => {
-    dispatch(setCurrentStoreName(storeToAskAbout?.name));
+  const onConfirmPress = useCallback((store: Store | null) => {
+    dispatch(setCurrentStoreName(store?.name));
     onCancelPress();
-  }, [storeToAskAbout]);
+  }, []);
 
   useEffect(() => {
     for (const store of storesList.data) {
@@ -48,7 +50,11 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
         currentStore.name.trim().toLowerCase() !==
           store?.name.trim().toLowerCase()
       ) {
-        setStoreToAskAbout(store);
+        if (shouldAutoSetStore) {
+          onConfirmPress(store);
+        } else {
+          setStoreToAskAbout(store);
+        }
       }
     }
   }, [currentLocation]);
@@ -92,7 +98,7 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
             >
               <TouchableOpacity
                 hitSlop={getButtonHitSlop(4)}
-                onPress={onConfirmPress}
+                onPress={() => onConfirmPress(storeToAskAbout)}
               >
                 <Text style={{ color: theme.colors.green[900] }}>Yes</Text>
               </TouchableOpacity>

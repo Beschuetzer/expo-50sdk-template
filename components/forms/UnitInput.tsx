@@ -1,10 +1,10 @@
-import { Picker } from "@react-native-picker/picker";
-import { Input, Stack, Heading, useTheme } from "native-base";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Picker } from '@react-native-picker/picker';
+import { Input, Stack, Heading, useTheme } from 'native-base';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { EMPTY_STRING, UNIT_INITIAL } from "@/constants/general";
-import { ItemUnit } from "@/types/Item";
-import { HeadingTagProp, SpacingProp } from "@/types/general";
+import { EMPTY_STRING, UNIT_INITIAL } from '@/constants/general';
+import { ItemUnit } from '@/types/Item';
+import { HeadingTagProp, SpacingProp } from '@/types/general';
 
 type UnitInputProps = {
   initialValue?: string;

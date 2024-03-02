@@ -1,25 +1,25 @@
-import { useTheme, Text, View } from 'native-base'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import Dialog from 'react-native-dialog'
-import { useDispatch } from 'react-redux'
+import { useTheme, Text, View } from 'native-base';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Dialog from 'react-native-dialog';
+import { useDispatch } from 'react-redux';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general'
-import { ListName, resetListToDisplayFilters } from '@/state/slices/listsSlice'
-import { List } from '@/types/Item'
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { ListName, resetListToDisplayFilters } from '@/state/slices/listsSlice';
+import { List } from '@/types/Item';
 
-export type ListFilterFilters<T> = Partial<Record<keyof T, string>>
+export type ListFilterFilters<T> = Partial<Record<keyof T, string>>;
 
 type ListFilterProps<T> = {
-  debounceTimeout?: number
-  filterNames: (keyof T)[]
-  isVisible: boolean
-  list: List<T>
-  listName: ListName
-  onMount?: () => void
-  onUnmount?: () => void
-  onValueChange: (filters: ListFilterFilters<T>) => void
-  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>
-}
+  debounceTimeout?: number;
+  filterNames: (keyof T)[];
+  isVisible: boolean;
+  list: List<T>;
+  listName: ListName;
+  onMount?: () => void;
+  onUnmount?: () => void;
+  onValueChange: (filters: ListFilterFilters<T>) => void;
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
 export function ListFilter<T>(props: ListFilterProps<T>) {
   const {
@@ -32,49 +32,49 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     onUnmount,
     onValueChange,
     setIsVisible,
-  } = props
+  } = props;
   const [filters, setFilters] = useState<ListFilterFilters<T> | null>(
     list.filters,
-  )
-  const theme = useTheme()
-  const debounceRef = useRef<any>(-1)
-  const dispatch = useDispatch()
+  );
+  const theme = useTheme();
+  const debounceRef = useRef<any>(-1);
+  const dispatch = useDispatch();
 
   const onClearPress = useCallback(() => {
-    dispatch(resetListToDisplayFilters({ listName }))
-  }, [])
+    dispatch(resetListToDisplayFilters({ listName }));
+  }, []);
 
   const onCloseModal = useCallback(() => {
-    setIsVisible && setIsVisible(false)
-  }, [setIsVisible])
+    setIsVisible && setIsVisible(false);
+  }, [setIsVisible]);
 
   const onChange = useCallback(
     (key: keyof T, value: string) => {
       setFilters((current) => ({
         ...current,
         [key]: value,
-      }))
+      }));
     },
     [onValueChange],
-  )
+  );
 
   useEffect(() => {
-    clearTimeout(debounceRef.current)
+    clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      onValueChange && onValueChange(filters || {})
-    }, debounceTimeout)
-  }, [filters])
+      onValueChange && onValueChange(filters || {});
+    }, debounceTimeout);
+  }, [filters]);
 
   useEffect(() => {
-    onMount && onMount()
+    onMount && onMount();
     return () => {
-      onUnmount && onUnmount()
-    }
-  }, [])
+      onUnmount && onUnmount();
+    };
+  }, []);
 
   useEffect(() => {
-    setFilters(list.filters)
-  }, [list])
+    setFilters(list.filters);
+  }, [list]);
 
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
@@ -91,7 +91,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
               placeholder="Term or regular expression"
             />
           </View>
-        )
+        );
       })}
       <Dialog.Button
         color={theme.colors.primary[900]}
@@ -104,5 +104,5 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
         onPress={onCloseModal}
       />
     </Dialog.Container>
-  )
+  );
 }

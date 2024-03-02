@@ -128,7 +128,6 @@ export function ReduxViewer() {
               </Button>
               <Button
                 onPress={() => {
-                  const upcToUse = MOCKS_UPCS?.[lastUpcIndexRef.current];
                   if (lastUpcIndexRef.current >= MOCKS_UPCS.length - 1) {
                     lastUpcIndexRef.current = 0;
                   } else {

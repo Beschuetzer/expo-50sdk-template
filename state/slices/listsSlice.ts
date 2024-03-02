@@ -587,8 +587,8 @@ export const lastPurchasedSelector = (key: Key) =>
   );
 
 /**
-*This should only be used for lists that don't use store specific value sorting
-**/
+ *This should only be used for lists that don't use store specific value sorting
+ **/
 export const listToDisplaySelector = (listName: ListName) =>
   createSelector(
     [

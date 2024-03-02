@@ -1,4 +1,4 @@
-import { getImagesFromUpcProduct } from './helpers'
+import { getImagesFromUpcProduct } from './helpers';
 
 import {
   DEFAULT_IMAGE_INDEX,
@@ -6,9 +6,9 @@ import {
   EMPTY_STRING,
   IMAGE_PRIORITY_MAPPING,
   UNIT_INITIAL,
-} from '@/constants/general'
-import { Item } from '@/types/Item'
-import { UpcProduct } from '@/types/UpcResponse'
+} from '@/constants/general';
+import { Item } from '@/types/Item';
+import { UpcProduct } from '@/types/UpcResponse';
 
 export function getItem(input?: UpcProduct | null): Item {
   return {
@@ -20,7 +20,7 @@ export function getItem(input?: UpcProduct | null): Item {
     unit: UNIT_INITIAL,
     addedDate: 0,
     lastUpdatedDate: 0,
-  }
+  };
 }
 
 export function getUpcProduct(item: Item, addLeadingZero = true): UpcProduct {
@@ -28,17 +28,17 @@ export function getUpcProduct(item: Item, addLeadingZero = true): UpcProduct {
     product_name: item.name || EMPTY_STRING,
     code: (addLeadingZero ? `0${item.upc}` : item.upc) || EMPTY_STRING,
     id: (addLeadingZero ? `0${item.upc}` : item.upc) || EMPTY_STRING,
-  } as UpcProduct
+  } as UpcProduct;
 
-  let keyNumber = 0
+  let keyNumber = 0;
   for (const image of item?.images || []) {
-    const nextKey = IMAGE_PRIORITY_MAPPING?.[keyNumber]
+    const nextKey = IMAGE_PRIORITY_MAPPING?.[keyNumber];
     if (nextKey) {
-      toReturn[nextKey as keyof UpcProduct] = image
-      keyNumber++
+      toReturn[nextKey as keyof UpcProduct] = image;
+      keyNumber++;
     } else {
-      break
+      break;
     }
   }
-  return toReturn
+  return toReturn;
 }

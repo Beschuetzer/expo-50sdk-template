@@ -1,6 +1,6 @@
-import React from "react";
-import { View, FlatList, Text, StyleSheet } from "react-native";
-import { unsubscribeFromKeyboardEvents } from "react-native-reanimated/lib/typescript/reanimated2/core";
+import React from 'react';
+import { View, FlatList, Text, StyleSheet } from 'react-native';
+import { unsubscribeFromKeyboardEvents } from 'react-native-reanimated/lib/typescript/reanimated2/core';
 
 type ObjectRendererProps<T> = {
   object: T;
@@ -15,7 +15,7 @@ export function ObjectRenderer<T>(props: ObjectRendererProps<T>) {
     const renderObjectProperties = Object.keys(object || {}).map((key) => {
       const value = (object as any)[key];
 
-      if (typeof value === "object") {
+      if (typeof value === 'object') {
         return <ObjectRenderer object={value} />;
       } else {
         return (
@@ -39,17 +39,17 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   item: {
-    backgroundColor: "#f9c2ff",
+    backgroundColor: '#f9c2ff',
     padding: 20,
     marginVertical: 8,
     borderRadius: 8,
   },
   property: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginBottom: 8,
   },
   propertyName: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginRight: 5,
   },
 });

@@ -1,25 +1,25 @@
-import { Row, useTheme, Text } from 'native-base'
-import { useCallback } from 'react'
-import { Switch } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
+import { Row, useTheme, Text } from 'native-base';
+import { useCallback } from 'react';
+import { Switch } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
   shouldShouldMockScannedResponsesSelector,
   toggleShouldShouldMockScannedResponses,
-} from '@/state/slices/generalSlice'
+} from '@/state/slices/generalSlice';
 
-type MockResponseToggleProps = object
+type MockResponseToggleProps = object;
 
 export function MockResponseToggle(props: MockResponseToggleProps) {
-  const theme = useTheme()
+  const theme = useTheme();
   const shouldMockResponse = useSelector(
     shouldShouldMockScannedResponsesSelector,
-  )
-  const dispatch = useDispatch()
+  );
+  const dispatch = useDispatch();
 
   const toggleSwitch = useCallback(() => {
-    dispatch(toggleShouldShouldMockScannedResponses())
-  }, [])
+    dispatch(toggleShouldShouldMockScannedResponses());
+  }, []);
 
   return (
     <Row alignItems="center">
@@ -35,5 +35,5 @@ export function MockResponseToggle(props: MockResponseToggleProps) {
         value={shouldMockResponse}
       />
     </Row>
-  )
+  );
 }

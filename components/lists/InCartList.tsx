@@ -5,7 +5,6 @@ import React, { useCallback, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTile } from './ItemTile';
 import { ItemTileWithStoreSpecificValues } from './ItemTileWithStoreSpecificValues';
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';

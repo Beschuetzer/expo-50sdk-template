@@ -1,11 +1,11 @@
-import { Button, useTheme } from "native-base";
-import { IButtonProps } from "native-base/lib/typescript/components/primitives/Button/types";
-import { ReactNode, useState } from "react";
+import { Button, useTheme } from 'native-base';
+import { IButtonProps } from 'native-base/lib/typescript/components/primitives/Button/types';
+import { ReactNode, useState } from 'react';
 import {
   ActivityIndicator,
   ColorValue,
   GestureResponderEvent,
-} from "react-native";
+} from 'react-native';
 
 type ButtonWithLoadingSpinnerProps = {
   onPress: (e: GestureResponderEvent) => void;
@@ -30,7 +30,6 @@ export function ButtonWithLoadingSpinner(props: ButtonWithLoadingSpinnerProps) {
         try {
           setIsLoading(true);
           onPress && onPress(e);
-        } catch (error) {
         } finally {
           setIsLoading(false);
         }

@@ -1,23 +1,23 @@
-import Slider from '@react-native-community/slider'
-import { FormControl, Stack, useTheme } from 'native-base'
-import { useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import Slider from '@react-native-community/slider';
+import { FormControl, Stack, useTheme } from 'native-base';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   customImageQualitySelector,
   setCustomImageQuality,
-} from '@/state/slices/optionsSlice'
+} from '@/state/slices/optionsSlice';
 
 export function CustomImageQualitySlider() {
-  const theme = useTheme()
-  const customImageQuality = useSelector(customImageQualitySelector)
-  const dispatch = useDispatch()
+  const theme = useTheme();
+  const customImageQuality = useSelector(customImageQualitySelector);
+  const dispatch = useDispatch();
 
   const onValueChange = useCallback((newValue: number) => {
     const rounded = Math.round(newValue * 100) / 100;
-    dispatch(setCustomImageQuality(rounded))
-  }, [])
+    dispatch(setCustomImageQuality(rounded));
+  }, []);
 
   return (
     <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -38,5 +38,5 @@ export function CustomImageQualitySlider() {
         maximumTrackTintColor={theme.colors.black}
       />
     </Stack>
-  )
+  );
 }

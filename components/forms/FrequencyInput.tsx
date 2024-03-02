@@ -1,17 +1,17 @@
-import { Picker } from "@react-native-picker/picker";
-import { Row, Input, theme, View, Stack, Heading, Text } from "native-base";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Picker } from '@react-native-picker/picker';
+import { Row, Input, theme, View, Stack, Heading, Text } from 'native-base';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   FREQUENCY_INITIAL,
   TIME_SPAN_TO_MILLISECONDS_MAPPING,
-} from "@/constants/general";
+} from '@/constants/general';
 import {
   Frequency,
   SpacingProp,
   HeadingTagProp,
   TimeSpan,
-} from "@/types/general";
+} from '@/types/general';
 
 type FrequencyInputProps = {
   initialFrequency?: Frequency;
@@ -78,7 +78,7 @@ export function FrequencyInput(props: FrequencyInputProps) {
             {Object.keys(TIME_SPAN_TO_MILLISECONDS_MAPPING).map((timespan) => (
               <Picker.Item
                 key={timespan}
-                label={`${timespan}${frequency?.number > 1 ? "s" : ""}`}
+                label={`${timespan}${frequency?.number > 1 ? 's' : ''}`}
                 value={timespan}
               />
             ))}

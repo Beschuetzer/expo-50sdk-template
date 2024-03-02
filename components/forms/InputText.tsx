@@ -1,4 +1,4 @@
-import { Text } from "react-native";
+import { Text } from 'react-native';
 
 type InputTextProps = {
   children: string | string[];
@@ -9,7 +9,7 @@ export function InputText(props: InputTextProps) {
   return (
     <Text
       style={{
-        fontWeight: "900",
+        fontWeight: '900',
       }}
     >
       {children}

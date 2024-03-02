@@ -1,15 +1,14 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
 
-import generalReducer, { generalSlice } from "@/state/slices/generalSlice";
-import listsReducer, { listsSlice } from "@/state/slices/listsSlice";
-import optionsReducer, { optionsSlice } from "@/state/slices/optionsSlice";
-import scannerReducer, { scannerSlice } from "@/state/slices/scannerSlice";
+import generalReducer, { generalSlice } from '@/state/slices/generalSlice';
+import listsReducer, { listsSlice } from '@/state/slices/listsSlice';
+import optionsReducer, { optionsSlice } from '@/state/slices/optionsSlice';
+import scannerReducer, { scannerSlice } from '@/state/slices/scannerSlice';
 
 const persistConfig = {
-  key: "root",
+  key: 'root',
   storage: AsyncStorage,
 };
 

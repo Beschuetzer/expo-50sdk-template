@@ -1,55 +1,55 @@
-import { FontAwesome } from '@expo/vector-icons'
-import { Center, Column, Row, theme } from 'native-base'
-import { useCallback, useMemo, useState } from 'react'
-import { TouchableOpacity } from 'react-native'
-import { FlatList } from 'react-native-gesture-handler'
+import { FontAwesome } from '@expo/vector-icons';
+import { Center, Column, Row, theme } from 'native-base';
+import { useCallback, useMemo, useState } from 'react';
+import { TouchableOpacity } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 
-import { ThumbnailPickerImage } from './ThumbnailPickerImage'
-import { useIsDarkMode } from '../hooks/useIsDarkTheme'
+import { ThumbnailPickerImage } from './ThumbnailPickerImage';
+import { useIsDarkMode } from '../hooks/useIsDarkTheme';
 
-import { EMPTY_STRING } from '@/constants/general'
-import { LOCAL_FILE_REGEX } from '@/constants/regexs'
-import { SpacingProp, StyleProp } from '@/types/general'
-import { captureImage, pickImage } from '@/utils/helpers'
+import { EMPTY_STRING } from '@/constants/general';
+import { LOCAL_FILE_REGEX } from '@/constants/regexs';
+import { SpacingProp, StyleProp } from '@/types/general';
+import { captureImage, pickImage } from '@/utils/helpers';
 
 type ThumbnailPickerProps = {
-  imagesToRender: Set<string>
-  selectedUrl: string
-  onSelectImage: (url: string, isCustomImage: boolean) => void
+  imagesToRender: Set<string>;
+  selectedUrl: string;
+  onSelectImage: (url: string, isCustomImage: boolean) => void;
 } & StyleProp &
-  SpacingProp
+  SpacingProp;
 
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
-  const { imagesToRender, selectedUrl, onSelectImage, spacing } = props
+  const { imagesToRender, selectedUrl, onSelectImage, spacing } = props;
   const [customImageUri, setCustomImageUri] = useState(
     selectedUrl?.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
-  )
-  const isDarkMode = useIsDarkMode()
+  );
+  const isDarkMode = useIsDarkMode();
   const modeColor = useMemo(
     () => (isDarkMode ? theme.colors.black : theme.colors.white),
     [theme],
-  )
+  );
 
   const handleSelect = useCallback(
     (imageUrl?: string, isCustomImage?: boolean) => {
-      if (!imageUrl) return
-      onSelectImage && onSelectImage(imageUrl, isCustomImage || false)
+      if (!imageUrl) return;
+      onSelectImage && onSelectImage(imageUrl, isCustomImage || false);
     },
     [onSelectImage],
-  )
+  );
 
   const getCustomImage = useCallback(
     async (resultFetcher: () => Promise<string | undefined>) => {
       try {
-        const result = (await resultFetcher()) || EMPTY_STRING
-        setCustomImageUri(result)
-        handleSelect(result, true)
+        const result = (await resultFetcher()) || EMPTY_STRING;
+        setCustomImageUri(result);
+        handleSelect(result, true);
       } catch (error) {
-        console.error('Error obtaining a custom image: ' + error)
+        console.error('Error obtaining a custom image: ' + error);
       }
     },
     [],
-  )
+  );
 
   return (
     <Column mt={spacing}>
@@ -57,13 +57,13 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         horizontal
         data={Array.from(imagesToRender.add(customImageUri))}
         renderItem={(item) => {
-          const imageUrl = item.item
-          if (!imageUrl) return null
+          const imageUrl = item.item;
+          if (!imageUrl) return null;
 
-          const isSelected = imageUrl === selectedUrl
+          const isSelected = imageUrl === selectedUrl;
           const borderColor = isSelected
             ? theme.colors.tertiary[900]
-            : modeColor
+            : modeColor;
 
           return (
             <ThumbnailPickerImage
@@ -73,7 +73,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
               onPress={(imageUrl) => handleSelect(imageUrl)}
               index={item.index}
             />
-          )
+          );
         }}
       />
       <Row space={spacing} mt={spacing}>
@@ -89,5 +89,5 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         </TouchableOpacity>
       </Row>
     </Column>
-  )
+  );
 }

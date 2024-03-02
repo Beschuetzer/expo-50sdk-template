@@ -1,53 +1,53 @@
-import { Camera, CameraType } from 'expo-camera'
-import { useFocusEffect, useNavigation } from 'expo-router'
-import { Button, View, Row, Text } from 'native-base'
-import React, { useState, useCallback } from 'react'
-import { StyleSheet, TouchableOpacity } from 'react-native'
+import { Camera, CameraType } from 'expo-camera';
+import { useFocusEffect, useNavigation } from 'expo-router';
+import { Button, View, Row, Text } from 'native-base';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
-import { FullscreenSpinner } from '@/components/FullscreenSpinner'
-import { ManualUpcInput } from '@/components/forms/ManualUpcInput'
-import { useRequestCameraPermissions } from '@/components/hooks/useRequestCameraPermissions'
-import { Routes } from '@/constants/navigation'
+import { FullscreenSpinner } from '@/components/FullscreenSpinner';
+import { ManualUpcInput } from '@/components/forms/ManualUpcInput';
+import { useRequestCameraPermissions } from '@/components/hooks/useRequestCameraPermissions';
+import { Routes } from '@/constants/navigation';
 
 const BarcodeScannerScreen = () => {
-  const [type, setType] = useState(CameraType.back)
-  const [scanned, setScanned] = useState(false)
-  const [isManuallyEntering, setIsManuallyEntering] = useState(false)
-  const hasPermission = useRequestCameraPermissions()
-  const [shouldRenderCamera, setShouldRenderCamera] = useState(true)
-  const navigation = useNavigation()
+  const [type, setType] = useState(CameraType.back);
+  const [scanned, setScanned] = useState(false);
+  const [isManuallyEntering, setIsManuallyEntering] = useState(false);
+  const hasPermission = useRequestCameraPermissions();
+  const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
+  const navigation = useNavigation();
 
   const handleBarCodeScanned = useCallback((scannedObj: { data: string }) => {
-    const { data } = scannedObj
-    setScanned(true)
-    navigation.navigate(Routes.ItemModal, { key: data })
-  }, [])
+    const { data } = scannedObj;
+    setScanned(true);
+    navigation.navigate(Routes.ItemModal, { key: data });
+  }, []);
 
   const onSwitchCameraPress = useCallback(() => {
     setType((current) =>
       current === CameraType.back ? CameraType.front : CameraType.back,
-    )
-  }, [])
+    );
+  }, []);
 
   const onManuallyEnter = useCallback(() => {
-    setIsManuallyEntering((current) => !current)
-  }, [])
+    setIsManuallyEntering((current) => !current);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
-      setShouldRenderCamera(true)
+      setShouldRenderCamera(true);
       return () => {
-        setScanned(false)
-        setShouldRenderCamera(false)
-      }
+        setScanned(false);
+        setShouldRenderCamera(false);
+      };
     }, []),
-  )
+  );
 
   if (hasPermission === null) {
-    return <FullscreenSpinner />
+    return <FullscreenSpinner />;
   }
   if (hasPermission === false) {
-    return <Text>No access to camera</Text>
+    return <Text>No access to camera</Text>;
   }
 
   return (
@@ -77,8 +77,8 @@ const BarcodeScannerScreen = () => {
         </TouchableOpacity>
       ) : null}
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -99,6 +99,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
   },
-})
+});
 
-export default BarcodeScannerScreen
+export default BarcodeScannerScreen;

@@ -1,4 +1,4 @@
-import { Store } from "@/types/Store";
+import { Store } from '@/types/Store';
 
 export const MOCK_STORES = [
   {
@@ -22,4 +22,4 @@ export const MOCK_STORES = [
       lon: '-93.0198135',
     },
   },
-] as Store[]
+] as Store[];

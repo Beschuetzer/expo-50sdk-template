@@ -1,12 +1,12 @@
-import { FontAwesome } from '@expo/vector-icons'
-import { Row, useTheme, Stack, FormControl } from 'native-base'
-import React, { useCallback, useMemo, useState } from 'react'
-import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useDispatch, useSelector } from 'react-redux'
+import { FontAwesome } from '@expo/vector-icons';
+import { Row, useTheme, Stack, FormControl } from 'native-base';
+import React, { useCallback, useMemo, useState } from 'react';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal'
+import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   itemsListSelector,
   setItemsList,
@@ -14,33 +14,33 @@ import {
   setStoreSpecificValues,
   storesListSelector,
   storeSpecificValuesMapSelector,
-} from '@/state/slices/listsSlice'
+} from '@/state/slices/listsSlice';
 import {
   setUpcProducts,
   upcProductsSelector,
-} from '@/state/slices/scannerSlice'
-import { loadAppStateFromFile, saveAppStateToFile } from '@/utils/helpers'
+} from '@/state/slices/scannerSlice';
+import { loadAppStateFromFile, saveAppStateToFile } from '@/utils/helpers';
 
-type SaveLoadStateProps = object
+type SaveLoadStateProps = object;
 
 const FILE_NAMES = {
   items: 'items',
   stores: 'stores',
   storeSpecificValues: 'storeSpecificValues',
   upcProducts: 'upcProducts',
-}
+};
 
 export const SaveLoadState = (props: SaveLoadStateProps) => {
-  const theme = useTheme()
-  const itemsList = useSelector(itemsListSelector)
-  const storeSpecificValues = useSelector(storeSpecificValuesMapSelector)
-  const upcProducts = useSelector(upcProductsSelector)
-  const stores = useSelector(storesListSelector)
-  const dispatch = useDispatch()
-  const iconSize = useMemo(() => theme.sizes[6], [theme])
+  const theme = useTheme();
+  const itemsList = useSelector(itemsListSelector);
+  const storeSpecificValues = useSelector(storeSpecificValuesMapSelector);
+  const upcProducts = useSelector(upcProductsSelector);
+  const stores = useSelector(storesListSelector);
+  const dispatch = useDispatch();
+  const iconSize = useMemo(() => theme.sizes[6], [theme]);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {},
-  )
+  );
 
   const onLoadItemsPress = useCallback(async () => {
     setConfirmModalProps({
@@ -49,18 +49,18 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         'Loading items will delete all of your current items.  Continue?',
       onCancel: () => null,
       onConfirm: async () => {
-        const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items)
+        const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items);
         const storeSpecificValues = await loadAppStateFromFile(
           FILE_NAMES.storeSpecificValues,
-        )
-        const upcProducts = await loadAppStateFromFile(FILE_NAMES.upcProducts)
-        dispatch(setStoreSpecificValues(storeSpecificValues))
-        dispatch(setItemsList(itemsLoaded))
-        dispatch(setUpcProducts(upcProducts))
-        setConfirmModalProps({ isVisible: false })
+        );
+        const upcProducts = await loadAppStateFromFile(FILE_NAMES.upcProducts);
+        dispatch(setStoreSpecificValues(storeSpecificValues));
+        dispatch(setItemsList(itemsLoaded));
+        dispatch(setUpcProducts(upcProducts));
+        setConfirmModalProps({ isVisible: false });
       },
-    })
-  }, [])
+    });
+  }, []);
 
   const onSaveItemsPress = useCallback(async () => {
     setConfirmModalProps({
@@ -68,16 +68,16 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       message: 'Are you sure you wan to save items?',
       onCancel: () => null,
       onConfirm: async () => {
-        await saveAppStateToFile(FILE_NAMES.items, itemsList)
+        await saveAppStateToFile(FILE_NAMES.items, itemsList);
         await saveAppStateToFile(
           FILE_NAMES.storeSpecificValues,
           storeSpecificValues,
-        )
-        await saveAppStateToFile(FILE_NAMES.upcProducts, upcProducts)
-        setConfirmModalProps({ isVisible: false })
+        );
+        await saveAppStateToFile(FILE_NAMES.upcProducts, upcProducts);
+        setConfirmModalProps({ isVisible: false });
       },
-    })
-  }, [upcProducts, itemsList])
+    });
+  }, [upcProducts, itemsList]);
 
   const onLoadStoresPress = useCallback(async () => {
     setConfirmModalProps({
@@ -86,12 +86,12 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         'Loading stores will delete all of your current stores.  Continue?',
       onCancel: () => null,
       onConfirm: async () => {
-        const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores)
-        dispatch(setStoresList(storesLoaded))
-        setConfirmModalProps({ isVisible: false })
+        const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores);
+        dispatch(setStoresList(storesLoaded));
+        setConfirmModalProps({ isVisible: false });
       },
-    })
-  }, [])
+    });
+  }, []);
 
   const onSaveStoresPress = useCallback(async () => {
     setConfirmModalProps({
@@ -99,11 +99,11 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       message: 'Are you sure you wan to save stores?',
       onCancel: () => null,
       onConfirm: async () => {
-        await saveAppStateToFile(FILE_NAMES.stores, stores)
-        setConfirmModalProps({ isVisible: false })
+        await saveAppStateToFile(FILE_NAMES.stores, stores);
+        setConfirmModalProps({ isVisible: false });
       },
-    })
-  }, [stores])
+    });
+  }, [stores]);
 
   return (
     <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -127,5 +127,5 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       </Row>
       <ConfirmModal {...confirmModalProps} />
     </Stack>
-  )
-}
+  );
+};

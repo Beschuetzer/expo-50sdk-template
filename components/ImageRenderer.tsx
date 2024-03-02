@@ -1,5 +1,5 @@
-import { Image, ImageProps } from "expo-image";
-import { AspectRatio } from "native-base";
+import { Image, ImageProps } from 'expo-image';
+import { AspectRatio } from 'native-base';
 
 type ImageRendererProps = ImageProps;
 
@@ -19,5 +19,5 @@ export function ImageRenderer(props: ImageRendererProps) {
     >
       <Image cachePolicy={cachePolicy} {...props} />
     </AspectRatio>
-  )
+  );
 }

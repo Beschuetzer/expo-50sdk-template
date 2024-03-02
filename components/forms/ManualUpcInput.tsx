@@ -1,71 +1,71 @@
-import { useNavigation } from 'expo-router'
-import { Button, Input, View, Text, useTheme, Row } from 'native-base'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { GestureResponderEvent } from 'react-native'
+import { useNavigation } from 'expo-router';
+import { Button, Input, View, Text, useTheme, Row } from 'native-base';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { GestureResponderEvent } from 'react-native';
 
-import { InputValidationMessage } from '../InputValidationMessage'
-import { MOCKS_UPCS } from '../mocks/mockUpcData'
+import { InputValidationMessage } from '../InputValidationMessage';
+import { MOCKS_UPCS } from '../mocks/mockUpcData';
 
-import { Routes } from '@/constants/navigation'
-import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs'
+import { Routes } from '@/constants/navigation';
+import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 
 type ManualUpcInputProps = {
-  isVisible?: boolean
-}
+  isVisible?: boolean;
+};
 
-const DEBOUNCE_TIMEOUT = 500
-const VALUE_INITIAL = ''
-const IS_VALID_INITIAL = true
+const DEBOUNCE_TIMEOUT = 500;
+const VALUE_INITIAL = '';
+const IS_VALID_INITIAL = true;
 
 function getIsValidValue(value: string) {
-  return !!UPC_REGEX.test(value)
+  return !!UPC_REGEX.test(value);
 }
 
 export function ManualUpcInput(props: ManualUpcInputProps) {
-  const { isVisible = true } = props
-  const timeoutRef = useRef<any>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isValid, setIsValid] = useState(IS_VALID_INITIAL)
-  const [value, setValue] = useState<string>(VALUE_INITIAL)
-  const theme = useTheme()
-  const navigation = useNavigation()
+  const { isVisible = true } = props;
+  const timeoutRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isValid, setIsValid] = useState(IS_VALID_INITIAL);
+  const [value, setValue] = useState<string>(VALUE_INITIAL);
+  const theme = useTheme();
+  const navigation = useNavigation();
 
   const onSearchPress = useCallback(
     (e: GestureResponderEvent) => {
-      e.preventDefault()
+      e.preventDefault();
       if (getIsValidValue(value)) {
-        navigation.navigate(Routes.ItemModal, { key: value })
+        navigation.navigate(Routes.ItemModal, { key: value });
       }
     },
     [value],
-  )
+  );
 
   const handleSetIsValid = useCallback((value: string) => {
-    clearTimeout(timeoutRef.current)
+    clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
-      setIsValid(getIsValidValue(value))
-    }, DEBOUNCE_TIMEOUT)
-  }, [])
+      setIsValid(getIsValidValue(value));
+    }, DEBOUNCE_TIMEOUT);
+  }, []);
 
   const onValueChange = useCallback(
     (text: string) => {
-      const newValue = text.trim()
-      setValue(newValue)
-      handleSetIsValid(newValue)
+      const newValue = text.trim();
+      setValue(newValue);
+      handleSetIsValid(newValue);
     },
     [setIsValid, setValue],
-  )
+  );
 
   useEffect(() => {
-    setValue(VALUE_INITIAL)
-    setIsValid(IS_VALID_INITIAL)
+    setValue(VALUE_INITIAL);
+    setIsValid(IS_VALID_INITIAL);
 
     if (inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [isVisible])
+  }, [isVisible]);
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
   return (
     <View>
       <Text p={3} pb={0}>
@@ -111,5 +111,5 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         Search
       </Button>
     </View>
-  )
+  );
 }

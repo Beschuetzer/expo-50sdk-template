@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { Row, Column, Text, useTheme, Button } from 'native-base';
+import { Row, Column, Text, useTheme } from 'native-base';
 import { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 import {
@@ -103,7 +103,7 @@ export function ItemTileWithStoreSpecificValues(props: ItemTileProps) {
             onPress={incrementQuantity}
             onLongPress={decrementQuantity}
           >
-            <Text style={{color: theme.colors.info[900]}}>
+            <Text style={{ color: theme.colors.info[900] }}>
               {quantityAtStore} {item.unit || ItemUnit.Package}
               {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
                 ? 's'

@@ -1,13 +1,17 @@
-import { View, Text, theme } from "native-base";
-import React, { ReactNode, useEffect, useRef } from "react";
-import { Animated, StyleSheet, I18nManager, Dimensions } from "react-native";
-import { RectButton, Swipeable, SwipeableProps } from "react-native-gesture-handler";
-import { useSelector } from "react-redux";
+import { View, Text, theme } from 'native-base';
+import React, { ReactNode, useEffect, useRef } from 'react';
+import { Animated, StyleSheet, I18nManager, Dimensions } from 'react-native';
+import {
+  RectButton,
+  Swipeable,
+  SwipeableProps,
+} from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
 
-import { EMPTY_STRING } from "@/constants/general";
-import { swipeableRowOpenThresholdSelector } from "@/state/slices/optionsSlice";
+import { EMPTY_STRING } from '@/constants/general';
+import { swipeableRowOpenThresholdSelector } from '@/state/slices/optionsSlice';
 
-type SwipeableRowDirection = "left" | "right";
+type SwipeableRowDirection = 'left' | 'right';
 type SwipeableRowAction = {
   title: string | ReactNode | ReactNode[];
   backgroundColor: string;
@@ -22,11 +26,11 @@ type SwipeableRowProps = {
   children?: ReactNode | ReactNode[];
   width?: string | number;
   id?: any;
-  swipeableProps?: SwipeableProps
-}
+  swipeableProps?: SwipeableProps;
+};
 
 export function SwipeableRow(props: SwipeableRowProps) {
-  const windowDimensions = Dimensions.get("window");
+  const windowDimensions = Dimensions.get('window');
   const {
     children,
     width = windowDimensions.width,
@@ -59,15 +63,15 @@ export function SwipeableRow(props: SwipeableRowProps) {
           onPress: () => null,
           title: rightSwipe?.title || EMPTY_STRING,
         },
-        "left",
+        'left',
       );
     return (
       <View
         width={width}
-        flexDirection={I18nManager.isRTL ? "row-reverse" : "row"}
+        flexDirection={I18nManager.isRTL ? 'row-reverse' : 'row'}
       >
         {leftActions?.map((action) => {
-          return renderAction(action, "left");
+          return renderAction(action, 'left');
         })}
       </View>
     );
@@ -84,15 +88,15 @@ export function SwipeableRow(props: SwipeableRowProps) {
           onPress: () => null,
           title: leftSwipe?.title || EMPTY_STRING,
         },
-        "right",
+        'right',
       );
     return (
       <View
         width={width}
-        flexDirection={I18nManager.isRTL ? "row-reverse" : "row"}
+        flexDirection={I18nManager.isRTL ? 'row-reverse' : 'row'}
       >
         {rightActions?.map((action) => {
-          return renderAction(action, "right");
+          return renderAction(action, 'right');
         })}
       </View>
     );
@@ -113,7 +117,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
               translateX: 0,
             },
           ],
-          width: "100%",
+          width: '100%',
         }}
       >
         <RectButton
@@ -121,13 +125,13 @@ export function SwipeableRow(props: SwipeableRowProps) {
             styles.action,
             {
               backgroundColor,
-              alignItems: direction === "left" ? "flex-start" : "flex-end",
+              alignItems: direction === 'left' ? 'flex-start' : 'flex-end',
               // width: ,
             },
           ]}
           onPress={onPress}
         >
-          {typeof title === "string" ? (
+          {typeof title === 'string' ? (
             <Text style={styles.actionText}>{title}</Text>
           ) : (
             title
@@ -163,14 +167,14 @@ export function SwipeableRow(props: SwipeableRowProps) {
 
 const styles = StyleSheet.create({
   actionText: {
-    color: "white",
+    color: 'white',
     fontSize: 16,
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     padding: 10,
   },
   action: {
     flex: 1,
-    justifyContent: "center",
-    textAlign: "center",
+    justifyContent: 'center',
+    textAlign: 'center',
   },
 });

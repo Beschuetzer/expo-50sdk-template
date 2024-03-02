@@ -1,9 +1,9 @@
-import { View, useTheme } from 'native-base'
+import { View, useTheme } from 'native-base';
 
-import { StoresList } from '@/components/lists/StoresList'
+import { StoresList } from '@/components/lists/StoresList';
 
 export default function StoreScreen() {
-  const theme = useTheme()
+  const theme = useTheme();
 
   return (
     <View
@@ -13,5 +13,5 @@ export default function StoreScreen() {
     >
       <StoresList />
     </View>
-  )
+  );
 }

@@ -3,13 +3,10 @@ import {
   ActivityIndicatorProps,
   View,
   Text,
-  Dimensions,
   useWindowDimensions,
-} from "react-native";
+} from 'react-native';
 
-import { useBottomTabHeight } from "./hooks/useBottomTabHeight";
-
-import { COLORS } from "@/constants/colors";
+import { COLORS } from '@/constants/colors';
 
 type FullscreenSpinnerProps = {
   activityIndicatorProps?: ActivityIndicatorProps;
@@ -25,9 +22,9 @@ export function FullscreenSpinner(props: FullscreenSpinnerProps) {
       style={{
         width: dimensions.width,
         height: dimensions.height,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       <ActivityIndicator

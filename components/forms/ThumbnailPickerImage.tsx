@@ -1,20 +1,20 @@
-import { View, useTheme } from 'native-base'
-import { TouchableOpacity } from 'react-native'
+import { View, useTheme } from 'native-base';
+import { TouchableOpacity } from 'react-native';
 
-import { ImageRenderer } from '../ImageRenderer'
+import { ImageRenderer } from '../ImageRenderer';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 
 type ThumbnailPickerImageProps = {
-  borderColor: string
-  imageUrl: string
-  index: number
-  onPress: (imageUrl: string) => void
-}
+  borderColor: string;
+  imageUrl: string;
+  index: number;
+  onPress: (imageUrl: string) => void;
+};
 
 export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
-  const { imageUrl, index, borderColor, onPress } = props
-  const theme = useTheme()
+  const { imageUrl, index, borderColor, onPress } = props;
+  const theme = useTheme();
 
   return (
     <View
@@ -32,5 +32,5 @@ export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
         />
       </TouchableOpacity>
     </View>
-  )
+  );
 }

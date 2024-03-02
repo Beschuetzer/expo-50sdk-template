@@ -1,50 +1,50 @@
-import { FontAwesome } from '@expo/vector-icons'
-import { Picker } from '@react-native-picker/picker'
-import { useNavigation } from 'expo-router'
-import { FormControl, Row, Stack } from 'native-base'
-import { useCallback } from 'react'
-import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useDispatch, useSelector } from 'react-redux'
+import { FontAwesome } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from 'expo-router';
+import { FormControl, Row, Stack } from 'native-base';
+import { useCallback } from 'react';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { EMPTY_STRING } from '@/constants/general'
-import { Routes } from '@/constants/navigation'
-import { maxWidth } from '@/constants/styles'
+import { EMPTY_STRING } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
+import { maxWidth } from '@/constants/styles';
 import {
   ListName,
   currentStoreSelector,
   listToDisplaySelector,
   setCurrentStoreName,
-} from '@/state/slices/listsSlice'
-import { Store } from '@/types/Store'
-import { HeadingTagProp } from '@/types/general'
+} from '@/state/slices/listsSlice';
+import { Store } from '@/types/Store';
+import { HeadingTagProp } from '@/types/general';
 
 type StorageManagerProps = {
-  showAddStore?: boolean
-  showStoreList?: boolean
-  useAbbreviatedVerbiage?: boolean
-} & HeadingTagProp
+  showAddStore?: boolean;
+  showStoreList?: boolean;
+  useAbbreviatedVerbiage?: boolean;
+} & HeadingTagProp;
 export function StoreManager(props: StorageManagerProps) {
   const {
     showAddStore = false,
     showStoreList = false,
     useAbbreviatedVerbiage = false,
     headingTag: Tag = FormControl.Label,
-  } = props
+  } = props;
 
-  const currentStore = useSelector(currentStoreSelector)
+  const currentStore = useSelector(currentStoreSelector);
   const storesList = useSelector(
     listToDisplaySelector(ListName.StoresList),
-  ) as Store[]
-  const navigation = useNavigation()
-  const dispatch = useDispatch()
+  ) as Store[];
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   const onAddPress = useCallback(() => {
-    navigation.navigate(Routes.StoreModal)
-  }, [])
+    navigation.navigate(Routes.StoreModal);
+  }, []);
 
   const onChangeStore = useCallback((storeName: string) => {
-    dispatch(setCurrentStoreName(storeName))
-  }, [])
+    dispatch(setCurrentStoreName(storeName));
+  }, []);
 
   return (
     <Stack>
@@ -74,5 +74,5 @@ export function StoreManager(props: StorageManagerProps) {
         </Picker>
       ) : null}
     </Stack>
-  )
+  );
 }

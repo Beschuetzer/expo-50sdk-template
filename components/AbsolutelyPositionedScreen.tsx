@@ -1,20 +1,20 @@
-import { Column, ScrollView, View, useTheme } from 'native-base'
-import { ReactNode, useState } from 'react'
+import { Column, ScrollView, View, useTheme } from 'native-base';
+import { ReactNode, useState } from 'react';
 
-import { absolutePositioning } from '@/constants/styles'
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general'
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { absolutePositioning } from '@/constants/styles';
 
 type AbsolutePositionedScreenProps = {
-  absolutelyPositionedJsx: ReactNode | ReactNode[]
-  children: ReactNode | ReactNode[]
-}
+  absolutelyPositionedJsx: ReactNode | ReactNode[];
+  children: ReactNode | ReactNode[];
+};
 
-const CONTAINER_HEIGHT_DEFAULT = 0
+const CONTAINER_HEIGHT_DEFAULT = 0;
 export function AbsolutePositionedScreen(props: AbsolutePositionedScreenProps) {
-  const { absolutelyPositionedJsx, children } = props
+  const { absolutelyPositionedJsx, children } = props;
   const [containerHeight, setContainerHeight] = useState(
     CONTAINER_HEIGHT_DEFAULT,
-  )
+  );
   const theme = useTheme();
 
   return (
@@ -29,12 +29,12 @@ export function AbsolutePositionedScreen(props: AbsolutePositionedScreenProps) {
         py={theme.space[FORM_INTER_ITEM_SPACING]}
         backgroundColor={theme.colors.white}
         onLayout={(event) => {
-          const height = event.nativeEvent?.layout?.height
-          setContainerHeight(height || CONTAINER_HEIGHT_DEFAULT)
+          const height = event.nativeEvent?.layout?.height;
+          setContainerHeight(height || CONTAINER_HEIGHT_DEFAULT);
         }}
       >
         {absolutelyPositionedJsx}
       </Column>
     </Column>
-  )
+  );
 }

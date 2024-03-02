@@ -11,10 +11,11 @@ import { UpcProp } from '@/types/general';
 
 type UseUpcProductProps = {
   onSuccessfulFetch?: (upcProduct: UpcProduct) => void;
+  shouldSkip?: boolean;
 } & UpcProp;
 
 export function useUpcProduct(props: UseUpcProductProps) {
-  const { onSuccessfulFetch, upc } = props;
+  const { onSuccessfulFetch, shouldSkip, upc } = props;
   const upcProduct = useSelector(upcProductSelector(upc));
   const shouldMockResponse = useSelector(
     shouldShouldMockScannedResponsesSelector,
@@ -66,10 +67,10 @@ export function useUpcProduct(props: UseUpcProductProps) {
     if (upcProduct) {
       setProduct(upcProduct);
       onSuccessfulFetch && onSuccessfulFetch(upcProduct);
-    } else if (upc?.match(UPC_REGEX)) {
+    } else if (!shouldSkip && upc?.match(UPC_REGEX)) {
       fetchUpcData();
     }
-  }, [upc, upcProduct]);
+  }, [upc, upcProduct, shouldSkip]);
 
   return {
     upcProduct: product,

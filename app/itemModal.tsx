@@ -28,10 +28,11 @@ export default function ItemModal() {
     showBlank = false,
     callerList,
   } = (route.params || {}) as any;
+  const itemInList = useSelector(itemsListItemSelector(key || EMPTY_STRING));
   const { upcProduct, errorMsg } = useUpcProduct({
     upc: key,
+    shouldSkip: !!itemInList,
   });
-  const itemInList = useSelector(itemsListItemSelector(key || EMPTY_STRING));
   const currentStore = useSelector(currentStoreSelector);
   const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
   const itemInListUsingName = useSelector(

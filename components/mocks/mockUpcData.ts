@@ -116,43 +116,14 @@ export async function handleMockResponse(upc: string) {
           'https://images.openfoodfacts.org/images/products/007/227/348/7253/front_en.8.400.jpg',
       },
     },
-    [MOCKS_UPCS[3]]: {
-      code: '',
-      status: 1,
-      status_verbose: 'worked',
-      product: {
-        brands: '',
-        code: '',
-        id: '',
-        image_front_small_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg',
-        image_front_thumb_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg',
-        image_front_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg',
-        image_ingredients_small_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.200.jpg',
-        image_ingredients_thumb_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.100.jpg',
-        image_ingredients_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/ingredients_en.27.400.jpg',
-        image_nutrition_small_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.200.jpg',
-        image_nutrition_thumb_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.100.jpg',
-        image_nutrition_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/nutrition_en.28.400.jpg',
-        image_small_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.200.jpg',
-        image_thumb_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.100.jpg',
-        image_url:
-          'https://images.openfoodfacts.org/images/products/009/661/910/7698/front_en.14.400.jpg',
-        product_name: '',
-      } as UpcProduct,
-    },
   } as unknown as { [key: string]: UpcResponse };
-  const toReturn = MOCKS[upc];
+  const toReturn = MOCKS?.[upc] || {
+    data: {
+      code: upc,
+      status: 0,
+      status_verbose: 'product not found',
+    },
+  };
   console.log({ toReturn, upc });
 
   return new Response(JSON.stringify(toReturn));

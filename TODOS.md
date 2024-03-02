@@ -1,5 +1,4 @@
 ## MVP
--Scanner should open an existing item if it exists and not make any calls (try manually adding an item with a upc)
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -add image placeholder for items with no image (manually add an item to test)
 -add a "Add all to Shopping" option when multiple selection mode

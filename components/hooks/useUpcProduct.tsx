@@ -3,11 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { handleMockResponse } from '../mocks/mockUpcData';
 
+import { EMPTY_STRING } from '@/constants/general';
 import { UPC_REGEX } from '@/constants/regexs';
 import { shouldShouldMockScannedResponsesSelector } from '@/state/slices/generalSlice';
 import { addUpcProduct, upcProductSelector } from '@/state/slices/scannerSlice';
+import { Item } from '@/types/Item';
 import { UpcProduct, UpcResponse } from '@/types/UpcResponse';
 import { UpcProp } from '@/types/general';
+import { getUpcProduct } from '@/utils/model-mappings';
 
 type UseUpcProductProps = {
   onSuccessfulFetch?: (upcProduct: UpcProduct) => void;
@@ -41,11 +44,16 @@ export function useUpcProduct(props: UseUpcProductProps) {
 
       if (response.ok) {
         const data = (await response.json()) as UpcResponse;
-        const upcProduct = data.product;
-        if (!upcProduct.code && !upcProduct.id && !upcProduct.product_name) {
-          upcProduct.product_name = 'N/A';
-          upcProduct.brands = 'N/A';
-        }
+        const upcProduct =
+          data?.product ||
+          getUpcProduct(
+            {
+              name: EMPTY_STRING,
+              upc,
+            } as Item,
+            false,
+          );
+
         dispatch(addUpcProduct(upcProduct));
         setProduct(upcProduct);
         onSuccessfulFetch && onSuccessfulFetch(upcProduct);

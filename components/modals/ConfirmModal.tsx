@@ -1,26 +1,24 @@
-// ConfirmModal.js
-
-import { View, Text, useTheme } from 'native-base'
-import React, { useCallback } from 'react'
-import { Modal, TouchableOpacity } from 'react-native'
+import { View, Text, useTheme } from 'native-base';
+import React, { useCallback } from 'react';
+import { Modal, TouchableOpacity } from 'react-native';
 
 export type ConfirmModalProps = {
-  isVisible?: boolean
-  message?: string
-  onConfirm?: () => void
-  onCancel?: () => void
-}
+  isVisible?: boolean;
+  message?: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+};
 export const ConfirmModal = (props: ConfirmModalProps) => {
   const theme = useTheme();
-  const { isVisible = false, message = '', onConfirm, onCancel } = props
+  const { isVisible = false, message = '', onConfirm, onCancel } = props;
 
   const onCancelPress = useCallback(() => {
-    onCancel && onCancel()
-  }, [onCancel])
+    onCancel && onCancel();
+  }, [onCancel]);
 
   const onConfirmPress = useCallback(() => {
-    onConfirm && onConfirm()
-  }, [onConfirm])
+    onConfirm && onConfirm();
+  }, [onConfirm]);
 
   return (
     <Modal
@@ -51,5 +49,5 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
         </View>
       </View>
     </Modal>
-  )
-}
+  );
+};

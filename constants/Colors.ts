@@ -1,3 +1,4 @@
+export const MODAL_BLUR_VIEW_COLOR = '#000000bb';
 const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
 

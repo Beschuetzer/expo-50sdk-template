@@ -1,7 +1,9 @@
+import { BlurView } from 'expo-blur';
 import { View, Text, useTheme } from 'native-base';
 import React, { useCallback } from 'react';
 import { Modal, TouchableOpacity } from 'react-native';
 
+import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { getButtonHitSlop } from '@/utils/helpers';
 
 export type ConfirmModalProps = {
@@ -24,12 +26,20 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
 
   return (
     <Modal
-      animationType="slide"
+      animationType="fade"
       transparent
       visible={isVisible}
       onRequestClose={onCancelPress}
     >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <BlurView
+        intensity={100}
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: MODAL_BLUR_VIEW_COLOR,
+        }}
+      >
         <View
           style={{ padding: 20, backgroundColor: 'white', borderRadius: 10 }}
         >
@@ -55,7 +65,7 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </BlurView>
     </Modal>
   );
 };

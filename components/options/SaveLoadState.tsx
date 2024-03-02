@@ -47,7 +47,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       isVisible: true,
       message:
         'Loading items will delete all of your current items.  Continue?',
-      onCancel: () => null,
+      onCancel: () => setConfirmModalProps({ isVisible: false }),
       onConfirm: async () => {
         const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items);
         const storeSpecificValues = await loadAppStateFromFile(
@@ -66,7 +66,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
     setConfirmModalProps({
       isVisible: true,
       message: 'Are you sure you wan to save items?',
-      onCancel: () => null,
+      onCancel: () => setConfirmModalProps({ isVisible: false }),
       onConfirm: async () => {
         await saveAppStateToFile(FILE_NAMES.items, itemsList);
         await saveAppStateToFile(
@@ -77,14 +77,14 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         setConfirmModalProps({ isVisible: false });
       },
     });
-  }, [upcProducts, itemsList]);
+  }, [upcProducts, itemsList, storeSpecificValues]);
 
   const onLoadStoresPress = useCallback(async () => {
     setConfirmModalProps({
       isVisible: true,
       message:
         'Loading stores will delete all of your current stores.  Continue?',
-      onCancel: () => null,
+      onCancel: () => setConfirmModalProps({ isVisible: false }),
       onConfirm: async () => {
         const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores);
         dispatch(setStoresList(storesLoaded));
@@ -97,7 +97,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
     setConfirmModalProps({
       isVisible: true,
       message: 'Are you sure you wan to save stores?',
-      onCancel: () => null,
+      onCancel: () => setConfirmModalProps({ isVisible: false }),
       onConfirm: async () => {
         await saveAppStateToFile(FILE_NAMES.stores, stores);
         setConfirmModalProps({ isVisible: false });

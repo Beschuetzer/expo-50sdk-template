@@ -1,13 +1,12 @@
 ## MVP
--figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
+-add toggle to auto-select closest store within range
 -add a "Add all to Shopping" option when multiple selection mode
+-figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 -how to add multiple selection options to shopping list and in cart list?
 -use frequency and last purchase date to show recommended items needed
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item
-
--figure out how to auto-select store if the difference in current location is <= 1 mile?
 
 -Custom thumbnail images:
     --add ability to long press an image which enters delete mode (trash bin show up in headerRight)

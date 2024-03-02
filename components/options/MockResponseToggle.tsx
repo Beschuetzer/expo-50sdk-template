@@ -26,11 +26,15 @@ export function MockResponseToggle(props: MockResponseToggleProps) {
       <Text mr={theme.space[1]}>Mock Scanned Responses</Text>
       <Switch
         trackColor={{
-          false: theme.colors.red[200],
-          true: theme.colors.green[900],
+          false: theme.colors.secondary[200],
+          true: theme.colors.primary[200],
         }}
-        thumbColor={shouldMockResponse ? '#f5dd4b' : '#f4f3f4'}
-        ios_backgroundColor="#3e3e3e"
+        thumbColor={
+          shouldMockResponse
+            ? theme.colors.primary[900]
+            : theme.colors.secondary[900]
+        }
+        ios_backgroundColor={theme.colors.black[900]}
         onValueChange={toggleSwitch}
         value={shouldMockResponse}
       />

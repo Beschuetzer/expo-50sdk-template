@@ -3,6 +3,8 @@ import { GpsCoordinate } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
 import { Frequency, TimeSpan } from '@/types/general';
 
+export const AUTO_SET_STORE_DISTANCE_THRESHOLD = 0.1;
+export const AUTO_SET_STORE_WHEN_CLOSE_ENOUGH = true;
 export const DEFAULT_IMAGE_INDEX = 0;
 export const EMPTY_NUMBER = 0;
 export const EMPTY_STRING = '';

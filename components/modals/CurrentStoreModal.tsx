@@ -3,7 +3,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  AUTO_SET_STORE_DISTANCE_THRESHOLD,
+  FORM_INTER_ITEM_SPACING,
+} from '@/constants/general';
 import {
   currentLocationSelector,
   currentStoreSelector,
@@ -12,13 +15,12 @@ import {
 } from '@/state/slices/listsSlice';
 import { Store } from '@/types/Store';
 
-export type CurrentStoreModalProps = object;
+export type AutoSetStoreModalProps = object;
 
 /**
  *This is in miles and determines how close you have to be to the store to assume you are there.
  **/
-const DISTANCE_THRESHOLD = 0.1;
-export const CurrentStoreModal = (props: CurrentStoreModalProps) => {
+export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
   const currentLocation = useSelector(currentLocationSelector);
   const currentStore = useSelector(currentStoreSelector);
   const storesList = useSelector(storesListSelector);
@@ -39,7 +41,7 @@ export const CurrentStoreModal = (props: CurrentStoreModalProps) => {
     for (const store of storesList.data) {
       if (
         store.calculatedDistance !== undefined &&
-        store.calculatedDistance <= DISTANCE_THRESHOLD &&
+        store.calculatedDistance <= AUTO_SET_STORE_DISTANCE_THRESHOLD &&
         currentStore.name.trim().toLowerCase() !==
           store?.name.trim().toLowerCase()
       ) {

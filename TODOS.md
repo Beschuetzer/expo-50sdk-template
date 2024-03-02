@@ -1,4 +1,5 @@
 ## MVP
+-add BlurView to modals
 -add toggle to auto-select closest store within range
 -Scanner should open an existing item if it exists and not make any calls (try manually adding an item with a upc)
 -add a "Add all to Shopping" option when multiple selection mode

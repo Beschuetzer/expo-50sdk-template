@@ -2,6 +2,8 @@ import { View, Text, useTheme } from 'native-base';
 import React, { useCallback } from 'react';
 import { Modal, TouchableOpacity } from 'react-native';
 
+import { getButtonHitSlop } from '@/utils/helpers';
+
 export type ConfirmModalProps = {
   isVisible?: boolean;
   message?: string;
@@ -39,10 +41,16 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
               marginTop: 20,
             }}
           >
-            <TouchableOpacity onPress={onConfirmPress}>
+            <TouchableOpacity
+              hitSlop={getButtonHitSlop(4)}
+              onPress={onConfirmPress}
+            >
               <Text style={{ color: theme.colors.green[900] }}>Confirm</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onCancelPress}>
+            <TouchableOpacity
+              hitSlop={getButtonHitSlop(4)}
+              onPress={onCancelPress}
+            >
               <Text style={{ color: theme.colors.danger[900] }}>Cancel</Text>
             </TouchableOpacity>
           </View>

@@ -14,6 +14,7 @@ import {
   storesListSelector,
 } from '@/state/slices/listsSlice';
 import { Store } from '@/types/Store';
+import { getButtonHitSlop } from '@/utils/helpers';
 
 export type AutoSetStoreModalProps = object;
 
@@ -78,10 +79,16 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
               marginTop: 20,
             }}
           >
-            <TouchableOpacity onPress={onConfirmPress}>
+            <TouchableOpacity
+              hitSlop={getButtonHitSlop(4)}
+              onPress={onConfirmPress}
+            >
               <Text style={{ color: theme.colors.green[900] }}>Yes</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onCancelPress}>
+            <TouchableOpacity
+              hitSlop={getButtonHitSlop(4)}
+              onPress={onCancelPress}
+            >
               <Text style={{ color: theme.colors.danger[900] }}>No</Text>
             </TouchableOpacity>
           </View>

@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import { Insets } from 'react-native';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { SortType, SortOrder } from '@/components/lists/sorters';
@@ -87,6 +88,18 @@ export async function deleteFile(path: string) {
 
 export function displayAlert(object: object | null) {
   alert(object ? JSON.stringify(object, null, 2) : object);
+}
+
+/**
+ *Default is 10 for each side
+ **/
+export function getButtonHitSlop(multiplier = 1) {
+  return {
+    top: 10 * multiplier,
+    bottom: 10 * multiplier,
+    left: 10 * multiplier,
+    right: 10 * multiplier,
+  } as Insets;
 }
 
 export function getEmptyArray<T>() {

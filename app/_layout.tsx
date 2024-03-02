@@ -18,7 +18,7 @@ import { Text } from '@/components/Themed';
 import { CloseButton } from '@/components/header/CloseButton';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
 import { useFlushRedux } from '@/components/hooks/useFlushRedux';
-import { AutoSetStoreModal } from '@/components/modals/CurrentStoreModal';
+import { AutoSetStoreModal } from '@/components/modals/AutoSetStoreModal';
 import { Routes } from '@/constants/navigation';
 import { persistor, store } from '@/state/store';
 

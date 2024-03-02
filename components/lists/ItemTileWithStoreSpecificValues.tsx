@@ -23,6 +23,7 @@ import {
   StoreSpecificValueKey,
 } from '@/types/Item';
 import { ItemProp } from '@/types/general';
+import { getButtonHitSlop } from '@/utils/helpers';
 
 type ItemTileProps = {
   buttonProps?: RectButtonProps;
@@ -94,12 +95,7 @@ export function ItemTileWithStoreSpecificValues(props: ItemTileProps) {
         <Column>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
           <TouchableOpacity
-            hitSlop={{
-              top: 10,
-              bottom: 10,
-              left: 10,
-              right: 10,
-            }}
+            hitSlop={getButtonHitSlop()}
             onPress={incrementQuantity}
             onLongPress={decrementQuantity}
           >

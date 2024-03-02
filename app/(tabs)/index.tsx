@@ -20,6 +20,7 @@ import { Routes } from '@/constants/navigation';
 import {
   ListName,
   completePurchase,
+  currentStoreSelector,
   moveAllToInCart,
   resetListToDisplay,
   setCurrentLocation,
@@ -42,6 +43,7 @@ export default function TabOneScreen() {
   });
   const layout = useWindowDimensions();
   const shoppingList = useSelector(shoppingListSelector);
+  const currentStore = useSelector(currentStoreSelector);
   const shoppingListItems = useSelector(
     storeSpecificListSelector(ListName.ShoppingList),
   );
@@ -155,6 +157,7 @@ export default function TabOneScreen() {
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
+      headerTitle: `Shopping (${currentStore.name})`,
     });
   });
 

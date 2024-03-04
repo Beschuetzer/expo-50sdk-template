@@ -197,24 +197,18 @@ export const listsSlice = createSlice({
           for (const [storeSpecificValueKey, value] of Object.entries(
             storeSpecificValues,
           )) {
-            if (
-              (state.storeSpecificValuesMap as any)?.[keyToUse]?.[
+            (state.storeSpecificValuesMap as any)[keyToUse][
+              storeSpecificValueKey
+            ] = {
+              ...((state.storeSpecificValuesMap as any)?.[keyToUse]?.[
                 storeSpecificValueKey
               ]
-            ) {
-              (state.storeSpecificValuesMap as any)[keyToUse][
-                storeSpecificValueKey
-              ] = {
-                ...((state.storeSpecificValuesMap as any)?.[keyToUse]?.[
-                  storeSpecificValueKey
-                ]
-                  ? (state.storeSpecificValuesMap as any)[keyToUse][
-                      storeSpecificValueKey
-                    ]
-                  : {}),
-                ...(value || {}),
-              };
-            }
+                ? (state.storeSpecificValuesMap as any)[keyToUse][
+                    storeSpecificValueKey
+                  ]
+                : {}),
+              ...(value || {}),
+            };
           }
         }
       }

@@ -21,6 +21,7 @@ import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
   ListName,
+  addAllToShoppingCart,
   currentStoreSelector,
   itemsListSelector,
   listToDisplaySelector,
@@ -76,6 +77,10 @@ export function ItemsList(props: ItemsListProps) {
     });
   }
 
+  const onAddAllToShoppingPress = useCallback(() => {
+    dispatch(addAllToShoppingCart(selectedItems));
+  }, [selectedItems]);
+
   const onSortPress = useCallback(() => {
     setIsSortModalOpen(true);
   }, []);
@@ -84,7 +89,7 @@ export function ItemsList(props: ItemsListProps) {
     setIsFilterModalOpen(true);
   }, []);
 
-  const onDeleteAll = useCallback(() => {
+  const onDeleteAllPress = useCallback(() => {
     dispatch(removeItemsListItems(selectedItems));
   }, [selectedItems]);
 
@@ -142,7 +147,11 @@ export function ItemsList(props: ItemsListProps) {
           options={[
             {
               text: 'Delete All',
-              onPress: onDeleteAll,
+              onPress: onDeleteAllPress,
+            },
+            {
+              text: 'All All to Shopping List',
+              onPress: onAddAllToShoppingPress,
             },
           ]}
         />

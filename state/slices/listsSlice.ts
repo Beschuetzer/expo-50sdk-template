@@ -45,6 +45,8 @@ export type SortOrders = {
 export type SortOrderValue = { sortBy: SortType; sortOrder: SortOrder };
 
 //#region Payloads
+export type AddAllToShoppingCartPayload = Item[];
+
 export type AddItemsListItemPayload = {
   item: Item;
   storeSpecificValues?: StoreSpecificValues;
@@ -113,6 +115,24 @@ export const listsSlice = createSlice({
   name: 'lists',
   initialState,
   reducers: {
+    addAllToShoppingCart: (
+      state: ListsState,
+      action: PayloadAction<AddAllToShoppingCartPayload>,
+    ) => {
+      const items = action.payload;
+      if (!items || items.length <= 0) return;
+
+      const storeSpecificValuesToUpdate = {
+        quantity: (currentQuantity: number) =>
+          currentQuantity > 0 ? currentQuantity + 1 : 1,
+      } as unknown as Partial<StoreSpecificValues>;
+
+      for (const item of items) {
+        const key = getKeyToUse(item);
+        console.log({ key });
+        // updateStoreSpecificValue(key, storeSpecificValuesToUpdate)
+      }
+    },
     addItemToCart: (
       state: ListsState,
       action: PayloadAction<ItemWithStoreSpecificValues>,
@@ -711,6 +731,7 @@ export const storeSpecificValuesSelector = (
 
 // Action creators are generated for each case reducer function
 export const {
+  addAllToShoppingCart,
   addItemsListItem,
   addItemToCart,
   addStoresListItem,

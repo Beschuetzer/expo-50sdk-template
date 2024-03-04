@@ -1,4 +1,5 @@
 import { useNavigation } from 'expo-router';
+import { useTheme } from 'native-base';
 import {
   useCallback,
   useEffect,
@@ -7,9 +8,9 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { useWindowDimensions, StyleSheet } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
-import { SceneMap, TabView } from 'react-native-tab-view';
+import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { AddButton } from '@/components/header/AddButton';
@@ -45,6 +46,7 @@ const renderScene = SceneMap({
 });
 
 export default function TabOneScreen() {
+  const theme = useTheme();
   const dispatch = useDispatch();
   useGpsCoordinate({
     onSuccess: (gpsCoordinate) => {
@@ -79,7 +81,7 @@ export default function TabOneScreen() {
       return main;
     }
     return shoppingListItems.length > 0
-      ? `${main} ${shoppingListItems.length}`
+      ? `${main} (${shoppingListItems.length})`
       : `Finished`;
   }, [shoppingListItems.length, inCartListItems.length]);
 
@@ -191,11 +193,22 @@ export default function TabOneScreen() {
     });
   }, [index, selectedShoppingCartItems.length, currentStore.name, listName]);
 
+  function renderTabBar(props: any) {
+    return (
+      <TabBar
+        {...props}
+        indicatorStyle={{ backgroundColor: theme.colors.tertiary[100] }}
+        style={{ backgroundColor: theme.colors.primary[900] }}
+      />
+    );
+  }
+
   return (
     <>
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
+        renderTabBar={renderTabBar}
         onIndexChange={setIndex}
         initialLayout={{ width: layout.width }}
       />
@@ -213,3 +226,19 @@ export default function TabOneScreen() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    // paddingTop: StatusBar.currentHeight,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: 'red',
+    padding: 16,
+  },
+});

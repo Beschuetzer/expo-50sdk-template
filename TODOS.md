@@ -3,7 +3,6 @@
 
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
--how to add multiple selection options to shopping list and in cart list?
 -use frequency and last purchase date to show recommended items needed
 
 ShoppingList
@@ -13,7 +12,6 @@ ShoppingList
     --add ability to long press an image which enters delete mode (trash bin show up in headerRight)
 
 -Store details should have a way to view all of the isles and sort them in order
-t-figure out 
 
  //todo: calculate FlashList estimatedItemSize for each instance
 

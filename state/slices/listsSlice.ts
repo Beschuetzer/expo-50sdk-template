@@ -16,6 +16,7 @@ import {
   StoreList,
   StoreSpecificValue,
   StoreSpecificValueKey,
+  StoreSpecificValueUpdater,
   StoreSpecificValues,
   StoreSpecificValuesMap,
 } from '@/types/Item';
@@ -75,9 +76,7 @@ export type UpdateStoreSpecificValuesPayload = {
   /**
    *The new value for each store specific value
    **/
-  storeSpecificValuesToUpdate: Partial<{
-    [key in StoreSpecificValueKey]: (currentValue: any) => any;
-  }>;
+  storeSpecificValuesToUpdate: StoreSpecificValueUpdater;
 };
 //#endregion
 
@@ -125,12 +124,10 @@ export const listsSlice = createSlice({
       const storeSpecificValuesToUpdate = {
         quantity: (currentQuantity: number) =>
           currentQuantity > 0 ? currentQuantity + 1 : 1,
-      } as unknown as Partial<StoreSpecificValues>;
+      } as StoreSpecificValueUpdater;
 
       for (const item of items) {
-        const key = getKeyToUse(item);
-        console.log({ key });
-        // updateStoreSpecificValue(key, storeSpecificValuesToUpdate)
+        updateStoreSpecificValueMap(state, item, storeSpecificValuesToUpdate);
       }
     },
     addItemToCart: (
@@ -526,24 +523,7 @@ export const listsSlice = createSlice({
         return;
       }
 
-      for (const [valueName, value] of Object.entries(
-        storeSpecificValuesToUpdate,
-      )) {
-        const currentItem = state.storeSpecificValuesMap?.[keyToUse] as any;
-        const currentValue = currentItem?.[valueName]?.[state.currentStoreName];
-        const newValue = value?.(currentValue);
-
-        if (!currentItem || !currentValue) {
-          state.storeSpecificValuesMap[keyToUse] = {
-            ...state.storeSpecificValuesMap[keyToUse],
-            [valueName]: {
-              [state.currentStoreName]: newValue,
-            },
-          } as StoreSpecificValues;
-        } else {
-          currentItem[valueName][state.currentStoreName] = newValue;
-        }
-      }
+      updateStoreSpecificValueMap(state, key, storeSpecificValuesToUpdate);
     },
   },
 });
@@ -759,3 +739,29 @@ export const {
 } = listsSlice.actions;
 
 export default listsSlice.reducer;
+
+function updateStoreSpecificValueMap(
+  state: ListsState,
+  key: Key,
+  storeSpecificValuesToUpdate: StoreSpecificValueUpdater,
+) {
+  const keyToUse = getKeyToUse(key);
+  for (const [valueName, value] of Object.entries(
+    storeSpecificValuesToUpdate || {},
+  )) {
+    const currentItem = state.storeSpecificValuesMap?.[keyToUse] as any;
+    const currentValue = currentItem?.[valueName]?.[state.currentStoreName];
+    const newValue = (value as any)?.(currentValue);
+
+    if (!currentItem || !currentValue) {
+      state.storeSpecificValuesMap[keyToUse] = {
+        ...state.storeSpecificValuesMap[keyToUse],
+        [valueName]: {
+          [state.currentStoreName]: newValue,
+        },
+      } as StoreSpecificValues;
+    } else {
+      currentItem[valueName][state.currentStoreName] = newValue;
+    }
+  }
+}

@@ -82,6 +82,9 @@ export type StoreSpecificValues = {
 } | null;
 
 export type StoreSpecificValue<T> = { [storeId: string]: T } | null | undefined;
+export type StoreSpecificValueUpdater = Partial<{
+  [key in StoreSpecificValueKey]: (currentValue: any) => any;
+}>;
 
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;

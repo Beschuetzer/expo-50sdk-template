@@ -9,7 +9,6 @@ const HEIGHT = 100;
 export function ImageRenderer(props: ImageRendererProps) {
   const theme = useTheme();
   const { source, cachePolicy = 'disk' } = props;
-  console.log({ source });
 
   if (!source)
     return (

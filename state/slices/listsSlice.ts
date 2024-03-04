@@ -287,22 +287,7 @@ export const listsSlice = createSlice({
       }
     },
     moveAllToInCart: (state: ListsState) => {
-      const { currentStoreName, storeSpecificValuesMap } = state;
-      for (const key of Object.keys(storeSpecificValuesMap)) {
-        if (
-          storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Quantity]?.[
-            currentStoreName
-          ]
-        ) {
-          (storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.IsInCart] =
-            {
-              ...(storeSpecificValuesMap[key] as any)[
-                StoreSpecificValueKey.IsInCart
-              ],
-              [currentStoreName]: true,
-            };
-        }
-      }
+      moveItems(state, Object.keys(state.storeSpecificValuesMap));
     },
     moveItemToShoppingList: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -324,6 +309,10 @@ export const listsSlice = createSlice({
       ][state.currentStoreName] = false;
     },
     moveSelectedToCart: (state: ListsState) => {
+      moveItems(
+        state,
+        state.selectedItemsFromShoppingCart.map((item) => getKeyToUse(item)),
+      );
     },
     removeItemsListItems: (
       state: ListsState,
@@ -778,6 +767,22 @@ export const {
 } = listsSlice.actions;
 
 export default listsSlice.reducer;
+
+function moveItems(state: ListsState, keys: string[]) {
+  const { currentStoreName, storeSpecificValuesMap } = state;
+  for (const key of keys) {
+    if (
+      storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Quantity]?.[
+        currentStoreName
+      ]
+    ) {
+      (storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.IsInCart] = {
+        ...(storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.IsInCart],
+        [currentStoreName]: true,
+      };
+    }
+  }
+}
 
 function updateStoreSpecificValueMap(
   state: ListsState,

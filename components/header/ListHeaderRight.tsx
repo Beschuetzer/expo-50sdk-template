@@ -15,14 +15,18 @@ import { EllipsisButton } from './EllipsisButton';
 import { ListNameProp } from '@/types/general';
 const { NotAnimatedContextMenu } = renderers;
 
+export type ListHeaderRightOptions =
+  | {
+      text: string;
+      onPress: () => void;
+    }
+  | undefined;
+
 type ListHeaderRightProps = {
   onSortPress?: () => void;
   onFilterPress?: () => void;
   onResetPress?: () => void;
-  options?: {
-    text: string;
-    onPress: () => void;
-  }[];
+  options?: ListHeaderRightOptions[];
 } & ListNameProp;
 export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
   (props, ref) => {
@@ -55,6 +59,7 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
           ) : null}
           {options && options?.length > 0
             ? options.map((option) => {
+                if (!option) return null;
                 return (
                   <MenuOption
                     customStyles={customOptionStyles}

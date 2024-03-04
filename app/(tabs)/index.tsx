@@ -1,5 +1,12 @@
-import { useFocusEffect, useNavigation } from 'expo-router';
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useNavigation } from 'expo-router';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useWindowDimensions } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
 import { SceneMap, TabView } from 'react-native-tab-view';
@@ -25,6 +32,7 @@ import {
   moveAllToInCart,
   moveSelectedToCart,
   resetListToDisplay,
+  selectedItemsFromShoppingCartSelector,
   setCurrentLocation,
   setSortOrder,
   shoppingListSelector,
@@ -52,6 +60,9 @@ export default function TabOneScreen() {
   );
   const inCartListItems = useSelector(
     storeSpecificListSelector(ListName.InCartList),
+  );
+  const selectedShoppingCartItems = useSelector(
+    selectedItemsFromShoppingCartSelector,
   );
 
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
@@ -143,7 +154,7 @@ export default function TabOneScreen() {
     }
   }, [inCartListItems.length]);
 
-  useFocusEffect(() => {
+  useEffect(() => {
     closeMenu();
     navigation.setOptions({
       headerRight: () => (
@@ -161,10 +172,12 @@ export default function TabOneScreen() {
                   },
                 ]
               : [
-                  {
-                    onPress: onMoveSelectedCartPress,
-                    text: 'Move Selected to Cart',
-                  },
+                  selectedShoppingCartItems.length > 0
+                    ? {
+                        onPress: onMoveSelectedCartPress,
+                        text: 'Move Selected to Cart',
+                      }
+                    : undefined,
                   {
                     onPress: onMoveAllCartPress,
                     text: 'Move all to Cart',
@@ -176,7 +189,7 @@ export default function TabOneScreen() {
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
       headerTitle: `Shopping (${currentStore.name})`,
     });
-  });
+  }, [index, selectedShoppingCartItems.length, currentStore.name, listName]);
 
   return (
     <>

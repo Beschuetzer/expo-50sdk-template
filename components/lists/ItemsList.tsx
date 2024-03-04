@@ -146,10 +146,12 @@ export function ItemsList(props: ItemsListProps) {
           onResetPress={onResetPress}
           listName={listName}
           options={[
-            {
-              text: 'All All to Shopping List',
-              onPress: onAddAllToShoppingPress,
-            },
+            selectedItems.length > 0
+              ? {
+                  text: 'Add Selected to Shopping List',
+                  onPress: onAddAllToShoppingPress,
+                }
+              : undefined,
             {
               text: 'Delete All',
               onPress: onDeleteAllPress,

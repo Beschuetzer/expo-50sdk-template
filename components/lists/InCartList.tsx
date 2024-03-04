@@ -29,6 +29,11 @@ import { getKeyToUse } from '@/utils/helpers';
 type InCartListProps = object;
 
 const listName: ListName = ListName.InCartList;
+
+/**
+ *The items for this list are actually not in the inCartList.data POS in redux.
+ *Instead they are calculated based on the storeSpecificValuesMap in the storeSpecificListSelector
+ **/
 export function InCartList(props: InCartListProps) {
   const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(storeSpecificListSelector(listName));

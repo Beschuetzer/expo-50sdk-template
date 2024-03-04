@@ -37,6 +37,11 @@ export const shoppingListSortTypes = [
 ] as SortType[];
 
 const listName: ListName = ListName.ShoppingList;
+
+/**
+ *The items for this list are actually not in the shoppingList.data POS in redux.
+ *Instead they are calculated based on the storeSpecificValuesMap in the storeSpecificListSelector
+ **/
 export function ShoppingList(props: ShoppingListProps) {
   const shoppingListToDisplay = useSelector(
     storeSpecificListSelector(listName),

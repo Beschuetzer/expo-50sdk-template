@@ -79,6 +79,7 @@ export function ItemsList(props: ItemsListProps) {
 
   const onAddAllToShoppingPress = useCallback(() => {
     dispatch(addAllToShoppingCart(selectedItems));
+    setIsMultiSelectMode(false);
   }, [selectedItems]);
 
   const onSortPress = useCallback(() => {

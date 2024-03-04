@@ -147,12 +147,12 @@ export function ItemsList(props: ItemsListProps) {
           listName={listName}
           options={[
             {
-              text: 'Delete All',
-              onPress: onDeleteAllPress,
-            },
-            {
               text: 'All All to Shopping List',
               onPress: onAddAllToShoppingPress,
+            },
+            {
+              text: 'Delete All',
+              onPress: onDeleteAllPress,
             },
           ]}
         />

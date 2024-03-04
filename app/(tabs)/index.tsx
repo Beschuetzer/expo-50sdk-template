@@ -21,6 +21,7 @@ import {
   ListName,
   completePurchase,
   currentStoreSelector,
+  inCartListSelector,
   moveAllToInCart,
   resetListToDisplay,
   setCurrentLocation,
@@ -43,11 +44,12 @@ export default function TabOneScreen() {
   });
   const layout = useWindowDimensions();
   const shoppingList = useSelector(shoppingListSelector);
+  const inCartList = useSelector(inCartListSelector);
   const currentStore = useSelector(currentStoreSelector);
   const shoppingListItems = useSelector(
     storeSpecificListSelector(ListName.ShoppingList),
   );
-  const inCartList = useSelector(
+  const inCartListItems = useSelector(
     storeSpecificListSelector(ListName.InCartList),
   );
 
@@ -55,26 +57,29 @@ export default function TabOneScreen() {
   const [index, setIndex] = useState(0);
   const menuRef = useRef<Menu>(null);
   const navigation = useNavigation();
-  const listName = ListName.ShoppingList;
+  const listName = useMemo(
+    () => (index === 0 ? ListName.ShoppingList : ListName.InCartList),
+    [index],
+  );
   const firstTabTitle = useMemo(() => {
     const main = 'Need';
-    if (shoppingListItems.length === 0 && inCartList.length === 0) {
+    if (shoppingListItems.length === 0 && inCartListItems.length === 0) {
       return main;
     }
     return shoppingListItems.length > 0
       ? `${main} ${shoppingListItems.length}`
       : `Finished`;
-  }, [shoppingListItems.length, inCartList.length]);
+  }, [shoppingListItems.length, inCartListItems.length]);
 
   const secondTabTitle = useMemo(() => {
     const main = 'In Cart';
-    if (shoppingListItems.length === 0 && inCartList.length === 0) {
+    if (shoppingListItems.length === 0 && inCartListItems.length === 0) {
       return main;
     }
-    return inCartList.length > 0
-      ? `${main} (${inCartList.length})`
+    return inCartListItems.length > 0
+      ? `${main} (${inCartListItems.length})`
       : `Cart Empty`;
-  }, [shoppingListItems.length, inCartList.length]);
+  }, [shoppingListItems.length, inCartListItems.length]);
   const routes = useMemo(
     () => [
       {
@@ -97,7 +102,7 @@ export default function TabOneScreen() {
     closeMenu();
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
-      callerList: ListName.ShoppingList,
+      callerList: listName,
       key: EMPTY_STRING,
     });
   }, [closeMenu]);
@@ -118,17 +123,20 @@ export default function TabOneScreen() {
     setIsSortModalOpen(true);
   }, []);
 
-  const onSortTypeChange = useCallback((sortType: SortType) => {
-    dispatch(setSortOrder({ listName, sortBy: sortType }));
-  }, []);
+  const onSortTypeChange = useCallback(
+    (sortType: SortType) => {
+      dispatch(setSortOrder({ listName, sortBy: sortType }));
+    },
+    [listName],
+  );
 
   useLayoutEffect(() => {
-    if (inCartList.length <= 0) {
+    if (inCartListItems.length <= 0) {
       setIndex(0);
     } else if (shoppingListItems.length === 0) {
       setIndex(1);
     }
-  }, [inCartList.length]);
+  }, [inCartListItems.length]);
 
   useFocusEffect(() => {
     closeMenu();
@@ -170,7 +178,9 @@ export default function TabOneScreen() {
         initialLayout={{ width: layout.width }}
       />
       <ListSorter
-        sortOrderValue={shoppingList.sortOrderValue}
+        sortOrderValue={
+          index === 0 ? shoppingList.sortOrderValue : inCartList.sortOrderValue
+        }
         listName={listName}
         isVisible={isSortModalOpen}
         setIsVisible={setIsSortModalOpen}

@@ -92,6 +92,7 @@ const CURRENT_LOCATION_INITIAL = null;
 export type ListsState = {
   currentLocation: GpsCoordinate | null;
   currentStoreName: string;
+  [ListName.InCartList]: ShoppingList;
   [ListName.ItemsList]: ItemsList;
   [ListName.ShoppingList]: ShoppingList;
   [ListName.StoresList]: StoreList;
@@ -102,6 +103,7 @@ export type ListsState = {
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
+  [ListName.InCartList]: getEmptyList(),
   [ListName.ItemsList]: getEmptyList(),
   [ListName.ShoppingList]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
@@ -374,7 +376,6 @@ export const listsSlice = createSlice({
       action: PayloadAction<ResetListToDisplayPayload>,
     ) => {
       const { listName } = action.payload;
-      if (!listName || listName === ListName.InCartList) return;
       const emptyList = getEmptyList<any>();
       emptyList.data = state[listName]?.data || [];
       state[listName] = emptyList;
@@ -384,7 +385,6 @@ export const listsSlice = createSlice({
       action: PayloadAction<ResetListToDisplayFiltersPayload>,
     ) => {
       const { listName } = action.payload;
-      if (!listName || listName === ListName.InCartList) return;
       const emptyList = getEmptyList<any>();
       emptyList.data = state[listName].data || [];
       emptyList.sortOrderValue = state[listName].sortOrderValue;
@@ -430,11 +430,7 @@ export const listsSlice = createSlice({
     ) => {
       const { filters, listName } = action.payload;
 
-      if (
-        !listName ||
-        listName === ListName.InCartList ||
-        Object.keys(filters || {}).length === 0
-      ) {
+      if (!listName || Object.keys(filters || {}).length === 0) {
         return;
       }
 
@@ -458,13 +454,13 @@ export const listsSlice = createSlice({
       action: PayloadAction<SetSortOrderPayload>,
     ) => {
       const { listName, sortBy = SortType.Name } = action.payload;
-      if (listName === ListName.InCartList) return;
       const listToSort = state[listName];
 
       if (!listToSort) {
         alert(`Unable to find a list with name of '${listName}'.`);
         return;
       }
+
       listToSort.data?.sort(
         getSorter(
           sortBy,
@@ -499,7 +495,6 @@ export const listsSlice = createSlice({
       action: PayloadAction<ToggleSortOrderPayload>,
     ) => {
       const { listName } = action.payload;
-      if (listName === ListName.InCartList) return;
 
       if (!state[listName].sortOrderValue) return;
       const sortOrder =
@@ -575,6 +570,9 @@ export const itemsListWithStoreSpecificValuesSelector = (id: string) =>
 export const itemsListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.ItemsList];
 
+export const inCartListSelector = (state: RootState) =>
+  state[listsSlice.name][ListName.InCartList];
+
 export const lastPurchasedSelector = (key: Key) =>
   createSelector(
     [
@@ -591,12 +589,7 @@ export const lastPurchasedSelector = (key: Key) =>
  **/
 export const listToDisplaySelector = (listName: ListName) =>
   createSelector(
-    [
-      (state: RootState) => {
-        if (listName === ListName.InCartList) return null;
-        return state[listsSlice.name]?.[listName];
-      },
-    ],
+    [(state: RootState) => state[listsSlice.name]?.[listName]],
     (list) => {
       if (!list) return [];
       const { filters, sortOrderValue, data } = list;
@@ -617,6 +610,7 @@ export const storeSpecificListSelector = (listname: ListName) =>
   createSelector(
     [
       (state: RootState) => state[listsSlice.name][ListName.ShoppingList],
+      (state: RootState) => state[listsSlice.name][ListName.InCartList],
       (state: RootState) => state[listsSlice.name][ListName.ItemsList],
       (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
       (state: RootState) => state[listsSlice.name].storesList.data,
@@ -624,6 +618,7 @@ export const storeSpecificListSelector = (listname: ListName) =>
     ],
     (
       shoppingList,
+      inCartList,
       itemsList,
       storeSpecificValuesMap,
       storesList,
@@ -663,13 +658,19 @@ export const storeSpecificListSelector = (listname: ListName) =>
 
       const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
         listToDisplay,
-        shoppingList.filters,
+        listname === ListName.ShoppingList
+          ? shoppingList.filters
+          : inCartList.filters,
       );
       filteredList.sort(
         getSorter(
-          shoppingList.sortOrderValue.sortBy,
+          listname === ListName.ShoppingList
+            ? shoppingList.sortOrderValue.sortBy
+            : inCartList.sortOrderValue.sortBy,
           currentStoreName,
-          shoppingList.sortOrderValue.sortOrder,
+          listname === ListName.ShoppingList
+            ? shoppingList.sortOrderValue.sortOrder
+            : inCartList.sortOrderValue.sortOrder,
         ),
       );
       return filteredList;

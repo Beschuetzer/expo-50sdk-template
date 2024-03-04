@@ -25,6 +25,8 @@ import { ListNameProp } from '@/types/general';
 import {
   calculateDistance,
   deleteImages,
+  displayAlert,
+  getEmptyArray,
   getEmptyList,
   getEmptyObject,
   getFilteredList,
@@ -67,7 +69,10 @@ export type SetSortOrderPayload = object &
   Pick<SortOrderValue, 'sortBy'>;
 
 export type ToggleSortOrderPayload = Pick<SetSortOrderPayload, 'listName'>;
-
+export type UpdateSelectedItemsFromShoppingCart = {
+  operation: 'add' | 'remove' | 'set';
+  item: ItemWithStoreSpecificValues | undefined;
+};
 export type UpdateStoreSpecificValuesPayload = {
   /**
    *The key to get the item from {@link ItemsList itemsList}
@@ -97,6 +102,7 @@ export type ListsState = {
   [ListName.ShoppingList]: ShoppingList;
   [ListName.StoresList]: StoreList;
   lastPurchasedMap: LastPurchasedMap;
+  selectedItemsFromShoppingCart: ItemWithStoreSpecificValues[];
   storeSpecificValuesMap: StoreSpecificValuesMap;
 };
 
@@ -108,6 +114,7 @@ const initialState: ListsState = {
   [ListName.ShoppingList]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
   lastPurchasedMap: getEmptyObject(),
+  selectedItemsFromShoppingCart: getEmptyArray(),
   storeSpecificValuesMap: getEmptyObject(),
 };
 //#endregion
@@ -316,6 +323,8 @@ export const listsSlice = createSlice({
         StoreSpecificValueKey.IsInCart
       ][state.currentStoreName] = false;
     },
+    moveSelectedToCart: (state: ListsState) => {
+    },
     removeItemsListItems: (
       state: ListsState,
       action: PayloadAction<Item[]>,
@@ -498,6 +507,36 @@ export const listsSlice = createSlice({
 
       state[listName].sortOrderValue.sortOrder = sortOrder;
     },
+    updateSelectedItemsFromShoppingCart: (
+      state: ListsState,
+      action: PayloadAction<UpdateSelectedItemsFromShoppingCart>,
+    ) => {
+      const { operation: opearation, item } = action.payload;
+      if (!item || !opearation) return;
+      const keyToUse = getKeyToUse(item);
+      if (!keyToUse) {
+        displayAlert({ error: 'No key found', item, keyToUse });
+      }
+
+      switch (opearation) {
+        case 'add':
+          state.selectedItemsFromShoppingCart = [
+            ...state.selectedItemsFromShoppingCart,
+            item,
+          ];
+          break;
+        case 'remove':
+          state.selectedItemsFromShoppingCart =
+            state.selectedItemsFromShoppingCart.filter(
+              (item) => getKeyToUse(item) !== keyToUse,
+            );
+          break;
+        case 'set':
+        default:
+          state.selectedItemsFromShoppingCart = item ? [item] : [];
+          break;
+      }
+    },
     updateStoreSpecificValues: (
       state: ListsState,
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
@@ -595,6 +634,9 @@ export const listToDisplaySelector = (listName: ListName) =>
       return filteredList;
     },
   );
+
+export const selectedItemsFromShoppingCartSelector = (state: RootState) =>
+  state[listsSlice.name].selectedItemsFromShoppingCart;
 
 /**
  *The way this is written, the shopping list will update when the storeList changes when really it should only change when the current store changes
@@ -713,6 +755,7 @@ export const {
   completePurchase,
   moveAllToInCart,
   moveItemToShoppingList,
+  moveSelectedToCart,
   removeItemsListItems,
   removeStoresListItem,
   resetCurrentLocation,
@@ -730,6 +773,7 @@ export const {
   setStoresList,
   setStoreSpecificValues,
   toggleSortOrder,
+  updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
 } = listsSlice.actions;
 

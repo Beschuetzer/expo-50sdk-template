@@ -15,7 +15,9 @@ import {
   ListName,
   addItemToCart,
   currentStoreSelector,
+  selectedItemsFromShoppingCartSelector,
   storeSpecificListSelector,
+  updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
@@ -52,9 +54,7 @@ export function ShoppingList(props: ShoppingListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<
-    ItemWithStoreSpecificValues[]
-  >([]);
+  const selectedItems = useSelector(selectedItemsFromShoppingCartSelector);
 
   const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
     setRefreshing(false);
@@ -130,7 +130,12 @@ export function ShoppingList(props: ShoppingListProps) {
           item={item}
           buttonProps={{
             onLongPress: () => {
-              setSelectedItems(isMultiSelectMode ? [] : [item]);
+              dispatch(
+                updateSelectedItemsFromShoppingCart({
+                  operation: 'set',
+                  item: isMultiSelectMode ? undefined : item,
+                }),
+              );
               setIsMultiSelectMode((current) => !current);
             },
           }}
@@ -139,15 +144,19 @@ export function ShoppingList(props: ShoppingListProps) {
               (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
             );
             if (isSelected) {
-              setSelectedItems((current) =>
-                current.filter(
-                  (itemLocal) => getKeyToUse(item) !== getKeyToUse(itemLocal),
-                ),
+              dispatch(
+                updateSelectedItemsFromShoppingCart({
+                  operation: 'remove',
+                  item,
+                }),
               );
             } else {
-              setSelectedItems((current) => {
-                return [...current, item];
-              });
+              dispatch(
+                updateSelectedItemsFromShoppingCart({
+                  operation: 'add',
+                  item,
+                }),
+              );
             }
           }}
           isSelected={

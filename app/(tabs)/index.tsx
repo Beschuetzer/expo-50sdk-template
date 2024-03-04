@@ -23,6 +23,7 @@ import {
   currentStoreSelector,
   inCartListSelector,
   moveAllToInCart,
+  moveSelectedToCart,
   resetListToDisplay,
   setCurrentLocation,
   setSortOrder,
@@ -111,7 +112,11 @@ export default function TabOneScreen() {
     dispatch(completePurchase());
   }, []);
 
-  const onMoveAllToInCartPress = useCallback(() => {
+  const onMoveSelectedCartPress = useCallback(() => {
+    dispatch(moveSelectedToCart());
+  }, []);
+
+  const onMoveAllCartPress = useCallback(() => {
     dispatch(moveAllToInCart());
   }, []);
 
@@ -157,8 +162,12 @@ export default function TabOneScreen() {
                 ]
               : [
                   {
-                    onPress: onMoveAllToInCartPress,
-                    text: 'Move all to In Cart',
+                    onPress: onMoveSelectedCartPress,
+                    text: 'Move Selected to Cart',
+                  },
+                  {
+                    onPress: onMoveAllCartPress,
+                    text: 'Move all to Cart',
                   },
                 ]
           }

@@ -1,6 +1,5 @@
 ## MVP
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
--add image placeholder for items with no image (manually add an item to test)
 -add a "Add all to Shopping" option when multiple selection mode
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 -how to add multiple selection options to shopping list and in cart list?

@@ -1,11 +1,29 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { Image, ImageProps } from 'expo-image';
-import { AspectRatio } from 'native-base';
+import { AspectRatio, View, useTheme } from 'native-base';
 
 type ImageRendererProps = ImageProps;
 
+const WIDTH = 75;
+const HEIGHT = 100;
 export function ImageRenderer(props: ImageRendererProps) {
+  const theme = useTheme();
   const { source, cachePolicy = 'disk' } = props;
-  if (!source) return null;
+  console.log({ source });
+
+  if (!source)
+    return (
+      <View
+        height={HEIGHT}
+        width={WIDTH}
+        backgroundColor={theme.colors.gray[200]}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <FontAwesome name="image" size={50} />
+      </View>
+    );
   return (
     <AspectRatio
       ratio={{
@@ -13,8 +31,8 @@ export function ImageRenderer(props: ImageRendererProps) {
         md: 9 / 10,
       }}
       height={{
-        base: 100,
-        md: 75,
+        base: HEIGHT,
+        md: WIDTH,
       }}
     >
       <Image cachePolicy={cachePolicy} {...props} />

@@ -15,8 +15,10 @@ import {
   ListName,
   addItemToCart,
   currentStoreSelector,
+  isMultiSelectModeForShoppingCartSelector,
   selectedItemsFromShoppingCartSelector,
   storeSpecificListSelector,
+  toggleIsMultiSelectModeForShoppingCart,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
@@ -53,8 +55,10 @@ export function ShoppingList(props: ShoppingListProps) {
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const selectedItems = useSelector(selectedItemsFromShoppingCartSelector);
+  const isMultiSelectMode = useSelector(
+    isMultiSelectModeForShoppingCartSelector,
+  );
 
   const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
     setRefreshing(false);
@@ -136,7 +140,7 @@ export function ShoppingList(props: ShoppingListProps) {
                   item: isMultiSelectMode ? undefined : item,
                 }),
               );
-              setIsMultiSelectMode((current) => !current);
+              dispatch(toggleIsMultiSelectModeForShoppingCart());
             },
           }}
           onSelect={(item) => {

@@ -87,6 +87,7 @@ export type UpdateStoreSpecificValuesPayload = {
 
 //#region State
 const CURRENT_LOCATION_INITIAL = null;
+const IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL = false;
 
 /**
  * {@link ListsState.itemsList itemsList} has all of the items that have been scanned (these can be added to any store)
@@ -103,12 +104,15 @@ export type ListsState = {
   [ListName.StoresList]: StoreList;
   lastPurchasedMap: LastPurchasedMap;
   selectedItemsFromShoppingCart: ItemWithStoreSpecificValues[];
+  isMultiSelectModeForShoppingCart: boolean;
   storeSpecificValuesMap: StoreSpecificValuesMap;
 };
 
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
+  isMultiSelectModeForShoppingCart:
+    IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   [ListName.InCartList]: getEmptyList(),
   [ListName.ItemsList]: getEmptyList(),
   [ListName.ShoppingList]: getEmptyList(),
@@ -313,6 +317,7 @@ export const listsSlice = createSlice({
         state,
         state.selectedItemsFromShoppingCart.map((item) => getKeyToUse(item)),
       );
+      state.isMultiSelectModeForShoppingCart = false;
     },
     removeItemsListItems: (
       state: ListsState,
@@ -482,6 +487,10 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       state.storeSpecificValuesMap = action.payload;
     },
+    toggleIsMultiSelectModeForShoppingCart: (state: ListsState) => {
+      state.isMultiSelectModeForShoppingCart =
+        !state.isMultiSelectModeForShoppingCart;
+    },
     toggleSortOrder: (
       state: ListsState,
       action: PayloadAction<ToggleSortOrderPayload>,
@@ -594,6 +603,9 @@ export const itemsListSelector = (state: RootState) =>
 
 export const inCartListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.InCartList];
+
+export const isMultiSelectModeForShoppingCartSelector = (state: RootState) =>
+  state[listsSlice.name].isMultiSelectModeForShoppingCart;
 
 export const lastPurchasedSelector = (key: Key) =>
   createSelector(
@@ -761,6 +773,7 @@ export const {
   setSortOrder,
   setStoresList,
   setStoreSpecificValues,
+  toggleIsMultiSelectModeForShoppingCart,
   toggleSortOrder,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,

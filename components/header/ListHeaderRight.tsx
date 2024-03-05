@@ -58,10 +58,11 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
             />
           ) : null}
           {options && options?.length > 0
-            ? options.map((option) => {
+            ? options.map((option, index) => {
                 if (!option) return null;
                 return (
                   <MenuOption
+                    key={index}
                     customStyles={customOptionStyles}
                     onSelect={option.onPress}
                     text={option.text}

@@ -502,12 +502,17 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       state.storeSpecificValuesMap = action.payload;
     },
-    toggleIsMultiSelectModeForInCartCart: (state: ListsState) => {
-      state.isMultiSelectModeForInCart = !state.isMultiSelectModeForInCart;
+    setIsMultiSelectModeForInCartCart: (
+      state: ListsState,
+      action: PayloadAction<boolean>,
+    ) => {
+      state.isMultiSelectModeForInCart = action.payload;
     },
-    toggleIsMultiSelectModeForShoppingCart: (state: ListsState) => {
-      state.isMultiSelectModeForShoppingCart =
-        !state.isMultiSelectModeForShoppingCart;
+    setIsMultiSelectModeForShoppingCart: (
+      state: ListsState,
+      action: PayloadAction<boolean>,
+    ) => {
+      state.isMultiSelectModeForShoppingCart = action.payload;
     },
     toggleSortOrder: (
       state: ListsState,
@@ -780,8 +785,8 @@ export const {
   setSortOrder,
   setStoresList,
   setStoreSpecificValues,
-  toggleIsMultiSelectModeForInCartCart,
-  toggleIsMultiSelectModeForShoppingCart,
+  setIsMultiSelectModeForInCartCart,
+  setIsMultiSelectModeForShoppingCart,
   toggleSortOrder,
   updateSelectedItemsFromInCart,
   updateSelectedItemsFromShoppingCart,

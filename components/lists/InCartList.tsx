@@ -23,7 +23,7 @@ import {
   setSortOrder,
   shoppingListSelector,
   storeSpecificListSelector,
-  toggleIsMultiSelectModeForInCartCart,
+  setIsMultiSelectModeForInCartCart,
   updateSelectedItemsFromInCart,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
@@ -128,7 +128,7 @@ export function InCartList(props: InCartListProps) {
                   item: isMultiSelectMode ? undefined : item,
                 }),
               );
-              dispatch(toggleIsMultiSelectModeForInCartCart());
+              dispatch(setIsMultiSelectModeForInCartCart(!isMultiSelectMode));
             },
           }}
           onSelect={(item) => {

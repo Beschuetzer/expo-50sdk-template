@@ -40,7 +40,8 @@ import {
   setSortOrder,
   shoppingListSelector,
   storeSpecificListSelector,
-  toggleIsMultiSelectModeForInCartCart,
+  setIsMultiSelectModeForInCartCart,
+  setIsMultiSelectModeForShoppingCart,
 } from '@/state/slices/listsSlice';
 
 const renderScene = SceneMap({
@@ -163,6 +164,11 @@ export default function TabOneScreen() {
       setIndex(1);
     }
   }, [inCartListItems.length]);
+
+  useEffect(() => {
+    dispatch(setIsMultiSelectModeForInCartCart(false));
+    dispatch(setIsMultiSelectModeForShoppingCart(false));
+  }, [index]);
 
   useEffect(() => {
     closeMenu();

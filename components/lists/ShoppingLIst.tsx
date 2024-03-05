@@ -18,7 +18,7 @@ import {
   isMultiSelectModeForShoppingCartSelector,
   selectedItemsFromShoppingCartSelector,
   storeSpecificListSelector,
-  toggleIsMultiSelectModeForShoppingCart,
+  setIsMultiSelectModeForShoppingCart,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
@@ -140,7 +140,7 @@ export function ShoppingList(props: ShoppingListProps) {
                   item: isMultiSelectMode ? undefined : item,
                 }),
               );
-              dispatch(toggleIsMultiSelectModeForShoppingCart());
+              dispatch(setIsMultiSelectModeForShoppingCart(!isMultiSelectMode));
             },
           }}
           onSelect={(item) => {

@@ -296,6 +296,7 @@ export const listsSlice = createSlice({
     },
     moveAllToInCart: (state: ListsState) => {
       moveItems(state, Object.keys(state.storeSpecificValuesMap));
+      state.selectedItemsFromShoppingCart = [];
     },
     moveItemToShoppingList: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -322,6 +323,7 @@ export const listsSlice = createSlice({
         state.selectedItemsFromShoppingCart.map((item) => getKeyToUse(item)),
       );
       state.isMultiSelectModeForShoppingCart = false;
+      state.selectedItemsFromShoppingCart = [];
     },
     moveSelectedToShopping: (state: ListsState) => {
       moveItems(
@@ -330,6 +332,7 @@ export const listsSlice = createSlice({
         false,
       );
       state.isMultiSelectModeForInCart = false;
+      state.selectedItemsFromInCart = [];
     },
     removeItemsListItems: (
       state: ListsState,

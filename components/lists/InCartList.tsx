@@ -17,10 +17,14 @@ import {
   ListName,
   addItemToCart,
   currentStoreSelector,
+  isMultiSelectModeForInCartSelector,
   moveItemToShoppingList,
+  selectedItemsFromInCartSelector,
   setSortOrder,
   shoppingListSelector,
   storeSpecificListSelector,
+  toggleIsMultiSelectModeForInCartCart,
+  updateSelectedItemsFromInCart,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
@@ -43,10 +47,8 @@ export function InCartList(props: InCartListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<
-    ItemWithStoreSpecificValues[]
-  >([]);
+  const selectedItems = useSelector(selectedItemsFromInCartSelector)
+  const isMultiSelectMode = useSelector(isMultiSelectModeForInCartSelector);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
     dispatch(
@@ -120,8 +122,13 @@ export function InCartList(props: InCartListProps) {
           item={item}
           buttonProps={{
             onLongPress: () => {
-              setSelectedItems(isMultiSelectMode ? [] : [item]);
-              setIsMultiSelectMode((current) => !current);
+              dispatch(
+                updateSelectedItemsFromInCart({
+                  operation: 'set',
+                  item: isMultiSelectMode ? undefined : item,
+                }),
+              );
+              dispatch(toggleIsMultiSelectModeForInCartCart());
             },
           }}
           onSelect={(item) => {
@@ -129,15 +136,19 @@ export function InCartList(props: InCartListProps) {
               (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
             );
             if (isSelected) {
-              setSelectedItems((current) =>
-                current.filter(
-                  (itemLocal) => getKeyToUse(item) !== getKeyToUse(itemLocal),
-                ),
+              dispatch(
+                updateSelectedItemsFromInCart({
+                  operation: 'remove',
+                  item,
+                }),
               );
             } else {
-              setSelectedItems((current) => {
-                return [...current, item];
-              });
+              dispatch(
+                updateSelectedItemsFromInCart({
+                  operation: 'add',
+                  item,
+                }),
+              );
             }
           }}
           isSelected={

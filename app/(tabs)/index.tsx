@@ -32,12 +32,15 @@ import {
   inCartListSelector,
   moveAllToInCart,
   moveSelectedToCart,
+  moveSelectedToShopping,
   resetListToDisplay,
+  selectedItemsFromInCartSelector,
   selectedItemsFromShoppingCartSelector,
   setCurrentLocation,
   setSortOrder,
   shoppingListSelector,
   storeSpecificListSelector,
+  toggleIsMultiSelectModeForInCartCart,
 } from '@/state/slices/listsSlice';
 
 const renderScene = SceneMap({
@@ -66,6 +69,7 @@ export default function TabOneScreen() {
   const selectedShoppingCartItems = useSelector(
     selectedItemsFromShoppingCartSelector,
   );
+  const selectedInCartItems = useSelector(selectedItemsFromInCartSelector);
 
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [index, setIndex] = useState(0);
@@ -125,8 +129,12 @@ export default function TabOneScreen() {
     dispatch(completePurchase());
   }, []);
 
-  const onMoveSelectedCartPress = useCallback(() => {
+  const onMoveSelectedToCartPress = useCallback(() => {
     dispatch(moveSelectedToCart());
+  }, []);
+
+  const onMoveSelectedToShoppingPress = useCallback(() => {
+    dispatch(moveSelectedToShopping());
   }, []);
 
   const onMoveAllCartPress = useCallback(() => {
@@ -168,6 +176,12 @@ export default function TabOneScreen() {
           options={
             index === 1
               ? [
+                  selectedInCartItems.length > 0
+                    ? {
+                        onPress: onMoveSelectedToShoppingPress,
+                        text: 'Move Selected to Shopping',
+                      }
+                    : undefined,
                   {
                     onPress: onCompletePurchasePress,
                     text: 'Mark all as Purchased',
@@ -176,7 +190,7 @@ export default function TabOneScreen() {
               : [
                   selectedShoppingCartItems.length > 0
                     ? {
-                        onPress: onMoveSelectedCartPress,
+                        onPress: onMoveSelectedToCartPress,
                         text: 'Move Selected to Cart',
                       }
                     : undefined,
@@ -191,7 +205,13 @@ export default function TabOneScreen() {
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
       headerTitle: `Shopping (${currentStore.name})`,
     });
-  }, [index, selectedShoppingCartItems.length, currentStore.name, listName]);
+  }, [
+    index,
+    selectedShoppingCartItems.length,
+    selectedInCartItems.length,
+    currentStore.name,
+    listName,
+  ]);
 
   function renderTabBar(props: any) {
     return (

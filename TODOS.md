@@ -1,5 +1,4 @@
 ## MVP
--add "move to need" option for incart list (will need to add the two POS that shopping cart has in ListSlice)
 
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])

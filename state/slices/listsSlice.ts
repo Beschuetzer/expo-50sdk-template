@@ -639,6 +639,9 @@ export const listToDisplaySelector = (listName: ListName) =>
     },
   );
 
+export const selectedItemsFromInCartSelector = (state: RootState) =>
+  state[listsSlice.name].selectedItemsFromInCart;
+
 export const selectedItemsFromShoppingCartSelector = (state: RootState) =>
   state[listsSlice.name].selectedItemsFromShoppingCart;
 
@@ -760,6 +763,7 @@ export const {
   moveAllToInCart,
   moveItemToShoppingList,
   moveSelectedToCart,
+  moveSelectedToShopping,
   removeItemsListItems,
   removeStoresListItem,
   resetCurrentLocation,
@@ -776,6 +780,7 @@ export const {
   setSortOrder,
   setStoresList,
   setStoreSpecificValues,
+  toggleIsMultiSelectModeForInCartCart,
   toggleIsMultiSelectModeForShoppingCart,
   toggleSortOrder,
   updateSelectedItemsFromInCart,

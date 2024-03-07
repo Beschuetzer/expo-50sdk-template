@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useWindowDimensions, StyleSheet } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import { useDispatch, useSelector } from 'react-redux';
@@ -42,6 +42,7 @@ import {
   storeSpecificListSelector,
   setIsMultiSelectModeForInCartCart,
   setIsMultiSelectModeForShoppingCart,
+  clearShopping,
 } from '@/state/slices/listsSlice';
 
 const renderScene = SceneMap({
@@ -126,6 +127,10 @@ export default function TabOneScreen() {
     });
   }, [closeMenu]);
 
+  const onClearAllPress = useCallback(() => {
+    dispatch(clearShopping());
+  }, []);
+
   const onCompletePurchasePress = useCallback(() => {
     dispatch(completePurchase());
   }, []);
@@ -179,8 +184,8 @@ export default function TabOneScreen() {
           onSortPress={onSortPress}
           onResetPress={onResetPress}
           listName={listName}
-          options={
-            index === 1
+          options={[
+            ...(index === 1
               ? [
                   selectedInCartItems.length > 0
                     ? {
@@ -204,8 +209,12 @@ export default function TabOneScreen() {
                     onPress: onMoveAllCartPress,
                     text: 'Move all to Cart',
                   },
-                ]
-          }
+                ]),
+            {
+              onPress: onClearAllPress,
+              text: 'Clear all',
+            },
+          ]}
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
@@ -252,19 +261,3 @@ export default function TabOneScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  tabBar: {
-    flexDirection: 'row',
-    // paddingTop: StatusBar.currentHeight,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: 'red',
-    padding: 16,
-  },
-});

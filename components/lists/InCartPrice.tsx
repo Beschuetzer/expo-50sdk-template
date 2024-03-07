@@ -1,15 +1,20 @@
-import { View, Text, useTheme } from 'native-base';
+import { View, Text, useTheme, Heading } from 'native-base';
+import { useSelector } from 'react-redux';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { ListName, priceOfItemsSelector } from '@/state/slices/listsSlice';
 
 export function InCartPrice() {
+  const priceOfItemsInCart = useSelector(
+    priceOfItemsSelector(ListName.InCartList),
+  );
   const theme = useTheme();
   return (
     <View
       backgroundColor="white"
       padding={theme.sizes[FORM_INTER_ITEM_SPACING]}
     >
-      <Text>Price: $100.00</Text>
+      <Heading size="xs">Price: ${priceOfItemsInCart}</Heading>
     </View>
   );
 }

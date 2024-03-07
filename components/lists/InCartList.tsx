@@ -1,10 +1,11 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { Text, useTheme, Stack } from 'native-base';
+import { Text, useTheme, Stack, View } from 'native-base';
 import React, { useCallback, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { InCartPrice } from './InCartPrice';
 import { ItemTileWithStoreSpecificValues } from './ItemTileWithStoreSpecificValues';
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
@@ -47,7 +48,7 @@ export function InCartList(props: InCartListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-  const selectedItems = useSelector(selectedItemsFromInCartSelector)
+  const selectedItems = useSelector(selectedItemsFromInCartSelector);
   const isMultiSelectMode = useSelector(isMultiSelectModeForInCartSelector);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
@@ -74,6 +75,7 @@ export function InCartList(props: InCartListProps) {
       name: item.name,
       upc: item.upc,
     } as Key;
+
     return (
       <SwipeableRow
         leftSwipe={{
@@ -117,46 +119,50 @@ export function InCartList(props: InCartListProps) {
           ),
         }}
       >
-        <ItemTileWithStoreSpecificValues
-          isMultiSelectMode={isMultiSelectMode}
-          item={item}
-          buttonProps={{
-            onLongPress: () => {
-              dispatch(
-                updateSelectedItemsFromInCart({
-                  operation: 'set',
-                  item: isMultiSelectMode ? undefined : item,
-                }),
+        {index === 0 ? (
+          <InCartPrice />
+        ) : (
+          <ItemTileWithStoreSpecificValues
+            isMultiSelectMode={isMultiSelectMode}
+            item={item}
+            buttonProps={{
+              onLongPress: () => {
+                dispatch(
+                  updateSelectedItemsFromInCart({
+                    operation: 'set',
+                    item: isMultiSelectMode ? undefined : item,
+                  }),
+                );
+                dispatch(setIsMultiSelectModeForInCartCart(!isMultiSelectMode));
+              },
+            }}
+            onSelect={(item) => {
+              const isSelected = !!selectedItems.find(
+                (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
               );
-              dispatch(setIsMultiSelectModeForInCartCart(!isMultiSelectMode));
-            },
-          }}
-          onSelect={(item) => {
-            const isSelected = !!selectedItems.find(
-              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
-            );
-            if (isSelected) {
-              dispatch(
-                updateSelectedItemsFromInCart({
-                  operation: 'remove',
-                  item,
-                }),
-              );
-            } else {
-              dispatch(
-                updateSelectedItemsFromInCart({
-                  operation: 'add',
-                  item,
-                }),
-              );
+              if (isSelected) {
+                dispatch(
+                  updateSelectedItemsFromInCart({
+                    operation: 'remove',
+                    item,
+                  }),
+                );
+              } else {
+                dispatch(
+                  updateSelectedItemsFromInCart({
+                    operation: 'add',
+                    item,
+                  }),
+                );
+              }
+            }}
+            isSelected={
+              !!selectedItems.find(
+                (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+              )
             }
-          }}
-          isSelected={
-            !!selectedItems.find(
-              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
-            )
-          }
-        />
+          />
+        )}
       </SwipeableRow>
     );
   }
@@ -172,13 +178,14 @@ export function InCartList(props: InCartListProps) {
             setRefreshing(false);
           }, 2000);
         }}
-        data={inCartList}
+        data={[{ name: 'in-cart price' } as any, ...inCartList]}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
         }
         estimatedItemSize={120}
         ItemSeparatorComponent={() => <ListItemSeparator />}
+        stickyHeaderIndices={[0]}
       />
       <ListSorter
         sortOrderValue={shoppingList.sortOrderValue}

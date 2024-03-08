@@ -39,6 +39,7 @@ import { getItemWithStoreSpecificValues } from '@/utils/model-mappings';
 export enum ListName {
   InCartList = 'inCartList',
   ItemsList = 'itemsList',
+  RecommendedItemsList = 'recommendedItemsList',
   ShoppingList = 'shoppingLIst',
   StoresList = 'storesList',
 }
@@ -101,6 +102,7 @@ export type ListsState = {
   currentStoreName: string;
   [ListName.InCartList]: ShoppingList;
   [ListName.ItemsList]: ItemsList;
+  [ListName.RecommendedItemsList]: StoreList;
   [ListName.ShoppingList]: ShoppingList;
   [ListName.StoresList]: StoreList;
   lastPurchasedMap: LastPurchasedMap;
@@ -123,6 +125,7 @@ const initialState: ListsState = {
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   [ListName.InCartList]: getEmptyList(),
   [ListName.ItemsList]: getEmptyList(),
+  [ListName.RecommendedItemsList]: getEmptyList(),
   [ListName.ShoppingList]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
   lastPurchasedMap: getEmptyObject(),
@@ -270,7 +273,7 @@ export const listsSlice = createSlice({
       }
     },
     clearShopping: (state: ListsState) => {
-      for (const [key, value] of Object.entries(state.storeSpecificValuesMap)) {
+      for (const [, value] of Object.entries(state.storeSpecificValuesMap)) {
         if (value?.[StoreSpecificValueKey.IsInCart]?.[state.currentStoreName]) {
           value[StoreSpecificValueKey.IsInCart][state.currentStoreName] = false;
         }
@@ -709,11 +712,18 @@ export const listToDisplaySelector = (listName: ListName) =>
 export const recommendedShoppingListItemsSelector = createSelector(
   [
     (state: RootState) => state[listsSlice.name][ListName.ItemsList],
+    (state: RootState) => state[listsSlice.name][ListName.RecommendedItemsList],
     (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
     (state: RootState) => state[listsSlice.name].lastPurchasedMap,
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
-  (itemsList, storeSpecificValuesMap, lastPurchasedMap, currentStoreName) => {
+  (
+    itemsList,
+    recommendedItemsList,
+    storeSpecificValuesMap,
+    lastPurchasedMap,
+    currentStoreName,
+  ) => {
     const now = Date.now();
     const recommendedItems: ItemWithStoreSpecificValues[] = [];
     for (const item of itemsList.data) {
@@ -732,9 +742,9 @@ export const recommendedShoppingListItemsSelector = createSelector(
     }
     return recommendedItems.sort(
       getSorter(
-        itemsList.sortOrderValue.sortBy,
+        recommendedItemsList.sortOrderValue.sortBy,
         currentStoreName,
-        itemsList.sortOrderValue.sortOrder,
+        recommendedItemsList.sortOrderValue.sortOrder,
       ),
     );
   },

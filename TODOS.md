@@ -1,6 +1,10 @@
 ## MVP
 
--test RecommendedItems.tsx (also figure out where to display)
+-add gorhom bottom sheet called RecommendationItemsSheet.tsx:
+    --sheet will show up only on the shopping tab
+    --minimized state will be only show "Show Recommended Items"
+    --maximized state will show the RecommendedItemsList
+    --convert RecommendedItemsList to use local state instead of redux for sort and filtering (remove the selector and the POS related to selected items and isSelectionMode)
 
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])

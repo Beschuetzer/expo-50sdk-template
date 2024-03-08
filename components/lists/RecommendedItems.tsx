@@ -11,13 +11,12 @@ import { SwipeableRow } from './SwipeableRow';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   currentStoreSelector,
-  isMultiSelectModeForShoppingCartSelector,
-  selectedItemsFromShoppingCartSelector,
   updateStoreSpecificValues,
   recommendedShoppingListItemsSelector,
   updateSelectedItemsFromRecommendedItems,
   setIsMultiSelectModeForRecommendedItems,
   selectedItemsFromRecommendedItemsSelector,
+  ListName,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
@@ -25,6 +24,7 @@ import { getKeyToUse } from '@/utils/helpers';
 
 type RecommendedItemsListProps = object;
 
+const listName: ListName = ListName.RecommendedItemsList;
 /**
  *The items for this list are actually not in the recommendations.data POS in redux.
  *Instead they are calculated based on the storeSpecificValuesMap in the storeSpecificListSelector

@@ -170,6 +170,26 @@ export function getFrequencyValue(number?: number): Frequency {
   };
 }
 
+export function getDurationFromFrequency(frequency?: Frequency) {
+  if (!frequency || !frequency.number || !frequency.timeSpan) return 0;
+  let multiplier: number;
+  switch (frequency.timeSpan) {
+    case TimeSpan.Hour:
+      multiplier = HOUR_IN_MS;
+      break;
+    case TimeSpan.Day:
+      multiplier = DAY_IN_MS;
+      break;
+    case TimeSpan.Week:
+      multiplier = WEEK_IN_MS;
+      break;
+    default:
+      multiplier = 0;
+      break;
+  }
+  return multiplier * frequency.number;
+}
+
 export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   const { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== 'granted') {

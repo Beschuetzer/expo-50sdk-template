@@ -7,7 +7,12 @@ import {
   IMAGE_PRIORITY_MAPPING,
   UNIT_INITIAL,
 } from '@/constants/general';
-import { Item } from '@/types/Item';
+import {
+  Item,
+  ItemWithStoreSpecificValues,
+  StoreSpecificValueKey,
+  StoreSpecificValues,
+} from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 
 export function getItem(input?: UpcProduct | null): Item {
@@ -20,6 +25,25 @@ export function getItem(input?: UpcProduct | null): Item {
     unit: UNIT_INITIAL,
     addedDate: 0,
     lastUpdatedDate: 0,
+  };
+}
+
+export function getItemWithStoreSpecificValues(
+  item: Item,
+  storeSpecificValues: StoreSpecificValues,
+): ItemWithStoreSpecificValues {
+  return {
+    ...item,
+    [StoreSpecificValueKey.Aisle]:
+      storeSpecificValues?.[StoreSpecificValueKey.Aisle] || {},
+    [StoreSpecificValueKey.IsInCart]:
+      storeSpecificValues?.[StoreSpecificValueKey.IsInCart] || {},
+    [StoreSpecificValueKey.ItemId]:
+      storeSpecificValues?.[StoreSpecificValueKey.ItemId] || {},
+    [StoreSpecificValueKey.Price]:
+      storeSpecificValues?.[StoreSpecificValueKey.Price] || {},
+    [StoreSpecificValueKey.Quantity]:
+      storeSpecificValues?.[StoreSpecificValueKey.Quantity] || {},
   };
 }
 

@@ -1,8 +1,9 @@
 ## MVP
 
+-test RecommendedItems.tsx (also figure out where to display)
+
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
--use frequency and last purchase date to show recommended items needed
 
 ShoppingList
     --add the ability to change upc for an item and have it update rather than add a new item

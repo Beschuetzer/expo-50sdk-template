@@ -34,6 +34,7 @@ import {
   getKeyToUse,
   getStoreWithDistance,
 } from '@/utils/helpers';
+import { getItemWithStoreSpecificValues } from '@/utils/model-mappings';
 
 export enum ListName {
   InCartList = 'inCartList',
@@ -676,6 +677,34 @@ export const listToDisplaySelector = (listName: ListName) =>
       return filteredList;
     },
   );
+
+export const recommendedShoppingListItemsSelector = createSelector(
+  [
+    (state: RootState) => state[listsSlice.name][ListName.ItemsList],
+    (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
+    (state: RootState) => state[listsSlice.name].lastPurchasedMap,
+    (state: RootState) => state[listsSlice.name].currentStoreName,
+  ],
+  (itemsList, storeSpecificValuesMap, lastPurchasedMap, currentStoreName) => {
+    const now = Date.now();
+    const recommendedItems: ItemWithStoreSpecificValues[] = [];
+    for (const item of itemsList.data) {
+      const key = getKeyToUse(item);
+      const lastPurchaseDate = lastPurchasedMap?.[key]?.[currentStoreName];
+      if (
+        item.frequency &&
+        lastPurchaseDate &&
+        lastPurchaseDate + item.frequency <= now
+      ) {
+        const storeSpecificValues = storeSpecificValuesMap[key];
+        recommendedItems.push(
+          getItemWithStoreSpecificValues(item, storeSpecificValues),
+        );
+      }
+    }
+    return recommendedItems;
+  },
+);
 
 export const selectedItemsFromInCartSelector = (state: RootState) =>
   state[listsSlice.name].selectedItemsFromInCart;

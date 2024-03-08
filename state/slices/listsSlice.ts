@@ -105,7 +105,9 @@ export type ListsState = {
   [ListName.StoresList]: StoreList;
   lastPurchasedMap: LastPurchasedMap;
   isMultiSelectModeForShoppingCart: boolean;
+  isMultiSelectModeForRecommendedItems: boolean;
   isMultiSelectModeForInCart: boolean;
+  selectedItemsFromRecommendedItems: ItemWithStoreSpecificValues[];
   selectedItemsFromShoppingCart: ItemWithStoreSpecificValues[];
   selectedItemsFromInCart: ItemWithStoreSpecificValues[];
   storeSpecificValuesMap: StoreSpecificValuesMap;
@@ -115,6 +117,8 @@ const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
   isMultiSelectModeForInCart: IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
+  isMultiSelectModeForRecommendedItems:
+    IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   isMultiSelectModeForShoppingCart:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   [ListName.InCartList]: getEmptyList(),
@@ -122,6 +126,7 @@ const initialState: ListsState = {
   [ListName.ShoppingList]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
   lastPurchasedMap: getEmptyObject(),
+  selectedItemsFromRecommendedItems: getEmptyArray(),
   selectedItemsFromShoppingCart: getEmptyArray(),
   selectedItemsFromInCart: getEmptyArray(),
   storeSpecificValuesMap: getEmptyObject(),
@@ -345,6 +350,17 @@ export const listsSlice = createSlice({
       state.isMultiSelectModeForInCart = false;
       state.selectedItemsFromInCart = [];
     },
+    moveSelectedRecommendationsShopping: (state: ListsState) => {
+      moveItems(
+        state,
+        state.selectedItemsFromRecommendedItems.map((item) =>
+          getKeyToUse(item),
+        ),
+        false,
+      );
+      state.isMultiSelectModeForRecommendedItems = false;
+      state.selectedItemsFromRecommendedItems = [];
+    },
     removeItemsListItems: (
       state: ListsState,
       action: PayloadAction<Item[]>,
@@ -525,6 +541,12 @@ export const listsSlice = createSlice({
     ) => {
       state.isMultiSelectModeForShoppingCart = action.payload;
     },
+    setIsMultiSelectModeForRecommendedItems: (
+      state: ListsState,
+      action: PayloadAction<boolean>,
+    ) => {
+      state.isMultiSelectModeForRecommendedItems = action.payload;
+    },
     toggleSortOrder: (
       state: ListsState,
       action: PayloadAction<ToggleSortOrderPayload>,
@@ -550,6 +572,12 @@ export const listsSlice = createSlice({
       action: PayloadAction<UpdateSelectedItemsPayload>,
     ) => {
       updateSelectedItems(state, action, ListName.ShoppingList);
+    },
+    updateSelectedItemsFromRecommendedItems: (
+      state: ListsState,
+      action: PayloadAction<UpdateSelectedItemsPayload>,
+    ) => {
+      updateSelectedItems(state, action, 'recommendedItems');
     },
     updateStoreSpecificValues: (
       state: ListsState,
@@ -702,12 +730,21 @@ export const recommendedShoppingListItemsSelector = createSelector(
         );
       }
     }
-    return recommendedItems;
+    return recommendedItems.sort(
+      getSorter(
+        itemsList.sortOrderValue.sortBy,
+        currentStoreName,
+        itemsList.sortOrderValue.sortOrder,
+      ),
+    );
   },
 );
 
 export const selectedItemsFromInCartSelector = (state: RootState) =>
   state[listsSlice.name].selectedItemsFromInCart;
+
+export const selectedItemsFromRecommendedItemsSelector = (state: RootState) =>
+  state[listsSlice.name].selectedItemsFromRecommendedItems;
 
 export const selectedItemsFromShoppingCartSelector = (state: RootState) =>
   state[listsSlice.name].selectedItemsFromShoppingCart;
@@ -831,6 +868,7 @@ export const {
   moveAllToInCart,
   moveItemToShoppingList,
   moveSelectedToCart,
+  moveSelectedRecommendationsShopping,
   moveSelectedToShopping,
   removeItemsListItems,
   removeStoresListItem,
@@ -849,9 +887,11 @@ export const {
   setStoresList,
   setStoreSpecificValues,
   setIsMultiSelectModeForInCartCart,
+  setIsMultiSelectModeForRecommendedItems,
   setIsMultiSelectModeForShoppingCart,
   toggleSortOrder,
   updateSelectedItemsFromInCart,
+  updateSelectedItemsFromRecommendedItems,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
 } = listsSlice.actions;
@@ -877,7 +917,7 @@ function moveItems(state: ListsState, keys: string[], isInCart = true) {
 function updateSelectedItems(
   state: ListsState,
   action: PayloadAction<UpdateSelectedItemsPayload>,
-  listName: ListName.ShoppingList | ListName.InCartList,
+  listName: ListName.ShoppingList | ListName.InCartList | 'recommendedItems',
 ) {
   const { operation: opearation, item } = action.payload;
   if (!item || !opearation) return;
@@ -888,36 +928,62 @@ function updateSelectedItems(
 
   switch (opearation) {
     case 'add':
-      if (listName === ListName.ShoppingList) {
-        state.selectedItemsFromShoppingCart = [
-          ...state.selectedItemsFromShoppingCart,
-          item,
-        ];
-      } else {
-        state.selectedItemsFromInCart = [
-          ...state.selectedItemsFromInCart,
-          item,
-        ];
+      switch (listName) {
+        case ListName.InCartList:
+          state.selectedItemsFromInCart = [
+            ...state.selectedItemsFromInCart,
+            item,
+          ];
+          break;
+        case ListName.ShoppingList:
+          state.selectedItemsFromShoppingCart = [
+            ...state.selectedItemsFromShoppingCart,
+            item,
+          ];
+          break;
+        case 'recommendedItems':
+          state.selectedItemsFromRecommendedItems = [
+            ...state.selectedItemsFromRecommendedItems,
+            item,
+          ];
+          break;
+        default:
+          throw new Error('No listname given in updateSelectedItems');
       }
       break;
     case 'remove':
-      if (listName === ListName.ShoppingList) {
-        state.selectedItemsFromShoppingCart =
-          state.selectedItemsFromShoppingCart.filter(
+      switch (listName) {
+        case ListName.InCartList:
+          state.selectedItemsFromInCart = state.selectedItemsFromInCart.filter(
             (item) => getKeyToUse(item) !== keyToUse,
           );
-      } else {
-        state.selectedItemsFromInCart = state.selectedItemsFromInCart.filter(
-          (item) => getKeyToUse(item) !== keyToUse,
-        );
+          break;
+        case ListName.ShoppingList:
+          state.selectedItemsFromShoppingCart =
+            state.selectedItemsFromShoppingCart.filter(
+              (item) => getKeyToUse(item) !== keyToUse,
+            );
+          break;
+        case 'recommendedItems':
+          state.selectedItemsFromRecommendedItems =
+            state.selectedItemsFromRecommendedItems.filter(
+              (item) => getKeyToUse(item) !== keyToUse,
+            );
+          break;
       }
       break;
     case 'set':
     default:
-      if (listName === ListName.ShoppingList) {
-        state.selectedItemsFromShoppingCart = item ? [item] : [];
-      } else {
-        state.selectedItemsFromInCart = item ? [item] : [];
+      switch (listName) {
+        case ListName.InCartList:
+          state.selectedItemsFromInCart = item ? [item] : [];
+          break;
+        case ListName.ShoppingList:
+          state.selectedItemsFromShoppingCart = item ? [item] : [];
+          break;
+        case 'recommendedItems':
+          state.selectedItemsFromRecommendedItems = item ? [item] : [];
+          break;
       }
       break;
   }

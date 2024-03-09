@@ -20,7 +20,10 @@ export function getItem(input?: UpcProduct | null): Item {
     frequency: EMPTY_NUMBER,
     images: getImagesFromUpcProduct(input) || [],
     imageToUseIndex: DEFAULT_IMAGE_INDEX,
-    name: input?.product_name || EMPTY_STRING,
+    name:
+      input?.brands && input?.product_name
+        ? `${input.brands} - ${input?.product_name}`
+        : input?.product_name || EMPTY_STRING,
     upc: input?.code || input?.id || EMPTY_STRING,
     unit: UNIT_INITIAL,
     addedDate: 0,

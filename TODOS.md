@@ -1,5 +1,4 @@
 ## MVP
--If store and current location are the same, n/a is displayed 
 
 -fix issue where using scanner to pull up existing item with custom image doesn't load custom image on load 
 

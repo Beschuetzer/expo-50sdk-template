@@ -190,7 +190,8 @@ export function StoresList(props: StoresListProps) {
                     </Text> */}
                 <Text>
                   Estimated Distance:{' '}
-                  {!item?.calculatedDistance || item.calculatedDistance === -1
+                  {item?.calculatedDistance == null ||
+                  item.calculatedDistance < 0
                     ? 'N/A'
                     : `${item.calculatedDistance}mi.`}
                 </Text>

@@ -131,6 +131,7 @@ export function ShoppingList(props: ShoppingListProps) {
       >
         <ItemTileWithStoreSpecificValues
           isMultiSelectMode={isMultiSelectMode}
+          listName={listName}
           item={item}
           buttonProps={{
             onLongPress: () => {

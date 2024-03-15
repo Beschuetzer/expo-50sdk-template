@@ -22,7 +22,7 @@ import {
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey,
 } from '@/types/Item';
-import { ItemProp } from '@/types/general';
+import { ItemProp, ListNameProp } from '@/types/general';
 import { getButtonHitSlop } from '@/utils/helpers';
 
 type ItemTileProps = {
@@ -30,12 +30,14 @@ type ItemTileProps = {
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
   onSelect?: (item: ItemWithStoreSpecificValues) => void;
-} & ItemProp;
+} & ItemProp &
+  ListNameProp;
 
 export function ItemTileWithStoreSpecificValues(props: ItemTileProps) {
   const {
     isSelected = false,
     isMultiSelectMode = false,
+    listName,
     buttonProps,
     item,
     onSelect,
@@ -87,6 +89,7 @@ export function ItemTileWithStoreSpecificValues(props: ItemTileProps) {
           navigation.navigate(Routes.ItemModal, {
             key: item.upc || item.name,
             showOverrideMsg: false,
+            callerList: listName,
           });
         }
       }}

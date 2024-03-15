@@ -125,7 +125,7 @@ export default function TabOneScreen() {
       callerList: listName,
       key: EMPTY_STRING,
     });
-  }, [closeMenu]);
+  }, [closeMenu, listName]);
 
   const onClearAllPress = useCallback(() => {
     dispatch(clearShopping());

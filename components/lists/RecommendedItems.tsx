@@ -37,9 +37,9 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(selectedItemsFromRecommendedItemsSelector);
-  const isMultiSelectMode = useSelector(
-    setIsMultiSelectModeForRecommendedItems,
-  );
+//   const isMultiSelectMode = useSelector(
+//     setIsMultiSelectModeForRecommendedItems,
+//   );
 
   const onSwipeRight = useCallback((key: Key) => {
     setRefreshing(false);
@@ -120,6 +120,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
       >
         <ItemTileWithStoreSpecificValues
           isMultiSelectMode={isMultiSelectMode}
+          listName={listName}
           item={item}
           buttonProps={{
             onLongPress: () => {

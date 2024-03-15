@@ -21,7 +21,7 @@ import {
   UPC_REQUIRED_CHAR_LENGTH,
 } from '@/constants/regexs';
 import { AddItemsListItemPayload } from '@/state/slices/listsSlice';
-import { Item, StoreSpecificValues } from '@/types/Item';
+import { Item, StoreSpecificValueKey, StoreSpecificValues } from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ItemProp } from '@/types/general';
 import { deleteFile, getFrequencyValue, getKeyToUse } from '@/utils/helpers';
@@ -40,6 +40,7 @@ export type ItemFormProps = {
   showOverrideMsg?: boolean;
   shouldFocusFirstField?: boolean;
   shouldAddQuantity?: boolean;
+  shouldAddToCart?: boolean;
 } & Partial<ItemProp>;
 
 export function ItemForm(props: ItemFormProps) {
@@ -51,6 +52,7 @@ export function ItemForm(props: ItemFormProps) {
     onClose,
     onSave,
     shouldAddQuantity = false,
+    shouldAddToCart = false,
     shouldFocusFirstField = true,
     showOverrideMsg = true,
   } = props;
@@ -121,10 +123,19 @@ export function ItemForm(props: ItemFormProps) {
     }
 
     shouldDeleteLastImageRef.current = false;
+
+    const storeSpecificValuesToUse = {
+      ...storeSpecificValuesRef.current,
+      [StoreSpecificValueKey.IsInCart]: {
+        ...storeSpecificValuesRef.current?.[StoreSpecificValueKey.IsInCart],
+        [currentStore?.name || EMPTY_STRING]: shouldAddToCart,
+      },
+    } as StoreSpecificValues;
+
     onSave &&
       onSave({
         item: itemToSave,
-        storeSpecificValues: storeSpecificValuesRef.current,
+        storeSpecificValues: storeSpecificValuesToUse,
         currentStore,
       });
     onClose && onClose();

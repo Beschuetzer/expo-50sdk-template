@@ -124,6 +124,7 @@ export function InCartList(props: InCartListProps) {
         ) : (
           <ItemTileWithStoreSpecificValues
             isMultiSelectMode={isMultiSelectMode}
+            listName={listName}
             item={item}
             buttonProps={{
               onLongPress: () => {

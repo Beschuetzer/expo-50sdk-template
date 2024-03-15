@@ -35,9 +35,6 @@ ShoppingList
 -create a component that sets the current store POS (create POS in generalSlice)
 
 -Swiping to add to shopping list should not be an option unless a store is selected (or a message should display indicating a store is needed (add an AlertModal for this?))
--Swiping to add to shopping list should add one of that item for the current store 
--add options tab (move mock buttons there when done, add auto save checkbox, add a backup button which can email a .json file of the current lists in redux, add a load button to load the .json file)
--reomove handleMockResponse in useUpcData when done and enable the actual fetch
 
 ## Features
 -ability to add a "frequency" field which guesses the time before expected next purchase date for each item.  When pulling up a store, the date each item was last in the basket is used to provide recommendaitons for what may be needed this trip (add ability to sort on the date items were last in basket)

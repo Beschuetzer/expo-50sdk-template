@@ -11,7 +11,7 @@ import { ImageRenderer } from '../ImageRenderer';
 import { Routes } from '@/constants/navigation';
 import { lastPurchasedSelector } from '@/state/slices/listsSlice';
 import { Item, ItemUnit } from '@/types/Item';
-import { ItemProp } from '@/types/general';
+import { ItemProp, ListNameProp } from '@/types/general';
 import { getFrequencyValue } from '@/utils/helpers';
 
 type ItemTileProps = {
@@ -19,7 +19,8 @@ type ItemTileProps = {
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
   onSelect?: (item: Item) => void;
-} & ItemProp;
+} & ItemProp &
+  ListNameProp;
 
 export function ItemTile(props: ItemTileProps) {
   const theme = useTheme();
@@ -28,6 +29,7 @@ export function ItemTile(props: ItemTileProps) {
     isSelected = false,
     isMultiSelectMode = false,
     buttonProps,
+    listName,
     item,
     onSelect,
   } = props;
@@ -48,6 +50,7 @@ export function ItemTile(props: ItemTileProps) {
           navigation.navigate(Routes.ItemModal, {
             key: item.upc || item.name,
             showOverrideMsg: false,
+            callerList: listName,
           });
         }
       }}

@@ -218,6 +218,7 @@ export function ItemsList(props: ItemsListProps) {
         }}
       >
         <ItemTile
+          listName={listName}
           isMultiSelectMode={isMultiSelectMode}
           item={item}
           buttonProps={{

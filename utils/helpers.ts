@@ -284,6 +284,20 @@ export async function retrieveImagePathFromAsyncStorage(key: Key) {
   }
 }
 
+export function roundNumber(number: number, decimalPlaces = 2) {
+  if (typeof number !== 'number' || typeof decimalPlaces !== 'number') {
+    throw new Error('Both arguments must be numbers');
+  }
+
+  if (decimalPlaces < 0) {
+    throw new Error('Decimal places must be non-negative');
+  }
+
+  const factor = Math.pow(10, decimalPlaces);
+  return Math.round(number * factor) / factor;
+}
+
+
 /**
  *@param key the key to use
  *@param uri the link to the image (web)

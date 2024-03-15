@@ -23,7 +23,7 @@ import {
   resetUpcProducts,
   upcProductsSelector,
 } from '@/state/slices/scannerSlice';
-import { Item, StoreSpecificValuesMap } from '@/types/Item';
+import { Item, StoreSpecificValueKey, StoreSpecificValuesMap } from '@/types/Item';
 import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers';
 
 const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500;
@@ -161,10 +161,12 @@ export function ReduxViewer() {
                     );
                     storeSpecificValuesMap[upcToUse] =
                       getRandomStoreSpecificValues();
-                    console.log({ storeSpecificValuesMap });
 
                     lastUpcNumberRef.current += 1;
                   }
+                  const keys = Object.keys(storeSpecificValuesMap);
+                  console.log({price: storeSpecificValuesMap[keys[0]][StoreSpecificValueKey.Price]});
+                  
                   dispatch(setItemsList(itemsList));
                   dispatch(setStoreSpecificValues(storeSpecificValuesMap));
                 }}

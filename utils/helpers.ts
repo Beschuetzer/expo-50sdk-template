@@ -195,7 +195,16 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   if (status !== 'granted') {
     throw new Error('Permission to access location was denied');
   }
-  const location = await Location.getCurrentPositionAsync({});
+
+  try {
+    await Location.enableNetworkProviderAsync();
+  } catch (error) {
+    console.log('Continuing without high accuracy mode');
+  }
+
+  const location = await Location.getCurrentPositionAsync({
+    accuracy: Location.Accuracy.BestForNavigation,
+  });
   if (!location?.coords) {
     return {
       lat: '-1',
@@ -296,7 +305,6 @@ export function roundNumber(number: number, decimalPlaces = 2) {
   const factor = Math.pow(10, decimalPlaces);
   return Math.round(number * factor) / factor;
 }
-
 
 /**
  *@param key the key to use

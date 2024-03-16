@@ -62,7 +62,7 @@ export function AutoSetStoreToggle(props: AutoSetStoreToggleProps) {
           true: theme.colors.primary[200],
         }}
         thumbColor={
-          autoSelectStore
+          autoSelectStore.enabled
             ? theme.colors.primary[900]
             : theme.colors.secondary[900]
         }

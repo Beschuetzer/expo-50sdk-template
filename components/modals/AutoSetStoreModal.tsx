@@ -17,7 +17,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { autoSetStoreSelector } from '@/state/slices/optionsSlice';
 import { Store } from '@/types/Store';
-import { getButtonHitSlop } from '@/utils/helpers';
+import { getButtonHitSlop, getIndexOfSmallestField } from '@/utils/helpers';
 
 export type AutoSetStoreModalProps = object;
 
@@ -43,18 +43,32 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
   }, []);
 
   useEffect(() => {
+    const storesMeetingCriteria: Store[] = [];
     for (const store of storesList.data) {
-      if (
+      const storeIsCloseEnough =
         store.calculatedDistance !== undefined &&
-        store.calculatedDistance <= AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL &&
-        currentStore.name.trim().toLowerCase() !==
-          store?.name.trim().toLowerCase()
-      ) {
-        if (autoSetStore.enabled) {
-          onConfirmPress(store);
-        } else {
-          setStoreToAskAbout(store);
-        }
+        store.calculatedDistance <= autoSetStore.maxDistanceInMiles;
+      if (storeIsCloseEnough) {
+        storesMeetingCriteria.push(store);
+      }
+    }
+
+    if (storesMeetingCriteria.length > 0) {
+      const assumedStore =
+        storesMeetingCriteria[
+          getIndexOfSmallestField<Store>(
+            storesMeetingCriteria,
+            'calculatedDistance',
+          )
+        ];
+      const isCurrentStoreAssumedStore =
+        currentStore.name.trim().toLowerCase() ===
+        assumedStore?.name.trim().toLowerCase();
+
+      if (!isCurrentStoreAssumedStore && autoSetStore.enabled) {
+        onConfirmPress(assumedStore);
+      } else if (!isCurrentStoreAssumedStore) {
+        setStoreToAskAbout(assumedStore);
       }
     }
   }, [currentLocation]);

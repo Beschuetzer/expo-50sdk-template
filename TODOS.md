@@ -1,4 +1,5 @@
 ## MVP
+
 -Select closest store if multiple meet minimum distance
 -Add confirmation modal for action like clear shopping list
 -fix issue where using scanner to pull up existing item with custom image doesn't load custom image on load 
@@ -52,6 +53,9 @@ the ability to create a store layout and have a map/route be generated based on 
 -Holding an item in a list should enter multi-selction mode, which allows selecting multiple items and then performing some action
 -Need to figure out how to drag and drop rows for easier custom sorting?
 
+
+## Testing
+-add a button to populate stores which creates 200 stores (x number of them being within .1 miles from current location);  then measure how long it takes to find the closest store in AutoSetStoreModal's useEffect
 
 ## Optimization Idea
 -Create a buton to add 500 or so items to itemsList.  Then try updating the quantity for a few items and see how quickly things render.  If there is slugglishness, separate storeSpecificValues from itemList.  It Would be a dictionary with Key as the key.  Would need to make a selector called itemWithStoreSpecificValuesSelector.  Would need to update the Item type wherever it is being used.  Same for current ItemWithStoreSpecificValues type use cases.  Would need to updat addItemsListItem and updateStoreSpecificValues reducers

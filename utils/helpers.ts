@@ -243,6 +243,22 @@ export function getImagesFromUpcProduct(upcProduct?: UpcProduct | null) {
   );
 }
 
+export function getIndexOfSmallestField<T>(arr: T[], key: keyof T) {
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return -1; // Handle invalid input
+  }
+
+  let smallestIndex = 0;
+
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i][key] < arr[smallestIndex][key]) {
+      smallestIndex = i;
+    }
+  }
+
+  return smallestIndex;
+}
+
 export function getStoreWithDistance(
   store: Store,
   currentLocation: GpsCoordinate | null,
@@ -365,4 +381,15 @@ export async function loadAppStateFromFile(fileName: string) {
     displayAlert({ message: 'Error loading app state:', error });
   }
   return null;
+}
+
+export async function measureExecutionTime(
+  func: () => void,
+  key = 'Func',
+  shouldLog = true,
+) {
+  const start = performance.now();
+  func && (await func());
+  const end = performance.now();
+  if (shouldLog) console.log({ [`executionTimeOf${key}`]: end - start });
 }

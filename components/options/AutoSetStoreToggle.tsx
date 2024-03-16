@@ -1,9 +1,9 @@
-import { Row, useTheme, Text } from 'native-base';
-import { useCallback } from 'react';
+import { Row, useTheme, Text, Input } from 'native-base';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Switch } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL } from '@/constants/general';
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   autoSetStoreSelector,
   setAutoSetStore,
@@ -11,9 +11,14 @@ import {
 
 type AutoSetStoreToggleProps = object;
 
+const AUTO_SET_DEBOUNCE_THRESHOLD = 500;
 export function AutoSetStoreToggle(props: AutoSetStoreToggleProps) {
   const theme = useTheme();
   const autoSelectStore = useSelector(autoSetStoreSelector);
+  const [autoSetDistance, setAutoSetDistance] = useState(
+    autoSelectStore.maxDistanceInMiles.toString(),
+  );
+  const autoSetDebounceRef = useRef<any>(-1);
   const dispatch = useDispatch();
 
   const toggleSwitch = useCallback(() => {
@@ -25,12 +30,32 @@ export function AutoSetStoreToggle(props: AutoSetStoreToggleProps) {
     );
   }, [autoSelectStore]);
 
+  useEffect(() => {
+    clearTimeout(autoSetDebounceRef.current);
+    autoSetDebounceRef.current = setTimeout(() => {
+      dispatch(
+        setAutoSetStore({
+          enabled: autoSelectStore.enabled,
+          maxDistanceInMiles: parseFloat(autoSetDistance),
+        }),
+      );
+    }, AUTO_SET_DEBOUNCE_THRESHOLD);
+  }, [autoSetDistance]);
+
   return (
-    <Row alignItems="center">
-      <Text mr={theme.space[1]}>
-        Auto Set Store when within {AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL}
-        mi.
-      </Text>
+    <Row alignItems="center" justifyContent="space-between">
+      <Row alignItems="center">
+        <Text mr={theme.space[FORM_INTER_ITEM_SPACING]}>
+          Auto Set Store when within
+        </Text>
+        <Input
+          width={theme.sizes[4]}
+          keyboardType="numeric"
+          value={autoSetDistance}
+          onChangeText={(newValue) => setAutoSetDistance(newValue)}
+        />
+        <Text ml={theme.space[FORM_INTER_ITEM_SPACING]}>mi.</Text>
+      </Row>
       <Switch
         trackColor={{
           false: theme.colors.secondary[200],

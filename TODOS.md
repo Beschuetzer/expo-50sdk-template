@@ -1,5 +1,5 @@
 ## MVP
--Make auto select store distance cutomizable
+-Select closest store if multiple meet minimum distance
 -Add confirmation modal for action like clear shopping list
 -fix issue where using scanner to pull up existing item with custom image doesn't load custom image on load 
 

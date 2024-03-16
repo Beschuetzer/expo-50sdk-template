@@ -3,27 +3,33 @@ import { useCallback } from 'react';
 import { Switch } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { AUTO_SET_STORE_DISTANCE_THRESHOLD } from '@/constants/general';
+import { AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL } from '@/constants/general';
 import {
-  autoSetStoreWhenCloseEnoughSelector,
-  setAutoSetStoreWhenCloseEnough,
+  autoSetStoreSelector,
+  setAutoSetStore,
 } from '@/state/slices/optionsSlice';
 
 type AutoSetStoreToggleProps = object;
 
 export function AutoSetStoreToggle(props: AutoSetStoreToggleProps) {
   const theme = useTheme();
-  const autoSelectStore = useSelector(autoSetStoreWhenCloseEnoughSelector);
+  const autoSelectStore = useSelector(autoSetStoreSelector);
   const dispatch = useDispatch();
 
   const toggleSwitch = useCallback(() => {
-    dispatch(setAutoSetStoreWhenCloseEnough(!autoSelectStore));
+    dispatch(
+      setAutoSetStore({
+        enabled: !autoSelectStore.enabled,
+        maxDistanceInMiles: autoSelectStore.maxDistanceInMiles,
+      }),
+    );
   }, [autoSelectStore]);
 
   return (
     <Row alignItems="center">
       <Text mr={theme.space[1]}>
-        Auto Set Store when within {AUTO_SET_STORE_DISTANCE_THRESHOLD}mi.
+        Auto Set Store when within {AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL}
+        mi.
       </Text>
       <Switch
         trackColor={{
@@ -37,7 +43,7 @@ export function AutoSetStoreToggle(props: AutoSetStoreToggleProps) {
         }
         ios_backgroundColor={theme.colors.black[400]}
         onValueChange={toggleSwitch}
-        value={autoSelectStore}
+        value={autoSelectStore.enabled}
       />
     </Row>
   );

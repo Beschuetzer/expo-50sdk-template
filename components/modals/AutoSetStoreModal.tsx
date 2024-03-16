@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import {
-  AUTO_SET_STORE_DISTANCE_THRESHOLD,
+  AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   FORM_INTER_ITEM_SPACING,
 } from '@/constants/general';
 import {
@@ -15,7 +15,7 @@ import {
   setCurrentStoreName,
   storesListSelector,
 } from '@/state/slices/listsSlice';
-import { autoSetStoreWhenCloseEnoughSelector } from '@/state/slices/optionsSlice';
+import { autoSetStoreSelector } from '@/state/slices/optionsSlice';
 import { Store } from '@/types/Store';
 import { getButtonHitSlop } from '@/utils/helpers';
 
@@ -27,7 +27,7 @@ export type AutoSetStoreModalProps = object;
 export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
   const currentLocation = useSelector(currentLocationSelector);
   const currentStore = useSelector(currentStoreSelector);
-  const shouldAutoSetStore = useSelector(autoSetStoreWhenCloseEnoughSelector);
+  const autoSetStore = useSelector(autoSetStoreSelector);
   const storesList = useSelector(storesListSelector);
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -46,11 +46,11 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
     for (const store of storesList.data) {
       if (
         store.calculatedDistance !== undefined &&
-        store.calculatedDistance <= AUTO_SET_STORE_DISTANCE_THRESHOLD &&
+        store.calculatedDistance <= AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL &&
         currentStore.name.trim().toLowerCase() !==
           store?.name.trim().toLowerCase()
       ) {
-        if (shouldAutoSetStore) {
+        if (autoSetStore.enabled) {
           onConfirmPress(store);
         } else {
           setStoreToAskAbout(store);

@@ -4,19 +4,28 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 import {
+  AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   AUTO_SET_STORE_WHEN_CLOSE_ENOUGH,
   IMAGE_PICKER_QUALITY_INITIAL,
   SWIPEABLE_ROW_OPEN_THRESHOLD,
 } from '@/constants/general';
 
+type AutoSetStore = {
+  enabled: boolean;
+  maxDistanceInMiles: number;
+}
+
 export type OptionsState = {
-  autoSetStoreWhenCloseEnough: boolean;
+  autoSetStore: AutoSetStore;
   customImageQuality: number;
   swipeableRowOpenThreshold: number;
 };
 
 const initialState: OptionsState = {
-  autoSetStoreWhenCloseEnough: AUTO_SET_STORE_WHEN_CLOSE_ENOUGH,
+  autoSetStore: {
+    enabled: AUTO_SET_STORE_WHEN_CLOSE_ENOUGH,
+    maxDistanceInMiles: AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
+  },
   customImageQuality: IMAGE_PICKER_QUALITY_INITIAL,
   swipeableRowOpenThreshold: SWIPEABLE_ROW_OPEN_THRESHOLD,
 };
@@ -25,11 +34,11 @@ export const optionsSlice = createSlice({
   name: 'options',
   initialState,
   reducers: {
-    setAutoSetStoreWhenCloseEnough: (
+    setAutoSetStore: (
       state: OptionsState,
-      action: PayloadAction<OptionsState['autoSetStoreWhenCloseEnough']>,
+      action: PayloadAction<OptionsState['autoSetStore']>,
     ) => {
-      state.autoSetStoreWhenCloseEnough = action.payload;
+      state.autoSetStore = action.payload;
     },
     setCustomImageQuality: (
       state: OptionsState,
@@ -54,13 +63,13 @@ export const optionsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   resetOptions,
-  setAutoSetStoreWhenCloseEnough,
+  setAutoSetStore,
   setSwipeableRowOpenThreshold,
   setCustomImageQuality,
 } = optionsSlice.actions;
 
-export const autoSetStoreWhenCloseEnoughSelector = (state: RootState) =>
-  state[optionsSlice.name].autoSetStoreWhenCloseEnough;
+export const autoSetStoreSelector = (state: RootState) =>
+  state[optionsSlice.name].autoSetStore;
 
 export const customImageQualitySelector = (state: RootState) =>
   state[optionsSlice.name].customImageQuality;

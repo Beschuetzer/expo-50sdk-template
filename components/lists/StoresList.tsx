@@ -185,16 +185,10 @@ export function StoresList(props: StoresListProps) {
             >
               <Stack flex={1} justifyContent="center">
                 <Text fontSize={theme.fontSizes['lg']}>{item.name}</Text>
-                {/* <Text>
-                      ({item.gpsCoordinates?.lat}, {item.gpsCoordinates?.lon})
-                    </Text> */}
-                <Text>
-                  Estimated Distance:{' '}
-                  {item?.calculatedDistance == null ||
-                  item.calculatedDistance < 0
-                    ? 'N/A'
-                    : `${item.calculatedDistance}mi.`}
-                </Text>
+                {item.calculatedDistance != null &&
+                item.calculatedDistance >= 0 ? (
+                  <Text>Estimated Distance: {item.calculatedDistance}mi.</Text>
+                ) : null}
               </Stack>
               <Stack>
                 {currentStore?.name !== keyToUse.name ? (

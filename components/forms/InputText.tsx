@@ -1,18 +1,21 @@
-import { Text } from 'react-native';
+import { Text, View, ViewStyle } from 'react-native';
 
 type InputTextProps = {
   children: string | string[];
+  style?: ViewStyle;
 };
 
 export function InputText(props: InputTextProps) {
-  const { children } = props;
+  const { children, style } = props;
   return (
-    <Text
-      style={{
-        fontWeight: '900',
-      }}
-    >
-      {children}
-    </Text>
+    <View style={style}>
+      <Text
+        style={{
+          fontWeight: '900',
+        }}
+      >
+        {children}
+      </Text>
+    </View>
   );
 }

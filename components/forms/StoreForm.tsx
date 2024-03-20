@@ -11,7 +11,10 @@ import {
   FORM_INTER_ITEM_SPACING,
   GPS_COORDINATES_DEFAULT,
 } from '@/constants/general';
-import { storesListSelector } from '@/state/slices/listsSlice';
+import {
+  AddStoresListItemPayload,
+  storesListSelector,
+} from '@/state/slices/listsSlice';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { StoreProp } from '@/types/general';
 import {
@@ -27,7 +30,7 @@ type StoreFormValdation = {
 
 type StoreFormProps = {
   onClose: () => void;
-  onSave: (store: Store) => void;
+  onSave: (addStoresListItemPayload: AddStoresListItemPayload) => void;
 } & StoreProp;
 
 export function StoreForm(props: StoreFormProps) {
@@ -55,11 +58,15 @@ export function StoreForm(props: StoreFormProps) {
   }
 
   function onSavePress() {
-    const itemToSave = {
+    const newStore = {
       name: storeName,
       gpsCoordinates,
     } as Store;
-    onSave && onSave(itemToSave);
+    onSave &&
+      onSave({
+        newStore,
+        store,
+      });
     onClose && onClose();
   }
 
@@ -116,7 +123,11 @@ export function StoreForm(props: StoreFormProps) {
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Row alignItems="center">
-          <InputText mr={theme.space[FORM_INTER_ITEM_SPACING]}>Lat:</InputText>
+          <InputText
+            style={{ marginRight: theme.space[FORM_INTER_ITEM_SPACING] }}
+          >
+            Lat:&nbsp;
+          </InputText>
           <Input
             variant="outline"
             keyboardType="numeric"
@@ -134,7 +145,11 @@ export function StoreForm(props: StoreFormProps) {
             }
             isInvalid={isNaN(parseFloat(gpsCoordinates.lat))}
           />
-          <InputText mx={theme.space[FORM_INTER_ITEM_SPACING]}>Long:</InputText>
+          <InputText
+            style={{ marginHorizontal: theme.space[FORM_INTER_ITEM_SPACING] }}
+          >
+            Long:&nbsp;
+          </InputText>
           <Input
             flex={1}
             variant="outline"

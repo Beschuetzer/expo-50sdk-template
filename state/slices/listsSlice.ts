@@ -21,7 +21,7 @@ import {
   StoreSpecificValuesMap,
 } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
-import { ListNameProp } from '@/types/general';
+import { ListNameProp, StoreProp } from '@/types/general';
 import {
   calculateDistance,
   deleteImages,
@@ -57,6 +57,10 @@ export type AddItemsListItemPayload = {
   storeSpecificValues?: StoreSpecificValues;
   currentStore?: Store;
 };
+
+export type AddStoresListItemPayload = {
+  newStore: Store;
+} & StoreProp;
 
 export type ResetListToDisplayFiltersPayload = ListNameProp;
 
@@ -245,9 +249,12 @@ export const listsSlice = createSlice({
         }
       }
     },
-    addStoresListItem: (state: ListsState, action: PayloadAction<Store>) => {
-      const store = action.payload;
-      const keyToUse = getKeyToUse(store);
+    addStoresListItem: (
+      state: ListsState,
+      action: PayloadAction<AddStoresListItemPayload>,
+    ) => {
+      const { newStore, store } = action.payload;
+      const keyToUse = getKeyToUse(newStore);
       if (!keyToUse) {
         alert('Unable to add an item with no name to the storesList.');
         return;
@@ -259,17 +266,22 @@ export const listsSlice = createSlice({
 
       if (storeIndex !== -1) {
         state.storesList.data[storeIndex] = getStoreWithDistance(
-          store,
+          newStore,
           state.currentLocation,
         );
         return;
       }
       state.storesList.data.push(
-        getStoreWithDistance(store, state.currentLocation),
+        getStoreWithDistance(newStore, state.currentLocation),
       );
 
       if (state.storesList.data.length === 1) {
-        state.currentStoreName = store.name;
+        state.currentStoreName = newStore.name;
+      }
+      if (store) {
+        state[ListName.StoresList].data = state[
+          ListName.StoresList
+        ].data.filter((storeLocal) => storeLocal.name !== store.name);
       }
     },
     clearShopping: (state: ListsState) => {

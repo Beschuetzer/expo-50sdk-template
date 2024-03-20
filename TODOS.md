@@ -1,5 +1,4 @@
 ## MVP
--fix changing name of store adding another store (keep tracker of current store name when calling route)
 -Select closest store if multiple meet minimum distance
 -Add confirmation modal for action like clear shopping list
 -fix issue where using scanner to pull up existing item with custom image doesn't load custom image on load 

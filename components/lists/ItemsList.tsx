@@ -77,10 +77,15 @@ export function ItemsList(props: ItemsListProps) {
     });
   }
 
+  const resetMultiSelectionMode = useCallback(() => {
+    setIsMultiSelectMode(false);
+    setSelectedItems([]);
+  }, []);
+
   const onAddAllToShoppingPress = useCallback(() => {
     dispatch(addAllToShoppingCart(selectedItems));
-    setIsMultiSelectMode(false);
-  }, [selectedItems]);
+    resetMultiSelectionMode();
+  }, [selectedItems, resetMultiSelectionMode]);
 
   const onSortPress = useCallback(() => {
     setIsSortModalOpen(true);
@@ -92,7 +97,8 @@ export function ItemsList(props: ItemsListProps) {
 
   const onDeleteAllPress = useCallback(() => {
     dispatch(removeItemsListItems(selectedItems));
-  }, [selectedItems]);
+    resetMultiSelectionMode();
+  }, [selectedItems, resetMultiSelectionMode]);
 
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));
@@ -152,10 +158,12 @@ export function ItemsList(props: ItemsListProps) {
                   onPress: onAddAllToShoppingPress,
                 }
               : undefined,
-            {
-              text: 'Delete All',
-              onPress: onDeleteAllPress,
-            },
+            selectedItems.length > 0
+              ? {
+                  text: 'Delete All',
+                  onPress: onDeleteAllPress,
+                }
+              : undefined,
           ]}
         />
       ),

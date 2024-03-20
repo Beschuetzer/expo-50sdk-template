@@ -1,3 +1,4 @@
+import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useNavigation } from 'expo-router';
 import { useTheme } from 'native-base';
 import {
@@ -27,6 +28,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from '@/components/modals/ConfirmModal';
+import { RecommendedItemsSheet } from '@/components/sheets/RecommendedItemsSheet';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
@@ -83,6 +85,7 @@ export default function TabOneScreen() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const menuRef = useRef<Menu>(null);
+  const recommendedItemsSheetRef = useRef<BottomSheetMethods>(null);
   const navigation = useNavigation();
   const listName = useMemo(
     () => (index === 0 ? ListName.ShoppingList : ListName.InCartList),
@@ -144,6 +147,7 @@ export default function TabOneScreen() {
         setConfirmModalProps({ isVisible: false });
       },
     });
+    
   }, []);
 
   const onCompletePurchasePress = useCallback(() => {
@@ -274,6 +278,7 @@ export default function TabOneScreen() {
         viewSize="small"
       />
       <ConfirmModal {...confirmModalProps} />
+      {/* <RecommendedItemsSheet ref={recommendedItemsSheetRef} /> */}
     </>
   );
 }

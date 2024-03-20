@@ -1,6 +1,4 @@
 ## MVP
--fix issue where using scanner to pull up existing item with custom image doesn't load custom image on load 
-
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:
     --sheet will show up only on the shopping tab
     --minimized state will be only show "Show Recommended Items"

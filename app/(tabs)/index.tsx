@@ -23,6 +23,10 @@ import {
   shoppingListSortTypes,
 } from '@/components/lists/ShoppingLIst';
 import { SortType } from '@/components/lists/sorters';
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from '@/components/modals/ConfirmModal';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
@@ -73,6 +77,9 @@ export default function TabOneScreen() {
   );
   const selectedInCartItems = useSelector(selectedItemsFromInCartSelector);
 
+  const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
+    {},
+  );
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const menuRef = useRef<Menu>(null);
@@ -128,7 +135,15 @@ export default function TabOneScreen() {
   }, [closeMenu, listName]);
 
   const onClearAllPress = useCallback(() => {
-    dispatch(clearShopping());
+    setConfirmModalProps({
+      isVisible: true,
+      message: 'Are you sure you want to clear the cart?',
+      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onConfirm: () => {
+        dispatch(clearShopping());
+        setConfirmModalProps({ isVisible: false });
+      },
+    });
   }, []);
 
   const onCompletePurchasePress = useCallback(() => {
@@ -258,6 +273,7 @@ export default function TabOneScreen() {
         sortTypes={shoppingListSortTypes}
         viewSize="small"
       />
+      <ConfirmModal {...confirmModalProps} />
     </>
   );
 }

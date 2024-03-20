@@ -1,5 +1,4 @@
 ## MVP
--Add confirmation modal for action like clear shopping list
 -fix issue where using scanner to pull up existing item with custom image doesn't load custom image on load 
 
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:

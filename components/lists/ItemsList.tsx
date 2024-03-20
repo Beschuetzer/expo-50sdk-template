@@ -16,6 +16,7 @@ import { SortType } from './sorters';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
+import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
@@ -61,6 +62,9 @@ export function ItemsList(props: ItemsListProps) {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
+  const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
+    {},
+  );
   const lastSortTypeRef = useRef(itemsListSortTypes[0]);
   const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: itemsList, title: 'Items List' });
@@ -95,9 +99,17 @@ export function ItemsList(props: ItemsListProps) {
     setIsFilterModalOpen(true);
   }, []);
 
-  const onDeleteAllPress = useCallback(() => {
-    dispatch(removeItemsListItems(selectedItems));
-    resetMultiSelectionMode();
+  const onDeleteSelectedPress = useCallback(() => {
+    setConfirmModalProps({
+      isVisible: true,
+      message: 'Are you sure you want to delete the selected items?',
+      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onConfirm: () => {
+        dispatch(removeItemsListItems(selectedItems));
+        resetMultiSelectionMode();
+        setConfirmModalProps({ isVisible: false });
+      },
+    });
   }, [selectedItems, resetMultiSelectionMode]);
 
   const onResetPress = useCallback(() => {
@@ -160,8 +172,8 @@ export function ItemsList(props: ItemsListProps) {
               : undefined,
             selectedItems.length > 0
               ? {
-                  text: 'Delete All',
-                  onPress: onDeleteAllPress,
+                  text: 'Delete Selected Items',
+                  onPress: onDeleteSelectedPress,
                 }
               : undefined,
           ]}
@@ -296,6 +308,7 @@ export function ItemsList(props: ItemsListProps) {
         setIsVisible={setIsFilterModalOpen}
         onValueChange={onFilterValueChange}
       />
+      <ConfirmModal {...confirmModalProps} />
     </>
   );
 }

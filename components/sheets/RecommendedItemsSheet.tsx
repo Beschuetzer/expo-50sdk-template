@@ -1,4 +1,5 @@
 import BottomSheet, {
+    BottomSheetFlatList,
   BottomSheetScrollView,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
@@ -12,6 +13,8 @@ import React, {
   useState,
 } from 'react';
 import { LayoutChangeEvent } from 'react-native';
+
+import { RecommendedItemsList } from '../lists/RecommendedItems';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 
@@ -35,7 +38,6 @@ export const RecommendedItemsSheet = forwardRef<
 
   const onViewLayout = useCallback((event: LayoutChangeEvent) => {
     const textHeight = Math.ceil(event?.nativeEvent.layout.height);
-    alert(textHeight);
     if (!textHeight) return;
     setViewHeight(textHeight);
   }, []);
@@ -52,11 +54,15 @@ export const RecommendedItemsSheet = forwardRef<
       ]}
       onChange={handleSheetChanges}
     >
-      <BottomSheetScrollView>
+        {/* < BottomSheetFlatList
+        
+        /> */}
+      {/* <BottomSheetScrollView>
         <BottomSheetView onLayout={onViewLayout}>
           <Text>Recommended Items</Text>
         </BottomSheetView>
-      </BottomSheetScrollView>
+      </BottomSheetScrollView> */}
+      <RecommendedItemsList />
     </BottomSheet>
   );
 });

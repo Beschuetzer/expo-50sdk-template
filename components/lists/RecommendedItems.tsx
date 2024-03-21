@@ -1,5 +1,8 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
+import {
+  BottomSheetFlatList,
+  BottomSheetFlatListMethods,
+} from '@gorhom/bottom-sheet';
 import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -37,7 +40,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
   const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
-  const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
+  const listRef = useRef<BottomSheetFlatListMethods | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(selectedItemsFromRecommendedItemsSelector);
   const isMultiSelectMode = useSelector(
@@ -118,7 +121,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
         }}
       >
         <ItemTileWithStoreSpecificValues
-          isRecommended={isRecommended}
+          isRecommended={!!isRecommended}
           isMultiSelectMode={isMultiSelectMode}
           listName={listName}
           item={item}
@@ -166,24 +169,21 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
   }
 
   return (
-    <>
-      <FlashList
-        ref={listRef}
-        refreshing={refreshing}
-        onRefresh={() => {
-          setRefreshing(true);
-          setTimeout(() => {
-            setRefreshing(false);
-          }, 2000);
-        }}
-        data={itemsPurchasedAtStore}
-        renderItem={renderItem}
-        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
-          getKeyToUse(item)
-        }
-        estimatedItemSize={120}
-        ItemSeparatorComponent={() => <ListItemSeparator />}
-      />
-    </>
+    <BottomSheetFlatList
+      ref={listRef}
+      refreshing={refreshing}
+      onRefresh={() => {
+        setRefreshing(true);
+        setTimeout(() => {
+          setRefreshing(false);
+        }, 2000);
+      }}
+      data={itemsPurchasedAtStore}
+      renderItem={renderItem}
+      keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
+        getKeyToUse(item)
+      }
+      ItemSeparatorComponent={() => <ListItemSeparator />}
+    />
   );
 }

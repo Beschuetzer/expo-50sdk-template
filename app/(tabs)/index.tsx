@@ -278,7 +278,7 @@ export default function TabOneScreen() {
         viewSize="small"
       />
       <ConfirmModal {...confirmModalProps} />
-      {/* <RecommendedItemsSheet ref={recommendedItemsSheetRef} /> */}
+      <RecommendedItemsSheet ref={recommendedItemsSheetRef} />
     </>
   );
 }

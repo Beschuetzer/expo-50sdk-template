@@ -28,6 +28,7 @@ import { getButtonHitSlop } from '@/utils/helpers';
 type ItemTileProps = {
   buttonProps?: RectButtonProps;
   isMultiSelectMode?: boolean;
+  isRecommended?: boolean;
   isSelected?: boolean;
   onSelect?: (item: ItemWithStoreSpecificValues) => void;
 } & ItemProp &
@@ -37,6 +38,7 @@ export function ItemTileWithStoreSpecificValues(props: ItemTileProps) {
   const {
     isSelected = false,
     isMultiSelectMode = false,
+    isRecommended = false,
     listName,
     buttonProps,
     item,
@@ -94,7 +96,12 @@ export function ItemTileWithStoreSpecificValues(props: ItemTileProps) {
         }
       }}
     >
-      <Row space={2}>
+      <Row
+        space={2}
+        backgroundColor={
+          isRecommended ? theme.colors.success[900] : theme.colors.white
+        }
+      >
         <Column>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
           <TouchableOpacity

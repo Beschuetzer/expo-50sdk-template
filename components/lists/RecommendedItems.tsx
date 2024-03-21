@@ -12,11 +12,13 @@ import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   currentStoreSelector,
   updateStoreSpecificValues,
-  recommendedShoppingListItemsSelector,
+  itemsPurchasedAtStoreSelector,
   updateSelectedItemsFromRecommendedItems,
   setIsMultiSelectModeForRecommendedItems,
   selectedItemsFromRecommendedItemsSelector,
   ListName,
+  lastPurchasedMapSelector,
+  isMultiSelectModeForRecommendedItemsSelector,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
@@ -30,16 +32,19 @@ const listName: ListName = ListName.RecommendedItemsList;
  *Instead they are calculated based on the storeSpecificValuesMap in the storeSpecificListSelector
  **/
 export function RecommendedItemsList(props: RecommendedItemsListProps) {
-  const recommendedItems = useSelector(recommendedShoppingListItemsSelector);
+  const itemsPurchasedAtStore = useSelector(itemsPurchasedAtStoreSelector);
+  const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
   const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(selectedItemsFromRecommendedItemsSelector);
-//   const isMultiSelectMode = useSelector(
-//     setIsMultiSelectModeForRecommendedItems,
-//   );
+  const isMultiSelectMode = useSelector(
+    isMultiSelectModeForRecommendedItemsSelector,
+  );
+
+  console.log({ itemsPurchasedAtStore, lastPurchasedMap });
 
   const onSwipeRight = useCallback((key: Key) => {
     setRefreshing(false);
@@ -75,22 +80,16 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
     //   name: item.name,
     //   upc: item.upc,
     // } as Key;
+    const keyToUse = getKeyToUse(item);
+    const now = Date.now();
+    const lastPurchaseDate = lastPurchasedMap[keyToUse]?.[currentStore.name];
+    const isRecommended =
+      item.frequency &&
+      lastPurchaseDate &&
+      lastPurchaseDate + item.frequency <= now;
+
     return (
       <SwipeableRow
-        // leftSwipe={{
-        //   title: (
-        //     <Stack paddingRight={theme.space[2]} alignItems="center">
-        //       <FontAwesome
-        //         name="remove"
-        //         color={theme.colors.white}
-        //         size={theme.sizes[8]}
-        //       />
-        //       <Text color={theme.colors.white}>Remove</Text>
-        //     </Stack>
-        //   ),
-        //   backgroundColor: theme.colors.red[900],
-        //   onPress: onSwipeLeft.bind(null, key),
-        // }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
           onPress: onSwipeRight.bind(null, item),
@@ -119,6 +118,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
         }}
       >
         <ItemTileWithStoreSpecificValues
+          isRecommended={isRecommended}
           isMultiSelectMode={isMultiSelectMode}
           listName={listName}
           item={item}
@@ -176,7 +176,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
             setRefreshing(false);
           }, 2000);
         }}
-        data={recommendedItems}
+        data={itemsPurchasedAtStore}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)

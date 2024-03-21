@@ -689,8 +689,15 @@ export const inCartListSelector = (state: RootState) =>
 export const isMultiSelectModeForInCartSelector = (state: RootState) =>
   state[listsSlice.name].isMultiSelectModeForInCart;
 
+export const isMultiSelectModeForRecommendedItemsSelector = (
+  state: RootState,
+) => state[listsSlice.name].isMultiSelectModeForRecommendedItems;
+
 export const isMultiSelectModeForShoppingCartSelector = (state: RootState) =>
   state[listsSlice.name].isMultiSelectModeForShoppingCart;
+
+export const lastPurchasedMapSelector = (state: RootState) =>
+  state[listsSlice.name].lastPurchasedMap;
 
 export const lastPurchasedSelector = (key: Key) =>
   createSelector(
@@ -721,7 +728,7 @@ export const listToDisplaySelector = (listName: ListName) =>
     },
   );
 
-export const recommendedShoppingListItemsSelector = createSelector(
+export const itemsPurchasedAtStoreSelector = createSelector(
   [
     (state: RootState) => state[listsSlice.name][ListName.ItemsList],
     (state: RootState) => state[listsSlice.name][ListName.RecommendedItemsList],
@@ -741,11 +748,7 @@ export const recommendedShoppingListItemsSelector = createSelector(
     for (const item of itemsList.data) {
       const key = getKeyToUse(item);
       const lastPurchaseDate = lastPurchasedMap?.[key]?.[currentStoreName];
-      if (
-        item.frequency &&
-        lastPurchaseDate &&
-        lastPurchaseDate + item.frequency <= now
-      ) {
+      if (lastPurchaseDate) {
         const storeSpecificValues = storeSpecificValuesMap[key];
         recommendedItems.push(
           getItemWithStoreSpecificValues(item, storeSpecificValues),

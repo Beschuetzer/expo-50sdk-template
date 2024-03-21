@@ -3,7 +3,7 @@ import {
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
 } from '@gorhom/bottom-sheet';
-import { Text, useTheme, Stack } from 'native-base';
+import { Text, useTheme, Stack, View } from 'native-base';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -184,6 +184,16 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
       keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
         getKeyToUse(item)
       }
+      ListHeaderComponent={() => (
+        <View
+          backgroundColor={theme.colors.white}
+          px={theme.space[FORM_INTER_ITEM_SPACING] * 2}
+          py={theme.space[FORM_INTER_ITEM_SPACING]}
+        >
+          <Text>Items Previously Purchased from {currentStore.name}</Text>
+        </View>
+      )}
+      stickyHeaderIndices={[0]}
       ItemSeparatorComponent={() => <ListItemSeparator />}
     />
   );

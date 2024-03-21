@@ -54,14 +54,6 @@ export const RecommendedItemsSheet = forwardRef<
       ]}
       onChange={handleSheetChanges}
     >
-        {/* < BottomSheetFlatList
-        
-        /> */}
-      {/* <BottomSheetScrollView>
-        <BottomSheetView onLayout={onViewLayout}>
-          <Text>Recommended Items</Text>
-        </BottomSheetView>
-      </BottomSheetScrollView> */}
       <RecommendedItemsList />
     </BottomSheet>
   );

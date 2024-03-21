@@ -93,6 +93,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
 
     return (
       <SwipeableRow
+        key={index}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
           onPress: onSwipeRight.bind(null, item),

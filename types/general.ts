@@ -1,3 +1,4 @@
+import { ReactElement } from 'react';
 import { ViewStyle } from 'react-native';
 
 import { Item, ItemWithStoreSpecificValues } from './Item';
@@ -60,3 +61,7 @@ export type StyleProp = {
 };
 
 export type ListRow<T> = { item: T; index: number };
+export type FlatListItem = {
+  jsx: ReactElement;
+  key: number | string;
+};

@@ -1,6 +1,8 @@
 ## MVP
 -add another tab to the TabView on index page called "Previously Purchased"
     --the tiles for each item (may need a need component) will display whether it is in the shopping list or the cart (via a symbol [green check for in shopping list and cart icon for in cart?] or text)
+    --make sure the multi-select works
+    --make sure the actions work and are correctly worded
 
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:
     --sheet will show up only on the shopping tab

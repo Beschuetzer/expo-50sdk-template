@@ -32,8 +32,8 @@ export type ListNameProp = {
   listName: ListName;
 };
 
-export type ItemProp = {
-  item: Item;
+export type ItemProp<T> = {
+  item: T;
 };
 
 export type ItemOrItemWithStoreSpecificValuesProp = {

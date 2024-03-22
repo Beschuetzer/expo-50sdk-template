@@ -1,32 +1,22 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme } from 'native-base';
-import { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
-import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
-import { useDispatch, useSelector } from 'react-redux';
+import { RectButton } from 'react-native-gesture-handler';
+import { useDispatch } from 'react-redux';
 
 import { ItemTileProps } from './ItemTile';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { Routes } from '@/constants/navigation';
-import {
-  storeSpecificValuesSelector,
-  updateStoreSpecificValues,
-} from '@/state/slices/listsSlice';
-import {
-  ItemUnit,
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey,
-} from '@/types/Item';
-import { getButtonHitSlop } from '@/utils/helpers';
+import { ItemWithStoreSpecificValues } from '@/types/Item';
 
-export type ItemTileWithStoreSpecificValuesProps = {
+type ItemTileForRecommendedItemsProps = {
   isRecommended?: boolean;
 } & ItemTileProps<ItemWithStoreSpecificValues>;
 
-export function ItemTileWithStoreSpecificValues(
-  props: ItemTileWithStoreSpecificValuesProps,
+export function ItemTileForRecommendedItems(
+  props: ItemTileForRecommendedItemsProps,
 ) {
   const {
     isSelected = false,
@@ -40,38 +30,6 @@ export function ItemTileWithStoreSpecificValues(
   const dispatch = useDispatch();
   const theme = useTheme();
   const navigation = useNavigation();
-
-  const quantityAtStore = useSelector(
-    storeSpecificValuesSelector(item, StoreSpecificValueKey.Quantity),
-  );
-  const priceAtStore = useSelector(
-    storeSpecificValuesSelector(item, StoreSpecificValueKey.Price),
-  );
-  const aisleAtStore = useSelector(
-    storeSpecificValuesSelector(item, StoreSpecificValueKey.Aisle),
-  );
-
-  const decrementQuantity = useCallback(() => {
-    dispatch(
-      updateStoreSpecificValues({
-        key: item,
-        storeSpecificValuesToUpdate: {
-          quantity: (current) => current - 1,
-        },
-      }),
-    );
-  }, [item]);
-
-  const incrementQuantity = useCallback(() => {
-    dispatch(
-      updateStoreSpecificValues({
-        key: item,
-        storeSpecificValuesToUpdate: {
-          quantity: (current) => current + 1,
-        },
-      }),
-    );
-  }, [item]);
 
   return (
     <RectButton
@@ -97,24 +55,10 @@ export function ItemTileWithStoreSpecificValues(
       >
         <Column>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
-          <TouchableOpacity
-            hitSlop={getButtonHitSlop()}
-            onPress={incrementQuantity}
-            onLongPress={decrementQuantity}
-          >
-            <Text style={{ color: theme.colors.info[900] }}>
-              {quantityAtStore} {item.unit || ItemUnit.Package}
-              {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
-                ? 's'
-                : ''}
-            </Text>
-          </TouchableOpacity>
         </Column>
         <Column>
           <Text>{item.name}</Text>
           <Text>{item.upc}</Text>
-          {aisleAtStore ? <Text>Aisle: {aisleAtStore}</Text> : null}
-          {priceAtStore ? <Text>${priceAtStore}</Text> : null}
         </Column>
         {isMultiSelectMode ? (
           <Column justifyContent="center" alignItems="flex-end" flex={1}>

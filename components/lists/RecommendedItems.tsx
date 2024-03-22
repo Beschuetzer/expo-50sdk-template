@@ -1,10 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { Text, useTheme, Stack, View } from 'native-base';
+import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTileWithStoreSpecificValues } from './ItemTileWithStoreSpecificValues';
+import { ItemTileForRecommendedItems } from './ItemTileForRecommendedItems';
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 
@@ -43,8 +43,6 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
   const isMultiSelectMode = useSelector(
     isMultiSelectModeForRecommendedItemsSelector,
   );
-
-  console.log({ itemsPurchasedAtStore, lastPurchasedMap });
 
   const onSwipeRight = useCallback((key: Key) => {
     setRefreshing(false);
@@ -118,7 +116,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
           ),
         }}
       >
-        <ItemTileWithStoreSpecificValues
+        <ItemTileForRecommendedItems
           isRecommended={!!isRecommended}
           isMultiSelectMode={isMultiSelectMode}
           listName={listName}

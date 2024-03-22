@@ -14,15 +14,15 @@ import { Item, ItemUnit } from '@/types/Item';
 import { ItemProp, ListNameProp } from '@/types/general';
 import { getFrequencyValue } from '@/utils/helpers';
 
-type ItemTileProps = {
+export type ItemTileProps<T> = {
   buttonProps?: RectButtonProps;
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
-  onSelect?: (item: Item) => void;
-} & ItemProp &
+  onSelect?: (item: T) => void;
+} & ItemProp<T> &
   ListNameProp;
 
-export function ItemTile(props: ItemTileProps) {
+export function ItemTile(props: ItemTileProps<Item>) {
   const theme = useTheme();
   const navigation = useNavigation();
   const {

@@ -75,9 +75,9 @@ export type SetSortOrderPayload = object &
   Pick<SortOrderValue, 'sortBy'>;
 
 export type ToggleSortOrderPayload = Pick<SetSortOrderPayload, 'listName'>;
-export type UpdateSelectedItemsPayload = {
+export type UpdateSelectedItemsPayload<T> = {
   operation: 'add' | 'remove' | 'set';
-  item: ItemWithStoreSpecificValues | undefined;
+  item: T | undefined;
 };
 export type UpdateStoreSpecificValuesPayload = {
   /**
@@ -578,19 +578,25 @@ export const listsSlice = createSlice({
     },
     updateSelectedItemsFromInCart: (
       state: ListsState,
-      action: PayloadAction<UpdateSelectedItemsPayload>,
+      action: PayloadAction<
+        UpdateSelectedItemsPayload<ItemWithStoreSpecificValues>
+      >,
     ) => {
       updateSelectedItems(state, action, ListName.InCartList);
     },
     updateSelectedItemsFromShoppingCart: (
       state: ListsState,
-      action: PayloadAction<UpdateSelectedItemsPayload>,
+      action: PayloadAction<
+        UpdateSelectedItemsPayload<ItemWithStoreSpecificValues>
+      >,
     ) => {
       updateSelectedItems(state, action, ListName.ShoppingList);
     },
     updateSelectedItemsFromRecommendedItems: (
       state: ListsState,
-      action: PayloadAction<UpdateSelectedItemsPayload>,
+      action: PayloadAction<
+        UpdateSelectedItemsPayload<ItemWithStoreSpecificValues>
+      >,
     ) => {
       updateSelectedItems(state, action, 'recommendedItems');
     },

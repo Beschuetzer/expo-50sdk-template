@@ -1,7 +1,6 @@
 ## MVP
 -add another tab to the TabView on index page called "Previously Purchased"
     --the tiles for each item (may need a need component) will display whether it is in the shopping list or the cart (via a symbol [green check for in shopping list and cart icon for in cart?] or text)
-    --remove all things around the bottom sheet
 
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:
     --sheet will show up only on the shopping tab
@@ -9,6 +8,8 @@
     --maximized state will show the RecommendedItemsList
     --convert RecommendedItemsList to use local state instead of redux for sort and filtering (remove the selector and the POS related to selected items and isSelectionMode)
 
+-add option to change item image size (how would this affect already taken images?)
+-calculate estimatedItemSize for each instance of FlashList
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 
@@ -20,7 +21,6 @@ ShoppingList
 
 -Store details should have a way to view all of the isles and sort them in order
 
- //todo: calculate FlashList estimatedItemSize for each instance
 
 //todo: figure out types for useRouter/useNavigation (expo-router)
 //todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/

@@ -19,6 +19,7 @@ import { ListHeaderRight } from '@/components/header/ListHeaderRight';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { InCartList } from '@/components/lists/InCartList';
 import { ListSorter } from '@/components/lists/ListSorter';
+import { RecommendedItemsList } from '@/components/lists/RecommendedItems';
 import {
   ShoppingList,
   shoppingListSortTypes,
@@ -28,7 +29,6 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from '@/components/modals/ConfirmModal';
-import { RecommendedItemsSheet } from '@/components/sheets/RecommendedItemsSheet';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
@@ -54,6 +54,7 @@ import {
 const renderScene = SceneMap({
   first: () => <ShoppingList />,
   second: () => <InCartList />,
+  third: () => <RecommendedItemsList />,
 });
 
 export default function TabOneScreen() {
@@ -110,6 +111,12 @@ export default function TabOneScreen() {
       ? `${main} (${inCartListItems.length})`
       : `Cart Empty`;
   }, [shoppingListItems.length, inCartListItems.length]);
+
+  const thirdTabTitle = useMemo(() => {
+    const main = 'Previously Bought';
+    return main;
+  }, []);
+
   const routes = useMemo(
     () => [
       {
@@ -120,8 +127,12 @@ export default function TabOneScreen() {
         key: 'second',
         title: secondTabTitle,
       },
+      {
+        key: 'third',
+        title: thirdTabTitle,
+      },
     ],
-    [firstTabTitle, secondTabTitle],
+    [firstTabTitle, secondTabTitle, thirdTabTitle],
   );
 
   const closeMenu = useCallback(() => {
@@ -147,7 +158,6 @@ export default function TabOneScreen() {
         setConfirmModalProps({ isVisible: false });
       },
     });
-    
   }, []);
 
   const onCompletePurchasePress = useCallback(() => {
@@ -278,7 +288,6 @@ export default function TabOneScreen() {
         viewSize="small"
       />
       <ConfirmModal {...confirmModalProps} />
-      <RecommendedItemsSheet ref={recommendedItemsSheetRef} />
     </>
   );
 }

@@ -1,8 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import {
-  BottomSheetFlatList,
-  BottomSheetFlatListMethods,
-} from '@gorhom/bottom-sheet';
+import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Stack, View } from 'native-base';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -40,7 +37,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
   const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
-  const listRef = useRef<BottomSheetFlatListMethods | null>(null);
+  const listRef = useRef<FlashList<ItemWithStoreSpecificValues>>(null);
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(selectedItemsFromRecommendedItemsSelector);
   const isMultiSelectMode = useSelector(
@@ -170,7 +167,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
   }
 
   return (
-    <BottomSheetFlatList
+    <FlashList
       ref={listRef}
       refreshing={refreshing}
       onRefresh={() => {
@@ -184,16 +181,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
       keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
         getKeyToUse(item)
       }
-      ListHeaderComponent={() => (
-        <View
-          backgroundColor={theme.colors.white}
-          px={theme.space[FORM_INTER_ITEM_SPACING] * 2}
-          py={theme.space[FORM_INTER_ITEM_SPACING]}
-        >
-          <Text>Items Previously Purchased from {currentStore.name}</Text>
-        </View>
-      )}
-      stickyHeaderIndices={[0]}
+      estimatedItemSize={150}
       ItemSeparatorComponent={() => <ListItemSeparator />}
     />
   );

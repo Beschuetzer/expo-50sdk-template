@@ -16,6 +16,7 @@ type ItemTileForRecommendedItemsProps = {
   isRecommended?: boolean;
 } & ItemTileProps<ItemWithStoreSpecificValues>;
 
+const TILE_WIDTH = 30;
 export function ItemTileForRecommendedItems(
   props: ItemTileForRecommendedItemsProps,
 ) {
@@ -49,13 +50,17 @@ export function ItemTileForRecommendedItems(
       }}
     >
       <Row
-        space={2}
+        space={theme.space['0']}
         backgroundColor={
           isRecommended ? theme.colors.success[900] : theme.colors.white
         }
       >
         <Column>
-          <ImageRenderer source={item.images[item.imageToUseIndex]} />
+          <ImageRenderer
+            height={TILE_WIDTH * 1.5}
+            width={TILE_WIDTH}
+            source={item.images[item.imageToUseIndex]}
+          />
         </Column>
         <Column>
           <Text>{item.name}</Text>

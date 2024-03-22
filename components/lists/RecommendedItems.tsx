@@ -100,7 +100,7 @@ export function RecommendedItemsList(props: RecommendedItemsListProps) {
               <FontAwesome
                 name="plus"
                 color={theme.colors.white}
-                size={theme.sizes[8]}
+                size={theme.sizes[6]}
               />
               <Text color={theme.colors.white}>To Cart</Text>
             </Stack>

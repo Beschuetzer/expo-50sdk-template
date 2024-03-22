@@ -92,7 +92,7 @@ export function ItemTileWithStoreSpecificValues(
       }}
     >
       <Row
-        space={2}
+        space={theme.space[FORM_INTER_ITEM_SPACING]}
         backgroundColor={
           isRecommended ? theme.colors.success[900] : theme.colors.white
         }

@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 
 import { ImageRenderer } from '../ImageRenderer';
 
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import { lastPurchasedSelector } from '@/state/slices/listsSlice';
@@ -56,7 +57,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
         }
       }}
     >
-      <Row space={2}>
+      <Row space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Column>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
         </Column>

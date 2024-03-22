@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { Routes } from '@/constants/navigation';
+import { tileContainerStyles } from '@/constants/styles';
 import { lastPurchasedSelector } from '@/state/slices/listsSlice';
 import { Item, ItemUnit } from '@/types/Item';
 import { ItemProp, ListNameProp } from '@/types/general';
@@ -88,12 +89,5 @@ export function ItemTile(props: ItemTileProps<Item>) {
 }
 
 const styles = StyleSheet.create({
-  rectButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    justifyContent: 'space-between',
-    flexDirection: 'column',
-    backgroundColor: 'white',
-  },
+  rectButton: tileContainerStyles,
 });

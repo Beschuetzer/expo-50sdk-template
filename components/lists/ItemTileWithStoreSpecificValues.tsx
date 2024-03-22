@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { Row, Column, Text, useTheme } from 'native-base';
+import { Row, Column, Text, useTheme, theme } from 'native-base';
 import { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
@@ -9,7 +9,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ItemTileProps } from './ItemTile';
 import { ImageRenderer } from '../ImageRenderer';
 
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
+import { tileContainerStyles } from '@/constants/styles';
 import {
   storeSpecificValuesSelector,
   updateStoreSpecificValues,
@@ -132,11 +134,8 @@ export function ItemTileWithStoreSpecificValues(
 
 const styles = StyleSheet.create({
   rectButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    justifyContent: 'space-between',
-    flexDirection: 'column',
-    backgroundColor: 'white',
+    ...tileContainerStyles,
+    paddingTop: theme.space[2],
+    paddingBottom: theme.space[FORM_INTER_ITEM_SPACING],
   },
 });

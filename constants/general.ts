@@ -20,6 +20,8 @@ export const GPS_COORDINATES_DEFAULT = Object.freeze({
 export const HOUR_IN_MS = 1000 * 60 * 60;
 export const DAY_IN_MS = HOUR_IN_MS * 24;
 export const WEEK_IN_MS = DAY_IN_MS * 7;
+export const IMAGE_RENDERER_WIDTH_DEFAULT = 75;
+export const IMAGE_RENDERER_HEIGHT_DEFAULT = 100;
 export const IMAGE_PICKER_QUALITY_INITIAL = 0.25;
 export const IMAGE_PRIORITY_MAPPING: {
   [key: number | string]: keyof UpcProduct;

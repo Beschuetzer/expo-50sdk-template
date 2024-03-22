@@ -2,19 +2,30 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Image, ImageProps } from 'expo-image';
 import { AspectRatio, View, useTheme } from 'native-base';
 
-type ImageRendererProps = ImageProps;
+import {
+  IMAGE_RENDERER_HEIGHT_DEFAULT,
+  IMAGE_RENDERER_WIDTH_DEFAULT,
+} from '@/constants/general';
 
-const WIDTH = 75;
-const HEIGHT = 100;
+type ImageRendererProps = {
+  height?: number;
+  width?: number;
+} & ImageProps;
+
 export function ImageRenderer(props: ImageRendererProps) {
   const theme = useTheme();
-  const { source, cachePolicy = 'disk' } = props;
+  const {
+    source,
+    cachePolicy = 'disk',
+    height = IMAGE_RENDERER_HEIGHT_DEFAULT,
+    width = IMAGE_RENDERER_WIDTH_DEFAULT,
+  } = props;
 
   if (!source)
     return (
       <View
-        height={HEIGHT}
-        width={WIDTH}
+        height={height}
+        width={width}
         backgroundColor={theme.colors.gray[200]}
         display="flex"
         alignItems="center"
@@ -30,8 +41,8 @@ export function ImageRenderer(props: ImageRendererProps) {
         md: 9 / 10,
       }}
       height={{
-        base: HEIGHT,
-        md: WIDTH,
+        base: height,
+        md: width,
       }}
     >
       <Image cachePolicy={cachePolicy} {...props} />

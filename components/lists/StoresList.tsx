@@ -19,6 +19,7 @@ import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
+import { tileContainerStyles } from '@/constants/styles';
 import {
   ListName,
   currentStoreSelector,
@@ -248,12 +249,5 @@ export function StoresList(props: StoresListProps) {
 }
 
 const styles = StyleSheet.create({
-  rectButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    justifyContent: 'space-between',
-    flexDirection: 'column',
-    backgroundColor: 'white',
-  },
+  rectButton: tileContainerStyles,
 });

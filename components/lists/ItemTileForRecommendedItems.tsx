@@ -9,6 +9,7 @@ import { ItemTileProps } from './ItemTile';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { Routes } from '@/constants/navigation';
+import { tileContainerStyles } from '@/constants/styles';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
 
 type ItemTileForRecommendedItemsProps = {
@@ -75,12 +76,5 @@ export function ItemTileForRecommendedItems(
 }
 
 const styles = StyleSheet.create({
-  rectButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    justifyContent: 'space-between',
-    flexDirection: 'column',
-    backgroundColor: 'white',
-  },
+  rectButton: tileContainerStyles,
 });

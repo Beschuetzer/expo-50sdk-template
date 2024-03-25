@@ -48,13 +48,22 @@ export function getSorter(
     ) {
       currentItem = currentItem[currentStoreName];
       nextItem = nextItem[currentStoreName];
+      if (
+        key === SortType.Aisle ||
+        key === SortType.ItemId ||
+        key === SortType.Price ||
+        key === SortType.Quantity
+      ) {
+        currentItem = parseFloat(currentItem);
+        nextItem = parseFloat(nextItem);
+      }
     }
 
     const isDescending = direction === SortOrder.Descending;
     if (!currentItem && nextItem) return isDescending ? 1 : -1;
     if (currentItem && !nextItem) return isDescending ? -1 : 1;
     if (currentItem === nextItem) return 0;
-    if (currentItem <= nextItem) return isDescending ? -1 : 1;
+    if (currentItem < nextItem) return isDescending ? -1 : 1;
     return isDescending ? 1 : -1;
   };
 }

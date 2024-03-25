@@ -29,7 +29,7 @@ import { getKeyToUse } from '@/utils/helpers';
 type ShoppingListProps = object;
 
 export const shoppingListSortTypes = [
-  SortType.Aisle,
+  SortType.AisleNumber,
   SortType.Name,
   SortType.Upc,
   SortType.ItemId,

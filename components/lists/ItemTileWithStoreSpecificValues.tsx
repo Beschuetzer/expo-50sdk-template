@@ -50,7 +50,7 @@ export function ItemTileWithStoreSpecificValues(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.Price),
   );
   const aisleNumberAtStore = useSelector(
-    storeSpecificValuesSelector(item, StoreSpecificValueKey.Aisle),
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.AisleNumber),
   );
 
   const decrementQuantity = useCallback(() => {

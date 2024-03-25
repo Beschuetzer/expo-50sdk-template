@@ -5,7 +5,12 @@ import {
   WEEK_IN_MS,
 } from '@/constants/general';
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
-import { Item, ItemUnit, StoreSpecificValues } from '@/types/Item';
+import {
+  Item,
+  ItemUnit,
+  StoreSpecificValueKey,
+  StoreSpecificValues,
+} from '@/types/Item';
 import { TimeSpan } from '@/types/general';
 
 const MOCK_NAMES = [
@@ -56,22 +61,22 @@ export function getRandomInt(min: number, max: number) {
 
 export function getRandomStoreSpecificValues(): StoreSpecificValues {
   return {
-    itemId: {
+    [StoreSpecificValueKey.ItemId]: {
       [MOCK_STORES[0].name]:
         `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
       [MOCK_STORES[1].name]:
         `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
     },
-    aisle: {
+    [StoreSpecificValueKey.AisleNumber]: {
       [MOCK_STORES[1].name]: getRandomInt(0, 2000),
     },
-    price: {
+    [StoreSpecificValueKey.Price]: {
       [MOCK_STORES[1].name]: getRandomInt(1, 1000),
     },
-    isInCart: {
+    [StoreSpecificValueKey.IsInCart]: {
       [MOCK_STORES[1].name]: false,
     },
-    quantity: {},
+    [StoreSpecificValueKey.Quantity]: {},
   };
 }
 

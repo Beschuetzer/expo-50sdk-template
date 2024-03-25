@@ -14,7 +14,7 @@ import {
   currentStoreSelector,
   itemsListWithStoreSpecificValuesSelector,
 } from '@/state/slices/listsSlice';
-import { ItemWithStoreSpecificValues, StoreSpecificValues } from '@/types/Item';
+import { ItemWithStoreSpecificValues, StoreSpecificValueKey, StoreSpecificValues } from '@/types/Item';
 import { ItemProp } from '@/types/general';
 import { getKeyToUse } from '@/utils/helpers';
 
@@ -70,7 +70,10 @@ export function ItemFormStoreSpecific(
   }, [aisleNumber, itemId, price, quantity, currentStore, onValueChange]);
 
   useEffect(() => {
-    setAisleNumber(itemInList?.aisle?.[currentStore.name] || EMPTY_NUMBER);
+    setAisleNumber(
+      itemInList?.[StoreSpecificValueKey.AisleNumber]?.[currentStore.name] ||
+        EMPTY_NUMBER,
+    );
     setItemId(itemInList?.itemId?.[currentStore.name] || EMPTY_STRING);
     setPrice(
       itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING,

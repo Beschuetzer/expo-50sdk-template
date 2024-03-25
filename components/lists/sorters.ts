@@ -2,7 +2,7 @@
  *The string values have to match the field names for {@link ItemWithStoreSpecificValues}
  **/
 export enum SortType {
-  Aisle = 'aisle',
+  AisleNumber = 'aisleNumber',
   AddedDate = 'addedDate',
   LastUpdatedDate = 'lastUpdatedDate',
   Distance = 'calculatedDistance',
@@ -21,7 +21,7 @@ export enum SortOrder {
 }
 
 export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
-  [SortType.Aisle]: 'Aisle in Current Store',
+  [SortType.AisleNumber]: 'Aisle # in Current Store',
   [SortType.AddedDate]: 'Date Added',
   [SortType.LastUpdatedDate]: 'Date Last Updated',
   [SortType.Distance]: 'Distance',
@@ -49,7 +49,7 @@ export function getSorter(
       currentItem = currentItem[currentStoreName];
       nextItem = nextItem[currentStoreName];
       if (
-        key === SortType.Aisle ||
+        key === SortType.AisleNumber ||
         key === SortType.ItemId ||
         key === SortType.Price ||
         key === SortType.Quantity

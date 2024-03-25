@@ -37,8 +37,8 @@ export function getItemWithStoreSpecificValues(
 ): ItemWithStoreSpecificValues {
   return {
     ...item,
-    [StoreSpecificValueKey.Aisle]:
-      storeSpecificValues?.[StoreSpecificValueKey.Aisle] || {},
+    [StoreSpecificValueKey.AisleNumber]:
+      storeSpecificValues?.[StoreSpecificValueKey.AisleNumber] || {},
     [StoreSpecificValueKey.IsInCart]:
       storeSpecificValues?.[StoreSpecificValueKey.IsInCart] || {},
     [StoreSpecificValueKey.ItemId]:

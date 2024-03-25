@@ -57,7 +57,7 @@ export type Item = Key & ItemBase;
 export type ItemWithStoreSpecificValues = Item & StoreSpecificValues;
 
 export enum StoreSpecificValueKey {
-  Aisle = 'aisle',
+  AisleNumber = 'aisleNumber',
   ItemId = 'itemId',
   Price = 'price',
   Quantity = 'quantity',
@@ -74,7 +74,7 @@ export type LastPurchasedMap = { [key: string]: StoreSpecificValue<number> };
  *These are fields which vary based on the store
  **/
 export type StoreSpecificValues = {
-  [StoreSpecificValueKey.Aisle]: StoreSpecificValue<number>;
+  [StoreSpecificValueKey.AisleNumber]: StoreSpecificValue<number>;
   [StoreSpecificValueKey.IsInCart]: StoreSpecificValue<boolean>;
   [StoreSpecificValueKey.ItemId]: StoreSpecificValue<string>;
   [StoreSpecificValueKey.Price]: StoreSpecificValue<number>;

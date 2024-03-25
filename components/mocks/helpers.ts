@@ -63,7 +63,7 @@ export function getRandomStoreSpecificValues(): StoreSpecificValues {
         `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
     },
     aisle: {
-      [MOCK_STORES[1].name]: `A${getRandomInt(0, 20)}`,
+      [MOCK_STORES[1].name]: getRandomInt(0, 2000),
     },
     price: {
       [MOCK_STORES[1].name]: getRandomInt(1, 1000),

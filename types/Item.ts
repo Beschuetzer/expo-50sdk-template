@@ -74,7 +74,7 @@ export type LastPurchasedMap = { [key: string]: StoreSpecificValue<number> };
  *These are fields which vary based on the store
  **/
 export type StoreSpecificValues = {
-  [StoreSpecificValueKey.Aisle]: StoreSpecificValue<string>;
+  [StoreSpecificValueKey.Aisle]: StoreSpecificValue<number>;
   [StoreSpecificValueKey.IsInCart]: StoreSpecificValue<boolean>;
   [StoreSpecificValueKey.ItemId]: StoreSpecificValue<string>;
   [StoreSpecificValueKey.Price]: StoreSpecificValue<number>;

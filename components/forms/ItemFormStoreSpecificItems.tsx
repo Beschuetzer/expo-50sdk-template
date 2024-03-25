@@ -14,16 +14,18 @@ import {
   currentStoreSelector,
   itemsListWithStoreSpecificValuesSelector,
 } from '@/state/slices/listsSlice';
-import { StoreSpecificValues } from '@/types/Item';
+import { ItemWithStoreSpecificValues, StoreSpecificValues } from '@/types/Item';
 import { ItemProp } from '@/types/general';
 import { getKeyToUse } from '@/utils/helpers';
 
-type ItemFormStoreSpecificProps = {
+type ItemFormStoreSpecificProps<T> = {
   onValueChange: (storeSpecificValues: StoreSpecificValues) => void;
-} & Partial<ItemProp> &
+} & Partial<ItemProp<T>> &
   Pick<ItemFormProps, 'shouldAddQuantity'>;
 
-export function ItemFormStoreSpecific(props: ItemFormStoreSpecificProps) {
+export function ItemFormStoreSpecific(
+  props: ItemFormStoreSpecificProps<ItemWithStoreSpecificValues>,
+) {
   const { item, onValueChange, shouldAddQuantity } = props;
   const theme = useTheme();
   const keyToUse = useMemo(
@@ -40,7 +42,7 @@ export function ItemFormStoreSpecific(props: ItemFormStoreSpecificProps) {
   );
 
   //initial values are set in useEffect below
-  const [aisle, setAisle] = useState(EMPTY_STRING);
+  const [aisleNumber, setAisleNumber] = useState(EMPTY_NUMBER);
   const [itemId, setItemId] = useState(EMPTY_STRING);
   const [price, setPrice] = useState(EMPTY_STRING);
   const [quantity, setQuantity] = useState(EMPTY_NUMBER);
@@ -50,7 +52,7 @@ export function ItemFormStoreSpecific(props: ItemFormStoreSpecificProps) {
     onValueChange &&
       onValueChange({
         aisle: {
-          [currentStore.name]: aisle,
+          [currentStore.name]: aisleNumber,
         },
         itemId: {
           [currentStore.name]: itemId,
@@ -65,10 +67,10 @@ export function ItemFormStoreSpecific(props: ItemFormStoreSpecificProps) {
           [currentStore.name]: false,
         },
       });
-  }, [aisle, itemId, price, quantity, currentStore, onValueChange]);
+  }, [aisleNumber, itemId, price, quantity, currentStore, onValueChange]);
 
   useEffect(() => {
-    setAisle(itemInList?.aisle?.[currentStore.name] || EMPTY_STRING);
+    setAisleNumber(itemInList?.aisle?.[currentStore.name] || EMPTY_NUMBER);
     setItemId(itemInList?.itemId?.[currentStore.name] || EMPTY_STRING);
     setPrice(
       itemInList?.price?.[currentStore.name]?.toString() || EMPTY_STRING,
@@ -117,11 +119,14 @@ export function ItemFormStoreSpecific(props: ItemFormStoreSpecificProps) {
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText>Aisle at '{currentStore.name}'</InputText>
         <Input
+          keyboardType="numeric"
           variant="outline"
           p={theme.space[1]}
           placeholder={`Aisle in ${currentStore.name}`}
-          value={aisle}
-          onChangeText={(newValue) => setAisle(newValue)}
+          value={aisleNumber.toString()}
+          onChangeText={(newValue) =>
+            setAisleNumber(parseFloat(newValue) || EMPTY_NUMBER)
+          }
         />
       </Stack>
     </Stack>

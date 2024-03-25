@@ -49,7 +49,7 @@ export function ItemTileWithStoreSpecificValues(
   const priceAtStore = useSelector(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.Price),
   );
-  const aisleAtStore = useSelector(
+  const aisleNumberAtStore = useSelector(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.Aisle),
   );
 
@@ -115,7 +115,9 @@ export function ItemTileWithStoreSpecificValues(
         <Column>
           <Text>{item.name}</Text>
           <Text>{item.upc}</Text>
-          {aisleAtStore ? <Text>Aisle: {aisleAtStore}</Text> : null}
+          {aisleNumberAtStore ? (
+            <Text>Aisle #: {aisleNumberAtStore}</Text>
+          ) : null}
           {priceAtStore ? <Text>${priceAtStore}</Text> : null}
         </Column>
         {isMultiSelectMode ? (

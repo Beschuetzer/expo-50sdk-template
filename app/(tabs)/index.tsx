@@ -1,4 +1,3 @@
-import { BottomSheetMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { useNavigation } from 'expo-router';
 import { useTheme } from 'native-base';
 import {
@@ -86,7 +85,6 @@ export default function TabOneScreen() {
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const menuRef = useRef<Menu>(null);
-  const recommendedItemsSheetRef = useRef<BottomSheetMethods>(null);
   const navigation = useNavigation();
   const listName = useMemo(
     () => (index === 0 ? ListName.ShoppingList : ListName.InCartList),

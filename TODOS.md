@@ -1,5 +1,4 @@
 ## MVP
--need to create a button in dev options to migrate aisle values to aisleNumber since the key changed from aisle to aisleNumber
 
 -add another tab to the TabView on index page called "Previously Purchased"
     --the tiles for each item (may need a need component) will display whether it is in the shopping list or the cart (via a symbol [green check for in shopping list and cart icon for in cart?] or text)

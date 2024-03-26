@@ -325,6 +325,18 @@ export const listsSlice = createSlice({
         }
       }
     },
+    migrateItems: (state: ListsState) => {
+      for (const key of Object.keys(state.storeSpecificValuesMap)) {
+        if ((state.storeSpecificValuesMap?.[key] as any)?.['aisle']) {
+          (state.storeSpecificValuesMap[key] as any)[
+            StoreSpecificValueKey.AisleNumber
+          ] =
+            (state.storeSpecificValuesMap?.[key] as any)?.['aisle'] ||
+            ({} as any);
+          delete (state.storeSpecificValuesMap?.[key] as any)['aisle'];
+        }
+      }
+    },
     moveAllToInCart: (state: ListsState) => {
       moveItems(state, Object.keys(state.storeSpecificValuesMap));
       state.selectedItemsFromShoppingCart = [];
@@ -749,7 +761,6 @@ export const itemsPurchasedAtStoreSelector = createSelector(
     lastPurchasedMap,
     currentStoreName,
   ) => {
-    const now = Date.now();
     const recommendedItems: ItemWithStoreSpecificValues[] = [];
     for (const item of itemsList.data) {
       const key = getKeyToUse(item);
@@ -896,6 +907,7 @@ export const {
   addStoresListItem,
   clearShopping,
   completePurchase,
+  migrateItems,
   moveAllToInCart,
   moveItemToShoppingList,
   moveSelectedToCart,
@@ -947,7 +959,9 @@ function moveItems(state: ListsState, keys: string[], isInCart = true) {
 
 function updateSelectedItems(
   state: ListsState,
-  action: PayloadAction<UpdateSelectedItemsPayload>,
+  action: PayloadAction<
+    UpdateSelectedItemsPayload<ItemWithStoreSpecificValues>
+  >,
   listName: ListName.ShoppingList | ListName.InCartList | 'recommendedItems',
 ) {
   const { operation: opearation, item } = action.payload;

@@ -164,7 +164,6 @@ export function ReduxViewer() {
 
                     lastUpcNumberRef.current += 1;
                   }
-                  const keys = Object.keys(storeSpecificValuesMap);
                   dispatch(setItemsList(itemsList));
                   dispatch(setStoreSpecificValues(storeSpecificValuesMap));
                 }}
@@ -183,7 +182,7 @@ export function ReduxViewer() {
                   items.push({
                     id: Math.random(),
                     users: Array(50)
-                      .fill()
+                      .fill(0)
                       .map((_, index) => index + 1),
                   });
                 }

@@ -14,7 +14,11 @@ import {
   currentStoreSelector,
   itemsListWithStoreSpecificValuesSelector,
 } from '@/state/slices/listsSlice';
-import { ItemWithStoreSpecificValues, StoreSpecificValueKey, StoreSpecificValues } from '@/types/Item';
+import {
+  ItemWithStoreSpecificValues,
+  StoreSpecificValueKey,
+  StoreSpecificValues,
+} from '@/types/Item';
 import { ItemProp } from '@/types/general';
 import { getKeyToUse } from '@/utils/helpers';
 
@@ -51,19 +55,19 @@ export function ItemFormStoreSpecific(
     if (!currentStore?.name) return;
     onValueChange &&
       onValueChange({
-        aisle: {
+        [StoreSpecificValueKey.AisleNumber]: {
           [currentStore.name]: aisleNumber,
         },
-        itemId: {
+        [StoreSpecificValueKey.ItemId]: {
           [currentStore.name]: itemId,
         },
-        price: {
+        [StoreSpecificValueKey.Price]: {
           [currentStore.name]: Math.abs(parseFloat(price) || EMPTY_NUMBER),
         },
-        quantity: {
+        [StoreSpecificValueKey.Quantity]: {
           [currentStore.name]: quantity,
         },
-        isInCart: {
+        [StoreSpecificValueKey.IsInCart]: {
           [currentStore.name]: false,
         },
       });

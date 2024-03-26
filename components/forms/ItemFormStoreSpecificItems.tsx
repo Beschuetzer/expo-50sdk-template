@@ -124,7 +124,7 @@ export function ItemFormStoreSpecific(
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <InputText>Aisle at '{currentStore.name}'</InputText>
+        <InputText>Aisle # at '{currentStore.name}'</InputText>
         <Input
           keyboardType="numeric"
           variant="outline"

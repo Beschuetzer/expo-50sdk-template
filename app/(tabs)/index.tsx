@@ -18,7 +18,7 @@ import { ListHeaderRight } from '@/components/header/ListHeaderRight';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { InCartList } from '@/components/lists/InCartList';
 import { ListSorter } from '@/components/lists/ListSorter';
-import { RecommendedItemsList } from '@/components/lists/RecommendedItems';
+import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedItems';
 import {
   ShoppingList,
   shoppingListSortTypes,
@@ -53,7 +53,7 @@ import {
 const renderScene = SceneMap({
   first: () => <ShoppingList />,
   second: () => <InCartList />,
-  third: () => <RecommendedItemsList />,
+  third: () => <PreviouslyPurchasedList />,
 });
 
 export default function TabOneScreen() {
@@ -111,7 +111,7 @@ export default function TabOneScreen() {
   }, [shoppingListItems.length, inCartListItems.length]);
 
   const thirdTabTitle = useMemo(() => {
-    const main = 'Previously Bought';
+    const main = 'Previously Purchased';
     return main;
   }, []);
 

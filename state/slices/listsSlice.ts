@@ -39,7 +39,7 @@ import { getItemWithStoreSpecificValues } from '@/utils/model-mappings';
 export enum ListName {
   InCartList = 'inCartList',
   ItemsList = 'itemsList',
-  RecommendedItemsList = 'recommendedItemsList',
+  PreviouslyPurchased = 'previouslyPurchased',
   ShoppingList = 'shoppingLIst',
   StoresList = 'storesList',
 }
@@ -106,14 +106,14 @@ export type ListsState = {
   currentStoreName: string;
   [ListName.InCartList]: ShoppingList;
   [ListName.ItemsList]: ItemsList;
-  [ListName.RecommendedItemsList]: StoreList;
+  [ListName.PreviouslyPurchased]: StoreList;
   [ListName.ShoppingList]: ShoppingList;
   [ListName.StoresList]: StoreList;
   lastPurchasedMap: LastPurchasedMap;
   isMultiSelectModeForShoppingCart: boolean;
-  isMultiSelectModeForRecommendedItems: boolean;
+  isMultiSelectModeForPreviouslyPurchased: boolean;
   isMultiSelectModeForInCart: boolean;
-  selectedItemsFromRecommendedItems: ItemWithStoreSpecificValues[];
+  selectedItemsFromPreviouslyPurchased: ItemWithStoreSpecificValues[];
   selectedItemsFromShoppingCart: ItemWithStoreSpecificValues[];
   selectedItemsFromInCart: ItemWithStoreSpecificValues[];
   storeSpecificValuesMap: StoreSpecificValuesMap;
@@ -123,17 +123,17 @@ const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentStoreName: EMPTY_STRING,
   isMultiSelectModeForInCart: IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
-  isMultiSelectModeForRecommendedItems:
+  isMultiSelectModeForPreviouslyPurchased:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   isMultiSelectModeForShoppingCart:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   [ListName.InCartList]: getEmptyList(),
   [ListName.ItemsList]: getEmptyList(),
-  [ListName.RecommendedItemsList]: getEmptyList(),
+  [ListName.PreviouslyPurchased]: getEmptyList(),
   [ListName.ShoppingList]: getEmptyList(),
   [ListName.StoresList]: getEmptyList(),
   lastPurchasedMap: getEmptyObject(),
-  selectedItemsFromRecommendedItems: getEmptyArray(),
+  selectedItemsFromPreviouslyPurchased: getEmptyArray(),
   selectedItemsFromShoppingCart: getEmptyArray(),
   selectedItemsFromInCart: getEmptyArray(),
   storeSpecificValuesMap: getEmptyObject(),
@@ -380,13 +380,13 @@ export const listsSlice = createSlice({
     moveSelectedRecommendationsShopping: (state: ListsState) => {
       moveItems(
         state,
-        state.selectedItemsFromRecommendedItems.map((item) =>
+        state.selectedItemsFromPreviouslyPurchased.map((item) =>
           getKeyToUse(item),
         ),
         false,
       );
-      state.isMultiSelectModeForRecommendedItems = false;
-      state.selectedItemsFromRecommendedItems = [];
+      state.isMultiSelectModeForPreviouslyPurchased = false;
+      state.selectedItemsFromPreviouslyPurchased = [];
     },
     removeItemsListItems: (
       state: ListsState,
@@ -568,11 +568,11 @@ export const listsSlice = createSlice({
     ) => {
       state.isMultiSelectModeForShoppingCart = action.payload;
     },
-    setIsMultiSelectModeForRecommendedItems: (
+    setIsMultiSelectModeForPreviouslyPurchased: (
       state: ListsState,
       action: PayloadAction<boolean>,
     ) => {
-      state.isMultiSelectModeForRecommendedItems = action.payload;
+      state.isMultiSelectModeForPreviouslyPurchased = action.payload;
     },
     toggleSortOrder: (
       state: ListsState,
@@ -604,13 +604,13 @@ export const listsSlice = createSlice({
     ) => {
       updateSelectedItems(state, action, ListName.ShoppingList);
     },
-    updateSelectedItemsFromRecommendedItems: (
+    updateSelectedItemsFromPreviouslyPurchased: (
       state: ListsState,
       action: PayloadAction<
         UpdateSelectedItemsPayload<ItemWithStoreSpecificValues>
       >,
     ) => {
-      updateSelectedItems(state, action, 'recommendedItems');
+      updateSelectedItems(state, action, 'previouslyPurchased');
     },
     updateStoreSpecificValues: (
       state: ListsState,
@@ -707,9 +707,9 @@ export const inCartListSelector = (state: RootState) =>
 export const isMultiSelectModeForInCartSelector = (state: RootState) =>
   state[listsSlice.name].isMultiSelectModeForInCart;
 
-export const isMultiSelectModeForRecommendedItemsSelector = (
+export const isMultiSelectModeForPreviouslyPurchasedSelector = (
   state: RootState,
-) => state[listsSlice.name].isMultiSelectModeForRecommendedItems;
+) => state[listsSlice.name].isMultiSelectModeForPreviouslyPurchased;
 
 export const isMultiSelectModeForShoppingCartSelector = (state: RootState) =>
   state[listsSlice.name].isMultiSelectModeForShoppingCart;
@@ -749,34 +749,34 @@ export const listToDisplaySelector = (listName: ListName) =>
 export const itemsPurchasedAtStoreSelector = createSelector(
   [
     (state: RootState) => state[listsSlice.name][ListName.ItemsList],
-    (state: RootState) => state[listsSlice.name][ListName.RecommendedItemsList],
+    (state: RootState) => state[listsSlice.name][ListName.PreviouslyPurchased],
     (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
     (state: RootState) => state[listsSlice.name].lastPurchasedMap,
     (state: RootState) => state[listsSlice.name].currentStoreName,
   ],
   (
     itemsList,
-    recommendedItemsList,
+    previouslyPurchasedList,
     storeSpecificValuesMap,
     lastPurchasedMap,
     currentStoreName,
   ) => {
-    const recommendedItems: ItemWithStoreSpecificValues[] = [];
+    const previoulsyPurchasedItems: ItemWithStoreSpecificValues[] = [];
     for (const item of itemsList.data) {
       const key = getKeyToUse(item);
       const lastPurchaseDate = lastPurchasedMap?.[key]?.[currentStoreName];
       if (lastPurchaseDate) {
         const storeSpecificValues = storeSpecificValuesMap[key];
-        recommendedItems.push(
+        previoulsyPurchasedItems.push(
           getItemWithStoreSpecificValues(item, storeSpecificValues),
         );
       }
     }
-    return recommendedItems.sort(
+    return previoulsyPurchasedItems.sort(
       getSorter(
-        recommendedItemsList.sortOrderValue.sortBy,
+        previouslyPurchasedList.sortOrderValue.sortBy,
         currentStoreName,
-        recommendedItemsList.sortOrderValue.sortOrder,
+        previouslyPurchasedList.sortOrderValue.sortOrder,
       ),
     );
   },
@@ -785,8 +785,9 @@ export const itemsPurchasedAtStoreSelector = createSelector(
 export const selectedItemsFromInCartSelector = (state: RootState) =>
   state[listsSlice.name].selectedItemsFromInCart;
 
-export const selectedItemsFromRecommendedItemsSelector = (state: RootState) =>
-  state[listsSlice.name].selectedItemsFromRecommendedItems;
+export const selectedItemsFromPreviouslyPurchasedSelector = (
+  state: RootState,
+) => state[listsSlice.name].selectedItemsFromPreviouslyPurchased;
 
 export const selectedItemsFromShoppingCartSelector = (state: RootState) =>
   state[listsSlice.name].selectedItemsFromShoppingCart;
@@ -930,11 +931,11 @@ export const {
   setStoresList,
   setStoreSpecificValues,
   setIsMultiSelectModeForInCartCart,
-  setIsMultiSelectModeForRecommendedItems,
+  setIsMultiSelectModeForPreviouslyPurchased,
   setIsMultiSelectModeForShoppingCart,
   toggleSortOrder,
   updateSelectedItemsFromInCart,
-  updateSelectedItemsFromRecommendedItems,
+  updateSelectedItemsFromPreviouslyPurchased,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
 } = listsSlice.actions;
@@ -962,7 +963,7 @@ function updateSelectedItems(
   action: PayloadAction<
     UpdateSelectedItemsPayload<ItemWithStoreSpecificValues>
   >,
-  listName: ListName.ShoppingList | ListName.InCartList | 'recommendedItems',
+  listName: ListName.ShoppingList | ListName.InCartList | 'previouslyPurchased',
 ) {
   const { operation: opearation, item } = action.payload;
   if (!item || !opearation) return;
@@ -986,9 +987,9 @@ function updateSelectedItems(
             item,
           ];
           break;
-        case 'recommendedItems':
-          state.selectedItemsFromRecommendedItems = [
-            ...state.selectedItemsFromRecommendedItems,
+        case 'previouslyPurchased':
+          state.selectedItemsFromPreviouslyPurchased = [
+            ...state.selectedItemsFromPreviouslyPurchased,
             item,
           ];
           break;
@@ -1009,9 +1010,9 @@ function updateSelectedItems(
               (item) => getKeyToUse(item) !== keyToUse,
             );
           break;
-        case 'recommendedItems':
-          state.selectedItemsFromRecommendedItems =
-            state.selectedItemsFromRecommendedItems.filter(
+        case 'previouslyPurchased':
+          state.selectedItemsFromPreviouslyPurchased =
+            state.selectedItemsFromPreviouslyPurchased.filter(
               (item) => getKeyToUse(item) !== keyToUse,
             );
           break;
@@ -1026,8 +1027,8 @@ function updateSelectedItems(
         case ListName.ShoppingList:
           state.selectedItemsFromShoppingCart = item ? [item] : [];
           break;
-        case 'recommendedItems':
-          state.selectedItemsFromRecommendedItems = item ? [item] : [];
+        case 'previouslyPurchased':
+          state.selectedItemsFromPreviouslyPurchased = item ? [item] : [];
           break;
       }
       break;

@@ -377,7 +377,7 @@ export const listsSlice = createSlice({
       state.isMultiSelectModeForInCart = false;
       state.selectedItemsFromInCart = [];
     },
-    moveSelectedRecommendationsShopping: (state: ListsState) => {
+    moveSelectedPreviouslyPurchasedItemsToShopping: (state: ListsState) => {
       moveItems(
         state,
         state.selectedItemsFromPreviouslyPurchased.map((item) =>
@@ -912,7 +912,7 @@ export const {
   moveAllToInCart,
   moveItemToShoppingList,
   moveSelectedToCart,
-  moveSelectedRecommendationsShopping,
+  moveSelectedPreviouslyPurchasedItemsToShopping,
   moveSelectedToShopping,
   removeItemsListItems,
   removeStoresListItem,

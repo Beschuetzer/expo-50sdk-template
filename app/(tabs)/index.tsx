@@ -21,7 +21,7 @@ import {
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { InCartList } from '@/components/lists/InCartList';
 import { ListSorter } from '@/components/lists/ListSorter';
-import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedLIst';
+import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
 import {
   ShoppingList,
   shoppingListSortTypes,

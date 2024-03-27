@@ -12,13 +12,13 @@ import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
 
-type ItemTileForRecommendedItemsProps = {
+type ItemTileForPreviouslyPurchasedProps = {
   isRecommended?: boolean;
 } & ItemTileProps<ItemWithStoreSpecificValues>;
 
 const TILE_WIDTH = 30;
-export function ItemTileForRecommendedItems(
-  props: ItemTileForRecommendedItemsProps,
+export function ItemTileForPreviouslyPurchased(
+  props: ItemTileForPreviouslyPurchasedProps,
 ) {
   const {
     isSelected = false,

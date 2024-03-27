@@ -4,7 +4,7 @@ import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTileForRecommendedItems } from './ItemTileForRecommendedItems';
+import { ItemTileForPreviouslyPurchased } from './ItemTileForPreviouslyPurchasedItems';
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 
@@ -118,13 +118,14 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
           ),
         }}
       >
-        <ItemTileForRecommendedItems
+        <ItemTileForPreviouslyPurchased
           isRecommended={!!isRecommended}
           isMultiSelectMode={isMultiSelectMode}
           listName={listName}
           item={item}
           buttonProps={{
             onLongPress: () => {
+              alert('press');
               dispatch(
                 updateSelectedItemsFromPreviouslyPurchased({
                   operation: 'set',

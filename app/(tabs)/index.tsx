@@ -14,11 +14,14 @@ import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { AddButton } from '@/components/header/AddButton';
-import { ListHeaderRight } from '@/components/header/ListHeaderRight';
+import {
+  ListHeaderRight,
+  ListHeaderRightOptions,
+} from '@/components/header/ListHeaderRight';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { InCartList } from '@/components/lists/InCartList';
 import { ListSorter } from '@/components/lists/ListSorter';
-import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedItems';
+import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedLIst';
 import {
   ShoppingList,
   shoppingListSortTypes,
@@ -202,6 +205,43 @@ export default function TabOneScreen() {
     dispatch(setIsMultiSelectModeForShoppingCart(false));
   }, [index]);
 
+  const getMenuOptions = useCallback(() => {
+    const options: ListHeaderRightOptions[] = [];
+    if (index === 0) {
+      if (selectedShoppingCartItems.length > 0) {
+        options.push({
+          onPress: onMoveSelectedToCartPress,
+          text: 'Move Selected to Cart',
+        });
+      }
+      options.push(
+        ...[
+          {
+            onPress: onMoveAllCartPress,
+            text: 'Move all to Cart',
+          },
+          {
+            onPress: onClearAllPress,
+            text: 'Clear all',
+          },
+        ],
+      );
+    } else if (index === 1) {
+      if (selectedInCartItems.length > 0) {
+        options.push({
+          onPress: onMoveSelectedToShoppingPress,
+          text: 'Move Selected to Shopping',
+        });
+      }
+      options.push({
+        onPress: onCompletePurchasePress,
+        text: 'Mark all as Purchased',
+      });
+    }
+
+    return options;
+  }, [index, selectedInCartItems, selectedShoppingCartItems]);
+
   useEffect(() => {
     closeMenu();
     navigation.setOptions({
@@ -211,37 +251,7 @@ export default function TabOneScreen() {
           onSortPress={onSortPress}
           onResetPress={onResetPress}
           listName={listName}
-          options={[
-            ...(index === 1
-              ? [
-                  selectedInCartItems.length > 0
-                    ? {
-                        onPress: onMoveSelectedToShoppingPress,
-                        text: 'Move Selected to Shopping',
-                      }
-                    : undefined,
-                  {
-                    onPress: onCompletePurchasePress,
-                    text: 'Mark all as Purchased',
-                  },
-                ]
-              : [
-                  selectedShoppingCartItems.length > 0
-                    ? {
-                        onPress: onMoveSelectedToCartPress,
-                        text: 'Move Selected to Cart',
-                      }
-                    : undefined,
-                  {
-                    onPress: onMoveAllCartPress,
-                    text: 'Move all to Cart',
-                  },
-                ]),
-            {
-              onPress: onClearAllPress,
-              text: 'Clear all',
-            },
-          ]}
+          options={getMenuOptions()}
         />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
@@ -253,6 +263,7 @@ export default function TabOneScreen() {
     selectedInCartItems.length,
     currentStore.name,
     listName,
+    getMenuOptions,
   ]);
 
   function renderTabBar(props: any) {

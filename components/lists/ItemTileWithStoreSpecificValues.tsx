@@ -23,9 +23,8 @@ import {
 } from '@/types/Item';
 import { getButtonHitSlop } from '@/utils/helpers';
 
-export type ItemTileWithStoreSpecificValuesProps = {
-  isRecommended?: boolean;
-} & ItemTileProps<ItemWithStoreSpecificValues>;
+export type ItemTileWithStoreSpecificValuesProps =
+  ItemTileProps<ItemWithStoreSpecificValues>;
 
 export function ItemTileWithStoreSpecificValues(
   props: ItemTileWithStoreSpecificValuesProps,
@@ -33,7 +32,6 @@ export function ItemTileWithStoreSpecificValues(
   const {
     isSelected = false,
     isMultiSelectMode = false,
-    isRecommended = false,
     listName,
     buttonProps,
     item,
@@ -93,9 +91,7 @@ export function ItemTileWithStoreSpecificValues(
     >
       <Row
         space={theme.space[FORM_INTER_ITEM_SPACING]}
-        backgroundColor={
-          isRecommended ? theme.colors.success[900] : theme.colors.white
-        }
+        backgroundColor={theme.colors.white}
       >
         <Column>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />

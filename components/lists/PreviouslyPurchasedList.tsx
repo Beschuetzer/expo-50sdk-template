@@ -182,7 +182,7 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
       keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
         getKeyToUse(item)
       }
-      estimatedItemSize={150}
+      estimatedItemSize={55}
       ItemSeparatorComponent={() => <ListItemSeparator />}
     />
   );

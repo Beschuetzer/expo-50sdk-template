@@ -140,6 +140,43 @@ export default function TabOneScreen() {
     menuRef.current?.close();
   }, [menuRef]);
 
+  const getMenuOptions = useCallback(() => {
+    const options: ListHeaderRightOptions[] = [];
+    if (index === 0) {
+      if (selectedShoppingCartItems.length > 0) {
+        options.push({
+          onPress: onMoveSelectedToCartPress,
+          text: 'Move Selected to Cart',
+        });
+      }
+      options.push(
+        ...[
+          {
+            onPress: onMoveAllCartPress,
+            text: 'Move all to Cart',
+          },
+          {
+            onPress: onClearAllPress,
+            text: 'Clear all',
+          },
+        ],
+      );
+    } else if (index === 1) {
+      if (selectedInCartItems.length > 0) {
+        options.push({
+          onPress: onMoveSelectedToShoppingPress,
+          text: 'Move Selected to Shopping',
+        });
+      }
+      options.push({
+        onPress: onCompletePurchasePress,
+        text: 'Mark all as Purchased',
+      });
+    }
+
+    return options;
+  }, [index, selectedInCartItems, selectedShoppingCartItems]);
+
   const onAddItemPress = useCallback(() => {
     closeMenu();
     navigation.navigate(Routes.ItemModal, {
@@ -204,43 +241,6 @@ export default function TabOneScreen() {
     dispatch(setIsMultiSelectModeForInCartCart(false));
     dispatch(setIsMultiSelectModeForShoppingCart(false));
   }, [index]);
-
-  const getMenuOptions = useCallback(() => {
-    const options: ListHeaderRightOptions[] = [];
-    if (index === 0) {
-      if (selectedShoppingCartItems.length > 0) {
-        options.push({
-          onPress: onMoveSelectedToCartPress,
-          text: 'Move Selected to Cart',
-        });
-      }
-      options.push(
-        ...[
-          {
-            onPress: onMoveAllCartPress,
-            text: 'Move all to Cart',
-          },
-          {
-            onPress: onClearAllPress,
-            text: 'Clear all',
-          },
-        ],
-      );
-    } else if (index === 1) {
-      if (selectedInCartItems.length > 0) {
-        options.push({
-          onPress: onMoveSelectedToShoppingPress,
-          text: 'Move Selected to Shopping',
-        });
-      }
-      options.push({
-        onPress: onCompletePurchasePress,
-        text: 'Mark all as Purchased',
-      });
-    }
-
-    return options;
-  }, [index, selectedInCartItems, selectedShoppingCartItems]);
 
   useEffect(() => {
     closeMenu();

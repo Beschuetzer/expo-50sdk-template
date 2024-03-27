@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Stack } from 'native-base';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTileForPreviouslyPurchased } from './ItemTileForPreviouslyPurchasedItems';
@@ -37,7 +37,6 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
   const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
-  const listRef = useRef<FlashList<ItemWithStoreSpecificValues>>(null);
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(
     selectedItemsFromPreviouslyPurchasedSelector,
@@ -59,27 +58,7 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
     );
   }, []);
 
-  //   const onSwipeLeft = useCallback(
-  //     (key: Key) => {
-  //       dispatch(
-  //         updateStoreSpecificValues({
-  //           key,
-  //           storeSpecificValuesToUpdate: {
-  //             isInCart: (current) => false,
-  //             quantity: (current) => 0,
-  //           },
-  //         }),
-  //       );
-  //       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-  //     },
-  //     [listRef],
-  //   );
-
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
-    // const key = {
-    //   name: item.name,
-    //   upc: item.upc,
-    // } as Key;
     const keyToUse = getKeyToUse(item);
     const now = Date.now();
     const lastPurchaseDate = lastPurchasedMap[keyToUse]?.[currentStore.name];
@@ -125,7 +104,6 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
           item={item}
           buttonProps={{
             onLongPress: () => {
-              alert('press');
               dispatch(
                 updateSelectedItemsFromPreviouslyPurchased({
                   operation: 'set',
@@ -168,21 +146,13 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
   }
 
   return (
-    <FlashList
-      ref={listRef}
+    <FlatList
       refreshing={refreshing}
-      onRefresh={() => {
-        setRefreshing(true);
-        setTimeout(() => {
-          setRefreshing(false);
-        }, 2000);
-      }}
       data={itemsPurchasedAtStore}
       renderItem={renderItem}
       keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
         getKeyToUse(item)
       }
-      estimatedItemSize={55}
       ItemSeparatorComponent={() => <ListItemSeparator />}
     />
   );

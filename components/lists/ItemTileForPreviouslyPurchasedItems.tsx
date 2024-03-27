@@ -3,7 +3,6 @@ import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme } from 'native-base';
 import { StyleSheet } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { useDispatch } from 'react-redux';
 
 import { ItemTileProps } from './ItemTile';
 import { ImageRenderer } from '../ImageRenderer';
@@ -29,7 +28,6 @@ export function ItemTileForPreviouslyPurchased(
     item,
     onSelect,
   } = props;
-  const dispatch = useDispatch();
   const theme = useTheme();
   const navigation = useNavigation();
 

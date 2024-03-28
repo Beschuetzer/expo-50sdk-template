@@ -538,8 +538,6 @@ export const listsSlice = createSlice({
         getSorter(newSortBy, state.currentStoreName, newSortOrder),
       );
 
-      if (!state[listName].sortOrderValue.sortOrder) return;
-
       state[listName].sortOrderValue = {
         sortBy: newSortBy,
         sortOrder: newSortOrder,
@@ -763,7 +761,7 @@ export const itemsPurchasedAtStoreSelector = createSelector(
 );
 
 export const previouslyPurchasedListSelector = (state: RootState) =>
-  state[listsSlice.name][ListName.InCartList];
+  state[listsSlice.name][ListName.PreviouslyPurchased];
 
 export const priceOfItemsSelector = (listname: ListName) =>
   createSelector(

@@ -263,12 +263,13 @@ export default function TabOneScreen() {
   );
 
   useLayoutEffect(() => {
+    if (index === 2) return;
     if (inCartListItems.length <= 0) {
       setIndex(0);
     } else if (shoppingListItems.length === 0) {
       setIndex(1);
     }
-  }, [inCartListItems.length, shoppingListItems.length]);
+  }, [inCartListItems.length, shoppingListItems.length, index]);
 
   useEffect(() => {
     dispatch(setIsMultiSelectModeForInCartCart(false));

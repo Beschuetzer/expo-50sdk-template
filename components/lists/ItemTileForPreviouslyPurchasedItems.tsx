@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme } from 'native-base';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 
@@ -41,6 +41,22 @@ export function ItemTileForPreviouslyPurchased(
   const theme = useTheme();
   const navigation = useNavigation();
 
+  const isRecommendedAndNotAdded = isRecommended && !isInCart && !isInShopping;
+  const dynamicBackgroundColor = useMemo(
+    () =>
+      isRecommendedAndNotAdded ? theme.colors.red[900] : theme.colors.white,
+    [isRecommendedAndNotAdded, theme],
+  );
+  const dynamicTextColor = useMemo(
+    () => (isRecommendedAndNotAdded ? theme.colors.white : theme.colors.black),
+    [isRecommendedAndNotAdded, theme],
+  );
+  const greenColor = theme.colors.green[900]
+  const dynamicAddColor = useMemo(
+    () => (isRecommendedAndNotAdded ? theme.colors.white : theme.colors.black),
+    [isRecommendedAndNotAdded, theme],
+  );
+
   const onAddPressLocal = useCallback(() => {
     onAddPress && onAddPress();
   }, [onAddPress]);
@@ -48,7 +64,7 @@ export function ItemTileForPreviouslyPurchased(
   return (
     <RectButton
       {...buttonProps}
-      style={styles.rectButton}
+      style={[styles.rectButton, { backgroundColor: dynamicBackgroundColor }]}
       onPress={() => {
         if (isMultiSelectMode) {
           onSelect && onSelect(item);
@@ -61,12 +77,7 @@ export function ItemTileForPreviouslyPurchased(
         }
       }}
     >
-      <Row
-        space={theme.space['0']}
-        backgroundColor={
-          isRecommended ? theme.colors.success[900] : theme.colors.white
-        }
-      >
+      <Row space={theme.space['0']}>
         <Column>
           <ImageRenderer
             height={TILE_WIDTH * 1.5}
@@ -75,8 +86,8 @@ export function ItemTileForPreviouslyPurchased(
           />
         </Column>
         <Column>
-          <Text>{item.name}</Text>
-          <Text>{item.upc}</Text>
+          <Text color={dynamicTextColor}>{item.name}</Text>
+          <Text color={dynamicTextColor}>{item.upc}</Text>
         </Column>
         <Row
           alignItems="center"
@@ -88,25 +99,25 @@ export function ItemTileForPreviouslyPurchased(
             <FontAwesome
               name="check"
               size={theme.sizes[5]}
-              color={theme.colors.green[900]}
+              color={greenColor}
             />
           ) : null}
           {isInCart ? (
             <FontAwesome
               name="shopping-cart"
               size={theme.sizes[ICON_SIZE]}
-              color={theme.colors.green[900]}
+              color={greenColor}
             />
           ) : null}
           {!isInCart && !isInShopping ? (
             <TouchableOpacity
               onPress={onAddPressLocal}
-              hitSlop={getButtonHitSlop()}
+              hitSlop={getButtonHitSlop(2)}
             >
               <FontAwesome
                 name="plus"
                 size={theme.sizes[ICON_SIZE]}
-                color={theme.colors.black}
+                color={dynamicAddColor}
               />
             </TouchableOpacity>
           ) : null}

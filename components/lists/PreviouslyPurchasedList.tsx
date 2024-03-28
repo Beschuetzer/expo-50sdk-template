@@ -130,6 +130,9 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
               );
             },
           }}
+          onAddPress={() => {
+            onSwipeRight(item);
+          }}
           onSelect={(item) => {
             const isSelected = !!selectedItems.find(
               (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),

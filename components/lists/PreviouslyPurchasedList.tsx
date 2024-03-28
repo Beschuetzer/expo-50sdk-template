@@ -52,7 +52,7 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
     storeSpecificListSelector(ListName.ShoppingList),
   );
 
-  const onSwipeRight = useCallback((key: Key) => {
+  const onAddPress = useCallback((key: Key) => {
     setRefreshing(false);
     dispatch(
       updateStoreSpecificValues({
@@ -81,85 +81,55 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
     );
 
     return (
-      <SwipeableRow
-        key={index}
-        rightSwipe={{
-          backgroundColor: theme.colors.primary[900],
-          onPress: onSwipeRight.bind(null, item),
-          title: currentStore.name ? (
-            <Stack
-              paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-              alignItems="center"
-            >
-              <FontAwesome
-                name="plus"
-                color={theme.colors.white}
-                size={theme.sizes[6]}
-              />
-              <Text color={theme.colors.white}>To Cart</Text>
-            </Stack>
-          ) : (
-            <Text
-              width={150}
-              numberOfLines={2}
-              paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-              color={theme.colors.white}
-            >
-              Select a Store to Add to Shopping List
-            </Text>
-          ),
-        }}
-      >
-        <ItemTileForPreviouslyPurchased
-          isInCart={!!itemInCart}
-          isInShopping={!!itemInShopping}
-          isRecommended={!!isRecommended}
-          isMultiSelectMode={isMultiSelectMode}
-          listName={listName}
-          item={item}
-          buttonProps={{
-            onLongPress: () => {
-              dispatch(
-                updateSelectedItemsFromPreviouslyPurchased({
-                  operation: 'set',
-                  item: isMultiSelectMode ? undefined : item,
-                }),
-              );
-              dispatch(
-                setIsMultiSelectModeForPreviouslyPurchased(!isMultiSelectMode),
-              );
-            },
-          }}
-          onAddPress={() => {
-            onSwipeRight(item);
-          }}
-          onSelect={(item) => {
-            const isSelected = !!selectedItems.find(
-              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+      <ItemTileForPreviouslyPurchased
+        isInCart={!!itemInCart}
+        isInShopping={!!itemInShopping}
+        isRecommended={!!isRecommended}
+        isMultiSelectMode={isMultiSelectMode}
+        listName={listName}
+        item={item}
+        buttonProps={{
+          onLongPress: () => {
+            dispatch(
+              updateSelectedItemsFromPreviouslyPurchased({
+                operation: 'set',
+                item: isMultiSelectMode ? undefined : item,
+              }),
             );
-            if (isSelected) {
-              dispatch(
-                updateSelectedItemsFromPreviouslyPurchased({
-                  operation: 'remove',
-                  item,
-                }),
-              );
-            } else {
-              dispatch(
-                updateSelectedItemsFromPreviouslyPurchased({
-                  operation: 'add',
-                  item,
-                }),
-              );
-            }
-          }}
-          isSelected={
-            !!selectedItems.find(
-              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
-            )
+            dispatch(
+              setIsMultiSelectModeForPreviouslyPurchased(!isMultiSelectMode),
+            );
+          },
+        }}
+        onAddPress={() => {
+          onAddPress(item);
+        }}
+        onSelect={(item) => {
+          const isSelected = !!selectedItems.find(
+            (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+          );
+          if (isSelected) {
+            dispatch(
+              updateSelectedItemsFromPreviouslyPurchased({
+                operation: 'remove',
+                item,
+              }),
+            );
+          } else {
+            dispatch(
+              updateSelectedItemsFromPreviouslyPurchased({
+                operation: 'add',
+                item,
+              }),
+            );
           }
-        />
-      </SwipeableRow>
+        }}
+        isSelected={
+          !!selectedItems.find(
+            (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+          )
+        }
+      />
     );
   }
 

@@ -1,14 +1,11 @@
-import { FontAwesome } from '@expo/vector-icons';
-import { Text, useTheme, Stack } from 'native-base';
+import { useTheme } from 'native-base';
 import React, { useCallback, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTileForPreviouslyPurchased } from './ItemTileForPreviouslyPurchasedItems';
 import { ListItemSeparator } from './ListItemSeparator';
-import { SwipeableRow } from './SwipeableRow';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   currentStoreSelector,
   updateStoreSpecificValues,
@@ -36,7 +33,6 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
   const itemsPurchasedAtStore = useSelector(itemsPurchasedAtStoreSelector);
   const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
   const currentStore = useSelector(currentStoreSelector);
-  const theme = useTheme();
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(

@@ -384,6 +384,7 @@ export const listsSlice = createSlice({
           getKeyToUse(item),
         ),
         false,
+        true,
       );
       state.isMultiSelectModeForPreviouslyPurchased = false;
       state.selectedItemsFromPreviouslyPurchased = [];
@@ -942,9 +943,26 @@ export const {
 
 export default listsSlice.reducer;
 
-function moveItems(state: ListsState, keys: string[], isInCart = true) {
+function moveItems(
+  state: ListsState,
+  keys: string[],
+  isInCart = true,
+  shouldAddQuantity = false,
+) {
   const { currentStoreName, storeSpecificValuesMap } = state;
+
   for (const key of keys) {
+    if (shouldAddQuantity) {
+      if (
+        !(storeSpecificValuesMap[key] as any)?.[StoreSpecificValueKey.Quantity]
+      ) {
+        (storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.Quantity] =
+          {};
+      }
+      (storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.Quantity] = {
+        [currentStoreName]: 1,
+      };
+    }
     if (
       storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Quantity]?.[
         currentStoreName

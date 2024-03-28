@@ -51,6 +51,8 @@ import {
   setIsMultiSelectModeForInCartCart,
   setIsMultiSelectModeForShoppingCart,
   clearShopping,
+  selectedItemsFromPreviouslyPurchasedSelector,
+  moveSelectedPreviouslyPurchasedItemsToShopping,
 } from '@/state/slices/listsSlice';
 
 const renderScene = SceneMap({
@@ -81,6 +83,9 @@ export default function TabOneScreen() {
     selectedItemsFromShoppingCartSelector,
   );
   const selectedInCartItems = useSelector(selectedItemsFromInCartSelector);
+  const selectedPreviouslyPurchasedItems = useSelector(
+    selectedItemsFromPreviouslyPurchasedSelector,
+  );
 
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {},
@@ -172,10 +177,22 @@ export default function TabOneScreen() {
         onPress: onCompletePurchasePress,
         text: 'Mark all as Purchased',
       });
+    } else if (index === 2) {
+      if (selectedPreviouslyPurchasedItems.length > 0) {
+        options.push({
+          onPress: onMoveSelectedPreviouslyPurchasedToShoppingPress,
+          text: 'Move Selected to Shopping',
+        });
+      }
     }
 
     return options;
-  }, [index, selectedInCartItems, selectedShoppingCartItems]);
+  }, [
+    index,
+    selectedInCartItems,
+    selectedShoppingCartItems,
+    selectedPreviouslyPurchasedItems,
+  ]);
 
   const onAddItemPress = useCallback(() => {
     closeMenu();
@@ -208,6 +225,10 @@ export default function TabOneScreen() {
 
   const onMoveSelectedToShoppingPress = useCallback(() => {
     dispatch(moveSelectedToShopping());
+  }, []);
+
+  const onMoveSelectedPreviouslyPurchasedToShoppingPress = useCallback(() => {
+    dispatch(moveSelectedPreviouslyPurchasedItemsToShopping());
   }, []);
 
   const onMoveAllCartPress = useCallback(() => {

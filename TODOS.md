@@ -1,6 +1,5 @@
 ## MVP
-
--fix reset button not working for index 1 and 2 in index.tsx
+-
 -figure out how to get the default sort order values for each list to be correct.
 
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:

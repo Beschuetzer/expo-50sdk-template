@@ -5,7 +5,7 @@ import { RootState } from '../store';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { SortOrder, SortType, getSorter } from '@/components/lists/sorters';
-import { EMPTY_STRING } from '@/constants/general';
+import { EMPTY_STRING, SORT_ORDER_VALUES_DEFAULT } from '@/constants/general';
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -444,7 +444,9 @@ export const listsSlice = createSlice({
     ) => {
       const { listName } = action.payload;
       const emptyList = getEmptyList<any>();
+      const defaultSortOrderValue = { ...SORT_ORDER_VALUES_DEFAULT[listName] };
       emptyList.data = state[listName]?.data || [];
+      emptyList.sortOrderValue = defaultSortOrderValue;
       state[listName] = emptyList;
     },
     resetListToDisplayFilters: (

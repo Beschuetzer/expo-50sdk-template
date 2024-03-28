@@ -249,7 +249,7 @@ export default function TabOneScreen() {
 
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));
-  }, []);
+  }, [listName]);
 
   const onSortPress = useCallback(() => {
     setIsSortModalOpen(true);

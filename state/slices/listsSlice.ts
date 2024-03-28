@@ -40,7 +40,7 @@ export enum ListName {
   InCartList = 'inCartList',
   ItemsList = 'itemsList',
   PreviouslyPurchased = 'previouslyPurchased',
-  ShoppingList = 'shoppingLIst',
+  ShoppingList = 'shoppingList',
   StoresList = 'storesList',
 }
 
@@ -72,7 +72,7 @@ export type SetFiltersPayload = {
 
 export type SetSortOrderPayload = object &
   ListNameProp &
-  Pick<SortOrderValue, 'sortBy'>;
+  Partial<Pick<SortOrderValue, 'sortOrder' | 'sortBy'>>;
 
 export type ToggleSortOrderPayload = Pick<SetSortOrderPayload, 'listName'>;
 export type UpdateSelectedItemsPayload<T> = {
@@ -127,10 +127,10 @@ const initialState: ListsState = {
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   isMultiSelectModeForShoppingCart:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
-  [ListName.InCartList]: getEmptyList(),
+  [ListName.InCartList]: getEmptyList(ListName.InCartList),
   [ListName.ItemsList]: getEmptyList(),
-  [ListName.PreviouslyPurchased]: getEmptyList(),
-  [ListName.ShoppingList]: getEmptyList(),
+  [ListName.PreviouslyPurchased]: getEmptyList(ListName.PreviouslyPurchased),
+  [ListName.ShoppingList]: getEmptyList(ListName.ShoppingList),
   [ListName.StoresList]: getEmptyList(),
   lastPurchasedMap: getEmptyObject(),
   selectedItemsFromPreviouslyPurchased: getEmptyArray(),
@@ -461,6 +461,9 @@ export const listsSlice = createSlice({
       state.itemsList = getEmptyList();
       state.storeSpecificValuesMap = {};
     },
+    resetListSlice: (state: ListsState) => {
+      state = initialState;
+    },
     resetLastPurchasedMap: (state: ListsState) => {
       state.lastPurchasedMap = getEmptyObject();
     },
@@ -520,7 +523,7 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<SetSortOrderPayload>,
     ) => {
-      const { listName, sortBy = SortType.Name } = action.payload;
+      const { listName, sortBy, sortOrder } = action.payload;
       const listToSort = state[listName];
 
       if (!listToSort) {
@@ -528,19 +531,18 @@ export const listsSlice = createSlice({
         return;
       }
 
+      const newSortBy = sortBy || state[listName].sortOrderValue.sortBy;
+      const newSortOrder =
+        sortOrder || state[listName].sortOrderValue.sortOrder;
       listToSort.data?.sort(
-        getSorter(
-          sortBy,
-          state.currentStoreName,
-          state[listName].sortOrderValue.sortOrder,
-        ),
+        getSorter(newSortBy, state.currentStoreName, newSortOrder),
       );
 
       if (!state[listName].sortOrderValue.sortOrder) return;
 
       state[listName].sortOrderValue = {
-        sortBy,
-        sortOrder: state[listName].sortOrderValue.sortOrder,
+        sortBy: newSortBy,
+        sortOrder: newSortOrder,
       };
     },
     setStoresList: (
@@ -752,9 +754,9 @@ export const itemsPurchasedAtStoreSelector = createSelector(
     }
     return previoulsyPurchasedItems.sort(
       getSorter(
-        previouslyPurchasedList.sortOrderValue.sortBy,
+        previouslyPurchasedList.sortOrderValue?.sortBy,
         currentStoreName,
-        previouslyPurchasedList.sortOrderValue.sortOrder,
+        previouslyPurchasedList.sortOrderValue?.sortOrder,
       ),
     );
   },
@@ -924,6 +926,7 @@ export const {
   resetCurrentStoreName,
   resetItemsList,
   resetLastPurchasedMap,
+  resetListSlice,
   resetListToDisplay,
   resetListToDisplayFilters,
   resetStoresList,

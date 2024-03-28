@@ -1,3 +1,5 @@
+import { SortOrder, SortType } from '@/components/lists/sorters';
+import { ListName, SortOrderValue } from '@/state/slices/listsSlice';
 import { ItemUnit } from '@/types/Item';
 import { GpsCoordinate } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
@@ -31,6 +33,25 @@ export const IMAGE_PRIORITY_MAPPING: {
   2: 'image_ingredients_thumb_url',
   3: 'image_nutrition_thumb_url',
 };
+
+export const SORT_ORDER_VALUE_DEFAULT: SortOrderValue = Object.freeze({
+  sortOrder: SortOrder.Descending,
+  sortBy: SortType.Name,
+});
+export const SORT_ORDER_VALUE_INDEX_LISTS_DEFAULT: SortOrderValue =
+  Object.freeze({
+    sortOrder: SortOrder.Descending,
+    sortBy: SortType.AisleNumber,
+  });
+export const SORT_ORDER_VALUES_DEFAULT: {
+  [key in ListName]: SortOrderValue;
+} = Object.freeze({
+  [ListName.InCartList]: { ...SORT_ORDER_VALUE_INDEX_LISTS_DEFAULT },
+  [ListName.ItemsList]: { ...SORT_ORDER_VALUE_DEFAULT },
+  [ListName.PreviouslyPurchased]: { ...SORT_ORDER_VALUE_INDEX_LISTS_DEFAULT },
+  [ListName.ShoppingList]: { ...SORT_ORDER_VALUE_INDEX_LISTS_DEFAULT },
+  [ListName.StoresList]: { ...SORT_ORDER_VALUE_DEFAULT },
+});
 export const SWIPEABLE_ROW_OPEN_THRESHOLD = 100;
 export const TIME_SPAN_TO_MILLISECONDS_MAPPING: { [key in TimeSpan]: number } =
   {

@@ -55,6 +55,18 @@ export function calculateDistance(
   return Math.round(distance * 100) / 100;
 }
 
+export function camelCaseToSpacedCapitalized(str: string) {
+  // Use regex to insert spaces before uppercase letters
+  // and then capitalize the first letter of each word
+  return str.replace(/([A-Z])/g, ' $1').replace(/^./, function (str) {
+    return str.toUpperCase();
+  });
+}
+
+// Example usage:
+console.log(camelCaseToSpacedCapitalized('camelCase')); // Output: "Camel Case"
+console.log(camelCaseToSpacedCapitalized('anotherExample')); // Output: "Another Example"
+
 export async function delay(ms: number) {
   if (ms <= 0) return;
   return new Promise((resolve) => {

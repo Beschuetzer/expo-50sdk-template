@@ -1,18 +1,19 @@
 import { Picker } from '@react-native-picker/picker';
-import { Button, FormControl, Row, Stack, useTheme, Text } from 'native-base';
+import { Button, FormControl, Row, Stack, useTheme, Column } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Dialog from 'react-native-dialog';
 import { useDispatch } from 'react-redux';
 
-import { SORT_TYPE_DESCRIPTIONS, SortType } from './sorters';
+import { SORT_TYPE_DESCRIPTIONS, SortOrder, SortType } from './sorters';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   SetSortOrderPayload,
   SortOrderValue,
-  toggleSortOrder,
+  setSortOrder,
 } from '@/state/slices/listsSlice';
 import { HeadingTagProp } from '@/types/general';
+import { camelCaseToSpacedCapitalized } from '@/utils/helpers';
 
 export type ListSortViewSize = 'large' | 'small';
 type ListSorterProps = {
@@ -71,7 +72,7 @@ export function ListSorter(props: ListSorterProps) {
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
       <Dialog.Title style={{ textAlign: 'center' }}>
-        Sort {sortOrderValue.sortOrder} By
+        {camelCaseToSpacedCapitalized(listName)} Sorting
       </Dialog.Title>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         {viewSize === 'large' ? (
@@ -91,35 +92,44 @@ export function ListSorter(props: ListSorterProps) {
           </>
         ) : (
           <>
-            <Button
-              variant="subtle"
-              onPress={() => dispatch(toggleSortOrder({ listName }))}
-            >
-              Toggle Order
-            </Button>
-            {sortTypes.map((sortType) => (
+            <Row justifyContent="space-between" alignItems="center">
               <Button
-                variant="ghost"
-                key={sortType}
-                onPress={() => onSortTypePress(sortType)}
+                isDisabled={sortOrderValue.sortOrder === SortOrder.Ascending}
+                variant="subtle"
+                onPress={() =>
+                  dispatch(
+                    setSortOrder({ listName, sortOrder: SortOrder.Ascending }),
+                  )
+                }
               >
-                {SORT_TYPE_DESCRIPTIONS[sortType]}
+                Ascending
               </Button>
-            ))}
+              <Button
+                isDisabled={sortOrderValue.sortOrder === SortOrder.Descending}
+                variant="subtle"
+                onPress={() =>
+                  dispatch(
+                    setSortOrder({ listName, sortOrder: SortOrder.Descending }),
+                  )
+                }
+              >
+                Descending
+              </Button>
+            </Row>
+            <Column>
+              {sortTypes.map((sortType) => (
+                <Button
+                  isDisabled={sortType === sortOrderValue.sortBy}
+                  variant="ghost"
+                  key={sortType}
+                  onPress={() => onSortTypePress(sortType)}
+                >
+                  {SORT_TYPE_DESCRIPTIONS[sortType]}
+                </Button>
+              ))}
+            </Column>
           </>
         )}
-      </Stack>
-      <Stack mt={theme.space[1]}>
-        <Text>
-          Currently{' '}
-          <Text fontWeight={900}>
-            {sortOrderValue.sortOrder?.toLowerCase()}
-          </Text>{' '}
-          by{' '}
-          <Text fontWeight={900}>
-            {SORT_TYPE_DESCRIPTIONS[sortOrderValue.sortBy]?.toLowerCase()}
-          </Text>
-        </Text>
       </Stack>
       <Dialog.Button
         color={theme.colors.primary[900]}

@@ -1,6 +1,7 @@
 ## MVP
+
+-figure out how to get the default sort order values for each list to be correct.
 -fix reset button not working for any list in index.tsx (the default value should be by aisle for index.tsx lists)
--change button in ListSorter for toggling to two buttons (one for each order type and disabled when current)
 
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:
     --sheet will show up only on the shopping tab

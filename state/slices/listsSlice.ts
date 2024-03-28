@@ -651,29 +651,6 @@ export const currentStoreSelector = createSelector(
   },
 );
 
-export const priceOfItemsSelector = (listname: ListName) =>
-  createSelector(
-    [
-      (state: RootState) => state[listsSlice.name][listname],
-      (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
-      (state: RootState) => state[listsSlice.name].currentStoreName,
-    ],
-    (list, storeSpecificValuesMap, currentStoreName) => {
-      let totalPrice = 0;
-      for (const value of Object.values(storeSpecificValuesMap)) {
-        if (value?.[StoreSpecificValueKey.IsInCart]?.[currentStoreName]) {
-          const quantity =
-            value?.[StoreSpecificValueKey.Quantity]?.[currentStoreName] || 0;
-          const price =
-            value?.[StoreSpecificValueKey.Price]?.[currentStoreName] || 0;
-          const itemPrice = quantity * price;
-          totalPrice += itemPrice;
-        }
-      }
-      return totalPrice;
-    },
-  );
-
 export const itemsListItemSelector = (id: string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].itemsList.data],
@@ -782,6 +759,29 @@ export const itemsPurchasedAtStoreSelector = createSelector(
     );
   },
 );
+
+export const priceOfItemsSelector = (listname: ListName) =>
+  createSelector(
+    [
+      (state: RootState) => state[listsSlice.name][listname],
+      (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
+      (state: RootState) => state[listsSlice.name].currentStoreName,
+    ],
+    (list, storeSpecificValuesMap, currentStoreName) => {
+      let totalPrice = 0;
+      for (const value of Object.values(storeSpecificValuesMap)) {
+        if (value?.[StoreSpecificValueKey.IsInCart]?.[currentStoreName]) {
+          const quantity =
+            value?.[StoreSpecificValueKey.Quantity]?.[currentStoreName] || 0;
+          const price =
+            value?.[StoreSpecificValueKey.Price]?.[currentStoreName] || 0;
+          const itemPrice = quantity * price;
+          totalPrice += itemPrice;
+        }
+      }
+      return totalPrice;
+    },
+  );
 
 export const selectedItemsFromInCartSelector = (state: RootState) =>
   state[listsSlice.name].selectedItemsFromInCart;

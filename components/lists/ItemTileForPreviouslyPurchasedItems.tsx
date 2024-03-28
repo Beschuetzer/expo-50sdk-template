@@ -7,11 +7,14 @@ import { RectButton } from 'react-native-gesture-handler';
 import { ItemTileProps } from './ItemTile';
 import { ImageRenderer } from '../ImageRenderer';
 
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
 
 type ItemTileForPreviouslyPurchasedProps = {
+  isInCart?: boolean;
+  isInShopping?: boolean;
   isRecommended?: boolean;
 } & ItemTileProps<ItemWithStoreSpecificValues>;
 
@@ -20,6 +23,8 @@ export function ItemTileForPreviouslyPurchased(
   props: ItemTileForPreviouslyPurchasedProps,
 ) {
   const {
+    isInCart = false,
+    isInShopping = false,
     isSelected = false,
     isMultiSelectMode = false,
     isRecommended = false,
@@ -64,15 +69,36 @@ export function ItemTileForPreviouslyPurchased(
           <Text>{item.name}</Text>
           <Text>{item.upc}</Text>
         </Column>
-        {isMultiSelectMode ? (
-          <Column justifyContent="center" alignItems="flex-end" flex={1}>
+        <Row
+          alignItems="center"
+          flex={8}
+          justifyContent="flex-end"
+          mr={theme.space[FORM_INTER_ITEM_SPACING]}
+        >
+          {isInShopping ? (
+            <FontAwesome
+              name="check"
+              size={theme.sizes[5]}
+              color={theme.colors.green[900]}
+            />
+          ) : null}
+          {isInCart ? (
+            <FontAwesome
+              name="shopping-cart"
+              size={theme.sizes[5]}
+              color={theme.colors.green[900]}
+            />
+          ) : null}
+        </Row>
+        <Column justifyContent="center" alignItems="flex-end" flex={1}>
+          {isMultiSelectMode ? (
             <FontAwesome
               name={`${isSelected ? 'circle' : 'circle-o'}`}
               color={theme.colors.primary[900]}
               size={theme.sizes[5]}
             />
-          </Column>
-        ) : null}
+          ) : null}
+        </Column>
       </Row>
     </RectButton>
   );

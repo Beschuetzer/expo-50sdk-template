@@ -19,6 +19,7 @@ import {
   ListName,
   lastPurchasedMapSelector,
   isMultiSelectModeForPreviouslyPurchasedSelector,
+  storeSpecificListSelector,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
@@ -44,6 +45,12 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
   const isMultiSelectMode = useSelector(
     isMultiSelectModeForPreviouslyPurchasedSelector,
   );
+  const itemsInCart = useSelector(
+    storeSpecificListSelector(ListName.InCartList),
+  );
+  const itemsInShopping = useSelector(
+    storeSpecificListSelector(ListName.ShoppingList),
+  );
 
   const onSwipeRight = useCallback((key: Key) => {
     setRefreshing(false);
@@ -66,6 +73,12 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
       item.frequency &&
       lastPurchaseDate &&
       lastPurchaseDate + item.frequency <= now;
+    const itemInCart = itemsInCart.find(
+      (item) => getKeyToUse(item) === keyToUse,
+    );
+    const itemInShopping = itemsInShopping.find(
+      (item) => getKeyToUse(item) === keyToUse,
+    );
 
     return (
       <SwipeableRow
@@ -98,6 +111,8 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
         }}
       >
         <ItemTileForPreviouslyPurchased
+          isInCart={!!itemInCart}
+          isInShopping={!!itemInShopping}
           isRecommended={!!isRecommended}
           isMultiSelectMode={isMultiSelectMode}
           listName={listName}

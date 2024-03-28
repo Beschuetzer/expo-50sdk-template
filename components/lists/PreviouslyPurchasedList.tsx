@@ -1,4 +1,3 @@
-import { useTheme } from 'native-base';
 import React, { useCallback, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';

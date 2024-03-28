@@ -54,6 +54,7 @@ import {
   selectedItemsFromPreviouslyPurchasedSelector,
   moveSelectedPreviouslyPurchasedItemsToShopping,
   setIsMultiSelectModeForPreviouslyPurchased,
+  previouslyPurchasedListSelector,
 } from '@/state/slices/listsSlice';
 
 const renderScene = SceneMap({
@@ -73,6 +74,7 @@ export default function TabOneScreen() {
   const layout = useWindowDimensions();
   const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(inCartListSelector);
+  const previouslyPurchasedList = useSelector(previouslyPurchasedListSelector);
   const currentStore = useSelector(currentStoreSelector);
   const shoppingListItems = useSelector(
     storeSpecificListSelector(ListName.ShoppingList),
@@ -95,10 +97,19 @@ export default function TabOneScreen() {
   const [index, setIndex] = useState(0);
   const menuRef = useRef<Menu>(null);
   const navigation = useNavigation();
-  const listName = useMemo(
-    () => (index === 0 ? ListName.ShoppingList : ListName.InCartList),
-    [index],
-  );
+  const listName = useMemo(() => {
+    let listToReturn = ListName.ShoppingList;
+    switch (index) {
+      case 1:
+        listToReturn = ListName.InCartList;
+        break;
+      case 2:
+        listToReturn = ListName.PreviouslyPurchased;
+        break;
+    }
+    return listToReturn;
+  }, [index]);
+
   const firstTabTitle = useMemo(() => {
     const main = 'Need';
     if (shoppingListItems.length === 0 && inCartListItems.length === 0) {
@@ -257,7 +268,7 @@ export default function TabOneScreen() {
     } else if (shoppingListItems.length === 0) {
       setIndex(1);
     }
-  }, [inCartListItems.length]);
+  }, [inCartListItems.length, shoppingListItems.length]);
 
   useEffect(() => {
     dispatch(setIsMultiSelectModeForInCartCart(false));
@@ -310,7 +321,11 @@ export default function TabOneScreen() {
       />
       <ListSorter
         sortOrderValue={
-          index === 0 ? shoppingList.sortOrderValue : inCartList.sortOrderValue
+          index === 0
+            ? shoppingList.sortOrderValue
+            : index === 1
+              ? inCartList.sortOrderValue
+              : previouslyPurchasedList.sortOrderValue
         }
         listName={listName}
         isVisible={isSortModalOpen}

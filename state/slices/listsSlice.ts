@@ -760,6 +760,9 @@ export const itemsPurchasedAtStoreSelector = createSelector(
   },
 );
 
+export const previouslyPurchasedListSelector = (state: RootState) =>
+  state[listsSlice.name][ListName.InCartList];
+
 export const priceOfItemsSelector = (listname: ListName) =>
   createSelector(
     [

@@ -1,8 +1,6 @@
 ## MVP
-
--add another tab to the TabView on index page called "Previously Purchased"
-    --figure out sorting
-    --make sure resetting sorting works
+-fix reset button not working for any list in index.tsx (the default value should be by aisle for index.tsx lists)
+-change button in ListSorter for toggling to two buttons (one for each order type and disabled when current)
 
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:
     --sheet will show up only on the shopping tab

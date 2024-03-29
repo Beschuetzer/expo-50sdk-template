@@ -5,7 +5,7 @@ import { RootState } from '../store';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { SortOrder, SortType, getSorter } from '@/components/lists/sorters';
-import { EMPTY_STRING, SORT_ORDER_VALUES_DEFAULT } from '@/constants/general';
+import { EMPTY_STRING } from '@/constants/general';
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -128,10 +128,10 @@ const initialState: ListsState = {
   isMultiSelectModeForShoppingCart:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   [ListName.InCartList]: getEmptyList(ListName.InCartList),
-  [ListName.ItemsList]: getEmptyList(),
+  [ListName.ItemsList]: getEmptyList(ListName.ItemsList),
   [ListName.PreviouslyPurchased]: getEmptyList(ListName.PreviouslyPurchased),
   [ListName.ShoppingList]: getEmptyList(ListName.ShoppingList),
-  [ListName.StoresList]: getEmptyList(),
+  [ListName.StoresList]: getEmptyList(ListName.StoresList),
   lastPurchasedMap: getEmptyObject(),
   selectedItemsFromPreviouslyPurchased: getEmptyArray(),
   selectedItemsFromShoppingCart: getEmptyArray(),
@@ -443,10 +443,8 @@ export const listsSlice = createSlice({
       action: PayloadAction<ResetListToDisplayPayload>,
     ) => {
       const { listName } = action.payload;
-      const emptyList = getEmptyList<any>();
-      const defaultSortOrderValue = { ...SORT_ORDER_VALUES_DEFAULT[listName] };
+      const emptyList = getEmptyList<any>(listName);
       emptyList.data = state[listName]?.data || [];
-      emptyList.sortOrderValue = defaultSortOrderValue;
       state[listName] = emptyList;
     },
     resetListToDisplayFilters: (
@@ -454,13 +452,13 @@ export const listsSlice = createSlice({
       action: PayloadAction<ResetListToDisplayFiltersPayload>,
     ) => {
       const { listName } = action.payload;
-      const emptyList = getEmptyList<any>();
+      const emptyList = getEmptyList<any>(listName);
       emptyList.data = state[listName].data || [];
       emptyList.sortOrderValue = state[listName].sortOrderValue;
       state[listName] = emptyList;
     },
     resetItemsList: (state: ListsState) => {
-      state.itemsList = getEmptyList();
+      state.itemsList = getEmptyList(ListName.ItemsList);
       state.storeSpecificValuesMap = {};
     },
     resetListSlice: (state: ListsState) => {
@@ -470,7 +468,7 @@ export const listsSlice = createSlice({
       state.lastPurchasedMap = getEmptyObject();
     },
     resetStoresList: (state: ListsState) => {
-      state.storesList = getEmptyList();
+      state.storesList = getEmptyList(ListName.StoresList);
       state.currentStoreName = EMPTY_STRING;
     },
     resetCurrentStoreName: (state: ListsState) => {

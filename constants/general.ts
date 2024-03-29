@@ -43,17 +43,6 @@ export const SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT: SortOrderValue =
     sortOrder: SortOrder.Ascending,
     sortBy: SortType.AisleNumber,
   });
-export const SORT_ORDER_VALUES_DEFAULT: {
-  [key in ListName]: SortOrderValue;
-} = Object.freeze({
-  [ListName.InCartList]: { ...SORT_ORDER_VALUE_BY_NAME_DEFAULT },
-  [ListName.ItemsList]: { ...SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT },
-  [ListName.PreviouslyPurchased]: {
-    ...SORT_ORDER_VALUE_BY_NAME_DEFAULT,
-  },
-  [ListName.ShoppingList]: { ...SORT_ORDER_VALUE_BY_NAME_DEFAULT },
-  [ListName.StoresList]: { ...SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT },
-});
 export const SWIPEABLE_ROW_OPEN_THRESHOLD = 100;
 export const TIME_SPAN_TO_MILLISECONDS_MAPPING: { [key in TimeSpan]: number } =
   {

@@ -5,7 +5,6 @@ import * as Location from 'expo-location';
 import { Insets } from 'react-native';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
-import { SortType, SortOrder } from '@/components/lists/sorters';
 import {
   DAY_IN_MS,
   EMPTY_STRING,
@@ -13,9 +12,12 @@ import {
   HOUR_IN_MS,
   IMAGE_PICKER_QUALITY_INITIAL,
   IMAGE_PRIORITY_MAPPING,
+  SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT,
+  SORT_ORDER_VALUE_BY_NAME_DEFAULT,
   WEEK_IN_MS,
 } from '@/constants/general';
 import { LOCAL_FILE_REGEX } from '@/constants/regexs';
+import { ListName } from '@/state/slices/listsSlice';
 import { Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
@@ -118,14 +120,11 @@ export function getEmptyArray<T>() {
   return [] as T;
 }
 
-export function getEmptyList<T>() {
+export function getEmptyList<T>(listName?: ListName) {
   return {
     data: getEmptyArray<T>(),
     filters: getEmptyObject<T>(),
-    sortOrderValue: {
-      sortBy: SortType.Name,
-      sortOrder: SortOrder.Ascending,
-    },
+    sortOrderValue: getSortOrderValues(listName || ListName.ItemsList),
   } as List<T>;
 }
 
@@ -269,6 +268,18 @@ export function getIndexOfSmallestField<T>(arr: T[], key: keyof T) {
   }
 
   return smallestIndex;
+}
+
+export function getSortOrderValues(listName: ListName) {
+  switch (listName) {
+    case ListName.InCartList:
+    case ListName.ShoppingList:
+      return SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT;
+    case ListName.PreviouslyPurchased:
+    case ListName.StoresList:
+    case ListName.ItemsList:
+      return SORT_ORDER_VALUE_BY_NAME_DEFAULT;
+  }
 }
 
 export function getStoreWithDistance(

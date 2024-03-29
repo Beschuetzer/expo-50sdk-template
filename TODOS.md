@@ -1,5 +1,4 @@
 ## MVP
--refactor to remove SORT_ORDER_VALUES_DEFAULT and replace with getSortOrderValues(listName: ListName) (and just switch the listname to return the correct values)
 -figure out how to get the default sort order values for each list to be correct.
 
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:

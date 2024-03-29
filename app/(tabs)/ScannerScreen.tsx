@@ -46,9 +46,8 @@ const BarcodeScannerScreen = () => {
       <ManualUpcInput isVisible={isManuallyEntering} />
       <BarcodeScanner
         cameraType={type}
-        onScanned={(scannedObj) => {
-          const { data } = scannedObj;
-          navigation.navigate(Routes.ItemModal, { key: data });
+        onScanned={(upc) => {
+          navigation.navigate(Routes.ItemModal, { key: upc });
         }}
       />
     </View>

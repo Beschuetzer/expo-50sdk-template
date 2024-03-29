@@ -1,3 +1,4 @@
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -22,10 +23,15 @@ import {
   UPC_REQUIRED_CHAR_LENGTH,
 } from '@/constants/regexs';
 import { AddItemsListItemPayload } from '@/state/slices/listsSlice';
-import { Item, StoreSpecificValueKey, StoreSpecificValues } from '@/types/Item';
+import {
+  Item,
+  ItemWithStoreSpecificValues,
+  StoreSpecificValueKey,
+  StoreSpecificValues,
+} from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ItemProp } from '@/types/general';
-import { deleteFile, getFrequencyValue, getKeyToUse } from '@/utils/helpers';
+import { deleteFile, displayAlert, getFrequencyValue, getKeyToUse } from '@/utils/helpers';
 
 type ItemFormValdation = {
   isValid: boolean;
@@ -42,7 +48,7 @@ export type ItemFormProps = {
   shouldFocusFirstField?: boolean;
   shouldAddQuantity?: boolean;
   shouldAddToCart?: boolean;
-} & Partial<ItemProp>;
+} & Partial<ItemProp<ItemWithStoreSpecificValues>>;
 
 export function ItemForm(props: ItemFormProps) {
   const {
@@ -67,6 +73,7 @@ export function ItemForm(props: ItemFormProps) {
     [item],
   );
 
+  const barcodeModalRef = useRef<BottomSheetModalMethods>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const itemToUse = useMemo(
     () => ({ ...(itemInList || item || ({} as Item)) }),
@@ -239,8 +246,18 @@ export function ItemForm(props: ItemFormProps) {
             }
             InputRightElement={
               <Barcode
+                ref={barcodeModalRef}
                 style={{ marginRight: theme.space[2] }}
-                onPress={() => alert('pressed')}
+                onPress={() => barcodeModalRef.current?.present()}
+                onScannedValue={(upc) => {
+                  if (!upc) {
+                    displayAlert({
+                      msg: 'Invalid Upc',
+                      upc,
+                    });
+                  }
+                  setUpcValue(upc);
+                }}
                 size={37}
               />
             }
@@ -295,7 +312,7 @@ export function ItemForm(props: ItemFormProps) {
       />
       <StoreManager showStoreList />
       <ItemFormStoreSpecific
-        item={itemToUse}
+        item={itemToUse as ItemWithStoreSpecificValues}
         onValueChange={onItemSpecificValueChange}
         shouldAddQuantity={shouldAddQuantity}
       />

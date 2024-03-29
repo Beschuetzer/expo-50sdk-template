@@ -1,4 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import {
   DarkTheme,
   DefaultTheme,
@@ -69,31 +70,36 @@ function RootLayoutNav() {
           <NativeBaseProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <MenuProvider>
-                <AutoSetStoreModal />
-                <Stack>
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false, headerTitleAlign: 'center' }}
-                  />
-                  <Stack.Screen
-                    name={Routes.ItemModal}
-                    options={{
-                      presentation: 'modal',
-                      title: 'Item Details',
-                      headerTitleAlign: 'center',
-                      headerLeft: () => <CloseButton />,
-                    }}
-                  />
-                  <Stack.Screen
-                    name={Routes.StoreModal}
-                    options={{
-                      presentation: 'modal',
-                      title: 'Store Details',
-                      headerTitleAlign: 'center',
-                      headerLeft: () => <CloseButton />,
-                    }}
-                  />
-                </Stack>
+                <BottomSheetModalProvider>
+                  <AutoSetStoreModal />
+                  <Stack>
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{
+                        headerShown: false,
+                        headerTitleAlign: 'center',
+                      }}
+                    />
+                    <Stack.Screen
+                      name={Routes.ItemModal}
+                      options={{
+                        presentation: 'modal',
+                        title: 'Item Details',
+                        headerTitleAlign: 'center',
+                        headerLeft: () => <CloseButton />,
+                      }}
+                    />
+                    <Stack.Screen
+                      name={Routes.StoreModal}
+                      options={{
+                        presentation: 'modal',
+                        title: 'Store Details',
+                        headerTitleAlign: 'center',
+                        headerLeft: () => <CloseButton />,
+                      }}
+                    />
+                  </Stack>
+                </BottomSheetModalProvider>
               </MenuProvider>
             </GestureHandlerRootView>
           </NativeBaseProvider>

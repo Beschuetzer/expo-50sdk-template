@@ -1,5 +1,5 @@
 import { SortOrder, SortType } from '@/components/lists/sorters';
-import { ListName, SortOrderValue } from '@/state/slices/listsSlice';
+import { SortOrderValue } from '@/state/slices/listsSlice';
 import { ItemUnit } from '@/types/Item';
 import { GpsCoordinate } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';

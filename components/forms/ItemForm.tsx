@@ -7,6 +7,7 @@ import { ItemFormStoreSpecific } from './ItemFormStoreSpecificItems';
 import { ThumbnailPicker } from './ThumbnailPicker';
 import { UnitInput } from './UnitInput';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
+import { Barcode } from '../Barcode';
 import { InputValidationMessage } from '../InputValidationMessage';
 import { StoreManager } from '../StoreManager';
 
@@ -224,17 +225,27 @@ export function ItemForm(props: ItemFormProps) {
       </Stack>
       <Stack>
         <InputText>Upc</InputText>
-        <Input
-          variant="outline"
-          keyboardType="numeric"
-          p={theme.space[1]}
-          placeholder="UPC Code"
-          value={upcValue}
-          onChangeText={(newText) => setUpcValue(newText)}
-          isInvalid={
-            !UPC_REGEX.test(upcValue || EMPTY_STRING) && upcValue.length !== 0
-          }
-        />
+        <Row>
+          <Input
+            flex={1}
+            variant="outline"
+            keyboardType="numeric"
+            p={theme.space[1]}
+            placeholder="UPC Code"
+            value={upcValue}
+            onChangeText={(newText) => setUpcValue(newText)}
+            isInvalid={
+              !UPC_REGEX.test(upcValue || EMPTY_STRING) && upcValue.length !== 0
+            }
+            InputRightElement={
+              <Barcode
+                style={{ marginRight: theme.space[2] }}
+                onPress={() => alert('pressed')}
+                size={37}
+              />
+            }
+          />
+        </Row>
         <InputValidationMessage
           isValid={isUpcValid}
           message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} or ${UPC_REQUIRED_CHAR_LENGTH + 1} numbers (currently ${upcValue.length})`}

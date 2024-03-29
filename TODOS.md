@@ -1,6 +1,5 @@
 ## MVP
--figure out how to get the default sort order values for each list to be correct.
-
+-Add barcode icon which opens a gorhom modal when pressed that scans a barcode and returns the scanned value
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:
     --sheet will show up only on the shopping tab
     --minimized state will be only show "Show Recommended Items"

@@ -51,7 +51,7 @@ export function ItemTileForPreviouslyPurchased(
     () => (isRecommendedAndNotAdded ? theme.colors.white : theme.colors.black),
     [isRecommendedAndNotAdded, theme],
   );
-  const greenColor = theme.colors.green[900]
+  const greenColor = theme.colors.green[900];
   const dynamicAddColor = useMemo(
     () => (isRecommendedAndNotAdded ? theme.colors.white : theme.colors.black),
     [isRecommendedAndNotAdded, theme],
@@ -78,22 +78,24 @@ export function ItemTileForPreviouslyPurchased(
       }}
     >
       <Row space={theme.space['0']}>
-        <Column>
+        <Column flex={0} mr={FORM_INTER_ITEM_SPACING}>
           <ImageRenderer
             height={TILE_WIDTH * 1.5}
             width={TILE_WIDTH}
             source={item.images[item.imageToUseIndex]}
           />
         </Column>
-        <Column>
-          <Text color={dynamicTextColor}>{item.name}</Text>
+        <Column flex={1}>
+          <Text flex={1} noOfLines={1} color={dynamicTextColor}>
+            {item.name}
+          </Text>
           <Text color={dynamicTextColor}>{item.upc}</Text>
         </Column>
         <Row
           alignItems="center"
-          flex={8}
+          flex={0}
           justifyContent="flex-end"
-          mr={theme.space[FORM_INTER_ITEM_SPACING]}
+          ml={theme.space[FORM_INTER_ITEM_SPACING]}
         >
           {isInShopping ? (
             <FontAwesome
@@ -122,7 +124,12 @@ export function ItemTileForPreviouslyPurchased(
             </TouchableOpacity>
           ) : null}
         </Row>
-        <Column justifyContent="center" alignItems="flex-end" flex={1}>
+        <Column
+          width={theme.sizes[2]}
+          justifyContent="center"
+          alignItems="flex-end"
+          flex={0}
+        >
           {isMultiSelectMode ? (
             <FontAwesome
               name={`${isSelected ? 'circle' : 'circle-o'}`}

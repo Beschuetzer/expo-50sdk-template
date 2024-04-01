@@ -9,8 +9,7 @@ import { useIsDarkMode } from '../hooks/useIsDarkTheme';
 
 import { EMPTY_STRING } from '@/constants/general';
 import { LOCAL_FILE_REGEX } from '@/constants/regexs';
-import { Item, ItemWithStoreSpecificValues } from '@/types/Item';
-import { ItemProp, SpacingProp, StyleProp } from '@/types/general';
+import { SpacingProp, StyleProp } from '@/types/general';
 import { captureImage, pickImage } from '@/utils/helpers';
 
 type ThumbnailPickerProps = {
@@ -18,11 +17,10 @@ type ThumbnailPickerProps = {
   selectedUrl: string;
   onSelectImage: (url: string, isCustomImage: boolean) => void;
 } & StyleProp &
-  SpacingProp &
-  Partial<ItemProp<ItemWithStoreSpecificValues>>;
+  SpacingProp;
 
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
-  const { item, imagesToRender, selectedUrl, onSelectImage, spacing } = props;
+  const { imagesToRender, selectedUrl, onSelectImage, spacing } = props;
   const [customImageUri, setCustomImageUri] = useState(
     selectedUrl?.match(LOCAL_FILE_REGEX) ? selectedUrl : EMPTY_STRING,
   );
@@ -59,7 +57,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         horizontal
         data={Array.from(imagesToRender.add(customImageUri))}
         renderItem={(itemLocal) => {
-          const { index, item: imageUrl  }= itemLocal
+          const { index, item: imageUrl } = itemLocal;
           if (!imageUrl) return null;
 
           const isSelected = imageUrl === selectedUrl;
@@ -69,7 +67,6 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
 
           return (
             <ThumbnailPickerImage
-              item={item}
               key={imageUrl}
               borderColor={borderColor}
               imageUrl={imageUrl}

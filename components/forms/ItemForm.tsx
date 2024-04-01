@@ -26,6 +26,7 @@ import { AddItemsListItemPayload } from '@/state/slices/listsSlice';
 import {
   Item,
   ItemWithStoreSpecificValues,
+  Key,
   StoreSpecificValueKey,
   StoreSpecificValues,
 } from '@/types/Item';
@@ -92,6 +93,10 @@ export function ItemForm(props: ItemFormProps) {
   const [productNameValue, setProductNameValue] = useState(
     itemToUse?.name || EMPTY_STRING,
   );
+  const originalKey = useMemo(
+    () => ({ name: itemToUse.name, upc: itemToUse.upc }) as Key,
+    [itemToUse],
+  );
   const frequencyInMsRef = useRef<number>(itemToUse?.frequency || -1);
   const unitRef = useRef<string>(EMPTY_STRING);
   const isUpcValid = useMemo(
@@ -150,6 +155,7 @@ export function ItemForm(props: ItemFormProps) {
         item: itemToSave,
         storeSpecificValues: storeSpecificValuesToUse,
         currentStore,
+        originalKey: originalKey || EMPTY_STRING,
       });
     onClose && onClose();
   }

@@ -56,6 +56,7 @@ export type AddItemsListItemPayload = {
   item: Item;
   storeSpecificValues?: StoreSpecificValues;
   currentStore?: Store;
+  originalKey?: Key;
 };
 
 export type AddStoresListItemPayload = {
@@ -199,7 +200,8 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<AddItemsListItemPayload>,
     ) => {
-      const { item, storeSpecificValues, currentStore } = action.payload || {};
+      const { originalKey, item, storeSpecificValues, currentStore } =
+        action.payload || {};
       const keyToUse = getKeyToUse(action.payload.item);
 
       if (!keyToUse) {
@@ -241,12 +243,21 @@ export const listsSlice = createSlice({
         }
       }
 
+      //update item if it exists otherwise add it
       if (!currentItem) {
         state.itemsList.data.push(newItem);
       } else {
         for (const [key, value] of Object.entries(item)) {
           currentItem[key] = value;
         }
+      }
+
+      //remove original item if the key for new item is different
+      const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
+      if (originalKeyToUse && keyToUse && originalKeyToUse !== keyToUse) {
+        state.itemsList.data = state.itemsList.data.filter(
+          (item) => getKeyToUse(item) !== originalKeyToUse,
+        );
       }
     },
     addStoresListItem: (

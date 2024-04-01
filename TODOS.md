@@ -1,6 +1,7 @@
 ## MVP
 
 -add ability to click an image and view full screen
+-figure out how to handle case where editing an existing item with upc then changing upc and saving causes new item to be created
 -how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?
 
 -add option to change item image size (how would this affect already taken images?)

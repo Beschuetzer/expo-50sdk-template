@@ -17,7 +17,7 @@ import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { EMPTY_STRING, ESTIMATED_SIZE_FOR_STORES_LIST, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import {
@@ -224,7 +224,7 @@ export function StoresList(props: StoresListProps) {
         data={storesListToDisplay}
         renderItem={renderItem}
         keyExtractor={(item: Store, index: number) => getKeyToUse(item)}
-        estimatedItemSize={120}
+        estimatedItemSize={ESTIMATED_SIZE_FOR_STORES_LIST}
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />
       <ListSorter

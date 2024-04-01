@@ -18,7 +18,11 @@ import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
 import { ItemTile } from '../tiles/ItemTile';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  EMPTY_STRING,
+  ESTIMATED_SIZE_FOR_ITEMS_LIST,
+  FORM_INTER_ITEM_SPACING,
+} from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
   ListName,
@@ -288,7 +292,7 @@ export function ItemsList(props: ItemsListProps) {
         data={itemsListToDisplay}
         renderItem={renderItem}
         keyExtractor={(item: Item, index: number) => getKeyToUse(item)}
-        estimatedItemSize={120}
+        estimatedItemSize={ESTIMATED_SIZE_FOR_ITEMS_LIST}
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />
       <ListSorter

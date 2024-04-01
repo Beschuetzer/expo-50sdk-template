@@ -10,6 +10,9 @@ export const AUTO_SET_STORE_WHEN_CLOSE_ENOUGH = true;
 export const DEFAULT_IMAGE_INDEX = 0;
 export const EMPTY_NUMBER = 0;
 export const EMPTY_STRING = '';
+export const ESTIMATED_SIZE_FOR_ITEMS_LIST = 108;
+export const ESTIMATED_SIZE_FOR_SHOPPING_LISTS = 133;
+export const ESTIMATED_SIZE_FOR_STORES_LIST = 61;
 export const FORM_INTER_ITEM_SPACING = 0.5;
 export const FREQUENCY_INITIAL = Object.freeze({
   number: 1,

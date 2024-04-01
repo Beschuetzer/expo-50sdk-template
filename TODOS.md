@@ -1,5 +1,14 @@
 ## MVP
--fix issue where storeSpecificValuesMap keys for a given store aren't updated when chaing a store's key.
+-refactor addStoresListItem reducer:
+    --add allowStoreOverride option
+        --when true changing an item's key to an already existing key will override that item with the new item. 
+            --error message will be the current one
+        --when false, it will not be possible to save the item in ITemForm
+            --There will be a safety check in the addStoresListItem reducer to exit early
+            --the error message will include something like "please enable overriding stores or modify the existing store with key of '...'"  
+    --storeSpecificValuesMap keys need to be updated when originalKey is defined and different than keyToUse
+
+
 -add allowItemOverride option
     --when true changing an item's key to an already existing key will override that item with the new item. 
     --when false, it will not be possible to save the item in ITemForm

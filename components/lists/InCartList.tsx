@@ -1,17 +1,17 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { Text, useTheme, Stack, View } from 'native-base';
+import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { InCartPrice } from './InCartPrice';
-import { ItemTileWithStoreSpecificValues } from './ItemTileWithStoreSpecificValues';
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
 import { shoppingListSortTypes } from './ShoppingLIst';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
+import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {

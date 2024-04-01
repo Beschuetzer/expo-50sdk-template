@@ -13,7 +13,7 @@ import {
 type AutoSetStore = {
   enabled: boolean;
   maxDistanceInMiles: number;
-}
+};
 
 export type OptionsState = {
   autoSetStore: AutoSetStore;

@@ -2,8 +2,8 @@ import React, { useCallback, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTileForPreviouslyPurchased } from './ItemTileForPreviouslyPurchasedItems';
 import { ListItemSeparator } from './ListItemSeparator';
+import { ItemTileForPreviouslyPurchased } from '../tiles/ItemTileForPreviouslyPurchasedItems';
 
 import {
   currentStoreSelector,

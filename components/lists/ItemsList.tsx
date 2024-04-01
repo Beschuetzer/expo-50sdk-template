@@ -7,7 +7,6 @@ import { LayoutAnimation } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTile } from './ItemTile';
 import { ListFilter, ListFilterFilters } from './ListFilter';
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
@@ -17,6 +16,7 @@ import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
+import { ItemTile } from '../tiles/ItemTile';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';

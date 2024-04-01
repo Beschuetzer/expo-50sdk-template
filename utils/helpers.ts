@@ -65,10 +65,6 @@ export function camelCaseToSpacedCapitalized(str: string) {
   });
 }
 
-// Example usage:
-console.log(camelCaseToSpacedCapitalized('camelCase')); // Output: "Camel Case"
-console.log(camelCaseToSpacedCapitalized('anotherExample')); // Output: "Another Example"
-
 export async function delay(ms: number) {
   if (ms <= 0) return;
   return new Promise((resolve) => {

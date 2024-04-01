@@ -12,8 +12,8 @@ export default function StoreModal() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const route = useRoute();
-  const { name } = (route?.params || {}) as any;
-  const store = useSelector(storesListItemSelector(name));
+  const { originalKey } = (route?.params || {}) as any;
+  const store = useSelector(storesListItemSelector(originalKey));
 
   return (
     <StoreForm
@@ -22,6 +22,7 @@ export default function StoreModal() {
         dispatch(addStoresListItem(addStoresListItemPayload));
       }}
       store={store}
+      originalKey={originalKey}
     />
   );
 }

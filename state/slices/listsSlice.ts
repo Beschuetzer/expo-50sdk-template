@@ -61,6 +61,7 @@ export type AddItemsListItemPayload = {
 
 export type AddStoresListItemPayload = {
   newStore: Store;
+  originalKey?: string;
 } & StoreProp;
 
 export type ResetListToDisplayFiltersPayload = ListNameProp;
@@ -256,7 +257,7 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<AddStoresListItemPayload>,
     ) => {
-      const { newStore, store } = action.payload;
+      const { newStore, store, originalKey } = action.payload;
       const keyToUse = getKeyToUse(newStore);
       if (!keyToUse) {
         alert('Unable to add an item with no name to the storesList.');
@@ -264,8 +265,10 @@ export const listsSlice = createSlice({
       }
 
       const storeIndex = state.storesList.data.findIndex(
-        (store) => store.name === keyToUse,
+        (store) => getKeyToUse(store) === keyToUse,
       );
+
+      console.log({originalKey, keyToUse, storeIndex});
 
       if (storeIndex !== -1) {
         state.storesList.data[storeIndex] = getStoreWithDistance(

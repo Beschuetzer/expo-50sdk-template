@@ -31,10 +31,11 @@ type StoreFormValdation = {
 type StoreFormProps = {
   onClose: () => void;
   onSave: (addStoresListItemPayload: AddStoresListItemPayload) => void;
-} & StoreProp;
+} & StoreProp &
+  Pick<AddStoresListItemPayload, 'originalKey'>;
 
 export function StoreForm(props: StoreFormProps) {
-  const { onClose, onSave, store } = props;
+  const { originalKey, onClose, onSave, store } = props;
   const theme = useTheme();
   const [storeName, setStoreName] = useState(store?.name || EMPTY_STRING);
   const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
@@ -66,6 +67,7 @@ export function StoreForm(props: StoreFormProps) {
       onSave({
         newStore,
         store,
+        originalKey,
       });
     onClose && onClose();
   }

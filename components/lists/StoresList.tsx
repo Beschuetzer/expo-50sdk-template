@@ -173,7 +173,7 @@ export function StoresList(props: StoresListProps) {
           style={styles.rectButton}
           onPress={() => {
             navigation.navigate(Routes.StoreModal, {
-              name: keyToUse.name,
+              originalKey: getKeyToUse(keyToUse),
             });
           }}
         >

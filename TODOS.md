@@ -1,5 +1,5 @@
 ## MVP
-
+-Figure out how to better handle long overflowing text titles in tiles
 -add gorhom bottom sheet called RecommendationItemsSheet.tsx:
     --sheet will show up only on the shopping tab
     --minimized state will be only show "Show Recommended Items"

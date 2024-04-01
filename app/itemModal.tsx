@@ -15,6 +15,7 @@ import {
   currentStoreSelector,
   itemsListItemSelector,
 } from '@/state/slices/listsSlice';
+import { ItemWithStoreSpecificValues } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 import { getItem } from '@/utils/model-mappings';
 
@@ -72,7 +73,7 @@ export default function ItemModal() {
         onSave={(addItemsListItemPayload: AddItemsListItemPayload) => {
           dispatch(addItemsListItem(addItemsListItemPayload));
         }}
-        item={fallbackItem}
+        item={fallbackItem as ItemWithStoreSpecificValues}
         itemInListUsingName={itemInListUsingName}
         itemInList={itemInList}
         currentStore={currentStore}

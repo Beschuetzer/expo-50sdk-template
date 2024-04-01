@@ -22,6 +22,7 @@ import { useFlushRedux } from '@/components/hooks/useFlushRedux';
 import { AutoSetStoreModal } from '@/components/modals/AutoSetStoreModal';
 import { Routes } from '@/constants/navigation';
 import { persistor, store } from '@/state/store';
+import { IMAGE_RENDERER_TITLE_DEFAULT } from '@/constants/general';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -94,6 +95,15 @@ function RootLayoutNav() {
                       options={{
                         presentation: 'modal',
                         title: 'Store Details',
+                        headerTitleAlign: 'center',
+                        headerLeft: () => <CloseButton />,
+                      }}
+                    />
+                    <Stack.Screen
+                      name={Routes.FullscreenImageScreen}
+                      options={{
+                        presentation: 'modal',
+                        title: IMAGE_RENDERER_TITLE_DEFAULT,
                         headerTitleAlign: 'center',
                         headerLeft: () => <CloseButton />,
                       }}

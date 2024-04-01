@@ -3,7 +3,6 @@ import { useNavigation } from 'expo-router';
 import { useEffect } from 'react';
 
 import { ImageRenderer } from '@/components/ImageRenderer';
-import { IMAGE_RENDERER_TITLE_DEFAULT } from '@/constants/general';
 import { Item } from '@/types/Item';
 
 export default function FullscreenImageScreen() {
@@ -13,12 +12,11 @@ export default function FullscreenImageScreen() {
     source: string;
     item: Item;
   };
-  console.log({ source });
 
   useEffect(() => {
+    if (!item?.name) return;
     navigation.setOptions({
-      headerTitle: item?.name || IMAGE_RENDERER_TITLE_DEFAULT,
-      headerTitleAlign: 'center',
+      headerTitle: item?.name,
     });
   }, []);
 

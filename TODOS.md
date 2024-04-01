@@ -1,5 +1,8 @@
 ## MVP
-
+-rework ho addItemsListItem reducer works:
+    --the storeSpecificValuesMap should remove the original key items
+    --refactor to remove the need to use .filter to remove the original item (should be able to update the current item)
+    
 -add ability to click an image and view full screen
 -how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?
 

@@ -202,6 +202,10 @@ export const listsSlice = createSlice({
     ) => {
       const { originalKey, item, storeSpecificValues, currentStore } =
         action.payload || {};
+      const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
+      const originalItemIndex = state[ListName.ItemsList].data.findIndex(
+        (item) => getKeyToUse(item) === originalKeyToUse,
+      );
       const keyToUse = getKeyToUse(action.payload.item);
 
       if (!keyToUse) {
@@ -210,12 +214,14 @@ export const listsSlice = createSlice({
         );
         return;
       }
+      if (!item) return;
 
-      const currentItem = getItemFromList(
-        state.itemsList.data,
-        keyToUse,
-      ) as any;
-      const newItem = { ...item } as any;
+      //add/update item
+      if (originalItemIndex >= 0) {
+        state[ListName.ItemsList].data[originalItemIndex] = item;
+      } else {
+        state[ListName.ItemsList].data.push(item);
+      }
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
@@ -242,22 +248,8 @@ export const listsSlice = createSlice({
           }
         }
       }
-
-      //update item if it exists otherwise add it
-      if (!currentItem) {
-        state.itemsList.data.push(newItem);
-      } else {
-        for (const [key, value] of Object.entries(item)) {
-          currentItem[key] = value;
-        }
-      }
-
-      //remove original item if the key for new item is different
-      const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
-      if (originalKeyToUse && keyToUse && originalKeyToUse !== keyToUse) {
-        state.itemsList.data = state.itemsList.data.filter(
-          (item) => getKeyToUse(item) !== originalKeyToUse,
-        );
+      if (originalKeyToUse && originalKeyToUse !== keyToUse) {
+        delete state.storeSpecificValuesMap[originalKeyToUse];
       }
     },
     addStoresListItem: (

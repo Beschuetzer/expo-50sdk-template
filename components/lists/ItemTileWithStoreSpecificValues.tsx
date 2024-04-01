@@ -7,6 +7,7 @@ import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTileProps } from './ItemTile';
+import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -118,20 +119,10 @@ export function ItemTileWithStoreSpecificValues(
           ) : null}
           {priceAtStore ? <Text>${priceAtStore}</Text> : null}
         </Column>
-        <Column
-          justifyContent="center"
-          alignItems="flex-end"
-          flex={0}
-          width={theme.sizes[2]}
-        >
-          {isMultiSelectMode ? (
-            <FontAwesome
-              name={`${isSelected ? 'circle' : 'circle-o'}`}
-              color={theme.colors.primary[900]}
-              size={theme.sizes[5]}
-            />
-          ) : null}
-        </Column>
+        <ItemTileIsSelectedColumn
+          isMultiSelectMode={isMultiSelectMode}
+          isSelected={isSelected}
+        />
       </Row>
     </RectButton>
   );

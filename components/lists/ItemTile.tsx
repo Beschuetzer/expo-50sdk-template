@@ -1,4 +1,3 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme } from 'native-base';
 import { useMemo } from 'react';
@@ -6,6 +5,7 @@ import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
+import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -77,20 +77,10 @@ export function ItemTile(props: ItemTileProps<Item>) {
             </Text>
           ) : null}
         </Column>
-        <Column
-          width={theme.sizes[2]}
-          justifyContent="center"
-          alignItems="flex-end"
-          flex={0}
-        >
-          {isMultiSelectMode ? (
-            <FontAwesome
-              name={`${isSelected ? 'circle' : 'circle-o'}`}
-              color={theme.colors.primary[900]}
-              size={theme.sizes[5]}
-            />
-          ) : null}
-        </Column>
+        <ItemTileIsSelectedColumn
+          isMultiSelectMode={isMultiSelectMode}
+          isSelected={isSelected}
+        />
       </Row>
     </RectButton>
   );

@@ -6,9 +6,14 @@ import { StyleSheet } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 
 import { ItemTileProps } from './ItemTile';
+import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  FORM_INTER_ITEM_SPACING,
+  ITEM_TILE_ICON_SIZE,
+  ITEM_TILE_WIDTH,
+} from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
@@ -21,8 +26,6 @@ type ItemTileForPreviouslyPurchasedProps = {
   onAddPress?: () => void;
 } & ItemTileProps<ItemWithStoreSpecificValues>;
 
-const TILE_WIDTH = 30;
-const ICON_SIZE = 5;
 export function ItemTileForPreviouslyPurchased(
   props: ItemTileForPreviouslyPurchasedProps,
 ) {
@@ -80,8 +83,8 @@ export function ItemTileForPreviouslyPurchased(
       <Row space={theme.space['0']}>
         <Column flex={0} mr={FORM_INTER_ITEM_SPACING}>
           <ImageRenderer
-            height={TILE_WIDTH * 1.5}
-            width={TILE_WIDTH}
+            height={ITEM_TILE_WIDTH * 1.5}
+            width={ITEM_TILE_WIDTH}
             source={item.images[item.imageToUseIndex]}
           />
         </Column>
@@ -107,7 +110,7 @@ export function ItemTileForPreviouslyPurchased(
           {isInCart ? (
             <FontAwesome
               name="shopping-cart"
-              size={theme.sizes[ICON_SIZE]}
+              size={theme.sizes[ITEM_TILE_ICON_SIZE]}
               color={greenColor}
             />
           ) : null}
@@ -118,26 +121,16 @@ export function ItemTileForPreviouslyPurchased(
             >
               <FontAwesome
                 name="plus"
-                size={theme.sizes[ICON_SIZE]}
+                size={theme.sizes[ITEM_TILE_ICON_SIZE]}
                 color={dynamicAddColor}
               />
             </TouchableOpacity>
           ) : null}
         </Row>
-        <Column
-          width={theme.sizes[2]}
-          justifyContent="center"
-          alignItems="flex-end"
-          flex={0}
-        >
-          {isMultiSelectMode ? (
-            <FontAwesome
-              name={`${isSelected ? 'circle' : 'circle-o'}`}
-              color={theme.colors.primary[900]}
-              size={theme.sizes[ICON_SIZE]}
-            />
-          ) : null}
-        </Column>
+        <ItemTileIsSelectedColumn
+          isMultiSelectMode={isMultiSelectMode}
+          isSelected={isSelected}
+        />
       </Row>
     </RectButton>
   );

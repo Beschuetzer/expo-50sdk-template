@@ -33,7 +33,8 @@ export const IMAGE_PRIORITY_MAPPING: {
   2: 'image_ingredients_thumb_url',
   3: 'image_nutrition_thumb_url',
 };
-
+export const ITEM_TILE_WIDTH = 30;
+export const ITEM_TILE_ICON_SIZE = 5;
 export const SORT_ORDER_VALUE_BY_NAME_DEFAULT: SortOrderValue = Object.freeze({
   sortOrder: SortOrder.Ascending,
   sortBy: SortType.Name,

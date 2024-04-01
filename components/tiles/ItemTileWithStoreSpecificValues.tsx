@@ -96,7 +96,10 @@ export function ItemTileWithStoreSpecificValues(
         backgroundColor={theme.colors.white}
       >
         <Column flex={0}>
-          <ImageRenderer source={item.images[item.imageToUseIndex]} />
+          <ImageRenderer
+            item={item}
+            source={item.images[item.imageToUseIndex]}
+          />
           <TouchableOpacity
             hitSlop={getButtonHitSlop()}
             onPress={incrementQuantity}

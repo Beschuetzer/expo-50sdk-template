@@ -282,6 +282,7 @@ export function ItemForm(props: ItemFormProps) {
           value={selectedUrl}
         />
         <ThumbnailPicker
+          item={item}
           spacing={theme.space[FORM_INTER_ITEM_SPACING]}
           selectedUrl={selectedUrl}
           onSelectImage={(url, isCustomImage) => {

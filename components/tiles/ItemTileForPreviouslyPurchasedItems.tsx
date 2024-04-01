@@ -84,6 +84,7 @@ export function ItemTileForPreviouslyPurchased(
       <Row space={theme.space['0']}>
         <Column flex={0} mr={FORM_INTER_ITEM_SPACING}>
           <ImageRenderer
+            item={item}
             height={ITEM_TILE_WIDTH * 1.5}
             width={ITEM_TILE_WIDTH}
             source={item.images[item.imageToUseIndex]}

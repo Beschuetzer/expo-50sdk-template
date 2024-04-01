@@ -60,7 +60,10 @@ export function ItemTile(props: ItemTileProps<Item>) {
     >
       <Row space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Column flex={0}>
-          <ImageRenderer source={item.images[item.imageToUseIndex]} />
+          <ImageRenderer
+            item={item}
+            source={item.images[item.imageToUseIndex]}
+          />
         </Column>
         <ItemTileNameAndUpcColumn item={item}>
           <Text>

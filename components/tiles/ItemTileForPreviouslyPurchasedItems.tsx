@@ -89,7 +89,7 @@ export function ItemTileForPreviouslyPurchased(
           />
         </Column>
         <Column flex={1}>
-          <Text flex={1} noOfLines={1} color={dynamicTextColor}>
+          <Text noOfLines={1} color={dynamicTextColor}>
             {item.name}
           </Text>
           <Text color={dynamicTextColor}>{item.upc}</Text>

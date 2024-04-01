@@ -62,7 +62,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
         </Column>
         <Column flex={1}>
-          <Text flex={1} noOfLines={1} flexWrap="wrap">
+          <Text noOfLines={1} flexWrap="wrap">
             {item.name}
           </Text>
           <Text>{item.upc}</Text>

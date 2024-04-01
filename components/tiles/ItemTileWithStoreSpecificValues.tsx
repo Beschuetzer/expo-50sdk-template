@@ -110,9 +110,7 @@ export function ItemTileWithStoreSpecificValues(
           </TouchableOpacity>
         </Column>
         <Column flex={1}>
-          <Text flex={1} noOfLines={1}>
-            {item.name}
-          </Text>
+          <Text noOfLines={1}>{item.name}</Text>
           <Text>{item.upc}</Text>
           {aisleNumberAtStore ? (
             <Text>Aisle #: {aisleNumberAtStore}</Text>

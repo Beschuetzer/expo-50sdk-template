@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTileProps } from './ItemTile';
 import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
+import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -109,14 +110,12 @@ export function ItemTileWithStoreSpecificValues(
             </Text>
           </TouchableOpacity>
         </Column>
-        <Column flex={1}>
-          <Text noOfLines={1}>{item.name}</Text>
-          <Text>{item.upc}</Text>
+        <ItemTileNameAndUpcColumn item={item}>
           {aisleNumberAtStore ? (
             <Text>Aisle #: {aisleNumberAtStore}</Text>
           ) : null}
           {priceAtStore ? <Text>${priceAtStore}</Text> : null}
-        </Column>
+        </ItemTileNameAndUpcColumn>
         <ItemTileIsSelectedColumn
           isMultiSelectMode={isMultiSelectMode}
           isSelected={isSelected}

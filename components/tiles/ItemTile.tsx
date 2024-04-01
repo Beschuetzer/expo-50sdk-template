@@ -6,6 +6,7 @@ import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
 import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
+import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -61,11 +62,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
         <Column flex={0}>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
         </Column>
-        <Column flex={1}>
-          <Text noOfLines={1} flexWrap="wrap">
-            {item.name}
-          </Text>
-          <Text>{item.upc}</Text>
+        <ItemTileNameAndUpcColumn item={item}>
           <Text>
             1 {item.unit || ItemUnit.Package} every {frequencyObj?.number}{' '}
             {frequencyObj?.timeSpan}
@@ -76,7 +73,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
               Last Purchased: {new Date(lastPurchased).toLocaleString()}
             </Text>
           ) : null}
-        </Column>
+        </ItemTileNameAndUpcColumn>
         <ItemTileIsSelectedColumn
           isMultiSelectMode={isMultiSelectMode}
           isSelected={isSelected}

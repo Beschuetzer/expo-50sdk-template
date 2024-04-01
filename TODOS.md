@@ -1,4 +1,7 @@
 ## MVP
+
+-how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?
+
 -add option to change item image size (how would this affect already taken images?)
 -add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])

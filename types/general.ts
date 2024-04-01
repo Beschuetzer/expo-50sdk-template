@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { ViewStyle } from 'react-native';
 
 import { Item, ItemWithStoreSpecificValues } from './Item';
@@ -15,6 +15,10 @@ export enum TimeSpan {
 export type Frequency = {
   number: number;
   timeSpan: TimeSpan;
+};
+
+export type ChildrenProp = {
+  children?: ReactNode | ReactNode[];
 };
 
 export type SpacingProp = {

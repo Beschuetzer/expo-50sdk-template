@@ -1,12 +1,13 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { Row, Column, Text, useTheme } from 'native-base';
+import { Row, Column, useTheme } from 'native-base';
 import { useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 
 import { ItemTileProps } from './ItemTile';
 import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
+import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
 import {
@@ -88,12 +89,7 @@ export function ItemTileForPreviouslyPurchased(
             source={item.images[item.imageToUseIndex]}
           />
         </Column>
-        <Column flex={1}>
-          <Text noOfLines={1} color={dynamicTextColor}>
-            {item.name}
-          </Text>
-          <Text color={dynamicTextColor}>{item.upc}</Text>
-        </Column>
+        <ItemTileNameAndUpcColumn item={item} color={dynamicTextColor} />
         <Row
           alignItems="center"
           flex={0}

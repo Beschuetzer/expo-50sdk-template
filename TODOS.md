@@ -1,4 +1,12 @@
 ## MVP
+-add allowItemOverride option
+    --when true changing an item's key to an already existing key will override that item with the new item. 
+    --when false, it will not be possible to save the item in ITemForm
+        --There will be a safety check in the addItemsListItem reducer to exit early
+        --the error message will include something like "please enable overriding items or modify the existing item with key of '...'"
+        
+-verify that the storeSpecificValuesMap keys for a given store change when that store's key changes (name).  Try adding an item with store values and then changing the store name
+-fix bug where changing key to an already existing key doesn't 
 -add ability to click an image and view full screen
 -how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?
 

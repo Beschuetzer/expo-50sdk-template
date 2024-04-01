@@ -93,7 +93,7 @@ export function ItemTileWithStoreSpecificValues(
         space={theme.space[FORM_INTER_ITEM_SPACING]}
         backgroundColor={theme.colors.white}
       >
-        <Column>
+        <Column flex={0}>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
           <TouchableOpacity
             hitSlop={getButtonHitSlop()}
@@ -108,23 +108,30 @@ export function ItemTileWithStoreSpecificValues(
             </Text>
           </TouchableOpacity>
         </Column>
-        <Column>
-          <Text>{item.name}</Text>
+        <Column flex={1}>
+          <Text flex={1} noOfLines={1}>
+            {item.name}
+          </Text>
           <Text>{item.upc}</Text>
           {aisleNumberAtStore ? (
             <Text>Aisle #: {aisleNumberAtStore}</Text>
           ) : null}
           {priceAtStore ? <Text>${priceAtStore}</Text> : null}
         </Column>
-        {isMultiSelectMode ? (
-          <Column justifyContent="center" alignItems="flex-end" flex={1}>
+        <Column
+          justifyContent="center"
+          alignItems="flex-end"
+          flex={0}
+          width={theme.sizes[2]}
+        >
+          {isMultiSelectMode ? (
             <FontAwesome
               name={`${isSelected ? 'circle' : 'circle-o'}`}
               color={theme.colors.primary[900]}
               size={theme.sizes[5]}
             />
-          </Column>
-        ) : null}
+          ) : null}
+        </Column>
       </Row>
     </RectButton>
   );

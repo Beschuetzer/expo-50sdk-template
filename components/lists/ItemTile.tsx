@@ -58,11 +58,13 @@ export function ItemTile(props: ItemTileProps<Item>) {
       }}
     >
       <Row space={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <Column>
+        <Column flex={0}>
           <ImageRenderer source={item.images[item.imageToUseIndex]} />
         </Column>
-        <Column>
-          <Text>{item.name}</Text>
+        <Column flex={1}>
+          <Text flex={1} noOfLines={1} flexWrap="wrap">
+            {item.name}
+          </Text>
           <Text>{item.upc}</Text>
           <Text>
             1 {item.unit || ItemUnit.Package} every {frequencyObj?.number}{' '}
@@ -75,15 +77,20 @@ export function ItemTile(props: ItemTileProps<Item>) {
             </Text>
           ) : null}
         </Column>
-        {isMultiSelectMode ? (
-          <Column justifyContent="center" alignItems="flex-end" flex={1}>
+        <Column
+          width={theme.sizes[2]}
+          justifyContent="center"
+          alignItems="flex-end"
+          flex={0}
+        >
+          {isMultiSelectMode ? (
             <FontAwesome
               name={`${isSelected ? 'circle' : 'circle-o'}`}
               color={theme.colors.primary[900]}
               size={theme.sizes[5]}
             />
-          </Column>
-        ) : null}
+          ) : null}
+        </Column>
       </Row>
     </RectButton>
   );

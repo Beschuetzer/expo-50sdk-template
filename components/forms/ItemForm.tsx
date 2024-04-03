@@ -50,7 +50,7 @@ export type ItemFormProps = {
   currentStore?: Store;
   onClose: () => void;
   onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void;
-  showOverrideMsg?: boolean;
+  showOverrideMsgInitial?: boolean;
   shouldFocusFirstField?: boolean;
   shouldAddQuantity?: boolean;
   shouldAddToCart?: boolean;
@@ -71,7 +71,7 @@ export function ItemForm(props: ItemFormProps) {
     shouldAddQuantity = false,
     shouldAddToCart = false,
     shouldFocusFirstField = true,
-    showOverrideMsg = true,
+    showOverrideMsgInitial = true,
   } = props;
 
   const theme = useTheme();
@@ -85,6 +85,9 @@ export function ItemForm(props: ItemFormProps) {
 
   const [selectedUrl, setSelectedUrl] = useState(
     itemToUse?.images[itemToUse?.imageToUseIndex] || EMPTY_STRING,
+  );
+  const [showOverrideMsg, setShowOverrideMsg] = useState(
+    showOverrideMsgInitial,
   );
   const [upcValue, setUpcValue] = useState(itemToUse?.upc || EMPTY_STRING);
   const [productNameValue, setProductNameValue] = useState(
@@ -211,7 +214,11 @@ export function ItemForm(props: ItemFormProps) {
         <>
           <Row space={3}>
             <Button
-              isDisabled={!formValidation.isValid || !productNameValue}
+              isDisabled={
+                !formValidation.isValid ||
+                !productNameValue ||
+                (!canOverrideItem && isProposedItemPresent)
+              }
               flex={1}
               onPress={onSavePress}
             >
@@ -244,7 +251,10 @@ export function ItemForm(props: ItemFormProps) {
           p={theme.space[1]}
           placeholder="Product Name"
           value={productNameValue}
-          onChangeText={(newText) => setProductNameValue(newText)}
+          onChangeText={(newText) => {
+            setProductNameValue(newText);
+            setShowOverrideMsg(true);
+          }}
           isInvalid={productNameValue.length <= 0}
         />
       </Stack>
@@ -258,7 +268,10 @@ export function ItemForm(props: ItemFormProps) {
             p={theme.space[1]}
             placeholder="UPC Code"
             value={upcValue}
-            onChangeText={(newText) => setUpcValue(newText)}
+            onChangeText={(newText) => {
+              setUpcValue(newText);
+              setShowOverrideMsg(true);
+            }}
             isInvalid={
               !UPC_REGEX.test(upcValue || EMPTY_STRING) && upcValue.length !== 0
             }

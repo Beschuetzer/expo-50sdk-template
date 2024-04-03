@@ -1,5 +1,4 @@
 ## MVP
--prevent saving when canOverrideItem is false
 -when canOverrideItem is true need to handle overriding correctly
 
 

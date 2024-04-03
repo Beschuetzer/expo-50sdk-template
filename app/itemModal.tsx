@@ -86,7 +86,7 @@ export default function ItemModal() {
         onSave={(addItemsListItemPayload: AddItemsListItemPayload) => {
           dispatch(addItemsListItem(addItemsListItemPayload));
         }}
-        showOverrideMsg={showOverrideMsg}
+        showOverrideMsgInitial={showOverrideMsg}
         shouldFocusFirstField={!itemInList}
         shouldAddQuantity={callerList === ListName.ShoppingList}
         shouldAddToCart={callerList === ListName.InCartList}

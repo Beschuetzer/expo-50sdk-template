@@ -1,4 +1,9 @@
 ## MVP
+-figure out issue when scanning already present item and clicking save (duplicate item is saved)
+-prevent saving when canOverrideItem is false
+-when canOverrideItem is true need to handle overriding correctly
+
+
 -refactor addStoresListItem reducer:
     --add allowStoreOverride option
         --when true changing an item's key to an already existing key will override that item with the new item. 
@@ -7,13 +12,6 @@
             --There will be a safety check in the addStoresListItem reducer to exit early
             --the error message will include something like "please enable overriding stores or modify the existing store with key of '...'"  
     --storeSpecificValuesMap keys need to be updated when originalKey is defined and different than keyToUse
-
-
--add allowItemOverride option
-    --when true changing an item's key to an already existing key will override that item with the new item. 
-    --when false, it will not be possible to save the item in ITemForm
-        --There will be a safety check in the addItemsListItem reducer to exit early
-        --the error message will include something like "please enable overriding items or modify the existing item with key of '...'"
         
 -fix bug where changing key to an already existing key doesn't 
 -add ability to click an image and view full screen

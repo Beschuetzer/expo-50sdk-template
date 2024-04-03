@@ -86,7 +86,8 @@ export const upcProductSelector = (id: string) =>
         (state[scannerSlice.name] as ScannerState).upcProducts,
     ],
     (upcProducts) => {
-      const value = (upcProducts as any)?.[id];
-      return value as UpcProduct;
+      const value = (upcProducts as any)?.[id.padStart(13, '0')];
+      const valueTwo = (upcProducts as any)?.[id];
+      return (value || valueTwo) as UpcProduct;
     },
   );

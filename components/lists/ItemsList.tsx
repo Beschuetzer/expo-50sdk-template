@@ -81,7 +81,7 @@ export function ItemsList(props: ItemsListProps) {
     closeMenu();
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
-      key: EMPTY_STRING,
+      key: { upc: EMPTY_STRING, name: EMPTY_STRING },
     });
   }
 

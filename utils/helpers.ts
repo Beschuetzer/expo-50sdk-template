@@ -139,7 +139,7 @@ export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {
   });
 }
 
-export function getKeyToUse(key: string | Key, displayAlert = true) {
+export function getKeyToUse(key: string | Key, displayAlert = false) {
   if (typeof key === 'string') return key;
   const toReturn = key?.upc || key?.name || EMPTY_STRING;
 

@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode } from 'react';
 import { ViewStyle } from 'react-native';
 
-import { Item, ItemWithStoreSpecificValues } from './Item';
+import { Item, ItemWithStoreSpecificValues, Key } from './Item';
 import { Store } from './Store';
 import { UpcProduct } from './UpcResponse';
 
@@ -30,6 +30,10 @@ export type HeadingTagProp = {
    *This is the component to use to render the header.
    **/
   headingTag?: any; //todo: figure out type here
+};
+
+export type OriginalKeyProp = {
+  originalKey: Key;
 };
 
 export type ListNameProp = {

@@ -6,6 +6,7 @@ import { GestureResponderEvent } from 'react-native';
 import { InputValidationMessage } from '../InputValidationMessage';
 import { MOCKS_UPCS } from '../mocks/mockUpcData';
 
+import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 
@@ -34,7 +35,9 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
     (e: GestureResponderEvent) => {
       e.preventDefault();
       if (getIsValidValue(value)) {
-        navigation.navigate(Routes.ItemModal, { key: value });
+        navigation.navigate(Routes.ItemModal, {
+          key: { upc: value, name: EMPTY_STRING },
+        });
       }
     },
     [value],

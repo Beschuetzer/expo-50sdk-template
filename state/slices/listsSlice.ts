@@ -21,7 +21,7 @@ import {
   StoreSpecificValuesMap,
 } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
-import { ListNameProp, StoreProp } from '@/types/general';
+import { ListNameProp, OriginalKeyProp, StoreProp } from '@/types/general';
 import {
   calculateDistance,
   deleteImages,
@@ -56,13 +56,12 @@ export type AddItemsListItemPayload = {
   item: Item;
   storeSpecificValues?: StoreSpecificValues;
   currentStore?: Store;
-  originalKey?: Key;
-};
+} & OriginalKeyProp;
 
 export type AddStoresListItemPayload = {
   newStore: Store;
-  originalKey?: string;
-} & StoreProp;
+} & StoreProp &
+  OriginalKeyProp;
 
 export type ResetListToDisplayFiltersPayload = ListNameProp;
 
@@ -258,6 +257,7 @@ export const listsSlice = createSlice({
       action: PayloadAction<AddStoresListItemPayload>,
     ) => {
       const { newStore, store, originalKey } = action.payload;
+      const originalKeyToUse = getKeyToUse(originalKey);
       const keyToUse = getKeyToUse(newStore);
       if (!keyToUse) {
         alert('Unable to add an item with no name to the storesList.');
@@ -268,7 +268,7 @@ export const listsSlice = createSlice({
         (store) => getKeyToUse(store) === keyToUse,
       );
 
-      console.log({originalKey, keyToUse, storeIndex});
+      console.log({ originalKeyToUse, keyToUse, storeIndex });
 
       if (storeIndex !== -1) {
         state.storesList.data[storeIndex] = getStoreWithDistance(

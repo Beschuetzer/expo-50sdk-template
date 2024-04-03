@@ -16,8 +16,10 @@ import {
   itemsListItemSelector,
   itemsListSelector,
 } from '@/state/slices/listsSlice';
+import { canOverrideItemSelector } from '@/state/slices/optionsSlice';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
+import { getKeyToUse } from '@/utils/helpers';
 import { getItem } from '@/utils/model-mappings';
 
 export default function ItemModal() {
@@ -30,16 +32,20 @@ export default function ItemModal() {
     showBlank = false,
     callerList,
   } = (route.params || {}) as any;
-  const itemInList = useSelector(itemsListItemSelector(key || EMPTY_STRING));
+  const keyToUse = getKeyToUse(key);
+  const itemInList = useSelector(
+    itemsListItemSelector(keyToUse || EMPTY_STRING),
+  );
+  const canOverrideItem = useSelector(canOverrideItemSelector);
+
+  console.log({key});
+  
   const { upcProduct, errorMsg } = useUpcProduct({
-    upc: key,
+    upc: key?.upc,
     shouldSkip: !!itemInList,
   });
   const currentStore = useSelector(currentStoreSelector);
   const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
-  const itemInListUsingName = useSelector(
-    itemsListItemSelector(fallbackItem?.name || EMPTY_STRING),
-  );
   const itemsList = useSelector(itemsListSelector);
 
   function getItemFromUpc(upcProduct: UpcProduct | null) {
@@ -52,7 +58,7 @@ export default function ItemModal() {
   }
 
   function renderContent() {
-    if (!itemInList && !itemInListUsingName && !upcProduct && !showBlank) {
+    if (!itemInList && !upcProduct && !showBlank) {
       return (
         <Center height="100%">
           {errorMsg ? (
@@ -69,19 +75,21 @@ export default function ItemModal() {
         </Center>
       );
     }
+
     return (
       <ItemForm
+        originalKey={key}
+        canOverrideItem={canOverrideItem}
+        currentStore={currentStore}
+        items={itemsList.data}
+        item={fallbackItem as ItemWithStoreSpecificValues}
+        itemInList={itemInList}
         onClose={() => navigation.canGoBack() && navigation.goBack()}
         onSave={(addItemsListItemPayload: AddItemsListItemPayload) => {
           dispatch(addItemsListItem(addItemsListItemPayload));
         }}
-        items={itemsList.data}
-        item={fallbackItem as ItemWithStoreSpecificValues}
-        itemInListUsingName={itemInListUsingName}
-        itemInList={itemInList}
-        currentStore={currentStore}
         showOverrideMsg={showOverrideMsg}
-        shouldFocusFirstField={!itemInList && !itemInListUsingName}
+        shouldFocusFirstField={!itemInList}
         shouldAddQuantity={callerList === ListName.ShoppingList}
         shouldAddToCart={callerList === ListName.InCartList}
       />

@@ -31,7 +31,7 @@ import {
   StoreSpecificValues,
 } from '@/types/Item';
 import { Store } from '@/types/Store';
-import { ItemProp, ItemsProp } from '@/types/general';
+import { ItemProp, ItemsProp, OriginalKeyProp } from '@/types/general';
 import {
   deleteFile,
   displayAlert,
@@ -45,8 +45,8 @@ type ItemFormValdation = {
 };
 
 export type ItemFormProps = {
-  itemInListUsingName?: Item | null;
   itemInList?: Item | null;
+  canOverrideItem?: boolean;
   currentStore?: Store;
   onClose: () => void;
   onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void;
@@ -55,16 +55,19 @@ export type ItemFormProps = {
   shouldAddQuantity?: boolean;
   shouldAddToCart?: boolean;
 } & Partial<ItemProp<ItemWithStoreSpecificValues>> &
-  ItemsProp<Item>;
+  ItemsProp<Item> &
+  OriginalKeyProp;
 
 export function ItemForm(props: ItemFormProps) {
   const {
+    canOverrideItem,
     currentStore,
     item,
+    items,
     itemInList,
-    itemInListUsingName,
     onClose,
     onSave,
+    originalKey,
     shouldAddQuantity = false,
     shouldAddToCart = false,
     shouldFocusFirstField = true,
@@ -72,14 +75,6 @@ export function ItemForm(props: ItemFormProps) {
   } = props;
 
   const theme = useTheme();
-  const keyToUse = useMemo(
-    () =>
-      getKeyToUse(
-        { name: item?.name || EMPTY_STRING, upc: item?.upc || EMPTY_STRING },
-        false,
-      ),
-    [item],
-  );
 
   const barcodeModalRef = useRef<BottomSheetModalMethods>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -94,10 +89,6 @@ export function ItemForm(props: ItemFormProps) {
   const [upcValue, setUpcValue] = useState(itemToUse?.upc || EMPTY_STRING);
   const [productNameValue, setProductNameValue] = useState(
     itemToUse?.name || EMPTY_STRING,
-  );
-  const originalKey = useMemo(
-    () => ({ name: itemToUse.name, upc: itemToUse.upc }) as Key,
-    [itemToUse],
   );
   const frequencyInMsRef = useRef<number>(itemToUse?.frequency || -1);
   const unitRef = useRef<string>(EMPTY_STRING);
@@ -115,6 +106,18 @@ export function ItemForm(props: ItemFormProps) {
   }, [isUpcValid, upcValue, productNameValue]);
   const customImagesToDeleteOnUnloadRef = useRef<string[]>([]);
   const shouldDeleteLastImageRef = useRef(true);
+  const isProposedItemPresent = useMemo(
+    () =>
+      getIsItemAlreadyPresent(items, upcValue, productNameValue, originalKey),
+    [items, upcValue, productNameValue, originalKey],
+  );
+  const keyBeingOverriden = useMemo(
+    () => upcValue || productNameValue,
+    [upcValue, productNameValue],
+  );
+  const fieldBeingUsedInKey = useMemo(() => {
+    return upcValue?.trim().length > 0 ? 'upc' : 'name';
+  }, [upcValue]);
 
   function onClosePress() {
     shouldDeleteLastImageRef.current = true;
@@ -202,15 +205,6 @@ export function ItemForm(props: ItemFormProps) {
     };
   }, []);
 
-  // !showOverrideMsg || !upcValue ? !itemInListUsingName : !itemInList
-  console.log({
-    key: getKeyToUse(itemToUse) || upcValue || productNameValue,
-    showOverrideMsg,
-    upcValue,
-    itemInListUsingName: !!itemInListUsingName,
-    itemInList: !!itemInList,
-  });
-
   return (
     <AbsolutePositionedScreen
       absolutelyPositionedJsx={
@@ -232,12 +226,12 @@ export function ItemForm(props: ItemFormProps) {
             message={formValidation.message}
           />
           <InputValidationMessage
-            isValid={
-              !showOverrideMsg ||
-              (!upcValue ? !itemInListUsingName : !itemInList)
+            isValid={!isProposedItemPresent}
+            message={
+              canOverrideItem
+                ? `An item with the ${fieldBeingUsedInKey} of '${keyBeingOverriden}' is already in the list and will be overriden.`
+                : `Please enable overriding items or remove the item with ${fieldBeingUsedInKey} of '${keyBeingOverriden}'`
             }
-            // message={`An item with the key of '${getKeyToUse(itemToUse) || upcValue || productNameValue}' is already in the list and will be overriden.`}
-            message={`An item with the key of '${upcValue && productNameValue ? keyToUse : !upcValue && productNameValue ? productNameValue : upcValue}' is already in the list and will be overriden.`}
           />
         </>
       }
@@ -342,4 +336,23 @@ export function ItemForm(props: ItemFormProps) {
       />
     </AbsolutePositionedScreen>
   );
+}
+
+function getIsItemAlreadyPresent(
+  items: Item[],
+  upcValue: string,
+  name: string,
+  originalKey: Key,
+) {
+  const originalKeyToUse = getKeyToUse(originalKey);
+  if (
+    (!upcValue && !name) ||
+    originalKeyToUse === name ||
+    originalKeyToUse === upcValue
+  )
+    return false;
+  return !!items.find((item) => {
+    const key = getKeyToUse(item);
+    return key === (upcValue ? upcValue.trim() : name);
+  });
 }

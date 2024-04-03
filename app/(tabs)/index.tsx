@@ -211,7 +211,7 @@ export default function TabOneScreen() {
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
       callerList: listName,
-      key: EMPTY_STRING,
+      key: { upc: EMPTY_STRING, name: EMPTY_STRING },
     });
   }, [closeMenu, listName]);
 

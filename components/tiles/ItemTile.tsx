@@ -51,7 +51,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
           onSelect && onSelect(item);
         } else {
           navigation.navigate(Routes.ItemModal, {
-            key: item.upc || item.name,
+            key: {upc: item.upc, name: item.name},
             showOverrideMsg: false,
             callerList: listName,
           });

@@ -227,7 +227,9 @@ export const listsSlice = createSlice({
           let indexOffset = 0;
           if (newItemIndex >= 0) {
             state[ListName.ItemsList].data.splice(newItemIndex, 1);
-            indexOffset++;
+            if (newItemIndex < originalItemIndex) {
+              indexOffset++;
+            }
           }
           state[ListName.ItemsList].data[
             originalItemIndex > 0

@@ -1,5 +1,5 @@
 import { Row, useTheme } from 'native-base';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Switch, SwitchProps } from 'react-native';
 
 import { ChildrenProp } from '@/types/general';

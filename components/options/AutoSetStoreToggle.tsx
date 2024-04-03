@@ -1,7 +1,8 @@
-import { Row, useTheme, Text, Input } from 'native-base';
+import { useTheme, Text, Input } from 'native-base';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Switch } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { ToggleWithText } from './ToggleWithText';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
@@ -43,33 +44,22 @@ export function AutoSetStoreToggle(props: AutoSetStoreToggleProps) {
   }, [autoSetDistance]);
 
   return (
-    <Row alignItems="center" justifyContent="space-between">
-      <Row alignItems="center">
-        <Text mr={theme.space[FORM_INTER_ITEM_SPACING]}>
-          Auto Set Store when within
-        </Text>
-        <Input
-          width={theme.sizes[4]}
-          keyboardType="numeric"
-          value={autoSetDistance}
-          onChangeText={(newValue) => setAutoSetDistance(newValue)}
-        />
-        <Text ml={theme.space[FORM_INTER_ITEM_SPACING]}>mi.</Text>
-      </Row>
-      <Switch
-        trackColor={{
-          false: theme.colors.secondary[200],
-          true: theme.colors.primary[200],
-        }}
-        thumbColor={
-          autoSelectStore.enabled
-            ? theme.colors.primary[900]
-            : theme.colors.secondary[900]
-        }
-        ios_backgroundColor={theme.colors.black[400]}
-        onValueChange={toggleSwitch}
-        value={autoSelectStore.enabled}
+    <ToggleWithText
+      switchProps={{
+        onValueChange: toggleSwitch,
+        value: autoSelectStore.enabled,
+      }}
+    >
+      <Text mr={theme.space[FORM_INTER_ITEM_SPACING]}>
+        Auto Set Store when within
+      </Text>
+      <Input
+        width={theme.sizes[4]}
+        keyboardType="numeric"
+        value={autoSetDistance}
+        onChangeText={(newValue) => setAutoSetDistance(newValue)}
       />
-    </Row>
+      <Text ml={theme.space[FORM_INTER_ITEM_SPACING]}>mi.</Text>
+    </ToggleWithText>
   );
 }

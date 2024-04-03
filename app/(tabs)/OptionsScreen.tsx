@@ -8,11 +8,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
 import { InputValidationMessage } from '@/components/InputValidationMessage';
 import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
+import { CanOverrideItemToggle } from '@/components/options/CanOverrideItemToggle';
 import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider';
 import { SaveLoadState } from '@/components/options/SaveLoadState';
 import {
   FORM_INTER_ITEM_SPACING,
-  SWIPEABLE_ROW_OPEN_THRESHOLD,
+  SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { setCurrentLocation } from '@/state/slices/listsSlice';
@@ -76,8 +77,10 @@ export default function OptionsScreen() {
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <SaveLoadState />
         <AutoSetStoreToggle />
+        <CanOverrideItemToggle />
         <FormControl.Label>
-          Item Row Open Threshold (default = {SWIPEABLE_ROW_OPEN_THRESHOLD}):
+          Item Row Open Threshold (default ={' '}
+          {SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT}):
         </FormControl.Label>
         <Row>
           <Input

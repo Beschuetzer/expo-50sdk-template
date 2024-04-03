@@ -7,6 +7,7 @@ import { Frequency, TimeSpan } from '@/types/general';
 
 export const AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL = 0.25;
 export const AUTO_SET_STORE_WHEN_CLOSE_ENOUGH = true;
+export const CAN_OVERRIDE_ITEM_DEFAULT = false;
 export const DEFAULT_IMAGE_INDEX = 0;
 export const EMPTY_NUMBER = 0;
 export const EMPTY_STRING = '';
@@ -49,7 +50,7 @@ export const SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT: SortOrderValue =
     sortOrder: SortOrder.Ascending,
     sortBy: SortType.AisleNumber,
   });
-export const SWIPEABLE_ROW_OPEN_THRESHOLD = 100;
+export const SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT = 100;
 export const TIME_SPAN_TO_MILLISECONDS_MAPPING: { [key in TimeSpan]: number } =
   {
     [TimeSpan.Hour]: HOUR_IN_MS,

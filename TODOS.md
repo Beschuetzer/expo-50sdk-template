@@ -1,5 +1,4 @@
 ## MVP
--figure out issue when scanning already present item and clicking save (duplicate item is saved)
 -prevent saving when canOverrideItem is false
 -when canOverrideItem is true need to handle overriding correctly
 

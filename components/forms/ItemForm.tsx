@@ -31,7 +31,7 @@ import {
   StoreSpecificValues,
 } from '@/types/Item';
 import { Store } from '@/types/Store';
-import { ItemProp } from '@/types/general';
+import { ItemProp, ItemsProp } from '@/types/general';
 import {
   deleteFile,
   displayAlert,
@@ -54,7 +54,8 @@ export type ItemFormProps = {
   shouldFocusFirstField?: boolean;
   shouldAddQuantity?: boolean;
   shouldAddToCart?: boolean;
-} & Partial<ItemProp<ItemWithStoreSpecificValues>>;
+} & Partial<ItemProp<ItemWithStoreSpecificValues>> &
+  ItemsProp<Item>;
 
 export function ItemForm(props: ItemFormProps) {
   const {
@@ -69,6 +70,7 @@ export function ItemForm(props: ItemFormProps) {
     shouldFocusFirstField = true,
     showOverrideMsg = true,
   } = props;
+
   const theme = useTheme();
   const keyToUse = useMemo(
     () =>
@@ -84,7 +86,7 @@ export function ItemForm(props: ItemFormProps) {
   const itemToUse = useMemo(
     () => ({ ...(itemInList || item || ({} as Item)) }),
     [item, itemInList],
-  );
+  ) as ItemWithStoreSpecificValues;
 
   const [selectedUrl, setSelectedUrl] = useState(
     itemToUse?.images[itemToUse?.imageToUseIndex] || EMPTY_STRING,
@@ -200,6 +202,15 @@ export function ItemForm(props: ItemFormProps) {
     };
   }, []);
 
+  // !showOverrideMsg || !upcValue ? !itemInListUsingName : !itemInList
+  console.log({
+    key: getKeyToUse(itemToUse) || upcValue || productNameValue,
+    showOverrideMsg,
+    upcValue,
+    itemInListUsingName: !!itemInListUsingName,
+    itemInList: !!itemInList,
+  });
+
   return (
     <AbsolutePositionedScreen
       absolutelyPositionedJsx={
@@ -222,8 +233,10 @@ export function ItemForm(props: ItemFormProps) {
           />
           <InputValidationMessage
             isValid={
-              !showOverrideMsg || !upcValue ? !itemInListUsingName : !itemInList
+              !showOverrideMsg ||
+              (!upcValue ? !itemInListUsingName : !itemInList)
             }
+            // message={`An item with the key of '${getKeyToUse(itemToUse) || upcValue || productNameValue}' is already in the list and will be overriden.`}
             message={`An item with the key of '${upcValue && productNameValue ? keyToUse : !upcValue && productNameValue ? productNameValue : upcValue}' is already in the list and will be overriden.`}
           />
         </>
@@ -288,7 +301,6 @@ export function ItemForm(props: ItemFormProps) {
           value={selectedUrl}
         />
         <ThumbnailPicker
-          item={item}
           spacing={theme.space[FORM_INTER_ITEM_SPACING]}
           selectedUrl={selectedUrl}
           onSelectImage={(url, isCustomImage) => {
@@ -324,7 +336,7 @@ export function ItemForm(props: ItemFormProps) {
       />
       <StoreManager showStoreList />
       <ItemFormStoreSpecific
-        item={itemToUse as ItemWithStoreSpecificValues}
+        item={itemToUse}
         onValueChange={onItemSpecificValueChange}
         shouldAddQuantity={shouldAddQuantity}
       />

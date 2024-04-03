@@ -40,6 +40,10 @@ export type ItemProp<T> = {
   item: T;
 };
 
+export type ItemsProp<T> = {
+  items: T[];
+};
+
 export type ItemOrItemWithStoreSpecificValuesProp = {
   item: Item | ItemWithStoreSpecificValues;
 };

@@ -14,6 +14,7 @@ import {
   addItemsListItem,
   currentStoreSelector,
   itemsListItemSelector,
+  itemsListSelector,
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
@@ -39,6 +40,7 @@ export default function ItemModal() {
   const itemInListUsingName = useSelector(
     itemsListItemSelector(fallbackItem?.name || EMPTY_STRING),
   );
+  const itemsList = useSelector(itemsListSelector);
 
   function getItemFromUpc(upcProduct: UpcProduct | null) {
     const item = getItem(upcProduct);
@@ -73,6 +75,7 @@ export default function ItemModal() {
         onSave={(addItemsListItemPayload: AddItemsListItemPayload) => {
           dispatch(addItemsListItem(addItemsListItemPayload));
         }}
+        items={itemsList.data}
         item={fallbackItem as ItemWithStoreSpecificValues}
         itemInListUsingName={itemInListUsingName}
         itemInList={itemInList}

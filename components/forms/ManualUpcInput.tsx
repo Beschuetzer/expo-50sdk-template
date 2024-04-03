@@ -9,6 +9,7 @@ import { MOCKS_UPCS } from '../mocks/mockUpcData';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import { getStandardizedUpcValue } from '@/utils/helpers';
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -35,8 +36,9 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
     (e: GestureResponderEvent) => {
       e.preventDefault();
       if (getIsValidValue(value)) {
+        const upc = getStandardizedUpcValue(value);
         navigation.navigate(Routes.ItemModal, {
-          key: { upc: value, name: EMPTY_STRING },
+          key: { upc, name: EMPTY_STRING },
           showOverrideMsg: false,
         });
       }

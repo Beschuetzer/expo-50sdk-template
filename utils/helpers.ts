@@ -16,7 +16,7 @@ import {
   SORT_ORDER_VALUE_BY_NAME_DEFAULT,
   WEEK_IN_MS,
 } from '@/constants/general';
-import { LOCAL_FILE_REGEX } from '@/constants/regexs';
+import { LOCAL_FILE_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import { ListName } from '@/state/slices/listsSlice';
 import { Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
@@ -276,6 +276,11 @@ export function getSortOrderValues(listName: ListName) {
     case ListName.ItemsList:
       return SORT_ORDER_VALUE_BY_NAME_DEFAULT;
   }
+}
+
+export function getStandardizedUpcValue(upc?: string) {
+  if (!upc || upc.length < UPC_REQUIRED_CHAR_LENGTH) return EMPTY_STRING;
+  return upc?.length === UPC_REQUIRED_CHAR_LENGTH + 1 ? upc.substring(1) : upc;
 }
 
 export function getStoreWithDistance(

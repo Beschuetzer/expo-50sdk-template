@@ -218,7 +218,23 @@ export const listsSlice = createSlice({
 
       //add/update item
       if (originalItemIndex >= 0) {
-        state[ListName.ItemsList].data[originalItemIndex] = item;
+        if (originalKeyToUse === keyToUse) {
+          state[ListName.ItemsList].data[originalItemIndex] = item;
+        } else {
+          const newItemIndex = state[ListName.ItemsList].data.findIndex(
+            (item) => getKeyToUse(item) === keyToUse,
+          );
+          let indexOffset = 0;
+          if (newItemIndex >= 0) {
+            state[ListName.ItemsList].data.splice(newItemIndex, 1);
+            indexOffset++;
+          }
+          state[ListName.ItemsList].data[
+            originalItemIndex > 0
+              ? originalItemIndex - indexOffset
+              : originalItemIndex
+          ] = item;
+        }
       } else {
         state[ListName.ItemsList].data.push(item);
       }

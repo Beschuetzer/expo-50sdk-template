@@ -1,6 +1,5 @@
 ## MVP
--when canOverrideItem is true need to handle overriding correctly
-
+-figure out bug where sometimes overriding doesn't remove the original item (logic is not quite right; need to consider originalItemIndex and newItemIndex and conditionally increment indexOffset?)
 
 -refactor addStoresListItem reducer:
     --add allowStoreOverride option

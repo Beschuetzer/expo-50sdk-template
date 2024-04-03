@@ -38,8 +38,6 @@ export default function ItemModal() {
   );
   const canOverrideItem = useSelector(canOverrideItemSelector);
 
-  console.log({key});
-  
   const { upcProduct, errorMsg } = useUpcProduct({
     upc: key?.upc,
     shouldSkip: !!itemInList,

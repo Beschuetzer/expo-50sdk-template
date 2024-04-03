@@ -8,8 +8,8 @@ import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { FullscreenSpinner } from '@/components/FullscreenSpinner';
 import { ManualUpcInput } from '@/components/forms/ManualUpcInput';
 import { useRequestCameraPermissions } from '@/components/hooks/useRequestCameraPermissions';
-import { Routes } from '@/constants/navigation';
 import { EMPTY_STRING } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 
 const BarcodeScannerScreen = () => {
   const [type, setType] = useState(CameraType.back);
@@ -50,6 +50,7 @@ const BarcodeScannerScreen = () => {
         onScanned={(upc) => {
           navigation.navigate(Routes.ItemModal, {
             key: { upc, name: EMPTY_STRING },
+            showOverrideMsg: false
           });
         }}
       />

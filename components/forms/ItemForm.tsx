@@ -226,7 +226,7 @@ export function ItemForm(props: ItemFormProps) {
             message={formValidation.message}
           />
           <InputValidationMessage
-            isValid={!isProposedItemPresent}
+            isValid={!showOverrideMsg || !isProposedItemPresent}
             message={
               canOverrideItem
                 ? `An item with the ${fieldBeingUsedInKey} of '${keyBeingOverriden}' is already in the list and will be overriden.`

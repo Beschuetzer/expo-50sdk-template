@@ -7,6 +7,7 @@ import {
   IMAGE_PRIORITY_MAPPING,
   UNIT_INITIAL,
 } from '@/constants/general';
+import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -24,7 +25,10 @@ export function getItem(input?: UpcProduct | null): Item {
       input?.brands && input?.product_name
         ? `${input.brands} - ${input?.product_name}`
         : input?.product_name || EMPTY_STRING,
-    upc: input?.code || input?.id || EMPTY_STRING,
+    upc:
+      input?.code?.length === UPC_REQUIRED_CHAR_LENGTH + 1
+        ? input.code.substring(1)
+        : input?.code || input?.id || EMPTY_STRING,
     unit: UNIT_INITIAL,
     addedDate: 0,
     lastUpdatedDate: 0,

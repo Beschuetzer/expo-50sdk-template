@@ -3,6 +3,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
 
+import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import { UpcProduct } from '@/types/UpcResponse';
 import { getKeyToUse } from '@/utils/helpers';
 
@@ -41,6 +42,7 @@ export const scannerSlice = createSlice({
         );
         return;
       }
+
       state.upcProducts[keyToUse] = {
         ...action.payload,
         timestamp: Date.now(),
@@ -86,8 +88,10 @@ export const upcProductSelector = (id: string) =>
         (state[scannerSlice.name] as ScannerState).upcProducts,
     ],
     (upcProducts) => {
-      const value = (upcProducts as any)?.[id.padStart(13, '0')];
-      const valueTwo = (upcProducts as any)?.[id];
-      return (value || valueTwo) as UpcProduct;
+      const valueOne =
+        upcProducts?.[id.padStart(UPC_REQUIRED_CHAR_LENGTH + 1, '0')];
+      const valueTwo = upcProducts?.[id];
+      const valueThree = upcProducts?.[id.substring(1)];
+      return (valueOne || valueTwo || valueThree) as UpcProduct;
     },
   );

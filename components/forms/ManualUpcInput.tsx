@@ -37,6 +37,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
       if (getIsValidValue(value)) {
         navigation.navigate(Routes.ItemModal, {
           key: { upc: value, name: EMPTY_STRING },
+          showOverrideMsg: false,
         });
       }
     },
@@ -92,18 +93,13 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${value.length} chars)`}
       />
       <Row space={1}>
-        <Button flex={1} onPress={() => onValueChange(MOCKS_UPCS[0])}>
-          Mock {MOCKS_UPCS[0]}
-        </Button>
-        <Button flex={1} onPress={() => onValueChange(MOCKS_UPCS[1])}>
-          Mock {MOCKS_UPCS[1]}
-        </Button>
-        <Button flex={1} onPress={() => onValueChange(MOCKS_UPCS[2])}>
-          Mock {MOCKS_UPCS[2]}
-        </Button>
-        <Button flex={1} onPress={() => onValueChange(MOCKS_UPCS[3])}>
-          Mock {MOCKS_UPCS[3]}
-        </Button>
+        {MOCKS_UPCS.map((mock) => {
+          return (
+            <Button flex={1} onPress={() => onValueChange(mock)}>
+              Mock {mock}
+            </Button>
+          );
+        })}
       </Row>
       <Button
         isDisabled={!isValid || value.length === 0}

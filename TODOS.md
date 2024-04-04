@@ -1,6 +1,6 @@
 ## MVP
 -refactor addStoresListItem reducer:
-    --storeSpecificValuesMap keys need to be updated when originalKey is defined and different than keyToUse
+    --storeSpecificValuesMap keys need to be updated when originalKey is defined and different than keyToUse (finish implementation for onKeyChange in addStoresListItem reducer)
         
 -fix bug where changing key to an already existing key doesn't 
 -add ability to click an image and view full screen

@@ -251,6 +251,21 @@ export const listsSlice = createSlice({
         listName: ListName.StoresList,
         newItem: getStoreWithDistance(newStore, state.currentLocation),
         originalKey,
+        onKeyChange: (input) => {
+          const { newKey, oldKey, type } = input;
+          console.log(input);
+          displayAlert(input);
+          switch (type) {
+            case OnKeyChangeType.Changing: {
+              console.log('need to implement changing case');
+              break;
+            }
+            case OnKeyChangeType.Merging: {
+              console.log('need to implement merging case');
+              break;
+            }
+          }
+        },
       });
 
       if (state.storesList.data.length === 1) {
@@ -877,7 +892,6 @@ export const storeSpecificValuesSelector = (
     },
   );
 
-// Action creators are generated for each case reducer function
 export const {
   addAllToShoppingCart,
   addItemsListItem,
@@ -920,6 +934,26 @@ export const {
 
 export default listsSlice.reducer;
 
+//#region Helpers
+enum OnKeyChangeType {
+  Changing = 'Changing',
+  Merging = 'Merging',
+}
+
+type OnKeyChangeInput = {
+  type: OnKeyChangeType;
+  newKey: string;
+  oldKey: string;
+};
+
+type UpdateListWithItemInput<T> = {
+  state: ListsState;
+  listName: ListName;
+  newItem: T;
+  originalKey: Key;
+  onKeyChange?: (input: OnKeyChangeInput) => void;
+};
+
 function moveItems(
   state: ListsState,
   keys: string[],
@@ -953,13 +987,6 @@ function moveItems(
   }
 }
 
-type UpdateListWithItemInput<T> = {
-  state: ListsState;
-  listName: ListName;
-  newItem: T;
-  originalKey: Key;
-};
-
 /**
  *Handles the following cases
  * Adding item
@@ -968,22 +995,33 @@ type UpdateListWithItemInput<T> = {
  * Overriding item with new item
  **/
 function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
-  const { listName, newItem, originalKey, state } = props;
-  const keyToUse = getKeyToUse(newItem);
+  const { listName, newItem, originalKey, state, onKeyChange } = props;
+  const newKeyToUse = getKeyToUse(newItem);
   const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
   const originalItemIndex = state[listName].data.findIndex(
     (item) => getKeyToUse(item) === originalKeyToUse,
   );
   const newItemIndex = state[listName].data.findIndex((item) => {
     const keyLocal = getKeyToUse(item);
-    console.log({ keyLocal, keyToUse });
-    return keyLocal === keyToUse;
+    return keyLocal === newKeyToUse;
   });
-  if (!keyToUse) {
+  if (!newKeyToUse) {
     alert(
-      `Unable to add an item with key of '${keyToUse}' to the '${listName}'.`,
+      `Unable to add an item with key of '${newKeyToUse}' to the '${listName}'.`,
     );
     return;
+  }
+
+  if (originalKeyToUse && newKeyToUse !== originalKeyToUse) {
+    const canDoSimpleUpdate = newItemIndex === -1;
+    onKeyChange &&
+      onKeyChange({
+        type: canDoSimpleUpdate
+          ? OnKeyChangeType.Changing
+          : OnKeyChangeType.Merging,
+        newKey: newKeyToUse,
+        oldKey: originalKeyToUse,
+      });
   }
 
   // console.log({
@@ -995,7 +1033,7 @@ function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
   //   newItemIndex,
   // });
   if (originalItemIndex >= 0) {
-    if (originalKeyToUse === keyToUse) {
+    if (originalKeyToUse === newKeyToUse) {
       console.log('updating existing item');
       state[listName].data[originalItemIndex] = newItem as any;
     } else {
@@ -1126,3 +1164,4 @@ function updateStoreSpecificValueMap(
     }
   }
 }
+//#endregion

@@ -15,12 +15,14 @@ import {
   AddStoresListItemPayload,
   storesListSelector,
 } from '@/state/slices/listsSlice';
+import { canOverrideStoreSelector } from '@/state/slices/optionsSlice';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { StoreProp } from '@/types/general';
 import {
   displayAlert,
   getGpsCoordinate,
   getItemFromList,
+  getKeyToUse,
 } from '@/utils/helpers';
 
 type StoreFormValdation = {
@@ -44,7 +46,20 @@ export function StoreForm(props: StoreFormProps) {
       ...GPS_COORDINATES_DEFAULT,
     },
   );
+  const canOverrideStore = useSelector(canOverrideStoreSelector);
   const storesList = useSelector(storesListSelector);
+  const originalKeyToUse = useMemo(
+    () => getKeyToUse(originalKey),
+    [originalKey],
+  );
+  const isProposedStorePresent = useMemo(
+    () =>
+      !!getItemFromList(storesList.data, {
+        name: storeName || EMPTY_STRING,
+        upc: EMPTY_STRING,
+      }),
+    [storeName, storesList],
+  );
 
   const formValidation: StoreFormValdation = useMemo(() => {
     const isValid = storeName.length > 0;
@@ -89,7 +104,10 @@ export function StoreForm(props: StoreFormProps) {
         <>
           <Row space={3}>
             <Button
-              isDisabled={!formValidation.isValid}
+              isDisabled={
+                !formValidation.isValid ||
+                (!canOverrideStore && isProposedStorePresent)
+              }
               flex={1}
               onPress={onSavePress}
             >
@@ -101,12 +119,14 @@ export function StoreForm(props: StoreFormProps) {
           </Row>
           <InputValidationMessage
             isValid={
-              !getItemFromList(storesList.data, {
-                name: storeName || EMPTY_STRING,
-                upc: EMPTY_STRING,
-              })
+              (!!originalKeyToUse && originalKeyToUse === storeName) ||
+              !isProposedStorePresent
             }
-            message={`An store with the key of '${storeName}' is already in the list and will be overriden.`}
+            message={
+              canOverrideStore
+                ? `An store with the name of '${storeName}' is already in the list and will be overriden.`
+                : `Please enable overriding stores or remove the store with name of '${storeName}'`
+            }
           />
         </>
       }

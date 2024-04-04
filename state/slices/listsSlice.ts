@@ -204,7 +204,12 @@ export const listsSlice = createSlice({
       const keyToUse = getKeyToUse(item);
       const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
 
-      updateListWithItem(state, ListName.ItemsList, item, originalKey);
+      updateListWithItem({
+        state,
+        listName: ListName.ItemsList,
+        newItem: item,
+        originalKey,
+      });
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
@@ -241,12 +246,12 @@ export const listsSlice = createSlice({
     ) => {
       const { newStore, originalKey } = action.payload;
 
-      updateListWithItem(
+      updateListWithItem({
         state,
-        ListName.StoresList,
-        getStoreWithDistance(newStore, state.currentLocation),
+        listName: ListName.StoresList,
+        newItem: getStoreWithDistance(newStore, state.currentLocation),
         originalKey,
-      );
+      });
 
       if (state.storesList.data.length === 1) {
         state.currentStoreName = newStore.name;
@@ -948,6 +953,13 @@ function moveItems(
   }
 }
 
+type UpdateListWithItemInput<T> = {
+  state: ListsState;
+  listName: ListName;
+  newItem: T;
+  originalKey: Key;
+};
+
 /**
  *Handles the following cases
  * Adding item
@@ -955,12 +967,8 @@ function moveItems(
  * Overriding item with existing item
  * Overriding item with new item
  **/
-function updateListWithItem<T extends Key>(
-  state: ListsState,
-  listName: ListName,
-  newItem: T,
-  originalKey: Key,
-) {
+function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
+  const { listName, newItem, originalKey, state } = props;
   const keyToUse = getKeyToUse(newItem);
   const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
   const originalItemIndex = state[listName].data.findIndex(

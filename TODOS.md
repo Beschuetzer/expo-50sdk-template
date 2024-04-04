@@ -1,4 +1,7 @@
 ## MVP
+updateListWithItem:
+    --figure out issue when adding a new item with an existing key
+    --use in addItemListItem reducer and test again
 
 -refactor addStoresListItem reducer:
     --add allowStoreOverride option

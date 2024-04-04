@@ -66,7 +66,6 @@ export function StoreForm(props: StoreFormProps) {
     onSave &&
       onSave({
         newStore,
-        store,
         originalKey,
       });
     onClose && onClose();

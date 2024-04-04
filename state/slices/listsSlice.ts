@@ -21,7 +21,7 @@ import {
   StoreSpecificValuesMap,
 } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
-import { ListNameProp, OriginalKeyProp, StoreProp } from '@/types/general';
+import { ListNameProp, OriginalKeyProp } from '@/types/general';
 import {
   calculateDistance,
   deleteImages,
@@ -60,8 +60,7 @@ export type AddItemsListItemPayload = {
 
 export type AddStoresListItemPayload = {
   newStore: Store;
-} & StoreProp &
-  OriginalKeyProp;
+} & OriginalKeyProp;
 
 export type ResetListToDisplayFiltersPayload = ListNameProp;
 
@@ -216,7 +215,6 @@ export const listsSlice = createSlice({
       }
       if (!item) return;
 
-      //add/update item
       if (originalItemIndex >= 0) {
         if (originalKeyToUse === keyToUse) {
           state[ListName.ItemsList].data[originalItemIndex] = item;
@@ -274,38 +272,17 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<AddStoresListItemPayload>,
     ) => {
-      const { newStore, store, originalKey } = action.payload;
-      const originalKeyToUse = getKeyToUse(originalKey);
-      const keyToUse = getKeyToUse(newStore);
-      if (!keyToUse) {
-        alert('Unable to add an item with no name to the storesList.');
-        return;
-      }
+      const { newStore, originalKey } = action.payload;
 
-      const storeIndex = state.storesList.data.findIndex(
-        (store) => getKeyToUse(store) === keyToUse,
-      );
-
-      console.log({ originalKeyToUse, keyToUse, storeIndex });
-
-      if (storeIndex !== -1) {
-        state.storesList.data[storeIndex] = getStoreWithDistance(
-          newStore,
-          state.currentLocation,
-        );
-        return;
-      }
-      state.storesList.data.push(
+      updateListWithItem(
+        state,
+        ListName.StoresList,
         getStoreWithDistance(newStore, state.currentLocation),
+        originalKey,
       );
 
       if (state.storesList.data.length === 1) {
         state.currentStoreName = newStore.name;
-      }
-      if (store) {
-        state[ListName.StoresList].data = state[
-          ListName.StoresList
-        ].data.filter((storeLocal) => storeLocal.name !== store.name);
       }
     },
     clearShopping: (state: ListsState) => {
@@ -1001,6 +978,54 @@ function moveItems(
         [currentStoreName]: isInCart,
       };
     }
+  }
+}
+
+function updateListWithItem<T extends Key>(
+  state: ListsState,
+  listName: ListName,
+  newItem: T,
+  originalKey: Key,
+) {
+  const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
+  const originalItemIndex = state[listName].data.findIndex(
+    (store) => getKeyToUse(store) === originalKeyToUse,
+  );
+  const keyToUse = getKeyToUse(newItem);
+  if (!keyToUse) {
+    alert(
+      `Unable to add an item with key of '${keyToUse}' to the '${listName}'.`,
+    );
+    return;
+  }
+
+  console.log({
+    originalKeyToUse,
+    keyToUse,
+    originalItemIndex,
+  });
+  if (originalItemIndex >= 0) {
+    if (originalKeyToUse === keyToUse) {
+      state[listName].data[originalItemIndex] = newItem as any;
+    } else {
+      const newStoreIndex = state[listName].data.findIndex(
+        (item) => getKeyToUse(item) === keyToUse,
+      );
+      let indexOffset = 0;
+      if (newStoreIndex >= 0) {
+        state[listName].data.splice(newStoreIndex, 1);
+        if (newStoreIndex < originalItemIndex) {
+          indexOffset++;
+        }
+      }
+      state[listName].data[
+        originalItemIndex > 0
+          ? originalItemIndex - indexOffset
+          : originalItemIndex
+      ] = newItem as any;
+    }
+  } else {
+    state[listName].data.push(newItem as any);
   }
 }
 

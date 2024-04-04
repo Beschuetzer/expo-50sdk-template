@@ -201,43 +201,10 @@ export const listsSlice = createSlice({
     ) => {
       const { originalKey, item, storeSpecificValues, currentStore } =
         action.payload || {};
+      const keyToUse = getKeyToUse(item);
       const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
-      const originalItemIndex = state[ListName.ItemsList].data.findIndex(
-        (item) => getKeyToUse(item) === originalKeyToUse,
-      );
-      const keyToUse = getKeyToUse(action.payload.item);
 
-      if (!keyToUse) {
-        alert(
-          'Unable to add an item with no name and no upc to the itemsList.',
-        );
-        return;
-      }
-      if (!item) return;
-
-      if (originalItemIndex >= 0) {
-        if (originalKeyToUse === keyToUse) {
-          state[ListName.ItemsList].data[originalItemIndex] = item;
-        } else {
-          const newItemIndex = state[ListName.ItemsList].data.findIndex(
-            (item) => getKeyToUse(item) === keyToUse,
-          );
-          let indexOffset = 0;
-          if (newItemIndex >= 0) {
-            state[ListName.ItemsList].data.splice(newItemIndex, 1);
-            if (newItemIndex < originalItemIndex) {
-              indexOffset++;
-            }
-          }
-          state[ListName.ItemsList].data[
-            originalItemIndex > 0
-              ? originalItemIndex - indexOffset
-              : originalItemIndex
-          ] = item;
-        }
-      } else {
-        state[ListName.ItemsList].data.push(item);
-      }
+      updateListWithItem(state, ListName.ItemsList, item, originalKey);
 
       //add store specific values if they exist
       if (storeSpecificValues && currentStore?.name) {
@@ -1011,15 +978,14 @@ function updateListWithItem<T extends Key>(
     return;
   }
 
-  console.log({
-    items: state[listName].data,
-    newItem,
-    originalKey,
-    originalKeyToUse,
-    keyToUse,
-    originalItemIndex,
-    newItemIndex,
-  });
+  // console.log({
+  //   newItem,
+  //   originalKey,
+  //   originalKeyToUse,
+  //   keyToUse,
+  //   originalItemIndex,
+  //   newItemIndex,
+  // });
   if (originalItemIndex >= 0) {
     if (originalKeyToUse === keyToUse) {
       console.log('updating existing item');
@@ -1048,7 +1014,6 @@ function updateListWithItem<T extends Key>(
     console.log('adding item');
     state[listName].data.push(newItem as any);
   }
-  console.log({ itemsAfter: state[listName].data });
 }
 
 function updateSelectedItems(

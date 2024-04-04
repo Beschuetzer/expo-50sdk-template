@@ -7,7 +7,7 @@ import { Frequency, TimeSpan } from '@/types/general';
 
 export const AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL = 0.25;
 export const AUTO_SET_STORE_WHEN_CLOSE_ENOUGH = true;
-export const CAN_OVERRIDE_ITEM_DEFAULT = false;
+export const CAN_OVERRIDE_DEFAULT = false;
 export const DEFAULT_IMAGE_INDEX = 0;
 export const EMPTY_NUMBER = 0;
 export const EMPTY_STRING = '';

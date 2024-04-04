@@ -9,6 +9,7 @@ import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScree
 import { InputValidationMessage } from '@/components/InputValidationMessage';
 import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
 import { CanOverrideItemToggle } from '@/components/options/CanOverrideItemToggle';
+import { CanOverrideStoreToggle } from '@/components/options/CanOverrideStoreToggle';
 import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider';
 import { SaveLoadState } from '@/components/options/SaveLoadState';
 import {
@@ -78,6 +79,7 @@ export default function OptionsScreen() {
         <SaveLoadState />
         <AutoSetStoreToggle />
         <CanOverrideItemToggle />
+        <CanOverrideStoreToggle />
         <FormControl.Label>
           Item Row Open Threshold (default ={' '}
           {SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT}):

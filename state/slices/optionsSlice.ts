@@ -6,7 +6,7 @@ import { RootState } from '../store';
 import {
   AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   AUTO_SET_STORE_WHEN_CLOSE_ENOUGH,
-  CAN_OVERRIDE_ITEM_DEFAULT,
+  CAN_OVERRIDE_DEFAULT,
   IMAGE_PICKER_QUALITY_INITIAL,
   SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 } from '@/constants/general';
@@ -19,6 +19,7 @@ type AutoSetStore = {
 export type OptionsState = {
   autoSetStore: AutoSetStore;
   canOverrideItem: boolean;
+  canOverrideStore: boolean;
   customImageQuality: number;
   swipeableRowOpenThreshold: number;
 };
@@ -28,7 +29,8 @@ const initialState: OptionsState = {
     enabled: AUTO_SET_STORE_WHEN_CLOSE_ENOUGH,
     maxDistanceInMiles: AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   },
-  canOverrideItem: CAN_OVERRIDE_ITEM_DEFAULT,
+  canOverrideItem: CAN_OVERRIDE_DEFAULT,
+  canOverrideStore: CAN_OVERRIDE_DEFAULT,
   customImageQuality: IMAGE_PICKER_QUALITY_INITIAL,
   swipeableRowOpenThreshold: SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 };
@@ -48,6 +50,12 @@ export const optionsSlice = createSlice({
       action: PayloadAction<OptionsState['canOverrideItem']>,
     ) => {
       state.canOverrideItem = action.payload;
+    },
+    setCanOverrideStore: (
+      state: OptionsState,
+      action: PayloadAction<OptionsState['canOverrideStore']>,
+    ) => {
+      state.canOverrideStore = action.payload;
     },
     setCustomImageQuality: (
       state: OptionsState,
@@ -74,6 +82,7 @@ export const {
   resetOptions,
   setAutoSetStore,
   setCanOverrideItem,
+  setCanOverrideStore,
   setSwipeableRowOpenThreshold,
   setCustomImageQuality,
 } = optionsSlice.actions;
@@ -83,6 +92,9 @@ export const autoSetStoreSelector = (state: RootState) =>
 
 export const canOverrideItemSelector = (state: RootState) =>
   state[optionsSlice.name].canOverrideItem;
+
+export const canOverrideStoreSelector = (state: RootState) =>
+  state[optionsSlice.name].canOverrideStore;
 
 export const customImageQualitySelector = (state: RootState) =>
   state[optionsSlice.name].customImageQuality;

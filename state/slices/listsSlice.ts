@@ -981,17 +981,29 @@ function moveItems(
   }
 }
 
+/**
+ *Handles the following cases
+ * Adding item
+ * Updating item
+ * Overriding item with existing item
+ * Overriding item with new item
+ **/
 function updateListWithItem<T extends Key>(
   state: ListsState,
   listName: ListName,
   newItem: T,
   originalKey: Key,
 ) {
+  const keyToUse = getKeyToUse(newItem);
   const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
   const originalItemIndex = state[listName].data.findIndex(
-    (store) => getKeyToUse(store) === originalKeyToUse,
+    (item) => getKeyToUse(item) === originalKeyToUse,
   );
-  const keyToUse = getKeyToUse(newItem);
+  const newItemIndex = state[listName].data.findIndex((item) => {
+    const keyLocal = getKeyToUse(item);
+    console.log({ keyLocal, keyToUse });
+    return keyLocal === keyToUse;
+  });
   if (!keyToUse) {
     alert(
       `Unable to add an item with key of '${keyToUse}' to the '${listName}'.`,
@@ -1000,21 +1012,26 @@ function updateListWithItem<T extends Key>(
   }
 
   console.log({
+    items: state[listName].data,
+    newItem,
+    originalKey,
     originalKeyToUse,
     keyToUse,
     originalItemIndex,
+    newItemIndex,
   });
   if (originalItemIndex >= 0) {
     if (originalKeyToUse === keyToUse) {
+      console.log('updating existing item');
       state[listName].data[originalItemIndex] = newItem as any;
     } else {
-      const newStoreIndex = state[listName].data.findIndex(
-        (item) => getKeyToUse(item) === keyToUse,
+      console.log(
+        'overriding existing item with existing item or updating item with new key',
       );
       let indexOffset = 0;
-      if (newStoreIndex >= 0) {
-        state[listName].data.splice(newStoreIndex, 1);
-        if (newStoreIndex < originalItemIndex) {
+      if (newItemIndex >= 0) {
+        state[listName].data.splice(newItemIndex, 1);
+        if (newItemIndex < originalItemIndex) {
           indexOffset++;
         }
       }
@@ -1024,9 +1041,14 @@ function updateListWithItem<T extends Key>(
           : originalItemIndex
       ] = newItem as any;
     }
+  } else if (originalItemIndex === -1 && newItemIndex >= 0) {
+    console.log('overring existing item with new item');
+    state[listName].data[newItemIndex] = newItem as any;
   } else {
+    console.log('adding item');
     state[listName].data.push(newItem as any);
   }
+  console.log({ itemsAfter: state[listName].data });
 }
 
 function updateSelectedItems(

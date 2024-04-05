@@ -1,7 +1,6 @@
 ## MVP
 
 -refactor addStoresListItem reducer:
-    --figure out merging case
     --test both cases again thoroughly
         
 -fix bug where changing key to an already existing key doesn't 

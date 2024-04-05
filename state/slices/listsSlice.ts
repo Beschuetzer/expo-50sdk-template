@@ -256,60 +256,62 @@ export const listsSlice = createSlice({
           const { newKey, oldKey, type } = input;
           console.log(input);
           displayAlert(input);
-          switch (type) {
-            case OnKeyChangeType.Changing: {
-              console.log('need to implement changing case'.padEnd(200, '-'));
-              const start = performance.now();
-              for (const [key, storeSpecificValues] of Object.entries(
-                state.storeSpecificValuesMap || {},
-              )) {
-                // console.log({ key, storeSpecificValues });
-                for (const [storeSpecificValueKey, value] of Object.entries(
-                  storeSpecificValues || {},
-                )) {
-                  // console.log({ storeSpecificValueKey, value});
-                  if (value?.[oldKey] !== undefined) {
-                    // console.log({ oldKey, value, oldKeyValue: value[oldKey] });
-                    const oldKeyValue = value?.[oldKey];
-                    const newKeyValue = value?.[newKey];
-                    if (typeof oldKeyValue === 'object') {
-                      value[newKey] = {
-                        ...(newKeyValue as unknown as object),
-                        ...(oldKeyValue as unknown as object),
-                      } as any;
-                    } else {
-                      value[newKey] = oldKeyValue;
-                    }
-                    delete value[oldKey];
-                  }
+          console.log(''.padEnd(200, '-'));
+          const start = performance.now();
+          for (const [key, storeSpecificValues] of Object.entries(
+            state.storeSpecificValuesMap || {},
+          )) {
+            for (const [storeSpecificValueKey, value] of Object.entries(
+              storeSpecificValues || {},
+            )) {
+              const oldKeyValue = value?.[oldKey];
+              const newKeyValue = value?.[newKey];
+              if (value && oldKeyValue !== undefined) {
+                if (storeSpecificValueKey === 'quantity') {
+                  console.log({
+                    case: '1',
+                    value,
+                    oldKeyValue,
+                    newKeyValue,
+                    currentStore: state.currentStoreName,
+                    storeSpecificValueKey,
+                    key,
+                  });
+                }
+                if (typeof oldKeyValue === 'object') {
+                  value[newKey] = {
+                    ...(newKeyValue as unknown as object),
+                    ...(oldKeyValue as unknown as object),
+                  } as any;
+                } else {
+                  value[newKey] = newKeyValue || oldKeyValue;
                 }
               }
-              const end = performance.now();
-              console.log({ timeToRun: end - start });
-              console.log(''.padStart(200, '-'));
-
-              // for (const [key, storeSpecificValues] of Object.entries(
-              //   state.storeSpecificValuesMap || {},
-              // )) {
-              //   console.log({
-              //     key,
-              //     storeSpecificValuesAfter: storeSpecificValues,
-              //   });
-              //   for (const [storeSpecificValueKey, value] of Object.entries(
-              //     storeSpecificValues || {},
-              //   )) {
-              //     console.log({ storeSpecificValueKey, value });
-              //   }
-              // }
-
-              state.currentStoreName = newKey;
-              break;
-            }
-            case OnKeyChangeType.Merging: {
-              console.log('need to implement merging case');
-              break;
+              delete value?.[oldKey];
             }
           }
+          const end = performance.now();
+          console.log({ timeToRun: end - start });
+          console.log('done with work'.padEnd(200, '-'));
+
+          for (const [key, storeSpecificValues] of Object.entries(
+            state.storeSpecificValuesMap || {},
+          )) {
+            // console.log({
+            //   key,
+            //   storeSpecificValuesAfter: storeSpecificValues,
+            // });
+            for (const [storeSpecificValueKey, value] of Object.entries(
+              storeSpecificValues || {},
+            )) {
+              if (storeSpecificValueKey === 'quantity') {
+                console.log({ key, storeSpecificValueKey, value });
+              }
+            }
+          }
+          console.log('done with print out'.padEnd(200, '-'));
+
+          state.currentStoreName = newKey;
         },
       });
 

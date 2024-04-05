@@ -257,7 +257,7 @@ export const listsSlice = createSlice({
           displayAlert(input);
           switch (type) {
             case OnKeyChangeType.Changing: {
-              console.log('need to implement changing case');
+              console.log('need to implement changing case'.padEnd(200, '-'));
               const start = performance.now();
               for (const [key, storeSpecificValues] of Object.entries(
                 state.storeSpecificValuesMap || {},
@@ -266,8 +266,8 @@ export const listsSlice = createSlice({
                 for (const [storeSpecificValueKey, value] of Object.entries(
                   storeSpecificValues || {},
                 )) {
-                  // console.log({ storeSpecificValueKey, value });
-                  if (value?.[oldKey]) {
+                  console.log({ storeSpecificValueKey, value});
+                  if (value?.[oldKey] !== undefined) {
                     console.log({ oldKey, value, oldKeyValue: value[oldKey] });
                     const oldKeyValue = value?.[oldKey];
                     const newKeyValue = value?.[newKey];
@@ -285,7 +285,7 @@ export const listsSlice = createSlice({
               }
               const end = performance.now();
               console.log({ timeToRun: end - start });
-              console.log(''.padStart(40, '-'));
+              console.log(''.padStart(200, '-'));
 
               for (const [key, storeSpecificValues] of Object.entries(
                 state.storeSpecificValuesMap || {},

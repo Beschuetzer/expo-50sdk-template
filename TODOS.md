@@ -21,7 +21,6 @@ ShoppingList
 
 -Store details should have a way to view all of the isles and sort them in order
 
-
 //todo: figure out types for useRouter/useNavigation (expo-router)
 //todo: npx expo install react-native-safe-area-context (install and start using SafeAreaView) https://docs.expo.dev/versions/latest/sdk/safe-area-context/
 //todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
@@ -36,6 +35,7 @@ ShoppingList
 -create a component that sets the current store POS (create POS in generalSlice)
 
 -Swiping to add to shopping list should not be an option unless a store is selected (or a message should display indicating a store is needed (add an AlertModal for this?))
+-add jest tests to helpers and other testable items (may need to refactor a bit)
 
 ## Features
 -ability to add a "frequency" field which guesses the time before expected next purchase date for each item.  When pulling up a store, the date each item was last in the basket is used to provide recommendaitons for what may be needed this trip (add ability to sort on the date items were last in basket)

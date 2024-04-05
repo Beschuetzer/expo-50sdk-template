@@ -1,6 +1,9 @@
 ## MVP
+-figure out why changing the current store seems to reset all other store's isInCart value
+
 -refactor addStoresListItem reducer:
-    --storeSpecificValuesMap keys need to be updated when originalKey is defined and different than keyToUse (finish implementation for onKeyChange in addStoresListItem reducer)
+    --figure out merging case
+    --test both cases again thoroughly
         
 -fix bug where changing key to an already existing key doesn't 
 -add ability to click an image and view full screen

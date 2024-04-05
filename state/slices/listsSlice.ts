@@ -266,9 +266,9 @@ export const listsSlice = createSlice({
                 for (const [storeSpecificValueKey, value] of Object.entries(
                   storeSpecificValues || {},
                 )) {
-                  console.log({ storeSpecificValueKey, value});
+                  // console.log({ storeSpecificValueKey, value});
                   if (value?.[oldKey] !== undefined) {
-                    console.log({ oldKey, value, oldKeyValue: value[oldKey] });
+                    // console.log({ oldKey, value, oldKeyValue: value[oldKey] });
                     const oldKeyValue = value?.[oldKey];
                     const newKeyValue = value?.[newKey];
                     if (typeof oldKeyValue === 'object') {
@@ -287,19 +287,19 @@ export const listsSlice = createSlice({
               console.log({ timeToRun: end - start });
               console.log(''.padStart(200, '-'));
 
-              for (const [key, storeSpecificValues] of Object.entries(
-                state.storeSpecificValuesMap || {},
-              )) {
-                console.log({
-                  key,
-                  storeSpecificValuesAfter: storeSpecificValues,
-                });
-                for (const [storeSpecificValueKey, value] of Object.entries(
-                  storeSpecificValues || {},
-                )) {
-                  console.log({ storeSpecificValueKey, value });
-                }
-              }
+              // for (const [key, storeSpecificValues] of Object.entries(
+              //   state.storeSpecificValuesMap || {},
+              // )) {
+              //   console.log({
+              //     key,
+              //     storeSpecificValuesAfter: storeSpecificValues,
+              //   });
+              //   for (const [storeSpecificValueKey, value] of Object.entries(
+              //     storeSpecificValues || {},
+              //   )) {
+              //     console.log({ storeSpecificValueKey, value });
+              //   }
+              // }
 
               state.currentStoreName = newKey;
               break;
@@ -1055,6 +1055,7 @@ function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
     const keyLocal = getKeyToUse(item);
     return keyLocal === newKeyToUse;
   });
+
   if (!newKeyToUse) {
     alert(
       `Unable to add an item with key of '${newKeyToUse}' to the '${listName}'.`,

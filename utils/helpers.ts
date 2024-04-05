@@ -141,6 +141,7 @@ export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {
 
 export function getKeyToUse(key: string | Key, displayAlert = false) {
   if (typeof key === 'string') return key;
+  standardizeKey(key);
   const toReturn = key?.upc || key?.name || EMPTY_STRING;
 
   if (!toReturn && displayAlert) {
@@ -416,4 +417,13 @@ export async function measureExecutionTime(
   func && (await func());
   const end = performance.now();
   if (shouldLog) console.log({ [`executionTimeOf${key}`]: end - start });
+}
+
+export function standardizeKey(key: Key) {
+  if (key?.name !== undefined) {
+    key.name = key.name.trim();
+  }
+  if (key?.upc !== undefined) {
+    key.upc = key.upc.trim();
+  }
 }

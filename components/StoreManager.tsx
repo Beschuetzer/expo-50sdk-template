@@ -67,7 +67,7 @@ export function StoreManager(props: StorageManagerProps) {
           {storesList.map((store) => (
             <Picker.Item
               key={store?.name}
-              label={`${store?.name} (lat: ${store?.gpsCoordinates?.lat}, long: ${store?.gpsCoordinates?.lon})`}
+              label={store?.name}
               value={store?.name}
             />
           ))}

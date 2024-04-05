@@ -1,6 +1,7 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+import { updateStoreSpecificValueMap } from './helpers/updateStoreSpecificValueMap';
 import { RootState } from '../store';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
@@ -1190,29 +1191,4 @@ function updateSelectedItems(
   }
 }
 
-function updateStoreSpecificValueMap(
-  state: ListsState,
-  key: Key,
-  storeSpecificValuesToUpdate: StoreSpecificValueUpdater,
-) {
-  const keyToUse = getKeyToUse(key);
-  for (const [valueName, value] of Object.entries(
-    storeSpecificValuesToUpdate || {},
-  )) {
-    const currentItem = state.storeSpecificValuesMap?.[keyToUse] as any;
-    const currentValue = currentItem?.[valueName]?.[state.currentStoreName];
-    const newValue = (value as any)?.(currentValue);
-
-    if (!currentItem || !currentValue) {
-      state.storeSpecificValuesMap[keyToUse] = {
-        ...state.storeSpecificValuesMap[keyToUse],
-        [valueName]: {
-          [state.currentStoreName]: newValue,
-        },
-      } as StoreSpecificValues;
-    } else {
-      currentItem[valueName][state.currentStoreName] = newValue;
-    }
-  }
-}
 //#endregion

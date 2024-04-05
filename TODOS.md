@@ -1,5 +1,4 @@
 ## MVP
--figure out why changing the current store seems to reset all other store's isInCart value
 
 -refactor addStoresListItem reducer:
     --figure out merging case

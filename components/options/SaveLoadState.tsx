@@ -8,7 +8,9 @@ import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
+  currentStoreSelector,
   itemsListSelector,
+  setCurrentStoreName,
   setItemsList,
   setStoresList,
   setStoreSpecificValues,
@@ -36,6 +38,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
   const storeSpecificValues = useSelector(storeSpecificValuesMapSelector);
   const upcProducts = useSelector(upcProductsSelector);
   const stores = useSelector(storesListSelector);
+  const currentStore = useSelector(currentStoreSelector);
   const dispatch = useDispatch();
   const iconSize = useMemo(() => theme.sizes[6], [theme]);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
@@ -88,6 +91,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       onConfirm: async () => {
         const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores);
         dispatch(setStoresList(storesLoaded));
+        dispatch(setCurrentStoreName())
         setConfirmModalProps({ isVisible: false });
       },
     });
@@ -99,7 +103,10 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       message: 'Are you sure you wan to save stores?',
       onCancel: () => setConfirmModalProps({ isVisible: false }),
       onConfirm: async () => {
-        await saveAppStateToFile(FILE_NAMES.stores, stores);
+        await saveAppStateToFile(FILE_NAMES.stores, {
+          ...stores,
+          currentStoreName: currentStore.name,
+        });
         setConfirmModalProps({ isVisible: false });
       },
     });

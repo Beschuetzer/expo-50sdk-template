@@ -258,6 +258,50 @@ export const listsSlice = createSlice({
           switch (type) {
             case OnKeyChangeType.Changing: {
               console.log('need to implement changing case');
+              const start = performance.now();
+              for (const [key, storeSpecificValues] of Object.entries(
+                state.storeSpecificValuesMap || {},
+              )) {
+                // console.log({ key, storeSpecificValues });
+                for (const [storeSpecificValueKey, value] of Object.entries(
+                  storeSpecificValues || {},
+                )) {
+                  // console.log({ storeSpecificValueKey, value });
+                  if (value?.[oldKey]) {
+                    console.log({ oldKey, value, oldKeyValue: value[oldKey] });
+                    const oldKeyValue = value?.[oldKey];
+                    const newKeyValue = value?.[newKey];
+                    if (typeof oldKeyValue === 'object') {
+                      value[newKey] = {
+                        ...(newKeyValue as unknown as object),
+                        ...(oldKeyValue as unknown as object),
+                      } as any;
+                    } else {
+                      value[newKey] = oldKeyValue;
+                    }
+                    delete value[oldKey];
+                  }
+                }
+              }
+              const end = performance.now();
+              console.log({ timeToRun: end - start });
+              console.log(''.padStart(40, '-'));
+
+              for (const [key, storeSpecificValues] of Object.entries(
+                state.storeSpecificValuesMap || {},
+              )) {
+                console.log({
+                  key,
+                  storeSpecificValuesAfter: storeSpecificValues,
+                });
+                for (const [storeSpecificValueKey, value] of Object.entries(
+                  storeSpecificValues || {},
+                )) {
+                  console.log({ storeSpecificValueKey, value });
+                }
+              }
+
+              state.currentStoreName = newKey;
               break;
             }
             case OnKeyChangeType.Merging: {
@@ -533,9 +577,15 @@ export const listsSlice = createSlice({
     },
     setStoresList: (
       state: ListsState,
-      action: PayloadAction<ListsState['storesList']>,
+      action: PayloadAction<
+        ListsState['storesList'] & { currentStoreName?: string }
+      >,
     ) => {
       if (!action.payload) return;
+      const { currentStoreName } = action.payload;
+      delete action.payload.currentStoreName;
+
+      state.currentStoreName = currentStoreName || EMPTY_STRING;
       state[ListName.StoresList] = action.payload;
     },
     setStoreSpecificValues: (

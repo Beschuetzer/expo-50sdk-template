@@ -26,7 +26,7 @@ import {
 import { Item, StoreSpecificValuesMap } from '@/types/Item';
 import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers';
 
-const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 500;
+const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 1000;
 const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000;
 export function ReduxViewer() {
   const lastUpcIndexRef = useRef(0);

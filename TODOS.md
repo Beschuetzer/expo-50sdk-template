@@ -1,7 +1,8 @@
 ## MVP
 -delete confirmations:
-    -- one on stores list
     --many on stores list
+
+-need to remove related storeSpecificValueMap items when removeStoresListItem reducer is called
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly

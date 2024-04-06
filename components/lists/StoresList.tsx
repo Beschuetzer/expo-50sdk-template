@@ -16,8 +16,13 @@ import { SortType } from './sorters';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
+import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
 
-import { EMPTY_STRING, ESTIMATED_SIZE_FOR_STORES_LIST, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  EMPTY_STRING,
+  ESTIMATED_SIZE_FOR_STORES_LIST,
+  FORM_INTER_ITEM_SPACING,
+} from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import {
@@ -55,9 +60,16 @@ export function StoresList(props: StoresListProps) {
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
+    {} as ConfirmModalProps,
+  );
   const lastSortTypeRef = useRef(storesListSortTypes[0]);
   const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: storesList, title: 'Stores List' });
+
+  const resetConfirmModalProps = useCallback(() => {
+    setConfirmModalProps({ isVisible: false });
+  }, []);
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close();
@@ -103,8 +115,18 @@ export function StoresList(props: StoresListProps) {
   const onSwipeLeft = useCallback(
     (keyToUse: Key) => {
       closeMenu();
-      dispatch(removeStoresListItem(keyToUse));
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setConfirmModalProps({
+        isVisible: true,
+        title: 'Deleting Store',
+        message: `Are you sure you want to delete '${keyToUse.name}'?`,
+        note: 'This will remove all store-specific data related to this store.',
+        onCancel: () => resetConfirmModalProps(),
+        onConfirm: () => {
+          dispatch(removeStoresListItem(keyToUse));
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          resetConfirmModalProps();
+        },
+      });
     },
     [listRef, closeMenu],
   );
@@ -244,6 +266,7 @@ export function StoresList(props: StoresListProps) {
         setIsVisible={setIsFilterModalOpen}
         onValueChange={onFilterValueChange}
       />
+      <ConfirmModal {...confirmModalProps} />
     </>
   );
 }

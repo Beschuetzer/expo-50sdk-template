@@ -2,7 +2,6 @@ import { BlurView } from 'expo-blur';
 import { View, Text, useTheme, Heading } from 'native-base';
 import React, { useCallback } from 'react';
 import { Modal, TouchableOpacity } from 'react-native';
-import { XOR } from 'ts-xor';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -10,26 +9,22 @@ import { getButtonHitSlop } from '@/utils/helpers';
 
 export type ConfirmModalProps = {
   isVisible?: boolean;
+  message?: string;
+  note?: string;
+  title?: string;
   onConfirm?: () => void;
   onCancel?: () => void;
-} & XOR<
-  {
-    message?: string;
-    title: string;
-  },
-  {
-    message: string;
-    title?: string;
-  }
->;
+};
+
 export const ConfirmModal = (props: ConfirmModalProps) => {
   const theme = useTheme();
   const {
     isVisible = false,
-    title = EMPTY_STRING,
     message = EMPTY_STRING,
-    onConfirm,
+    note = EMPTY_STRING,
     onCancel,
+    onConfirm,
+    title = EMPTY_STRING,
   } = props;
 
   const onCancelPress = useCallback(() => {
@@ -69,6 +64,16 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
             </Heading>
           ) : null}
           {message ? <Text>{message}</Text> : null}
+          {note ? (
+            <Text
+              italic
+              bold
+              fontSize="xs"
+              mt={theme.space[FORM_INTER_ITEM_SPACING]}
+            >
+              *{note}
+            </Text>
+          ) : null}
           <View
             style={{
               flexDirection: 'row',

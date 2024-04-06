@@ -67,7 +67,7 @@ export function ItemsList(props: ItemsListProps) {
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
-    {},
+    {} as ConfirmModalProps,
   );
   const lastSortTypeRef = useRef(itemsListSortTypes[0]);
   const menuRef = useRef<Menu>(null);

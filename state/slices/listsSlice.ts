@@ -259,38 +259,43 @@ export const listsSlice = createSlice({
           displayAlert(input);
           console.log(''.padEnd(200, '-'));
           const start = performance.now();
-          for (const [key, storeSpecificValues] of Object.entries(
-            state.storeSpecificValuesMap || {},
-          )) {
-            for (const [storeSpecificValueKey, value] of Object.entries(
-              storeSpecificValues || {},
-            )) {
-              const oldKeyValue = value?.[oldKey];
-              const newKeyValue = value?.[newKey];
-              if (value && oldKeyValue !== undefined) {
+
+          iterateStoreSpecificValuesMap({
+            storeSpecificValuesMap: state.storeSpecificValuesMap,
+            onNewStoreSpecificValue(input) {
+              const {
+                itemKey,
+                storeSpecificValueKeyValue,
+                storeSpecificValueKey,
+              } = input;
+              const oldKeyValue = storeSpecificValueKeyValue?.[oldKey];
+              const newKeyValue = storeSpecificValueKeyValue?.[newKey];
+              if (storeSpecificValueKeyValue && oldKeyValue !== undefined) {
                 if (storeSpecificValueKey === 'quantity') {
                   console.log({
                     case: '1',
-                    value,
+                    storeSpecificValueKeyValue,
                     oldKeyValue,
                     newKeyValue,
                     currentStore: state.currentStoreName,
                     storeSpecificValueKey,
-                    key,
+                    itemKey,
                   });
                 }
                 if (typeof oldKeyValue === 'object') {
-                  value[newKey] = {
+                  storeSpecificValueKeyValue[newKey] = {
                     ...(newKeyValue as unknown as object),
                     ...(oldKeyValue as unknown as object),
                   } as any;
                 } else {
-                  value[newKey] = newKeyValue || oldKeyValue;
+                  storeSpecificValueKeyValue[newKey] =
+                    newKeyValue || oldKeyValue;
                 }
               }
-              delete value?.[oldKey];
-            }
-          }
+              delete storeSpecificValueKeyValue?.[oldKey];
+            },
+          });
+
           const end = performance.now();
           console.log({ timeToRun: end - start });
           console.log('done with work'.padEnd(200, '-'));

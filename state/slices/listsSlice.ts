@@ -35,6 +35,7 @@ import {
   getKeyToUse,
   getStoreWithDistance,
 } from '@/utils/helpers';
+import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
 import { getItemWithStoreSpecificValues } from '@/utils/model-mappings';
 
 export enum ListName {
@@ -467,15 +468,15 @@ export const listsSlice = createSlice({
         (store) => store.name !== keyToUse,
       );
 
-      for (const [, values] of Object.entries(
-        state.storeSpecificValuesMap || {},
-      )) {
-        for (const [, value] of Object.entries(values || {})) {
-          if (value?.[keyToUse] !== undefined) {
-            delete value[keyToUse];
+      iterateStoreSpecificValuesMap({
+        storeSpecificValuesMap: state.storeSpecificValuesMap,
+        onNewStoreSpecificValue: (input) => {
+          const { storeSpecificValueKeyValue } = input;
+          if (storeSpecificValueKeyValue?.[keyToUse] !== undefined) {
+            delete storeSpecificValueKeyValue[keyToUse];
           }
-        }
-      }
+        },
+      });
     },
     resetCurrentLocation: (state: ListsState) => {
       state.currentLocation = CURRENT_LOCATION_INITIAL;

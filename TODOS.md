@@ -1,6 +1,6 @@
 ## MVP
+-replace all for loops over storeSpecificvValuesMap with iterateStoreSpecificValuesMap
 
--add helper method called iterateStoreSpecificValues which makes it easier to iterate the values and do something to them (callback names: onNewItemStart, onNewItemEnd, onNewStoreSpecificKey)
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly

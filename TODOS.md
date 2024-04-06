@@ -1,9 +1,13 @@
 ## MVP
+-delete confirmations:
+    --one on items list
+    --many on items list
+    -- one on stores list
+    --many on stores list
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly
         
--fix bug where changing key to an already existing key doesn't 
 -add ability to click an image and view full screen
 -how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?
 

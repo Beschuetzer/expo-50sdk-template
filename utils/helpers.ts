@@ -153,6 +153,11 @@ export function getKeyToUse(key: string | Key, displayAlert = false) {
   return toReturn;
 }
 
+export function getKeyToUseFieldName(key: Key) {
+  if (!key) return EMPTY_STRING;
+  return key.upc ? 'upc' : 'name';
+}
+
 export function getFrequencyValue(number?: number): Frequency {
   if (!number)
     return {

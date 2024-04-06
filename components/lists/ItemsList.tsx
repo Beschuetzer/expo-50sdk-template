@@ -73,6 +73,10 @@ export function ItemsList(props: ItemsListProps) {
   const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: itemsList, title: 'Items List' });
 
+  const resetConfirmModalProps = useCallback(() => {
+    setConfirmModalProps({ isVisible: false });
+  }, []);
+
   const closeMenu = useCallback(() => {
     menuRef.current?.close();
   }, [menuRef]);
@@ -107,11 +111,11 @@ export function ItemsList(props: ItemsListProps) {
     setConfirmModalProps({
       isVisible: true,
       message: 'Are you sure you want to delete the selected items?',
-      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onCancel: () => resetConfirmModalProps(),
       onConfirm: () => {
         dispatch(removeItemsListItems(selectedItems));
         resetMultiSelectionMode();
-        setConfirmModalProps({ isVisible: false });
+        resetConfirmModalProps();
       },
     });
   }, [selectedItems, resetMultiSelectionMode]);
@@ -151,9 +155,21 @@ export function ItemsList(props: ItemsListProps) {
 
   const onSwipeLeft = useCallback(
     (item: Item) => {
+      const keyToDisplay = item?.name || item?.upc;
+      const isUpc = !item.name;
+      const isUpcMessagePart = isUpc ? `the item with the upc of ` : '';
+
       closeMenu();
-      dispatch(removeItemsListItems([item]));
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setConfirmModalProps({
+        isVisible: true,
+        message: `Are you sure you want to delete ${isUpcMessagePart}'${keyToDisplay}'?`,
+        onCancel: () => resetConfirmModalProps(),
+        onConfirm: () => {
+          dispatch(removeItemsListItems([item]));
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          resetConfirmModalProps();
+        },
+      });
     },
     [listRef, closeMenu],
   );

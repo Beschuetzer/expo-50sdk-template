@@ -302,6 +302,19 @@ export function getStoreWithDistance(
   };
 }
 
+export function joinWithAnd(array: (string | undefined)[]) {
+  if (array.length === 0) {
+    return '';
+  } else if (array.length === 1) {
+    return array[0];
+  } else if (array.length === 2) {
+    return array.join(' and ');
+  } else {
+    const lastItem = array.pop(); // Remove the last item from the array
+    return array.join(', ') + ', and ' + lastItem;
+  }
+}
+
 export async function captureImage() {
   try {
     const result = await ImagePicker.launchCameraAsync(getImagePickerOptions());

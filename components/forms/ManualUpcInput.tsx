@@ -95,9 +95,9 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${value.length} chars)`}
       />
       <Row space={1}>
-        {MOCKS_UPCS.map((mock) => {
+        {MOCKS_UPCS.map((mock, index) => {
           return (
-            <Button flex={1} onPress={() => onValueChange(mock)}>
+            <Button key={index} flex={1} onPress={() => onValueChange(mock)}>
               Mock {mock}
             </Button>
           );

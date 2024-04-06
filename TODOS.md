@@ -1,6 +1,5 @@
 ## MVP
 -delete confirmations:
-    --many on items list
     -- one on stores list
     --many on stores list
 

@@ -1,20 +1,36 @@
 import { BlurView } from 'expo-blur';
-import { View, Text, useTheme } from 'native-base';
+import { View, Text, useTheme, Heading } from 'native-base';
 import React, { useCallback } from 'react';
 import { Modal, TouchableOpacity } from 'react-native';
+import { XOR } from 'ts-xor';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { getButtonHitSlop } from '@/utils/helpers';
 
 export type ConfirmModalProps = {
   isVisible?: boolean;
-  message?: string;
   onConfirm?: () => void;
   onCancel?: () => void;
-};
+} & XOR<
+  {
+    message?: string;
+    title: string;
+  },
+  {
+    message: string;
+    title?: string;
+  }
+>;
 export const ConfirmModal = (props: ConfirmModalProps) => {
   const theme = useTheme();
-  const { isVisible = false, message = '', onConfirm, onCancel } = props;
+  const {
+    isVisible = false,
+    title = EMPTY_STRING,
+    message = EMPTY_STRING,
+    onConfirm,
+    onCancel,
+  } = props;
 
   const onCancelPress = useCallback(() => {
     onCancel && onCancel();
@@ -43,7 +59,16 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
         <View
           style={{ padding: 20, backgroundColor: 'white', borderRadius: 10 }}
         >
-          <Text>{message}</Text>
+          {title ? (
+            <Heading
+              size="sm"
+              textAlign="center"
+              mb={theme.space[FORM_INTER_ITEM_SPACING]}
+            >
+              {title}
+            </Heading>
+          ) : null}
+          {message ? <Text>{message}</Text> : null}
           <View
             style={{
               flexDirection: 'row',

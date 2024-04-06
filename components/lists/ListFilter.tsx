@@ -81,7 +81,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
       <Dialog.Title style={{ textAlign: 'center' }}>Filter</Dialog.Title>
       {filterNames.map((filterName: keyof T) => {
         return (
-          <View key={filterName}>
+          <View key={filterName?.toString()}>
             <Text ml={theme.space[FORM_INTER_ITEM_SPACING]}>
               {filterName.toString()}
             </Text>

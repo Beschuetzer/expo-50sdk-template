@@ -38,7 +38,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { Item, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
-import { getKeyToUse } from '@/utils/helpers';
+import { getKeyToUse, joinWithAnd } from '@/utils/helpers';
 
 type ItemsListProps = object;
 
@@ -110,7 +110,8 @@ export function ItemsList(props: ItemsListProps) {
   const onDeleteSelectedPress = useCallback(() => {
     setConfirmModalProps({
       isVisible: true,
-      message: 'Are you sure you want to delete the selected items?',
+      title: 'Deleting Items',
+      message: `Are you sure you want to delete ${joinWithAnd(selectedItems.map((item) => `'${item.name || item.upc}'`))}?`,
       onCancel: () => resetConfirmModalProps(),
       onConfirm: () => {
         dispatch(removeItemsListItems(selectedItems));
@@ -162,6 +163,7 @@ export function ItemsList(props: ItemsListProps) {
       closeMenu();
       setConfirmModalProps({
         isVisible: true,
+        title: 'Delete Item',
         message: `Are you sure you want to delete ${isUpcMessagePart}'${keyToDisplay}'?`,
         onCancel: () => resetConfirmModalProps(),
         onConfirm: () => {

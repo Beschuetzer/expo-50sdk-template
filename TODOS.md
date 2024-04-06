@@ -1,9 +1,9 @@
 ## MVP
--replace all for loops over storeSpecificvValuesMap with iterateStoreSpecificValuesMap
 
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly
+-clean up addStoresListItem when conviced it is working correctly
         
 -add ability to click an image and view full screen
 -how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?

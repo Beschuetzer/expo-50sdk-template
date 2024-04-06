@@ -7,9 +7,9 @@ import {
   StoreSpecificValues,
   StoreSpecificValuesMap,
 } from '@/types/Item';
+import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
 
-
-const KEY_TO_USE = 'keyToUse'
+const KEY_TO_USE = 'keyToUse';
 jest.mock('@/utils/helpers', () => {
   return {
     getSortOrderValues: jest.fn(),
@@ -68,15 +68,12 @@ describe('updateStoreSpecificValueMap', () => {
 function logState(state: ListsState) {
   console.log('Logging State'.padEnd(200, '-'));
 
-  for (const [key, values] of Object.entries(
-    state.storeSpecificValuesMap || {},
-  )) {
-    console.log({ key, values });
-    for (const [storeSpecificValueKey, valueAtStore] of Object.entries(
-      values || {},
-    )) {
-      console.log({ storeSpecificValueKey, valueAtStore });
-    }
-  }
+  iterateStoreSpecificValuesMap({
+    storeSpecificValuesMap: state.storeSpecificValuesMap,
+    onNewStoreSpecificValue(input) {
+      console.log(input);
+    },
+  });
+
   console.log(''.padEnd(200, '-'));
 }

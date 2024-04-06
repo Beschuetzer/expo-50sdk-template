@@ -892,31 +892,40 @@ export const storeSpecificListSelector = (listname: ListName) =>
       if (!currentStore?.name) return [];
 
       const listToDisplay = [] as ItemWithStoreSpecificValues[];
-      for (const [key, values] of Object.entries(storeSpecificValuesMap)) {
-        const isInCartForCurrentStore =
-          values?.[StoreSpecificValueKey.IsInCart]?.[currentStore.name];
 
-        if (
-          (listname === ListName.ShoppingList && isInCartForCurrentStore) ||
-          (listname === ListName.InCartList && !isInCartForCurrentStore)
-        )
-          continue;
+      iterateStoreSpecificValuesMap({
+        storeSpecificValuesMap,
+        onNewItemStart: (input) => {
+          const { itemKey, storeSpecificValues } = input;
+          const isInCartForCurrentStore =
+            storeSpecificValues?.[StoreSpecificValueKey.IsInCart]?.[
+              currentStore.name
+            ];
 
-        const currentQuantityForItemAndStoreCombination =
-          values?.[StoreSpecificValueKey.Quantity]?.[currentStore.name];
+          if (
+            (listname === ListName.ShoppingList && isInCartForCurrentStore) ||
+            (listname === ListName.InCartList && !isInCartForCurrentStore)
+          )
+            return;
 
-        if (
-          currentQuantityForItemAndStoreCombination &&
-          currentQuantityForItemAndStoreCombination > 0
-        ) {
-          const currentItem = getItemFromList(itemsList.data, key);
-          if (!currentItem) continue;
-          listToDisplay.push({
-            ...currentItem,
-            ...values,
-          } as ItemWithStoreSpecificValues);
-        }
-      }
+          const currentQuantityForItemAndStoreCombination =
+            storeSpecificValues?.[StoreSpecificValueKey.Quantity]?.[
+              currentStore.name
+            ];
+
+          if (
+            currentQuantityForItemAndStoreCombination &&
+            currentQuantityForItemAndStoreCombination > 0
+          ) {
+            const currentItem = getItemFromList(itemsList.data, itemKey);
+            if (!currentItem) return;
+            listToDisplay.push({
+              ...currentItem,
+              ...storeSpecificValues,
+            } as ItemWithStoreSpecificValues);
+          }
+        },
+      });
 
       const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
         listToDisplay,

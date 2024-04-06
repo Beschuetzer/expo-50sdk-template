@@ -5,12 +5,12 @@ import {
 } from '@/types/Item';
 
 type OnNewItemInput = {
-  itemKey?: string;
-  storeSpecificValues?: StoreSpecificValues;
+  itemKey: string;
+  storeSpecificValues: StoreSpecificValues;
 };
 type OnNewStoreSpecificValueInput = {
-  storeSpecificValueKey?: string;
-  storeSpecificValueKeyValue?: StoreSpecificValue<unknown>;
+  storeSpecificValueKey: string;
+  storeSpecificValueKeyValue: StoreSpecificValue<unknown>;
 } & OnNewItemInput;
 
 type IterateStoreSpecificValuesMapInput = {

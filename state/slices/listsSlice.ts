@@ -321,14 +321,30 @@ export const listsSlice = createSlice({
       }
     },
     clearShopping: (state: ListsState) => {
-      for (const [, value] of Object.entries(state.storeSpecificValuesMap)) {
-        if (value?.[StoreSpecificValueKey.IsInCart]?.[state.currentStoreName]) {
-          value[StoreSpecificValueKey.IsInCart][state.currentStoreName] = false;
-        }
-        if (value?.[StoreSpecificValueKey.Quantity]?.[state.currentStoreName]) {
-          value[StoreSpecificValueKey.Quantity][state.currentStoreName] = 0;
-        }
-      }
+      iterateStoreSpecificValuesMap({
+        storeSpecificValuesMap: state.storeSpecificValuesMap,
+        onNewItemStart: (input) => {
+          const { storeSpecificValues } = input;
+          if (
+            storeSpecificValues?.[StoreSpecificValueKey.IsInCart]?.[
+              state.currentStoreName
+            ]
+          ) {
+            storeSpecificValues[StoreSpecificValueKey.IsInCart][
+              state.currentStoreName
+            ] = false;
+          }
+          if (
+            storeSpecificValues?.[StoreSpecificValueKey.Quantity]?.[
+              state.currentStoreName
+            ]
+          ) {
+            storeSpecificValues[StoreSpecificValueKey.Quantity][
+              state.currentStoreName
+            ] = 0;
+          }
+        },
+      });
     },
     completePurchase: (state: ListsState) => {
       const { currentStoreName, storeSpecificValuesMap } = state;

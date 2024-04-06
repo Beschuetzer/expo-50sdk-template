@@ -34,18 +34,21 @@ export function iterateStoreSpecificValuesMap(
     storeSpecificValuesMap || {},
   )) {
     onNewItemStart && onNewItemStart({ itemKey, storeSpecificValues });
-    for (const [
-      storeSpecificValueKey,
-      storeSpecificValueKeyValue,
-    ] of Object.entries(storeSpecificValues || {})) {
-      onNewStoreSpecificValue &&
+
+    if (onNewStoreSpecificValue) {
+      for (const [
+        storeSpecificValueKey,
+        storeSpecificValueKeyValue,
+      ] of Object.entries(storeSpecificValues || {})) {
         onNewStoreSpecificValue({
           itemKey,
           storeSpecificValueKey,
           storeSpecificValueKeyValue,
           storeSpecificValues,
         });
+      }
     }
+
     onNewItemEnd && onNewItemEnd({ itemKey, storeSpecificValues });
   }
 }

@@ -1,8 +1,6 @@
 ## MVP
--delete confirmations:
-    --many on stores list
 
--need to remove related storeSpecificValueMap items when removeStoresListItem reducer is called
+-add helper method called iterateStoreSpecificValues which makes it easier to iterate the values and do something to them (callback names: onNewItemStart, onNewItemEnd, onNewStoreSpecificKey)
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly

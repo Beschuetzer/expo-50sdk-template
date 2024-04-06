@@ -81,7 +81,10 @@ export type StoreSpecificValues = {
   [StoreSpecificValueKey.Quantity]: StoreSpecificValue<number>;
 } | null;
 
-export type StoreSpecificValue<T> = { [storeId: string]: T } | null | undefined;
+export type StoreSpecificValue<T> =
+  | { [storeKey: string]: T }
+  | null
+  | undefined;
 export type StoreSpecificValueUpdater = Partial<{
   [key in StoreSpecificValueKey]: (currentValue: any) => any;
 }>;

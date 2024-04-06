@@ -253,7 +253,7 @@ export const listsSlice = createSlice({
         newItem: getStoreWithDistance(newStore, state.currentLocation),
         originalKey,
         onKeyChange: (input) => {
-          const { newKey, oldKey, type } = input;
+          const { newKey, oldKey } = input;
           console.log(input);
           displayAlert(input);
           console.log(''.padEnd(200, '-'));
@@ -466,6 +466,16 @@ export const listsSlice = createSlice({
       state.storesList.data = state.storesList.data.filter(
         (store) => store.name !== keyToUse,
       );
+
+      for (const [, values] of Object.entries(
+        state.storeSpecificValuesMap || {},
+      )) {
+        for (const [, value] of Object.entries(values || {})) {
+          if (value?.[keyToUse] !== undefined) {
+            delete value[keyToUse];
+          }
+        }
+      }
     },
     resetCurrentLocation: (state: ListsState) => {
       state.currentLocation = CURRENT_LOCATION_INITIAL;

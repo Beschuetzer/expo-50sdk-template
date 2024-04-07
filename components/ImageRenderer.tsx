@@ -15,8 +15,8 @@ import { Item } from '@/types/Item';
 import { ItemProp } from '@/types/general';
 
 type ImageRendererProps = {
-  height?: number;
-  width?: number;
+  height?: number | string;
+  width?: number | string;
   showFullscreenOnPress?: boolean;
   title?: string;
 } & ImageProps &
@@ -36,7 +36,7 @@ export function ImageRenderer(props: ImageRendererProps) {
 
   const onImagePress = useCallback(() => {
     if (!showFullscreenOnPress) return;
-    navigation.navigate(Routes.FullscreenImageScreen, { source, item });
+    navigation.navigate(Routes.FullscreenImageScreen, { item });
   }, [navigation, source, showFullscreenOnPress]);
 
   return (

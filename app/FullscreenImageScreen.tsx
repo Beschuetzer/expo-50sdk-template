@@ -1,22 +1,26 @@
 import { useRoute } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { Text } from 'native-base';
+import { useEffect, useMemo } from 'react';
 
 import { ImageRenderer } from '@/components/ImageRenderer';
+import { useUpcProduct } from '@/components/hooks/useUpcProduct';
 import { EMPTY_STRING } from '@/constants/general';
-import { upcProductSelector } from '@/state/slices/scannerSlice';
 import { Item } from '@/types/Item';
 
 export default function FullscreenImageScreen() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { source, item } = (route.params || {}) as {
-    source: string;
+  const { item } = (route.params || {}) as {
     item: Item;
   };
-  const upcProduct = useSelector(upcProductSelector(item?.upc || EMPTY_STRING));
-  console.log({ upcData: upcProduct });
+  const { upcProduct } = useUpcProduct({
+    upc: item?.upc || EMPTY_STRING,
+  });
+  const imageToUse = useMemo(
+    () => upcProduct?.image_url || upcProduct?.image_front_url,
+    [upcProduct],
+  );
 
   useEffect(() => {
     if (!item?.name) return;
@@ -25,5 +29,10 @@ export default function FullscreenImageScreen() {
     });
   }, []);
 
-  return <ImageRenderer source={upcProduct?.image_url || source} item={item} />;
+  if (!imageToUse) {
+    return <Text>Need to handle undefined case</Text>;
+  }
+  return (
+    <ImageRenderer source={imageToUse} item={item} height="auto" width="100%" />
+  );
 }

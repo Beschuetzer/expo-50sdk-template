@@ -315,6 +315,18 @@ export function joinWithAnd(array: (string | undefined)[]) {
   }
 }
 
+export async function getCustomImage(
+  resultFetcher: () => Promise<string | undefined>,
+  onResultFound: (result: string) => void,
+) {
+  try {
+    const result = (await resultFetcher()) || EMPTY_STRING;
+    onResultFound && onResultFound(result);
+  } catch (error) {
+    console.error('Error obtaining a custom image: ' + error);
+  }
+}
+
 export async function captureImage() {
   try {
     const result = await ImagePicker.launchCameraAsync(getImagePickerOptions());

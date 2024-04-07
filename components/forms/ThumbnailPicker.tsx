@@ -1,16 +1,15 @@
-import { FontAwesome } from '@expo/vector-icons';
-import { Center, Column, Row, theme } from 'native-base';
+import { Column, Row, theme } from 'native-base';
 import { useCallback, useMemo, useState } from 'react';
-import { TouchableOpacity } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
 import { ThumbnailPickerImage } from './ThumbnailPickerImage';
+import { ImageCapturer } from '../ImageCapturer';
 import { useIsDarkMode } from '../hooks/useIsDarkTheme';
 
 import { EMPTY_STRING } from '@/constants/general';
 import { LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { SpacingProp, StyleProp } from '@/types/general';
-import { captureImage, pickImage } from '@/utils/helpers';
+import { captureImage, getCustomImage, pickImage } from '@/utils/helpers';
 
 type ThumbnailPickerProps = {
   imagesToRender: Set<string>;
@@ -38,18 +37,19 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     [onSelectImage],
   );
 
-  const getCustomImage = useCallback(
-    async (resultFetcher: () => Promise<string | undefined>) => {
-      try {
-        const result = (await resultFetcher()) || EMPTY_STRING;
-        setCustomImageUri(result);
-        handleSelect(result, true);
-      } catch (error) {
-        console.error('Error obtaining a custom image: ' + error);
-      }
-    },
-    [],
-  );
+  const onSelectPress = useCallback(() => {
+    getCustomImage(pickImage, (result) => {
+      setCustomImageUri(result);
+      handleSelect(result, true);
+    });
+  }, [handleSelect]);
+
+  const onCameraPress = useCallback(() => {
+    getCustomImage(captureImage, (result) => {
+      setCustomImageUri(result);
+      handleSelect(result, true);
+    })
+  }, [handleSelect]);
 
   return (
     <Column mt={spacing}>
@@ -77,16 +77,11 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         }}
       />
       <Row space={spacing} mt={spacing}>
-        <TouchableOpacity onPress={() => getCustomImage(captureImage)}>
-          <Center borderColor={modeColor} width={75} height={50}>
-            <FontAwesome name="camera" size={50} />
-          </Center>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => getCustomImage(pickImage)}>
-          <Center borderColor={modeColor} width={75} height={50}>
-            Select
-          </Center>
-        </TouchableOpacity>
+        <ImageCapturer
+          onCameraPress={onCameraPress}
+          onSelectPress={onSelectPress}
+          borderColor={modeColor}
+        />
       </Row>
     </Column>
   );

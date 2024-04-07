@@ -1,11 +1,13 @@
 ## MVP
 
+-FullscreenImageScreen:
+    --figure out how to handle case where no image is available
+    --figure out how to handle case where custom image is current (don't want to use upc data in that case)
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly
 -clean up addStoresListItem when conviced it is working correctly
         
--add ability to click an image and view full screen
 -how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?
 
 -add option to change item image size (how would this affect already taken images?)

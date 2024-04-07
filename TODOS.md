@@ -1,6 +1,7 @@
 ## MVP
 
 -FullscreenImageScreen:
+    --finish ImageCapturer implementation (can use ThumbnailPicker example)
     --figure out how to handle case where no image is available
     --figure out how to handle case where custom image is current (don't want to use upc data in that case)
 

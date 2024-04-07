@@ -84,7 +84,7 @@ export function ItemTileWithStoreSpecificValues(
           onSelect && onSelect(item);
         } else {
           navigation.navigate(Routes.ItemModal, {
-            key: {upc: item.upc, name: item.name},
+            key: { upc: item.upc, name: item.name },
             showOverrideMsg: false,
             callerList: listName,
           });

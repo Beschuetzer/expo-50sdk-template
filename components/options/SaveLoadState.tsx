@@ -91,7 +91,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       onConfirm: async () => {
         const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores);
         dispatch(setStoresList(storesLoaded));
-        dispatch(setCurrentStoreName())
+        dispatch(setCurrentStoreName());
         setConfirmModalProps({ isVisible: false });
       },
     });

@@ -13,7 +13,10 @@ import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
-import { ESTIMATED_SIZE_FOR_SHOPPING_LISTS, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  ESTIMATED_SIZE_FOR_SHOPPING_LISTS,
+  FORM_INTER_ITEM_SPACING,
+} from '@/constants/general';
 import {
   ListName,
   addItemToCart,

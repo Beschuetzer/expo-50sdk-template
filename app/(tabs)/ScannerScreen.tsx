@@ -50,7 +50,7 @@ const BarcodeScannerScreen = () => {
         onScanned={(upc) => {
           navigation.navigate(Routes.ItemModal, {
             key: { upc, name: EMPTY_STRING },
-            showOverrideMsg: false
+            showOverrideMsg: false,
           });
         }}
       />

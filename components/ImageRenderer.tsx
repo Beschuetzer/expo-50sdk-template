@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import {
-  IMAGE_RENDERER_HEIGHT_DEFAULT,
+  IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
   IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT,
   IMAGE_RENDERER_WIDTH_DEFAULT,
 } from '@/constants/general';
@@ -30,7 +30,7 @@ export function ImageRenderer(props: ImageRendererProps) {
     source,
     cachePolicy = 'disk',
     showFullscreenOnPress = IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT,
-    height = IMAGE_RENDERER_HEIGHT_DEFAULT,
+    height = IMAGE_RENDERER_WIDTH_DEFAULT * IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
     width = IMAGE_RENDERER_WIDTH_DEFAULT,
   } = props;
 

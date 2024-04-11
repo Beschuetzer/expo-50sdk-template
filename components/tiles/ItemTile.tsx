@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
+import { ItemTileBasicContent } from './ItemTileBasicContent';
 import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
@@ -17,11 +18,16 @@ import { Item, ItemUnit } from '@/types/Item';
 import { ItemProp, ListNameProp } from '@/types/general';
 import { getFrequencyValue } from '@/utils/helpers';
 
+export enum ItemTileViewingMode {
+  Basic = 'Basic',
+  Full = 'Full',
+}
 export type ItemTileProps<T> = {
   buttonProps?: RectButtonProps;
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
   onSelect?: (item: T) => void;
+  viewingMode?: ItemTileViewingMode;
 } & ItemProp<T> &
   ListNameProp;
 
@@ -35,12 +41,54 @@ export function ItemTile(props: ItemTileProps<Item>) {
     listName,
     item,
     onSelect,
+    viewingMode = ItemTileViewingMode.Basic,
   } = props;
   const lastPurchased = useSelector(lastPurchasedSelector(item)) || 0;
   const frequencyObj = useMemo(
     () => getFrequencyValue(item?.frequency),
     [item],
   );
+
+  function renderContent() {
+    switch (viewingMode) {
+      case ItemTileViewingMode.Basic:
+        return (
+          <ItemTileBasicContent
+            item={item}
+            isMultiSelectMode={isMultiSelectMode}
+            isSelected={isSelected}
+          />
+        );
+      default:
+        return (
+          <>
+            <Column flex={0}>
+              <ImageRenderer
+                item={item}
+                source={item.images[item.imageToUseIndex]}
+              />
+            </Column>
+            <ItemTileNameAndUpcColumn item={item}>
+              <Text>
+                1 {item.unit || ItemUnit.Package} every {frequencyObj?.number}{' '}
+                {frequencyObj?.timeSpan}
+                {frequencyObj?.number > 1 ? 's' : ''}
+              </Text>
+              <Text>
+                Last Purchased:{' '}
+                {lastPurchased
+                  ? new Date(lastPurchased).toLocaleString()
+                  : 'N/A'}
+              </Text>
+            </ItemTileNameAndUpcColumn>
+            <ItemTileIsSelectedColumn
+              isMultiSelectMode={isMultiSelectMode}
+              isSelected={isSelected}
+            />
+          </>
+        );
+    }
+  }
 
   return (
     <RectButton
@@ -58,30 +106,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
         }
       }}
     >
-      <Row space={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <Column flex={0}>
-          <ImageRenderer
-            item={item}
-            source={item.images[item.imageToUseIndex]}
-          />
-        </Column>
-        <ItemTileNameAndUpcColumn item={item}>
-          <Text>
-            1 {item.unit || ItemUnit.Package} every {frequencyObj?.number}{' '}
-            {frequencyObj?.timeSpan}
-            {frequencyObj?.number > 1 ? 's' : ''}
-          </Text>
-          {lastPurchased ? (
-            <Text>
-              Last Purchased: {new Date(lastPurchased).toLocaleString()}
-            </Text>
-          ) : null}
-        </ItemTileNameAndUpcColumn>
-        <ItemTileIsSelectedColumn
-          isMultiSelectMode={isMultiSelectMode}
-          isSelected={isSelected}
-        />
-      </Row>
+      <Row space={theme.space[FORM_INTER_ITEM_SPACING]}>{renderContent()}</Row>
     </RectButton>
   );
 }

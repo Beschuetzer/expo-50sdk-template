@@ -28,8 +28,8 @@ export const DAY_IN_MS = HOUR_IN_MS * 24;
 export const WEEK_IN_MS = DAY_IN_MS * 7;
 export const IMAGE_RENDERER_TITLE_DEFAULT = 'Image Viewer';
 export const IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT = true;
-export const IMAGE_RENDERER_WIDTH_DEFAULT = 75;
-export const IMAGE_RENDERER_HEIGHT_DEFAULT = 100;
+export const IMAGE_RENDERER_WIDTH_DEFAULT = 60;
+export const IMAGE_RENDERER_ASPECT_RATIO_DEFAULT = 1.5;
 export const IMAGE_PICKER_QUALITY_INITIAL = 0.25;
 export const IMAGE_PRIORITY_MAPPING: {
   [key: number | string]: keyof UpcProduct;

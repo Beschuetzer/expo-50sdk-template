@@ -1,4 +1,6 @@
 ## MVP
+-Figure out how to use only one Item tile:
+    --add optional inputs for item-specific things and remove useSelectors
 -Add toggle viewing mode:
     --for needs items list
     --for in cart items list

@@ -16,7 +16,7 @@ import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
-import { ItemTile } from '../tiles/ItemTile';
+import { ItemTile, ItemTileViewingMode } from '../tiles/ItemTile';
 
 import {
   EMPTY_STRING,
@@ -69,6 +69,7 @@ export function ItemsList(props: ItemsListProps) {
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {} as ConfirmModalProps,
   );
+  const [viewingMode, setViewingMode] = useState(ItemTileViewingMode.Full);
   const lastSortTypeRef = useRef(itemsListSortTypes[0]);
   const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: itemsList, title: 'Items List' });
@@ -123,11 +124,21 @@ export function ItemsList(props: ItemsListProps) {
 
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));
+    setSelectedItems([]);
+    setIsMultiSelectMode(false);
   }, []);
 
   const onSortTypeChange = useCallback((sortType: SortType) => {
     lastSortTypeRef.current = sortType;
     dispatch(setSortOrder({ listName, sortBy: sortType }));
+  }, []);
+
+  const onToggleViewingModePress = useCallback(() => {
+    setViewingMode((current) => {
+      return current === ItemTileViewingMode.Basic
+        ? ItemTileViewingMode.Full
+        : ItemTileViewingMode.Basic;
+    });
   }, []);
 
   const onFilterValueChange = useCallback(
@@ -198,6 +209,10 @@ export function ItemsList(props: ItemsListProps) {
                   onPress: onDeleteSelectedPress,
                 }
               : undefined,
+            {
+              text: 'Toggle Viewing Mode',
+              onPress: onToggleViewingModePress,
+            },
           ]}
         />
       ),
@@ -263,6 +278,7 @@ export function ItemsList(props: ItemsListProps) {
           listName={listName}
           isMultiSelectMode={isMultiSelectMode}
           item={item}
+          viewingMode={viewingMode}
           buttonProps={{
             onLongPress: () => {
               setSelectedItems(isMultiSelectMode ? [] : [item]);

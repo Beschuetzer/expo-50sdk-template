@@ -527,6 +527,7 @@ export const listsSlice = createSlice({
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyList(ListName.ItemsList);
       state.storeSpecificValuesMap = {};
+      state.lastPurchasedMap = {};
     },
     resetListSlice: (state: ListsState) => {
       state = initialState;
@@ -590,6 +591,13 @@ export const listsSlice = createSlice({
     ) => {
       if (!action.payload) return;
       state.itemsList = action.payload;
+    },
+    setLastPurchasedMap: (
+      state: ListsState,
+      action: PayloadAction<ListsState['lastPurchasedMap']>,
+    ) => {
+      if (!action.payload) return;
+      state.lastPurchasedMap = action.payload;
     },
     setSortOrder: (
       state: ListsState,
@@ -1019,6 +1027,7 @@ export const {
   setCurrentStoreName,
   setFilters,
   setItemsList,
+  setLastPurchasedMap,
   setSortOrder,
   setStoresList,
   setStoreSpecificValues,

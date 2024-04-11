@@ -10,8 +10,10 @@ import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   currentStoreSelector,
   itemsListSelector,
+  lastPurchasedMapSelector,
   setCurrentStoreName,
   setItemsList,
+  setLastPurchasedMap,
   setStoresList,
   setStoreSpecificValues,
   storesListSelector,
@@ -29,6 +31,7 @@ const FILE_NAMES = {
   items: 'items',
   stores: 'stores',
   storeSpecificValues: 'storeSpecificValues',
+  lastPurchasedMap: 'lastPurchasedMap',
   upcProducts: 'upcProducts',
 };
 
@@ -36,6 +39,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
   const theme = useTheme();
   const itemsList = useSelector(itemsListSelector);
   const storeSpecificValues = useSelector(storeSpecificValuesMapSelector);
+  const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
   const upcProducts = useSelector(upcProductsSelector);
   const stores = useSelector(storesListSelector);
   const currentStore = useSelector(currentStoreSelector);
@@ -57,8 +61,12 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
           FILE_NAMES.storeSpecificValues,
         );
         const upcProducts = await loadAppStateFromFile(FILE_NAMES.upcProducts);
+        const lastPurchasedMap = await loadAppStateFromFile(
+          FILE_NAMES.lastPurchasedMap,
+        );
         dispatch(setStoreSpecificValues(storeSpecificValues));
         dispatch(setItemsList(itemsLoaded));
+        dispatch(setLastPurchasedMap(lastPurchasedMap));
         dispatch(setUpcProducts(upcProducts));
         setConfirmModalProps({ isVisible: false });
       },
@@ -76,6 +84,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
           FILE_NAMES.storeSpecificValues,
           storeSpecificValues,
         );
+        await saveAppStateToFile(FILE_NAMES.lastPurchasedMap, lastPurchasedMap);
         await saveAppStateToFile(FILE_NAMES.upcProducts, upcProducts);
         setConfirmModalProps({ isVisible: false });
       },

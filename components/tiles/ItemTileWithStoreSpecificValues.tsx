@@ -38,7 +38,7 @@ export function ItemTileWithStoreSpecificValues(
     buttonProps,
     item,
     onSelect,
-    viewingMode = ItemTileViewingMode.Basic,
+    viewingMode = ItemTileViewingMode.Full,
   } = props;
   const dispatch = useDispatch();
   const theme = useTheme();

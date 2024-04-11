@@ -31,6 +31,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from '@/components/modals/ConfirmModal';
+import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
@@ -57,12 +58,7 @@ import {
   previouslyPurchasedListSelector,
   resetSelectedItemsInShopping,
 } from '@/state/slices/listsSlice';
-
-const renderScene = SceneMap({
-  first: () => <ShoppingList />,
-  second: () => <InCartList />,
-  third: () => <PreviouslyPurchasedList />,
-});
+import { getNewViewingMode } from '@/utils/helpers';
 
 export default function TabOneScreen() {
   const theme = useTheme();
@@ -91,6 +87,7 @@ export default function TabOneScreen() {
     selectedItemsFromPreviouslyPurchasedSelector,
   );
 
+  const [viewingMode, setViewingMode] = useState(ItemTileViewingMode.Basic);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {},
   );
@@ -98,6 +95,17 @@ export default function TabOneScreen() {
   const [index, setIndex] = useState(0);
   const menuRef = useRef<Menu>(null);
   const navigation = useNavigation();
+
+  const renderScene = useMemo(
+    () =>
+      SceneMap({
+        first: () => <ShoppingList viewingMode={viewingMode} />,
+        second: () => <InCartList viewingMode={viewingMode} />,
+        third: () => <PreviouslyPurchasedList />,
+      }),
+    [viewingMode],
+  );
+
   const listName = useMemo(() => {
     let listToReturn = ListName.ShoppingList;
     switch (index) {
@@ -154,12 +162,21 @@ export default function TabOneScreen() {
     [firstTabTitle, secondTabTitle, thirdTabTitle],
   );
 
+  const onToggleViewingModePress = useCallback(() => {
+    setViewingMode((current) => getNewViewingMode(current));
+  }, []);
+
   const closeMenu = useCallback(() => {
     menuRef.current?.close();
   }, [menuRef]);
 
   const getMenuOptions = useCallback(() => {
-    const options: ListHeaderRightOptions[] = [];
+    const options: ListHeaderRightOptions[] = [
+      {
+        text: 'Toggle Viewing Mode',
+        onPress: onToggleViewingModePress,
+      },
+    ];
     if (index === 0) {
       if (selectedShoppingCartItems.length > 0) {
         options.push({

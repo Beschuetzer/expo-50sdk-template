@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
+import { ItemTileProps } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
 import {
@@ -29,7 +30,10 @@ import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
 import { getKeyToUse } from '@/utils/helpers';
 
-type ShoppingListProps = object;
+type ShoppingListProps = Pick<
+  ItemTileProps<ItemWithStoreSpecificValues>,
+  'viewingMode'
+>;
 
 export const shoppingListSortTypes = [
   SortType.AisleNumber,
@@ -50,6 +54,7 @@ const listName: ListName = ListName.ShoppingList;
  *Instead they are calculated based on the storeSpecificValuesMap in the storeSpecificListSelector
  **/
 export function ShoppingList(props: ShoppingListProps) {
+  const { viewingMode } = props;
   const shoppingListToDisplay = useSelector(
     storeSpecificListSelector(listName),
   );
@@ -136,6 +141,7 @@ export function ShoppingList(props: ShoppingListProps) {
           isMultiSelectMode={isMultiSelectMode}
           listName={listName}
           item={item}
+          viewingMode={viewingMode}
           buttonProps={{
             onLongPress: () => {
               dispatch(

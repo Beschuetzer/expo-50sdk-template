@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import { Insets } from 'react-native';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
+import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import {
   DAY_IN_MS,
   EMPTY_STRING,
@@ -270,6 +271,12 @@ export function getIndexOfSmallestField<T>(arr: T[], key: keyof T) {
   }
 
   return smallestIndex;
+}
+
+export function getNewViewingMode(viewingMode: ItemTileViewingMode) {
+  return viewingMode === ItemTileViewingMode.Basic
+    ? ItemTileViewingMode.Full
+    : ItemTileViewingMode.Basic;
 }
 
 export function getSortOrderValues(listName: ListName) {

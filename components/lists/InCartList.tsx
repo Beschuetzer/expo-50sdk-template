@@ -11,6 +11,7 @@ import { ListSorter } from './ListSorter';
 import { shoppingListSortTypes } from './ShoppingLIst';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
+import { ItemTileProps } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
 import {
@@ -34,7 +35,10 @@ import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
 import { getKeyToUse } from '@/utils/helpers';
 
-type InCartListProps = object;
+type InCartListProps = Pick<
+  ItemTileProps<ItemWithStoreSpecificValues>,
+  'viewingMode'
+>;
 
 const listName: ListName = ListName.InCartList;
 
@@ -43,6 +47,7 @@ const listName: ListName = ListName.InCartList;
  *Instead they are calculated based on the storeSpecificValuesMap in the storeSpecificListSelector
  **/
 export function InCartList(props: InCartListProps) {
+  const { viewingMode } = props;
   const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(storeSpecificListSelector(listName));
   const currentStore = useSelector(currentStoreSelector);
@@ -129,6 +134,7 @@ export function InCartList(props: InCartListProps) {
             isMultiSelectMode={isMultiSelectMode}
             listName={listName}
             item={item}
+            viewingMode={viewingMode}
             buttonProps={{
               onLongPress: () => {
                 dispatch(

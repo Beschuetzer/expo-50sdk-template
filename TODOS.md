@@ -1,7 +1,4 @@
 ## MVP
--Add toggle viewing mode:
-    --for needs items list
-    --for in cart items list
 
 -FullscreenImageScreen:
     --finish ImageCapturer implementation (can use ThumbnailPicker example)

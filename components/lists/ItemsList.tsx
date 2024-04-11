@@ -38,7 +38,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { Item, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
-import { getKeyToUse, joinWithAnd } from '@/utils/helpers';
+import { getKeyToUse, getNewViewingMode, joinWithAnd } from '@/utils/helpers';
 
 type ItemsListProps = object;
 
@@ -134,11 +134,7 @@ export function ItemsList(props: ItemsListProps) {
   }, []);
 
   const onToggleViewingModePress = useCallback(() => {
-    setViewingMode((current) => {
-      return current === ItemTileViewingMode.Basic
-        ? ItemTileViewingMode.Full
-        : ItemTileViewingMode.Basic;
-    });
+    setViewingMode((current) => getNewViewingMode(current));
   }, []);
 
   const onFilterValueChange = useCallback(

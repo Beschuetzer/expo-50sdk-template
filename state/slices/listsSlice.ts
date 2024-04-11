@@ -6,7 +6,7 @@ import { RootState } from '../store';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { SortOrder, SortType, getSorter } from '@/components/lists/sorters';
-import { EMPTY_STRING } from '@/constants/general';
+import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -260,6 +260,7 @@ export const listsSlice = createSlice({
           console.log(''.padEnd(200, '-'));
           const start = performance.now();
 
+          //handle storeSpecificValuesMap merging
           iterateStoreSpecificValuesMap({
             storeSpecificValuesMap: state.storeSpecificValuesMap,
             onNewStoreSpecificValue(input) {
@@ -296,10 +297,26 @@ export const listsSlice = createSlice({
             },
           });
 
+          //handle lastPurchasedMap merging (uses the most recent value between the two stores)
+          for (const [, storeSpecificValue] of Object.entries(
+            state.lastPurchasedMap || {},
+          )) {
+            const oldKeyValue = storeSpecificValue?.[oldKey];
+            const newKeyValue = storeSpecificValue?.[newKey];
+            if (storeSpecificValue && oldKeyValue !== undefined) {
+              storeSpecificValue[newKey] = Math.max(
+                newKeyValue || EMPTY_NUMBER,
+                oldKeyValue || EMPTY_NUMBER,
+              );
+            }
+            delete storeSpecificValue?.[oldKey];
+          }
+
           const end = performance.now();
           console.log({ timeToRun: end - start });
           console.log('done with work'.padEnd(200, '-'));
 
+          //validating storeSpecificValuesMap
           for (const [key, storeSpecificValues] of Object.entries(
             state.storeSpecificValuesMap || {},
           )) {
@@ -315,6 +332,14 @@ export const listsSlice = createSlice({
               }
             }
           }
+
+          //validating lastPurcahsedMap
+          for (const [key, storeSpecificValue] of Object.entries(
+            state.lastPurchasedMap || {},
+          )) {
+            console.log({ storeSpecificValue });
+          }
+
           console.log('done with print out'.padEnd(200, '-'));
 
           state.currentStoreName = newKey;

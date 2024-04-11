@@ -78,18 +78,20 @@ export function ItemTileWithStoreSpecificValues(
 
   const quantityAtStoreJsx = useMemo(() => {
     return (
-      <TouchableOpacity
-        hitSlop={getButtonHitSlop()}
-        onPress={incrementQuantity}
-        onLongPress={decrementQuantity}
-      >
-        <Text style={{ color: theme.colors.info[900] }}>
-          {quantityAtStore} {item.unit || ItemUnit.Package}
-          {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
-            ? 's'
-            : ''}
-        </Text>
-      </TouchableOpacity>
+      <Row>
+        <TouchableOpacity
+          hitSlop={getButtonHitSlop()}
+          onPress={incrementQuantity}
+          onLongPress={decrementQuantity}
+        >
+          <Text style={{ color: theme.colors.info[900] }}>
+            {quantityAtStore} {item.unit || ItemUnit.Package}
+            {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
+              ? 's'
+              : ''}
+          </Text>
+        </TouchableOpacity>
+      </Row>
     );
   }, [quantityAtStore, item, incrementQuantity, decrementQuantity]);
 
@@ -154,7 +156,7 @@ export function ItemTileWithStoreSpecificValues(
     >
       <Column>
         <Row backgroundColor={theme.colors.white}>{renderContent()}</Row>
-        {quantityAtStoreJsx}
+        {viewingMode === ItemTileViewingMode.Basic ? null : quantityAtStoreJsx}
       </Column>
     </RectButton>
   );

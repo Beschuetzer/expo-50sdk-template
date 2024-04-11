@@ -1,14 +1,14 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Stack } from 'native-base';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
-import { ItemTileProps } from '../tiles/ItemTile';
+import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
 import {
@@ -68,6 +68,10 @@ export function ShoppingList(props: ShoppingListProps) {
     isMultiSelectModeForShoppingCartSelector,
   );
 
+  const iconSize = useMemo(() => {
+    return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
+  }, [viewingMode]);
+
   const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
     setRefreshing(false);
     dispatch(addItemToCart(item));
@@ -102,7 +106,7 @@ export function ShoppingList(props: ShoppingListProps) {
               <FontAwesome
                 name="remove"
                 color={theme.colors.white}
-                size={theme.sizes[8]}
+                size={iconSize}
               />
               <Text color={theme.colors.white}>Remove</Text>
             </Stack>
@@ -121,7 +125,7 @@ export function ShoppingList(props: ShoppingListProps) {
               <FontAwesome
                 name="plus"
                 color={theme.colors.white}
-                size={theme.sizes[8]}
+                size={iconSize}
               />
               <Text color={theme.colors.white}>To Cart</Text>
             </Stack>

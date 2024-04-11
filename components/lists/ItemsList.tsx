@@ -2,7 +2,13 @@ import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useFocusEffect, useNavigation } from 'expo-router';
 import { Text, useTheme, Stack } from 'native-base';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { LayoutAnimation } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
 import { useDispatch, useSelector } from 'react-redux';
@@ -73,6 +79,10 @@ export function ItemsList(props: ItemsListProps) {
   const lastSortTypeRef = useRef(itemsListSortTypes[0]);
   const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: itemsList, title: 'Items List' });
+
+  const iconSize = useMemo(() => {
+    return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
+  }, [viewingMode]);
 
   const resetConfirmModalProps = useCallback(() => {
     setConfirmModalProps({ isVisible: false });
@@ -236,7 +246,7 @@ export function ItemsList(props: ItemsListProps) {
               <FontAwesome
                 name="trash"
                 color={theme.colors.white}
-                size={theme.sizes[8]}
+                size={iconSize}
               />
             </Stack>
           ),
@@ -254,7 +264,7 @@ export function ItemsList(props: ItemsListProps) {
               <FontAwesome
                 name="plus"
                 color={theme.colors.white}
-                size={theme.sizes[8]}
+                size={iconSize}
               />
               <Text color={theme.colors.white}>Shopping List</Text>
             </Stack>

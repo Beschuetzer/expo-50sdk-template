@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Stack } from 'native-base';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -11,13 +11,10 @@ import { ListSorter } from './ListSorter';
 import { shoppingListSortTypes } from './ShoppingLIst';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
-import { ItemTileProps } from '../tiles/ItemTile';
+import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
-import {
-  ESTIMATED_SIZE_FOR_SHOPPING_LISTS,
-  FORM_INTER_ITEM_SPACING,
-} from '@/constants/general';
+import { ESTIMATED_SIZE_FOR_SHOPPING_LISTS } from '@/constants/general';
 import {
   ListName,
   addItemToCart,
@@ -59,6 +56,10 @@ export function InCartList(props: InCartListProps) {
   const selectedItems = useSelector(selectedItemsFromInCartSelector);
   const isMultiSelectMode = useSelector(isMultiSelectModeForInCartSelector);
 
+  const iconSize = useMemo(() => {
+    return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
+  }, [viewingMode]);
+
   const onSortTypeChange = useCallback((sortType: SortType) => {
     dispatch(
       setSortOrder({ listName: ListName.ShoppingList, sortBy: sortType }),
@@ -92,40 +93,40 @@ export function InCartList(props: InCartListProps) {
               <FontAwesome
                 name="remove"
                 color={theme.colors.white}
-                size={theme.sizes[8]}
+                size={iconSize}
               />
-              <Text color={theme.colors.white}>Remove</Text>
+              <Text color={theme.colors.white}>Back to Shopping</Text>
             </Stack>
           ),
           backgroundColor: theme.colors.red[900],
           onPress: onSwipeLeft.bind(null, key),
         }}
-        rightSwipe={{
-          backgroundColor: theme.colors.primary[900],
-          onPress: onSwipeRight.bind(null, item),
-          title: currentStore.name ? (
-            <Stack
-              paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-              alignItems="center"
-            >
-              <FontAwesome
-                name="plus"
-                color={theme.colors.white}
-                size={theme.sizes[8]}
-              />
-              <Text color={theme.colors.white}>To Cart</Text>
-            </Stack>
-          ) : (
-            <Text
-              width={150}
-              numberOfLines={2}
-              paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-              color={theme.colors.white}
-            >
-              Select a Store to Add to Shopping List
-            </Text>
-          ),
-        }}
+        // rightSwipe={{
+        //   backgroundColor: theme.colors.primary[900],
+        //   onPress: onSwipeRight.bind(null, item),
+        //   title: currentStore.name ? (
+        //     <Stack
+        //       paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
+        //       alignItems="center"
+        //     >
+        //       <FontAwesome
+        //         name="plus"
+        //         color={theme.colors.white}
+        //         size={iconSize}
+        //       />
+        //       <Text color={theme.colors.white}>To Cart</Text>
+        //     </Stack>
+        //   ) : (
+        //     <Text
+        //       width={150}
+        //       numberOfLines={2}
+        //       paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
+        //       color={theme.colors.white}
+        //     >
+        //       Select a Store to Add to Shopping List
+        //     </Text>
+        //   ),
+        // }}
       >
         {index === 0 ? (
           <InCartPrice />

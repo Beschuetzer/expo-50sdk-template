@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, FlatList, Text, StyleSheet } from 'react-native';
-import { unsubscribeFromKeyboardEvents } from 'react-native-reanimated/lib/typescript/reanimated2/core';
+import { View, Text, StyleSheet } from 'react-native';
 
 type ObjectRendererProps<T> = {
   object: T;

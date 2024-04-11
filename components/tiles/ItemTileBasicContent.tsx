@@ -34,6 +34,7 @@ export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
           source={item.images[item.imageToUseIndex]}
           height={HEIGHT}
           width={(HEIGHT * 2) / 3}
+          useMarginRight
         />
       </Column>
       <ItemTileNameAndUpcColumn item={item} showUpc={showUpc}>

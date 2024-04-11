@@ -66,6 +66,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
               <ImageRenderer
                 item={item}
                 source={item.images[item.imageToUseIndex]}
+                useMarginRight
               />
             </Column>
             <ItemTileNameAndUpcColumn item={item}>

@@ -124,6 +124,7 @@ export function ItemTileWithStoreSpecificValues(
               <ImageRenderer
                 item={item}
                 source={item.images[item.imageToUseIndex]}
+                useMarginRight
               />
             </Column>
             <ItemTileNameAndUpcColumn item={item}>

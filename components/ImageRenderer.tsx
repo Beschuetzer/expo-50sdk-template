@@ -20,6 +20,7 @@ type ImageRendererProps = {
   width?: number | string;
   showFullscreenOnPress?: boolean;
   title?: string;
+  useMarginRight?: boolean;
 } & ImageProps &
   Partial<ItemProp<Item>>;
 
@@ -33,8 +34,9 @@ export function ImageRenderer(props: ImageRendererProps) {
     showFullscreenOnPress = IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT,
     height = IMAGE_RENDERER_WIDTH_DEFAULT * IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
     width = IMAGE_RENDERER_WIDTH_DEFAULT,
+    useMarginRight = false,
   } = props;
-  const marginRight = theme.space[FORM_INTER_ITEM_SPACING];
+  const marginRight = useMarginRight ? theme.space[FORM_INTER_ITEM_SPACING] : 0;
 
   const onImagePress = useCallback(() => {
     if (!showFullscreenOnPress) return;

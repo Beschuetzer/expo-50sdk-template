@@ -3,7 +3,6 @@
 -FullscreenImageScreen:
     --use Object renderer to display all of the fields below in a scroll view?
 
--fix stlying for ThumbnailPicker such that the border goes around the image not the padding
 -figure out why saving an item with no images saves an array of empty strings (4 to be precise)
 
 -refactor addStoresListItem reducer:

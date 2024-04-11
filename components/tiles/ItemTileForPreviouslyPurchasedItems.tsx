@@ -88,6 +88,7 @@ export function ItemTileForPreviouslyPurchased(
             height={ITEM_TILE_WIDTH * 1.5}
             width={ITEM_TILE_WIDTH}
             source={item.images[item.imageToUseIndex]}
+            useMarginRight
           />
         </Column>
         <ItemTileNameAndUpcColumn item={item} color={dynamicTextColor} />

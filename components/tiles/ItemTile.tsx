@@ -106,7 +106,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
         }
       }}
     >
-      <Row space={theme.space[FORM_INTER_ITEM_SPACING]}>{renderContent()}</Row>
+      <Row>{renderContent()}</Row>
     </RectButton>
   );
 }

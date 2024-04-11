@@ -81,8 +81,8 @@ export function ItemTileForPreviouslyPurchased(
         }
       }}
     >
-      <Row space={theme.space['0']}>
-        <Column flex={0} mr={FORM_INTER_ITEM_SPACING}>
+      <Row>
+        <Column flex={0}>
           <ImageRenderer
             item={item}
             height={ITEM_TILE_WIDTH * 1.5}
@@ -91,12 +91,7 @@ export function ItemTileForPreviouslyPurchased(
           />
         </Column>
         <ItemTileNameAndUpcColumn item={item} color={dynamicTextColor} />
-        <Row
-          alignItems="center"
-          flex={0}
-          justifyContent="flex-end"
-          ml={theme.space[FORM_INTER_ITEM_SPACING]}
-        >
+        <Row alignItems="center" flex={0} justifyContent="flex-end">
           {isInShopping ? (
             <FontAwesome
               name="check"

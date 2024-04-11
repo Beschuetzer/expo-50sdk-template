@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import {
+  FORM_INTER_ITEM_SPACING,
   IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
   IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT,
   IMAGE_RENDERER_WIDTH_DEFAULT,
@@ -33,6 +34,7 @@ export function ImageRenderer(props: ImageRendererProps) {
     height = IMAGE_RENDERER_WIDTH_DEFAULT * IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
     width = IMAGE_RENDERER_WIDTH_DEFAULT,
   } = props;
+  const marginRight = theme.space[FORM_INTER_ITEM_SPACING];
 
   const onImagePress = useCallback(() => {
     if (!showFullscreenOnPress) return;
@@ -49,19 +51,26 @@ export function ImageRenderer(props: ImageRendererProps) {
           display="flex"
           alignItems="center"
           justifyContent="center"
+          style={{ marginRight: marginRight * 4 }}
         >
-          <FontAwesome name="image" size={50} />
+          <FontAwesome
+            name="image"
+            size={
+              parseFloat(width as string) / IMAGE_RENDERER_ASPECT_RATIO_DEFAULT
+            }
+          />
         </View>
       ) : (
         <AspectRatio
           ratio={{
-            base: 3 / 4,
+            base: 1 / IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
             md: 9 / 10,
           }}
           height={{
             base: height,
             md: width,
           }}
+          mr={marginRight}
         >
           <Image cachePolicy={cachePolicy} {...props} />
         </AspectRatio>

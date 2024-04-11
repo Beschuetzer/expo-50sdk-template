@@ -153,12 +153,7 @@ export function ItemTileWithStoreSpecificValues(
         }
       }}
     >
-      <Row
-        space={theme.space[FORM_INTER_ITEM_SPACING]}
-        backgroundColor={theme.colors.white}
-      >
-        {renderContent()}
-      </Row>
+      <Row backgroundColor={theme.colors.white}>{renderContent()}</Row>
     </RectButton>
   );
 }

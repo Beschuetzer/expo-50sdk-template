@@ -1,12 +1,12 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme, theme } from 'native-base';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemTileProps } from './ItemTile';
+import { ItemTileProps, ItemTileViewingMode } from './ItemTile';
+import { ItemTileBasicContent } from './ItemTileBasicContent';
 import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
@@ -38,6 +38,7 @@ export function ItemTileWithStoreSpecificValues(
     buttonProps,
     item,
     onSelect,
+    viewingMode = ItemTileViewingMode.Basic,
   } = props;
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -75,6 +76,67 @@ export function ItemTileWithStoreSpecificValues(
     );
   }, [item]);
 
+  const quantityAtStoreJsx = useMemo(() => {
+    return (
+      <TouchableOpacity
+        hitSlop={getButtonHitSlop()}
+        onPress={incrementQuantity}
+        onLongPress={decrementQuantity}
+      >
+        <Text style={{ color: theme.colors.info[900] }}>
+          {quantityAtStore} {item.unit || ItemUnit.Package}
+          {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
+            ? 's'
+            : ''}
+        </Text>
+      </TouchableOpacity>
+    );
+  }, [quantityAtStore, item, incrementQuantity, decrementQuantity]);
+
+  const mainContentJsx = useMemo(() => {
+    return (
+      <>
+        {aisleNumberAtStore ? <Text>Aisle #: {aisleNumberAtStore}</Text> : null}
+        {priceAtStore ? <Text>${priceAtStore}</Text> : null}
+      </>
+    );
+  }, [priceAtStore, aisleNumberAtStore]);
+
+  function renderContent() {
+    switch (viewingMode) {
+      case ItemTileViewingMode.Basic:
+        return (
+          <ItemTileBasicContent
+            item={item}
+            isMultiSelectMode={isMultiSelectMode}
+            isSelected={isSelected}
+            showUpc={false}
+          >
+            {quantityAtStoreJsx}
+          </ItemTileBasicContent>
+        );
+      default:
+        return (
+          <>
+            <Column flex={0}>
+              <ImageRenderer
+                item={item}
+                source={item.images[item.imageToUseIndex]}
+              />
+              {quantityAtStoreJsx}
+            </Column>
+            <ItemTileNameAndUpcColumn item={item}>
+              {mainContentJsx}
+            </ItemTileNameAndUpcColumn>
+            <ItemTileIsSelectedColumn
+              isMultiSelectMode={isMultiSelectMode}
+              isSelected={isSelected}
+            />
+          </>
+        );
+    }
+  }
+
   return (
     <RectButton
       {...buttonProps}
@@ -95,34 +157,7 @@ export function ItemTileWithStoreSpecificValues(
         space={theme.space[FORM_INTER_ITEM_SPACING]}
         backgroundColor={theme.colors.white}
       >
-        <Column flex={0}>
-          <ImageRenderer
-            item={item}
-            source={item.images[item.imageToUseIndex]}
-          />
-          <TouchableOpacity
-            hitSlop={getButtonHitSlop()}
-            onPress={incrementQuantity}
-            onLongPress={decrementQuantity}
-          >
-            <Text style={{ color: theme.colors.info[900] }}>
-              {quantityAtStore} {item.unit || ItemUnit.Package}
-              {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
-                ? 's'
-                : ''}
-            </Text>
-          </TouchableOpacity>
-        </Column>
-        <ItemTileNameAndUpcColumn item={item}>
-          {aisleNumberAtStore ? (
-            <Text>Aisle #: {aisleNumberAtStore}</Text>
-          ) : null}
-          {priceAtStore ? <Text>${priceAtStore}</Text> : null}
-        </ItemTileNameAndUpcColumn>
-        <ItemTileIsSelectedColumn
-          isMultiSelectMode={isMultiSelectMode}
-          isSelected={isSelected}
-        />
+        {renderContent()}
       </Row>
     </RectButton>
   );

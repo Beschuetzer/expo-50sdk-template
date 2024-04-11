@@ -3,7 +3,7 @@ import { Column, Text, useTheme } from 'native-base';
 import { Item } from '@/types/Item';
 import { ChildrenProp, ItemProp } from '@/types/general';
 
-type ItemTileNameAndUpcColumnProps = {
+export type ItemTileNameAndUpcColumnProps = {
   color?: string;
   showUpc?: boolean;
 } & ItemProp<Item> &

@@ -3,18 +3,29 @@ import React from 'react';
 
 import { ItemTileProps } from './ItemTile';
 import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
-import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
+import {
+  ItemTileNameAndUpcColumn,
+  ItemTileNameAndUpcColumnProps,
+} from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { Item } from '@/types/Item';
-import { ItemProp } from '@/types/general';
+import { ChildrenProp, ItemProp } from '@/types/general';
 
-type ItemTileBasicContentProps = ItemProp<Item> &
-  Required<Pick<ItemTileProps<Item>, 'isSelected' | 'isMultiSelectMode'>>;
+type ItemTileBasicContentProps = ChildrenProp &
+  ItemProp<Item> &
+  Required<Pick<ItemTileProps<Item>, 'isSelected' | 'isMultiSelectMode'>> &
+  Pick<ItemTileNameAndUpcColumnProps, 'showUpc'>;
 
 const HEIGHT = 46;
 export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
-  const { item, isMultiSelectMode = false, isSelected = false } = props;
+  const {
+    children,
+    item,
+    isMultiSelectMode = false,
+    isSelected = false,
+    showUpc = true,
+  } = props;
   return (
     <>
       <Column flex={0}>
@@ -25,7 +36,9 @@ export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
           width={(HEIGHT * 2) / 3}
         />
       </Column>
-      <ItemTileNameAndUpcColumn item={item} />
+      <ItemTileNameAndUpcColumn item={item} showUpc={showUpc}>
+        {children}
+      </ItemTileNameAndUpcColumn>
       <ItemTileIsSelectedColumn
         isMultiSelectMode={isMultiSelectMode}
         isSelected={isSelected}

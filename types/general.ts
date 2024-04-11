@@ -36,6 +36,10 @@ export type OriginalKeyProp = {
   originalKey: Key;
 };
 
+export type KeyProp = {
+  key: Key;
+};
+
 export type ListNameProp = {
   listName: ListName;
 };

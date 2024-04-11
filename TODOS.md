@@ -1,9 +1,10 @@
 ## MVP
 
 -FullscreenImageScreen:
-    --finish ImageCapturer implementation (can use ThumbnailPicker example)
-    --figure out how to handle case where no image is available
-    --figure out how to handle case where custom image is current (don't want to use upc data in that case)
+    --use Object renderer to display all of the fields below in a scroll view?
+
+-fix stlying for ThumbnailPicker such that the border goes around the image not the padding
+-figure out why saving an item with no images saves an array of empty strings (4 to be precise)
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly

@@ -44,6 +44,7 @@ export type ItemBase = {
    *This is in milliseconds
    **/
   frequency?: number;
+  fullscreenImage?: string;
   images: string[];
   imageToUseIndex: number;
   lastUpdatedDate: number;

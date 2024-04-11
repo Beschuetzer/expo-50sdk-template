@@ -1,9 +1,5 @@
 ## MVP
 
--FullscreenImageScreen:
-    --use Object renderer to display all of the fields below in a scroll view?
-
--figure out why saving an item with no images saves an array of empty strings (4 to be precise)
 
 -refactor addStoresListItem reducer:
     --test both cases again thoroughly

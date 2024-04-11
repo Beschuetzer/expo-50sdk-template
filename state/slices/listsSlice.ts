@@ -206,6 +206,10 @@ export const listsSlice = createSlice({
       const keyToUse = getKeyToUse(item);
       const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
 
+      if (item.images) {
+        item.images = item.images.filter((item) => !!item);
+      }
+
       updateListWithItem({
         state,
         listName: ListName.ItemsList,

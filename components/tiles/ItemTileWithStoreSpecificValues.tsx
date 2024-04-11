@@ -123,7 +123,6 @@ export function ItemTileWithStoreSpecificValues(
                 item={item}
                 source={item.images[item.imageToUseIndex]}
               />
-              {quantityAtStoreJsx}
             </Column>
             <ItemTileNameAndUpcColumn item={item}>
               {mainContentJsx}
@@ -153,7 +152,10 @@ export function ItemTileWithStoreSpecificValues(
         }
       }}
     >
-      <Row backgroundColor={theme.colors.white}>{renderContent()}</Row>
+      <Column>
+        <Row backgroundColor={theme.colors.white}>{renderContent()}</Row>
+        {quantityAtStoreJsx}
+      </Column>
     </RectButton>
   );
 }

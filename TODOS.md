@@ -1,5 +1,4 @@
 ## MVP
--Adjust jsx for item tiles with specific item values in full mode to have two rows as the first elements
 -fix issue where the increment/decrement handler for tiles with item specific items in basic view mode goes across whole tile
 -FullscreenImageScreen:
     --finish ImageCapturer implementation (can use ThumbnailPicker example)

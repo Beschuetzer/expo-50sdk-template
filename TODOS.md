@@ -1,4 +1,5 @@
 ## MVP
+-Fix issue where changing store key doesn't change the lastPurchasedMap
 
 -FullscreenImageScreen:
     --finish ImageCapturer implementation (can use ThumbnailPicker example)

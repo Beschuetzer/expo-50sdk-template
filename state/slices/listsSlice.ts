@@ -534,6 +534,11 @@ export const listsSlice = createSlice({
     resetLastPurchasedMap: (state: ListsState) => {
       state.lastPurchasedMap = getEmptyObject();
     },
+    resetSelectedItemsInShopping: (state: ListsState) => {
+      state.selectedItemsFromInCart = [];
+      state.selectedItemsFromPreviouslyPurchased = [];
+      state.selectedItemsFromShoppingCart = [];
+    },
     resetStoresList: (state: ListsState) => {
       state.storesList = getEmptyList(ListName.StoresList);
       state.currentStoreName = EMPTY_STRING;
@@ -1008,6 +1013,7 @@ export const {
   resetListSlice,
   resetListToDisplay,
   resetListToDisplayFilters,
+  resetSelectedItemsInShopping,
   resetStoresList,
   setCurrentLocation,
   setCurrentStoreName,

@@ -55,6 +55,7 @@ import {
   moveSelectedPreviouslyPurchasedItemsToShopping,
   setIsMultiSelectModeForPreviouslyPurchased,
   previouslyPurchasedListSelector,
+  resetSelectedItemsInShopping,
 } from '@/state/slices/listsSlice';
 
 const renderScene = SceneMap({
@@ -275,6 +276,7 @@ export default function TabOneScreen() {
     dispatch(setIsMultiSelectModeForInCartCart(false));
     dispatch(setIsMultiSelectModeForShoppingCart(false));
     dispatch(setIsMultiSelectModeForPreviouslyPurchased(false));
+    dispatch(resetSelectedItemsInShopping());
   }, [index]);
 
   useEffect(() => {

@@ -58,6 +58,8 @@ import {
   previouslyPurchasedListSelector,
   resetSelectedItemsInShopping,
   removeShoppingListItems,
+  addAllToShoppingCart,
+  itemsPurchasedAtStoreSelector,
 } from '@/state/slices/listsSlice';
 import { getNewViewingMode } from '@/utils/helpers';
 
@@ -72,6 +74,7 @@ export default function TabOneScreen() {
   const layout = useWindowDimensions();
   const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(inCartListSelector);
+  const itemsPurchasedAtStore = useSelector(itemsPurchasedAtStoreSelector);
   const previouslyPurchasedList = useSelector(previouslyPurchasedListSelector);
   const currentStore = useSelector(currentStoreSelector);
   const shoppingListItems = useSelector(
@@ -219,6 +222,10 @@ export default function TabOneScreen() {
           text: 'Move Selected to Shopping',
         });
       }
+      options.push({
+        onPress: onMoveAllRecommendedToShoppingPress,
+        text: 'Move All Recommended to Shopping',
+      });
     }
 
     return options;
@@ -253,6 +260,13 @@ export default function TabOneScreen() {
   const onCompletePurchasePress = useCallback(() => {
     dispatch(completePurchase());
   }, []);
+
+  const onMoveAllRecommendedToShoppingPress = useCallback(() => {
+    const recommended = itemsPurchasedAtStore.filter(
+      (item) => item.isRecommended,
+    );
+    dispatch(addAllToShoppingCart(recommended));
+  }, [itemsPurchasedAtStore]);
 
   const onMoveSelectedToCartPress = useCallback(() => {
     dispatch(moveSelectedToCart());

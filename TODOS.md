@@ -1,5 +1,4 @@
 ## MVP
--add "Move all recommended to Shopping" for Previously purchased menu (the PreviouslyPurchasedItems array has isRecommended field which can be used to add)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 
 -Custom thumbnail images:

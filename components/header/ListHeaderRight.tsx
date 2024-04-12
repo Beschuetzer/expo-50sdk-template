@@ -88,6 +88,7 @@ const customOptionStyles: MenuOptionCustomStyle = {
     color: theme.colors.white,
     fontWeight: '300',
     fontSize: 20,
+    paddingVertical: theme.sizes[1],
     textAlign: 'center',
   },
 };

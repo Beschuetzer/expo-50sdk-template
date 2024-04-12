@@ -546,6 +546,23 @@ export const listsSlice = createSlice({
       const emptyList = getEmptyList<any>(listName);
       emptyList.data = state[listName]?.data || [];
       state[listName] = emptyList;
+
+      switch (listName) {
+        case ListName.InCartList:
+          state.isMultiSelectModeForInCart = false;
+          state.selectedItemsFromInCart = [];
+          break;
+        case ListName.ShoppingList:
+          state.isMultiSelectModeForShoppingCart = false;
+          state.selectedItemsFromShoppingCart = [];
+          break;
+        case ListName.PreviouslyPurchased:
+          state.isMultiSelectModeForPreviouslyPurchased = false;
+          state.selectedItemsFromPreviouslyPurchased = [];
+          break;
+        default:
+          break;
+      }
     },
     resetListToDisplayFilters: (
       state: ListsState,

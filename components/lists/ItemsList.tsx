@@ -211,12 +211,12 @@ export function ItemsList(props: ItemsListProps) {
               : undefined,
             selectedItems.length > 0
               ? {
-                  text: 'Delete Selected Items',
+                  text: 'Delete Selected',
                   onPress: onDeleteSelectedPress,
                 }
               : undefined,
             {
-              text: 'Toggle Viewing Mode',
+              text: 'Toggle Mode',
               onPress: onToggleViewingModePress,
             },
           ]}

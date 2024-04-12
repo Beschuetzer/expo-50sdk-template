@@ -23,6 +23,7 @@ export type ListHeaderRightOptions =
   | undefined;
 
 type ListHeaderRightProps = {
+  onClose?: () => void;
   onSortPress?: () => void;
   onFilterPress?: () => void;
   onResetPress?: () => void;
@@ -30,7 +31,8 @@ type ListHeaderRightProps = {
 } & ListNameProp;
 export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
   (props, ref) => {
-    const { options, onSortPress, onFilterPress, onResetPress } = props;
+    const { options, onClose, onSortPress, onFilterPress, onResetPress } =
+      props;
 
     return (
       <Menu renderer={NotAnimatedContextMenu} ref={ref}>
@@ -70,6 +72,11 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
                 );
               })
             : null}
+          <MenuOption
+            customStyles={customOptionStyles}
+            onSelect={onClose}
+            text="Close"
+          />
         </MenuOptions>
       </Menu>
     );

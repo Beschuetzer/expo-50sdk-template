@@ -489,32 +489,26 @@ export const listsSlice = createSlice({
       state: ListsState,
       action: PayloadAction<Item[]>,
     ) => {
-      const keysToUse = action.payload.map((item) => getKeyToUse(item));
-      if (!keysToUse) {
-        alert(
-          'A list ofkey must be provided in order to remove them from the itemsList.',
-        );
-        return;
-      }
-
-      state.itemsList.data = state.itemsList.data.filter((item) => {
-        if (item.upc && item.name) {
-          const isMatch = !keysToUse.includes(item.upc);
-          if (!isMatch) {
-            deleteImages(item.images);
-          }
-          return isMatch;
-        }
-        const isMatch = !keysToUse.includes(item?.name || EMPTY_STRING);
-        if (!isMatch) {
-          deleteImages(item.images);
-        }
-        return isMatch;
-      });
-
-      for (const keyToUse of keysToUse) {
-        state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
-      }
+      removeItems<Item>(
+        state,
+        action.payload,
+        ListName.ItemsList,
+        (itemBeingRemoved) => {
+          deleteImages(itemBeingRemoved.images);
+        },
+      );
+    },
+    removeShoppingListItems: (
+      state: ListsState,
+      action: PayloadAction<Item[]>,
+    ) => {
+      removeItems<ItemWithStoreSpecificValues>(
+        state,
+        action.payload,
+        ListName.ShoppingList,
+      );
+      state.isMultiSelectModeForShoppingCart = false;
+      state.selectedItemsFromShoppingCart = [];
     },
     removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -1052,6 +1046,7 @@ export const {
   moveSelectedPreviouslyPurchasedItemsToShopping,
   moveSelectedToShopping,
   removeItemsListItems,
+  removeShoppingListItems,
   removeStoresListItem,
   resetCurrentLocation,
   resetCurrentStoreName,
@@ -1285,6 +1280,33 @@ function updateSelectedItems(
           break;
       }
       break;
+  }
+}
+
+function removeItems<T extends Key>(
+  state: ListsState,
+  itemsToRemove: Item[],
+  listName: ListName,
+  onRemoveItem?: (keyBeingRemoved: T) => void,
+) {
+  const keysToUse = itemsToRemove.map((item) => getKeyToUse(item));
+  state[listName].data = state[listName].data.filter((item: Key) => {
+    if (item?.upc && item.name) {
+      const isMatch = !keysToUse.includes(item.upc);
+      if (!isMatch) {
+        onRemoveItem && onRemoveItem(item as T);
+      }
+      return isMatch;
+    }
+    const isMatch = !keysToUse.includes(item?.name || EMPTY_STRING);
+    if (!isMatch) {
+      onRemoveItem && onRemoveItem(item as T);
+    }
+    return isMatch;
+  }) as any;
+
+  for (const keyToUse of keysToUse) {
+    state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
   }
 }
 

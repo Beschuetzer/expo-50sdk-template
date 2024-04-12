@@ -1,18 +1,7 @@
 ## MVP
-
-
--refactor addStoresListItem reducer:
-    --test both cases again thoroughly
--clean up addStoresListItem when conviced it is working correctly
-        
 -how do you iterate through the children and check if any are text and assign color to the prop is it is (e.g. ItemTileNameAndUpcColumn)?
 
--add option to change item image size (how would this affect already taken images?)
--add different viewing modes for tiles (compact (hide images), image-only, etc.)
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
-
-ShoppingList
-    --add the ability to change upc for an item and have it update rather than add a new item
 
 -Custom thumbnail images:
     --add ability to long press an image which enters delete mode (trash bin show up in headerRight)

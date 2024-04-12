@@ -268,10 +268,11 @@ export const listsSlice = createSlice({
         originalKey,
         onKeyChange: (input) => {
           const { newKey, oldKey } = input;
-          console.log(input);
-          displayAlert(input);
-          console.log(''.padEnd(200, '-'));
-          const start = performance.now();
+
+          // console.log(input);
+          // displayAlert(input);
+          // console.log(''.padEnd(200, '-'));
+          // const start = performance.now();
 
           //handle storeSpecificValuesMap merging
           iterateStoreSpecificValuesMap({
@@ -325,35 +326,35 @@ export const listsSlice = createSlice({
             delete storeSpecificValue?.[oldKey];
           }
 
-          const end = performance.now();
-          console.log({ timeToRun: end - start });
-          console.log('done with work'.padEnd(200, '-'));
+          // const end = performance.now();
+          // console.log({ timeToRun: end - start });
+          // console.log('done with work'.padEnd(200, '-'));
 
-          //validating storeSpecificValuesMap
-          for (const [key, storeSpecificValues] of Object.entries(
-            state.storeSpecificValuesMap || {},
-          )) {
-            // console.log({
-            //   key,
-            //   storeSpecificValuesAfter: storeSpecificValues,
-            // });
-            for (const [storeSpecificValueKey, value] of Object.entries(
-              storeSpecificValues || {},
-            )) {
-              if (storeSpecificValueKey === 'quantity') {
-                console.log({ key, storeSpecificValueKey, value });
-              }
-            }
-          }
+          // //validating storeSpecificValuesMap
+          // for (const [key, storeSpecificValues] of Object.entries(
+          //   state.storeSpecificValuesMap || {},
+          // )) {
+          //   // console.log({
+          //   //   key,
+          //   //   storeSpecificValuesAfter: storeSpecificValues,
+          //   // });
+          //   for (const [storeSpecificValueKey, value] of Object.entries(
+          //     storeSpecificValues || {},
+          //   )) {
+          //     if (storeSpecificValueKey === 'quantity') {
+          //       console.log({ key, storeSpecificValueKey, value });
+          //     }
+          //   }
+          // }
 
-          //validating lastPurcahsedMap
-          for (const [key, storeSpecificValue] of Object.entries(
-            state.lastPurchasedMap || {},
-          )) {
-            console.log({ storeSpecificValue });
-          }
+          // //validating lastPurcahsedMap
+          // for (const [key, storeSpecificValue] of Object.entries(
+          //   state.lastPurchasedMap || {},
+          // )) {
+          //   console.log({ storeSpecificValue });
+          // }
 
-          console.log('done with print out'.padEnd(200, '-'));
+          // console.log('done with print out'.padEnd(200, '-'));
 
           state.currentStoreName = newKey;
         },

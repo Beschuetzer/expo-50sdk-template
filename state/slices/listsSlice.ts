@@ -207,7 +207,16 @@ export const listsSlice = createSlice({
       const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
 
       if (item.images) {
-        item.images = item.images.filter((item) => !!item);
+        let indexOffset = 0;
+        item.images = item.images.filter((imageLocal, index) => {
+          const isValid = !!imageLocal;
+          if (!isValid && index <= item?.imageToUseIndex) indexOffset++;
+          return isValid;
+        });
+
+        if (item.imageToUseIndex) {
+          item.imageToUseIndex -= indexOffset;
+        }
       }
 
       updateListWithItem({

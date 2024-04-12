@@ -12,6 +12,7 @@ import {
   ItemWithStoreSpecificValues,
   ItemsList,
   Key,
+  LastPurchasedList,
   LastPurchasedMap,
   ShoppingList,
   StoreList,
@@ -108,7 +109,7 @@ export type ListsState = {
   currentStoreName: string;
   [ListName.InCartList]: ShoppingList;
   [ListName.ItemsList]: ItemsList;
-  [ListName.PreviouslyPurchased]: StoreList;
+  [ListName.PreviouslyPurchased]: LastPurchasedList;
   [ListName.ShoppingList]: ShoppingList;
   [ListName.StoresList]: StoreList;
   lastPurchasedMap: LastPurchasedMap;
@@ -1159,9 +1160,9 @@ function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
   const newKeyToUse = getKeyToUse(newItem);
   const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
   const originalItemIndex = state[listName].data.findIndex(
-    (item) => getKeyToUse(item) === originalKeyToUse,
+    (item: Key) => getKeyToUse(item) === originalKeyToUse,
   );
-  const newItemIndex = state[listName].data.findIndex((item) => {
+  const newItemIndex = state[listName].data.findIndex((item: Key) => {
     const keyLocal = getKeyToUse(item);
     return keyLocal === newKeyToUse;
   });

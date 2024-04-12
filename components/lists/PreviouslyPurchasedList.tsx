@@ -19,7 +19,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
-import { getKeyToUse } from '@/utils/helpers';
+import { getIsPreviouslyPurchasedItemRecommended, getKeyToUse } from '@/utils/helpers';
 
 type PreviouslyPurchasedListProps = object;
 
@@ -62,12 +62,11 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     const keyToUse = getKeyToUse(item);
-    const now = Date.now();
     const lastPurchaseDate = lastPurchasedMap[keyToUse]?.[currentStore.name];
-    const isRecommended =
-      item.frequency &&
-      lastPurchaseDate &&
-      lastPurchaseDate + item.frequency <= now;
+    const isRecommended = getIsPreviouslyPurchasedItemRecommended(
+      item,
+      lastPurchaseDate,
+    );
     const itemInCart = itemsInCart.find(
       (item) => getKeyToUse(item) === keyToUse,
     );
@@ -140,3 +139,4 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
     />
   );
 }
+

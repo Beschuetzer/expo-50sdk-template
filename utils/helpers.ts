@@ -19,7 +19,7 @@ import {
 } from '@/constants/general';
 import { LOCAL_FILE_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import { ListName } from '@/state/slices/listsSlice';
-import { Key, List } from '@/types/Item';
+import { Item, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
 import { Frequency, TimeSpan } from '@/types/general';
@@ -138,6 +138,18 @@ export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {
     }
     return true;
   });
+}
+
+export function getIsPreviouslyPurchasedItemRecommended(
+  item: Item,
+  lastPurchaseDate: number | undefined,
+) {
+  const now = Date.now();
+  return (
+    item.frequency &&
+    lastPurchaseDate &&
+    lastPurchaseDate + item.frequency <= now
+  );
 }
 
 export function getKeyToUse(key: string | Key, displayAlert = false) {

@@ -56,6 +56,9 @@ export type ItemBase = {
  **/
 export type Item = Key & ItemBase;
 export type ItemWithStoreSpecificValues = Item & StoreSpecificValues;
+export type PrevioulsyPurchasedItem = ItemWithStoreSpecificValues & {
+  isRecommended: boolean;
+};
 
 export enum StoreSpecificValueKey {
   AisleNumber = 'aisleNumber',

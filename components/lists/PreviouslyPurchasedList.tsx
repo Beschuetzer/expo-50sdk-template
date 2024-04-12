@@ -6,20 +6,22 @@ import { ListItemSeparator } from './ListItemSeparator';
 import { ItemTileForPreviouslyPurchased } from '../tiles/ItemTileForPreviouslyPurchasedItems';
 
 import {
-  currentStoreSelector,
   updateStoreSpecificValues,
   itemsPurchasedAtStoreSelector,
   updateSelectedItemsFromPreviouslyPurchased,
   setIsMultiSelectModeForPreviouslyPurchased,
   selectedItemsFromPreviouslyPurchasedSelector,
   ListName,
-  lastPurchasedMapSelector,
   isMultiSelectModeForPreviouslyPurchasedSelector,
   storeSpecificListSelector,
 } from '@/state/slices/listsSlice';
-import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
+import {
+  ItemWithStoreSpecificValues,
+  Key,
+  PrevioulsyPurchasedItem,
+} from '@/types/Item';
 import { ListRow } from '@/types/general';
-import { getIsPreviouslyPurchasedItemRecommended, getKeyToUse } from '@/utils/helpers';
+import { getKeyToUse } from '@/utils/helpers';
 
 type PreviouslyPurchasedListProps = object;
 
@@ -30,8 +32,6 @@ const listName: ListName = ListName.PreviouslyPurchased;
  **/
 export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
   const itemsPurchasedAtStore = useSelector(itemsPurchasedAtStoreSelector);
-  const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
-  const currentStore = useSelector(currentStoreSelector);
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(
@@ -60,13 +60,8 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
     );
   }, []);
 
-  function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
+  function renderItem({ item, index }: ListRow<PrevioulsyPurchasedItem>) {
     const keyToUse = getKeyToUse(item);
-    const lastPurchaseDate = lastPurchasedMap[keyToUse]?.[currentStore.name];
-    const isRecommended = getIsPreviouslyPurchasedItemRecommended(
-      item,
-      lastPurchaseDate,
-    );
     const itemInCart = itemsInCart.find(
       (item) => getKeyToUse(item) === keyToUse,
     );
@@ -78,7 +73,7 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
       <ItemTileForPreviouslyPurchased
         isInCart={!!itemInCart}
         isInShopping={!!itemInShopping}
-        isRecommended={!!isRecommended}
+        isRecommended={!!item.isRecommended}
         isMultiSelectMode={isMultiSelectMode}
         listName={listName}
         item={item}
@@ -139,4 +134,3 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
     />
   );
 }
-

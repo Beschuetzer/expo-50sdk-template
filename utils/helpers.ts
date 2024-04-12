@@ -145,7 +145,7 @@ export function getIsPreviouslyPurchasedItemRecommended(
   lastPurchaseDate: number | undefined,
 ) {
   const now = Date.now();
-  return (
+  return !!(
     item.frequency &&
     lastPurchaseDate &&
     lastPurchaseDate + item.frequency <= now

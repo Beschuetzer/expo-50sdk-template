@@ -14,6 +14,7 @@ import {
   Key,
   LastPurchasedList,
   LastPurchasedMap,
+  PrevioulsyPurchasedItem,
   ShoppingList,
   StoreList,
   StoreSpecificValue,
@@ -32,6 +33,7 @@ import {
   getEmptyList,
   getEmptyObject,
   getFilteredList,
+  getIsPreviouslyPurchasedItemRecommended,
   getItemFromList,
   getKeyToUse,
   getStoreWithDistance,
@@ -876,15 +878,19 @@ export const itemsPurchasedAtStoreSelector = createSelector(
     lastPurchasedMap,
     currentStoreName,
   ) => {
-    const previoulsyPurchasedItems: ItemWithStoreSpecificValues[] = [];
+    const previoulsyPurchasedItems: PrevioulsyPurchasedItem[] = [];
     for (const item of itemsList.data) {
       const key = getKeyToUse(item);
       const lastPurchaseDate = lastPurchasedMap?.[key]?.[currentStoreName];
       if (lastPurchaseDate) {
         const storeSpecificValues = storeSpecificValuesMap[key];
-        previoulsyPurchasedItems.push(
-          getItemWithStoreSpecificValues(item, storeSpecificValues),
-        );
+        previoulsyPurchasedItems.push({
+          ...getItemWithStoreSpecificValues(item, storeSpecificValues),
+          isRecommended: getIsPreviouslyPurchasedItemRecommended(
+            item,
+            lastPurchaseDate,
+          ),
+        });
       }
     }
     return previoulsyPurchasedItems.sort(

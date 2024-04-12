@@ -24,7 +24,7 @@ export default function FullscreenImageScreen() {
   };
   const [customImageUri, setCustomImageUri] = useState(
     item?.fullscreenImage ||
-      item?.images[item?.imageToUseIndex].match(LOCAL_FILE_REGEX)
+      item?.images?.[item?.imageToUseIndex]?.match(LOCAL_FILE_REGEX)
       ? item?.images[item?.imageToUseIndex]
       : EMPTY_STRING,
   );

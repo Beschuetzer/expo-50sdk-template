@@ -57,6 +57,7 @@ import {
   setIsMultiSelectModeForPreviouslyPurchased,
   previouslyPurchasedListSelector,
   resetSelectedItemsInShopping,
+  removeShoppingListItems,
 } from '@/state/slices/listsSlice';
 import { getNewViewingMode } from '@/utils/helpers';
 
@@ -183,6 +184,10 @@ export default function TabOneScreen() {
           onPress: onMoveSelectedToCartPress,
           text: 'Move Selected to Cart',
         });
+        options.push({
+          onPress: onRemoveSelectedPress,
+          text: 'Remove Selected',
+        });
       }
       options.push(
         ...[
@@ -264,6 +269,10 @@ export default function TabOneScreen() {
   const onMoveAllCartPress = useCallback(() => {
     dispatch(moveAllToInCart());
   }, []);
+
+  const onRemoveSelectedPress = useCallback(() => {
+    dispatch(removeShoppingListItems(selectedShoppingCartItems));
+  }, [selectedShoppingCartItems]);
 
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));

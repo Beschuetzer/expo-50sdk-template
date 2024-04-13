@@ -1,15 +1,18 @@
 import { Button, Input, View, Text, useTheme, Row } from 'native-base';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 
+import { BarcodeScannerProps } from '../BarcodeScanner';
 import { InputValidationMessage } from '../InputValidationMessage';
 import { MOCKS_UPCS } from '../mocks/mockUpcData';
 
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import { scanningModeSelector } from '@/state/slices/optionsSlice';
 import { getIsValidUpcValue } from '@/utils/helpers';
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
-  onPress: (value: string) => void;
+  onPress: BarcodeScannerProps['onScanned'];
 };
 
 const DEBOUNCE_TIMEOUT = 500;
@@ -17,6 +20,7 @@ const VALUE_INITIAL = '';
 const IS_VALID_INITIAL = true;
 
 export function ManualUpcInput(props: ManualUpcInputProps) {
+  const scanningMode = useSelector(scanningModeSelector);
   const { isVisible = true, onPress = () => null } = props;
   const timeoutRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,7 +90,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         backgroundColor="secondary.900"
         borderRadius={0}
         onPress={() => {
-          onPress && onPress(value);
+          onPress && onPress(value, scanningMode);
         }}
       >
         Search

@@ -7,6 +7,11 @@ import { UpcProduct } from './UpcResponse';
 
 import { ListName } from '@/state/slices/listsSlice';
 
+export enum ScanningMode {
+  AddToCart = 'Add to Cart',
+  ItemLookup = 'Item Lookup',
+}
+
 export enum TimeSpan {
   Hour = 'Hour',
   Day = 'Day',

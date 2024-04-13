@@ -2,22 +2,29 @@ import { Camera, CameraType } from 'expo-camera';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet } from 'react-native';
+import { useSelector } from 'react-redux';
 
 import { EMPTY_STRING } from '@/constants/general';
+import { scanningModeSelector } from '@/state/slices/optionsSlice';
+import { ScanningMode } from '@/types/general';
 
 type ScannedObj = { data: string };
-type BarcodeScannerProps = {
+export type BarcodeScannerProps = {
   cameraType?: CameraType;
-  onScanned?: (upc: string) => void;
+  onScanned?: (upc: string, scanningMode: ScanningMode) => void;
 };
 
 export function BarcodeScanner(props: BarcodeScannerProps) {
+  const scanningMode = useSelector(scanningModeSelector);
   const { cameraType = CameraType.back, onScanned } = props;
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
 
-  const handleBarCodeScanned = useCallback((scannedObj: ScannedObj) => {
-    onScanned && onScanned(scannedObj.data || EMPTY_STRING);
-  }, []);
+  const handleBarCodeScanned = useCallback(
+    (scannedObj: ScannedObj) => {
+      onScanned && onScanned(scannedObj.data || EMPTY_STRING, scanningMode);
+    },
+    [scanningMode],
+  );
 
   useFocusEffect(
     useCallback(() => {

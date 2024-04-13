@@ -19,37 +19,42 @@ import {
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import {
+  scanningModeSelector,
+  setScanningMode,
+} from '@/state/slices/optionsSlice';
+import { ScanningMode } from '@/types/general';
+import {
   getIsValidUpcValue,
   getItemFromList,
   getStandardizedUpcValue,
 } from '@/utils/helpers';
 
-enum ScannerScreenMode {
-  AddToCart = 'Add to Cart',
-  ItemLookup = 'Item Lookup',
-}
 export default function ScannerScreen() {
   const itemsList = useSelector(itemsListSelector);
+  const scanningMode = useSelector(scanningModeSelector);
   const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const theme = useTheme();
-  const [mode, setMode] = useState(ScannerScreenMode.ItemLookup);
 
-  console.log({mode});
-  
   const handleUpcNavigation = useCallback(
-    (value: string) => {
+    (value: string, mode: ScanningMode) => {
+      const modeToUse = mode || scanningMode;
       if (getIsValidUpcValue(value)) {
         const upc = getStandardizedUpcValue(value);
         const itemInList = getItemFromList(itemsList.data, value);
-        console.log({ mode, isItemInList: !!itemInList, value, upc });
+        console.log({ modeToUse, isItemInList: !!itemInList, value, upc });
 
-        if (mode === ScannerScreenMode.AddToCart) {
+        if (modeToUse === ScanningMode.AddToCart) {
           if (itemInList) {
-            console.log('use a snackbar to display a message after adding to cart ');
+            console.log(
+              'use a snackbar to display a message after adding to cart ',
+            );
+            console.log(
+              'need to add a way to reset if the caller to handleUpcNavigation is the Barcode scanner otherwise it will just keep scanning',
+            );
             dispatch(
               updateStoreSpecificValues({
                 key: { upc },
@@ -68,7 +73,7 @@ export default function ScannerScreen() {
         });
       }
     },
-    [itemsList, mode],
+    [itemsList, scanningMode],
   );
 
   const onSwitchCameraPress = useCallback(() => {
@@ -81,8 +86,8 @@ export default function ScannerScreen() {
     setIsManuallyEntering((current) => !current);
   }, []);
 
-  const onModeChange = useCallback((newValue: ScannerScreenMode) => {
-    setMode(newValue);
+  const onModeChange = useCallback((newValue: ScanningMode) => {
+    dispatch(setScanningMode(newValue));
   }, []);
 
   if (hasPermission === null) {
@@ -101,14 +106,14 @@ export default function ScannerScreen() {
         <Heading size="xs">Mode:</Heading>
         <Picker
           style={{ flex: 1 }}
-          selectedValue={mode}
+          selectedValue={scanningMode}
           onValueChange={onModeChange}
         >
-          {Object.values(ScannerScreenMode).map((modeName) => (
+          {Object.values(ScanningMode).map((modeName) => (
             <Picker.Item key={modeName} label={modeName} value={modeName} />
           ))}
         </Picker>
-        {mode === ScannerScreenMode.AddToCart ? (
+        {scanningMode === ScanningMode.AddToCart ? (
           <>
             <Heading size="xs">Store:</Heading>
             <StoreManager showTag={false} showStoreList style={{ flex: 1 }} />
@@ -129,7 +134,12 @@ export default function ScannerScreen() {
         isVisible={isManuallyEntering}
         onPress={handleUpcNavigation}
       />
-      <BarcodeScanner cameraType={type} onScanned={handleUpcNavigation} />
+      <BarcodeScanner
+        cameraType={type}
+        onScanned={(upc, scanningMode) => {
+          handleUpcNavigation(upc, scanningMode);
+        }}
+      />
     </View>
   );
 }

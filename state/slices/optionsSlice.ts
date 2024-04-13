@@ -10,6 +10,7 @@ import {
   IMAGE_PICKER_QUALITY_INITIAL,
   SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 } from '@/constants/general';
+import { ScanningMode } from '@/types/general';
 
 type AutoSetStore = {
   enabled: boolean;
@@ -21,6 +22,7 @@ export type OptionsState = {
   canOverrideItem: boolean;
   canOverrideStore: boolean;
   customImageQuality: number;
+  scanningMode: ScanningMode;
   swipeableRowOpenThreshold: number;
 };
 
@@ -32,6 +34,7 @@ const initialState: OptionsState = {
   canOverrideItem: CAN_OVERRIDE_DEFAULT,
   canOverrideStore: CAN_OVERRIDE_DEFAULT,
   customImageQuality: IMAGE_PICKER_QUALITY_INITIAL,
+  scanningMode: ScanningMode.AddToCart,
   swipeableRowOpenThreshold: SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 };
 
@@ -64,6 +67,13 @@ export const optionsSlice = createSlice({
       if (!action.payload) return;
       state.customImageQuality = action.payload;
     },
+    setScanningMode: (
+      state: OptionsState,
+      action: PayloadAction<OptionsState['scanningMode']>,
+    ) => {
+      if (!action.payload) return;
+      state.scanningMode = action.payload;
+    },
     setSwipeableRowOpenThreshold: (
       state: OptionsState,
       action: PayloadAction<OptionsState['swipeableRowOpenThreshold']>,
@@ -83,6 +93,7 @@ export const {
   setAutoSetStore,
   setCanOverrideItem,
   setCanOverrideStore,
+  setScanningMode,
   setSwipeableRowOpenThreshold,
   setCustomImageQuality,
 } = optionsSlice.actions;
@@ -98,6 +109,9 @@ export const canOverrideStoreSelector = (state: RootState) =>
 
 export const customImageQualitySelector = (state: RootState) =>
   state[optionsSlice.name].customImageQuality;
+
+export const scanningModeSelector = (state: RootState) =>
+  state[optionsSlice.name].scanningMode;
 
 export const swipeableRowOpenThresholdSelector = (state: RootState) =>
   state[optionsSlice.name].swipeableRowOpenThreshold;

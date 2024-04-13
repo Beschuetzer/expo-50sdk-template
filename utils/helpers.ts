@@ -17,7 +17,11 @@ import {
   SORT_ORDER_VALUE_BY_NAME_DEFAULT,
   WEEK_IN_MS,
 } from '@/constants/general';
-import { LOCAL_FILE_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import {
+  LOCAL_FILE_REGEX,
+  UPC_REGEX,
+  UPC_REQUIRED_CHAR_LENGTH,
+} from '@/constants/regexs';
 import { ListName } from '@/state/slices/listsSlice';
 import { Item, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
@@ -150,6 +154,10 @@ export function getIsPreviouslyPurchasedItemRecommended(
     lastPurchaseDate &&
     lastPurchaseDate + item.frequency <= now
   );
+}
+
+export function getIsValidUpcValue(value: string) {
+  return !!UPC_REGEX.test(value);
 }
 
 export function getKeyToUse(key: string | Key, displayAlert = false) {

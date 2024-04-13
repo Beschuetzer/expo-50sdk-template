@@ -71,9 +71,10 @@ export function ItemTile(props: ItemTileProps<Item>) {
             </Column>
             <ItemTileNameAndUpcColumn item={item}>
               <Text>
-                1 {item.unit || ItemUnit.Package} every {frequencyObj?.number}{' '}
-                {frequencyObj?.timeSpan}
-                {frequencyObj?.number > 1 ? 's' : ''}
+                1 {item.unit || ItemUnit.Package} every{' '}
+                {frequencyObj.number > 1
+                  ? `${frequencyObj.number} ${frequencyObj.timeSpan}s`
+                  : `${frequencyObj.timeSpan}`}
               </Text>
               <Text>
                 Last Purchased:{' '}

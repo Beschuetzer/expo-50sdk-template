@@ -17,7 +17,6 @@ import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
 import {
   currentStoreSelector,
-  itemsListSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import {
@@ -25,16 +24,11 @@ import {
   setScanningMode,
 } from '@/state/slices/optionsSlice';
 import { ScanningMode } from '@/types/general';
-import {
-  getIsValidUpcValue,
-  getItemFromList,
-  getStandardizedUpcValue,
-} from '@/utils/helpers';
+import { getIsValidUpcValue, getStandardizedUpcValue } from '@/utils/helpers';
 
 const SNACKBAR_VISIBILITY_DURATION = 2500;
 export default function ScannerScreen() {
   const currentStore = useSelector(currentStoreSelector);
-  const itemsList = useSelector(itemsListSelector);
   const scanningMode = useSelector(scanningModeSelector);
   const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
@@ -47,17 +41,14 @@ export default function ScannerScreen() {
   const [lastUpcScanned, setLastUpcScanned] = useState(EMPTY_STRING);
 
   const handleUpcNavigation = useCallback(
-    (value: string, mode: ScanningMode) => {
+    (value: string, mode: ScanningMode, isItemInList: boolean) => {
       const modeToUse = mode || scanningMode;
       if (getIsValidUpcValue(value)) {
         const upc = getStandardizedUpcValue(value);
-        const itemInList = getItemFromList(itemsList.data, value);
-        console.log({ modeToUse, isItemInList: !!itemInList, value, upc });
-
         setLastUpcScanned(upc);
 
         if (modeToUse === ScanningMode.AddToCart) {
-          if (itemInList) {
+          if (isItemInList) {
             dispatch(
               updateStoreSpecificValues({
                 key: { upc },
@@ -77,15 +68,15 @@ export default function ScannerScreen() {
         });
       }
     },
-    [itemsList, scanningMode],
+    [scanningMode],
   );
 
   const onBarcodeScanned = useCallback(
-    (upc: string, scanningMode: ScanningMode) => {
+    (upc: string, scanningMode: ScanningMode, isItemInList: boolean) => {
       const now = Date.now();
       const diff = now - lastScanTimeRef.current;
       if (diff <= SNACKBAR_VISIBILITY_DURATION) return;
-      handleUpcNavigation(upc, scanningMode);
+      handleUpcNavigation(upc, scanningMode, isItemInList);
       lastScanTimeRef.current = now;
     },
     [lastScanTimeRef.current, handleUpcNavigation],

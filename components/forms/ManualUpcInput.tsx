@@ -7,8 +7,10 @@ import { InputValidationMessage } from '../InputValidationMessage';
 import { MOCKS_UPCS } from '../mocks/mockUpcData';
 
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import { listToDisplaySelector, ListName } from '@/state/slices/listsSlice';
 import { scanningModeSelector } from '@/state/slices/optionsSlice';
-import { getIsValidUpcValue } from '@/utils/helpers';
+import { Item } from '@/types/Item';
+import { getIsValidUpcValue, getItemFromList } from '@/utils/helpers';
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -20,6 +22,9 @@ const VALUE_INITIAL = '';
 const IS_VALID_INITIAL = true;
 
 export function ManualUpcInput(props: ManualUpcInputProps) {
+  const itemsList = useSelector(
+    listToDisplaySelector(ListName.ItemsList),
+  ) as Item[];
   const scanningMode = useSelector(scanningModeSelector);
   const { isVisible = true, onPress = () => null } = props;
   const timeoutRef = useRef<any>(null);
@@ -90,7 +95,8 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         backgroundColor="secondary.900"
         borderRadius={0}
         onPress={() => {
-          onPress && onPress(value, scanningMode);
+          onPress &&
+            onPress(value, scanningMode, !!getItemFromList(itemsList, value));
         }}
       >
         Search

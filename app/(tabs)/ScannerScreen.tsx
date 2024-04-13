@@ -2,8 +2,9 @@ import { Picker } from '@react-native-picker/picker';
 import { CameraType } from 'expo-camera';
 import { useNavigation } from 'expo-router';
 import { Button, View, Row, Text, Heading, useTheme } from 'native-base';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { StyleSheet } from 'react-native';
+import { Snackbar } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { BarcodeScanner } from '@/components/BarcodeScanner';
@@ -15,6 +16,7 @@ import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
 import {
+  currentStoreSelector,
   itemsListSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
@@ -29,7 +31,9 @@ import {
   getStandardizedUpcValue,
 } from '@/utils/helpers';
 
+const SNACKBAR_VISIBILITY_DURATION = 2500;
 export default function ScannerScreen() {
+  const currentStore = useSelector(currentStoreSelector);
   const itemsList = useSelector(itemsListSelector);
   const scanningMode = useSelector(scanningModeSelector);
   const [type, setType] = useState(CameraType.back);
@@ -38,6 +42,9 @@ export default function ScannerScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const theme = useTheme();
+  const lastScanTimeRef = useRef(-1);
+  const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
+  const [lastUpcScanned, setLastUpcScanned] = useState(EMPTY_STRING);
 
   const handleUpcNavigation = useCallback(
     (value: string, mode: ScanningMode) => {
@@ -47,14 +54,10 @@ export default function ScannerScreen() {
         const itemInList = getItemFromList(itemsList.data, value);
         console.log({ modeToUse, isItemInList: !!itemInList, value, upc });
 
+        setLastUpcScanned(upc);
+
         if (modeToUse === ScanningMode.AddToCart) {
           if (itemInList) {
-            console.log(
-              'use a snackbar to display a message after adding to cart ',
-            );
-            console.log(
-              'need to add a way to reset if the caller to handleUpcNavigation is the Barcode scanner otherwise it will just keep scanning',
-            );
             dispatch(
               updateStoreSpecificValues({
                 key: { upc },
@@ -64,6 +67,7 @@ export default function ScannerScreen() {
                 },
               }),
             );
+            setIsSnackbarVisible(true);
             return;
           }
         }
@@ -74,6 +78,17 @@ export default function ScannerScreen() {
       }
     },
     [itemsList, scanningMode],
+  );
+
+  const onBarcodeScanned = useCallback(
+    (upc: string, scanningMode: ScanningMode) => {
+      const now = Date.now();
+      const diff = now - lastScanTimeRef.current;
+      if (diff <= SNACKBAR_VISIBILITY_DURATION) return;
+      handleUpcNavigation(upc, scanningMode);
+      lastScanTimeRef.current = now;
+    },
+    [lastScanTimeRef.current, handleUpcNavigation],
   );
 
   const onSwitchCameraPress = useCallback(() => {
@@ -134,12 +149,26 @@ export default function ScannerScreen() {
         isVisible={isManuallyEntering}
         onPress={handleUpcNavigation}
       />
-      <BarcodeScanner
-        cameraType={type}
-        onScanned={(upc, scanningMode) => {
-          handleUpcNavigation(upc, scanningMode);
+      <BarcodeScanner cameraType={type} onScanned={onBarcodeScanned} />
+      <Snackbar
+        style={{ backgroundColor: theme.colors.white }}
+        visible={isSnackbarVisible}
+        onDismiss={() => setIsSnackbarVisible(false)}
+        action={{
+          label: 'Close',
+          buttonColor: theme.colors.black,
+          textColor: theme.colors.white,
+          onPress: () => {
+            setIsSnackbarVisible(false);
+            lastScanTimeRef.current = -1;
+          },
         }}
-      />
+        duration={SNACKBAR_VISIBILITY_DURATION}
+      >
+        <Text>
+          Added {lastUpcScanned} to shopping list for '{currentStore.name}'.
+        </Text>
+      </Snackbar>
     </View>
   );
 }

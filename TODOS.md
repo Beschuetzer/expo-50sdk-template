@@ -1,16 +1,4 @@
 ## MVP
--finish handleUpcNavigation in ScannerScreen.tsx
--add option to toggle scanning modes (text "Add to cart mode" and "item look up mode" will display as overlay).
-    --add-to-cart-mode
-        ---has overlay saying such
-        ---StoreManager shows at the top
-        ---adds to cart instead of pulling up
-        ---should show ItemForm if no item found
-    --item-look-up-mode
-        ---same as current behavior
-        ---overlay shows up
-        ---no store manager
-
 -Add "per week/hour/etc" to the ItemTile button
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 

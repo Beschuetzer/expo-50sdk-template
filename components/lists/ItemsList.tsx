@@ -201,7 +201,6 @@ export function ItemsList(props: ItemsListProps) {
           onSortPress={onSortPress}
           onFilterPress={onFilterPress}
           onResetPress={onResetPress}
-          listName={listName}
           options={[
             selectedItems.length > 0
               ? {

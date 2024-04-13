@@ -143,7 +143,6 @@ export function StoresList(props: StoresListProps) {
           onSortPress={onSortPress}
           onFilterPress={onFilterPress}
           onResetPress={onResetPress}
-          listName={listName}
         />
       ),
       headerLeft: () => <AddButton onPress={onAddStorePress} />,

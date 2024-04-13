@@ -327,7 +327,6 @@ export default function TabOneScreen() {
           ref={menuRef}
           onSortPress={onSortPress}
           onResetPress={onResetPress}
-          listName={listName}
           options={getMenuOptions()}
         />
       ),

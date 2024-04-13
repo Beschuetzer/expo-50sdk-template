@@ -5,7 +5,6 @@
         ---StoreManager shows at the top
         ---adds to cart instead of pulling up
         ---should show ItemForm if no item found
-        ---may need to change how ManualInput component works (add onPress callback prop)
     --item-look-up-mode
         ---same as current behavior
         ---overlay shows up

@@ -12,7 +12,6 @@ import {
 
 import { EllipsisButton } from './EllipsisButton';
 
-import { ListNameProp } from '@/types/general';
 const { NotAnimatedContextMenu } = renderers;
 
 export type ListHeaderRightOptions =
@@ -28,7 +27,7 @@ type ListHeaderRightProps = {
   onFilterPress?: () => void;
   onResetPress?: () => void;
   options?: ListHeaderRightOptions[];
-} & ListNameProp;
+}
 export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
   (props, ref) => {
     const { options, onClose, onSortPress, onFilterPress, onResetPress } =

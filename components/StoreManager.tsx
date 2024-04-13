@@ -3,6 +3,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from 'expo-router';
 import { FormControl, Row, Stack } from 'native-base';
 import { useCallback } from 'react';
+import { ViewStyle } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -21,14 +22,18 @@ import { HeadingTagProp } from '@/types/general';
 type StorageManagerProps = {
   showAddStore?: boolean;
   showStoreList?: boolean;
+  showTag?: boolean;
+  style?: ViewStyle;
   useAbbreviatedVerbiage?: boolean;
 } & HeadingTagProp;
 export function StoreManager(props: StorageManagerProps) {
   const {
+    headingTag: Tag = FormControl.Label,
     showAddStore = false,
     showStoreList = false,
+    showTag = true,
+    style,
     useAbbreviatedVerbiage = false,
-    headingTag: Tag = FormControl.Label,
   } = props;
 
   const currentStore = useSelector(currentStoreSelector);
@@ -47,12 +52,14 @@ export function StoreManager(props: StorageManagerProps) {
   }, []);
 
   return (
-    <Stack>
+    <Stack style={style}>
       <Row {...maxWidth} justifyContent="space-between" alignItems="center">
-        <Tag>
-          Current {useAbbreviatedVerbiage ? EMPTY_STRING : 'Store'}:{' '}
-          {currentStore?.name || 'No store selected'}
-        </Tag>
+        {showTag ? (
+          <Tag>
+            Current {useAbbreviatedVerbiage ? EMPTY_STRING : 'Store'}:{' '}
+            {currentStore?.name || 'No store selected'}
+          </Tag>
+        ) : null}
         {showAddStore ? (
           <TouchableOpacity onPress={onAddPress}>
             <FontAwesome size={28} name="plus" />

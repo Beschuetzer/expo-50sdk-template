@@ -8,7 +8,7 @@ import { EMPTY_STRING } from '@/constants/general';
 type ScannedObj = { data: string };
 type BarcodeScannerProps = {
   cameraType?: CameraType;
-  onScanned?: (scanned: string) => void;
+  onScanned?: (upc: string) => void;
 };
 
 export function BarcodeScanner(props: BarcodeScannerProps) {

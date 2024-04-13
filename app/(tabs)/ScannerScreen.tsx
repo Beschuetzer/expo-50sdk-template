@@ -4,6 +4,7 @@ import { useNavigation } from 'expo-router';
 import { Button, View, Row, Text, Heading, useTheme } from 'native-base';
 import React, { useState, useCallback } from 'react';
 import { StyleSheet } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { FullscreenSpinner } from '@/components/FullscreenSpinner';
@@ -13,29 +14,62 @@ import { useRequestCameraPermissions } from '@/components/hooks/useRequestCamera
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
-import { getIsValidUpcValue, getStandardizedUpcValue } from '@/utils/helpers';
+import {
+  itemsListSelector,
+  updateStoreSpecificValues,
+} from '@/state/slices/listsSlice';
+import {
+  getIsValidUpcValue,
+  getItemFromList,
+  getStandardizedUpcValue,
+} from '@/utils/helpers';
 
 enum ScannerScreenMode {
   AddToCart = 'Add to Cart',
   ItemLookup = 'Item Lookup',
 }
 export default function ScannerScreen() {
+  const itemsList = useSelector(itemsListSelector);
   const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const theme = useTheme();
   const [mode, setMode] = useState(ScannerScreenMode.ItemLookup);
 
-  const onSearchPress = useCallback((value: string) => {
-    if (getIsValidUpcValue(value)) {
-      const upc = getStandardizedUpcValue(value);
-      navigation.navigate(Routes.ItemModal, {
-        key: { upc, name: EMPTY_STRING },
-        showOverrideMsg: false,
-      });
-    }
-  }, []);
+  console.log({mode});
+  
+  const handleUpcNavigation = useCallback(
+    (value: string) => {
+      if (getIsValidUpcValue(value)) {
+        const upc = getStandardizedUpcValue(value);
+        const itemInList = getItemFromList(itemsList.data, value);
+        console.log({ mode, isItemInList: !!itemInList, value, upc });
+
+        if (mode === ScannerScreenMode.AddToCart) {
+          if (itemInList) {
+            console.log('use a snackbar to display a message after adding to cart ');
+            dispatch(
+              updateStoreSpecificValues({
+                key: { upc },
+                storeSpecificValuesToUpdate: {
+                  quantity: (currentQuantity: number) =>
+                    currentQuantity > 0 ? currentQuantity + 1 : 1,
+                },
+              }),
+            );
+            return;
+          }
+        }
+        navigation.navigate(Routes.ItemModal, {
+          key: { upc, name: EMPTY_STRING },
+          showOverrideMsg: false,
+        });
+      }
+    },
+    [itemsList, mode],
+  );
 
   const onSwitchCameraPress = useCallback(() => {
     setType((current) =>
@@ -91,16 +125,11 @@ export default function ScannerScreen() {
           {isManuallyEntering ? 'Close' : 'Enter 13 digit Upc'}
         </Button>
       </Row>
-      <ManualUpcInput isVisible={isManuallyEntering} onPress={onSearchPress} />
-      <BarcodeScanner
-        cameraType={type}
-        onScanned={(upc) => {
-          navigation.navigate(Routes.ItemModal, {
-            key: { upc, name: EMPTY_STRING },
-            showOverrideMsg: false,
-          });
-        }}
+      <ManualUpcInput
+        isVisible={isManuallyEntering}
+        onPress={handleUpcNavigation}
       />
+      <BarcodeScanner cameraType={type} onScanned={handleUpcNavigation} />
     </View>
   );
 }

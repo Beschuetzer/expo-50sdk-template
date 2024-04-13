@@ -16,10 +16,10 @@ import { maxWidth } from '@/constants/styles';
 import { getIsValidUpcValue, getStandardizedUpcValue } from '@/utils/helpers';
 
 enum ScannerScreenMode {
-  AddToCart = 'AddToCart',
-  ItemLookup = 'ItemLookup',
+  AddToCart = 'Add to Cart',
+  ItemLookup = 'Item Lookup',
 }
-const ScannerScreen = () => {
+export default function ScannerScreen() {
   const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
@@ -64,19 +64,19 @@ const ScannerScreen = () => {
         alignItems="center"
         {...maxWidth}
       >
-        <Heading size="sm">Mode:</Heading>
+        <Heading size="xs">Mode:</Heading>
         <Picker
           style={{ flex: 1 }}
           selectedValue={mode}
           onValueChange={onModeChange}
         >
-          {Object.keys(ScannerScreenMode).map((modeName) => (
+          {Object.values(ScannerScreenMode).map((modeName) => (
             <Picker.Item key={modeName} label={modeName} value={modeName} />
           ))}
         </Picker>
         {mode === ScannerScreenMode.AddToCart ? (
           <>
-            <Heading size="sm">Store:</Heading>
+            <Heading size="xs">Store:</Heading>
             <StoreManager showTag={false} showStoreList style={{ flex: 1 }} />
           </>
         ) : (
@@ -103,12 +103,10 @@ const ScannerScreen = () => {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
 });
-
-export default ScannerScreen;

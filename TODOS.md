@@ -1,5 +1,4 @@
 ## MVP
--Fix bug where stores with no coordinates get set as current
 -add option to toggle scanning modes (text "Add to cart mode" and "item look up mode" will display as overlay).
     --add-to-cart-mode
         ---has overlay saying such

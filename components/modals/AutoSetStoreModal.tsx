@@ -46,7 +46,7 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
     const storesMeetingCriteria: Store[] = [];
     for (const store of storesList.data) {
       const storeIsCloseEnough =
-        store.calculatedDistance !== undefined &&
+        store.calculatedDistance != null &&
         store.calculatedDistance <= autoSetStore.maxDistanceInMiles;
       if (storeIsCloseEnough) {
         storesMeetingCriteria.push(store);
@@ -71,7 +71,7 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
         setStoreToAskAbout(assumedStore);
       }
     }
-  }, [currentLocation]);
+  }, [currentLocation, storesList.data]);
 
   return (
     <>

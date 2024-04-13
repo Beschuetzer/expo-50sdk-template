@@ -1,4 +1,6 @@
 ## MVP
+-Add "per week/hour/etc" to the ItemTile button
+-Fix bug where stores with no coordinates get set as current
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 
 -Custom thumbnail images:
@@ -32,6 +34,8 @@ the ability to create a store layout and have a map/route be generated based on 
 -ability to start a "shopping run" and have it track where you are in the run and provide images of the current item and accept input to change to the next item (or go back)
 -voice commands like adding an item to the list
 -add ability to open google maps for directions to a store (would need to allow input of address or ability to get from GPS coords)
+-ability to get the current temp at a specified home location (address which is converted to GPS coordinates) and then adding a field for each item whether it is freezer or fridge item.  Then using the temp to determine how long the item can stay outside before going bad?
+
 
 ## Enhancements
 -Holding an item in a list should enter multi-selction mode, which allows selecting multiple items and then performing some action

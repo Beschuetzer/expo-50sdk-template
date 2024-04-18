@@ -1,21 +1,50 @@
 import { BlurView } from 'expo-blur';
 import { View, useTheme, Text } from 'native-base';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Modal, TouchableOpacity } from 'react-native';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { ChildrenProp } from '@/types/general';
 import { getButtonHitSlop } from '@/utils/helpers';
 
+type ModalWithBlurButton = {
+  text?: string;
+  color?: string;
+};
+
 export type ModalWithBlurProps = {
+  cancelButton?: ModalWithBlurButton;
+  confirmButton?: ModalWithBlurButton;
   isVisible?: boolean;
   onConfirm?: () => void;
   onCancel?: () => void;
 } & ChildrenProp;
 
 export function ModalWithBlur(props: ModalWithBlurProps) {
-  const { isVisible = false, children, onCancel, onConfirm } = props;
+  const {
+    cancelButton,
+    confirmButton,
+    isVisible = false,
+    children,
+    onCancel,
+    onConfirm,
+  } = props;
   const theme = useTheme();
+
+  const cancelButtonToUse = useMemo(() => {
+    return {
+      text: 'Cancel',
+      color: theme.colors.danger[900],
+      ...cancelButton,
+    } as ModalWithBlurButton;
+  }, [cancelButton, theme]);
+  const confirmButtonToUse = useMemo(() => {
+    return {
+      text: 'Confirm',
+      color: theme.colors.green[900],
+      ...confirmButton,
+    } as ModalWithBlurButton;
+  }, [confirmButton, theme]);
 
   const onCancelPress = useCallback(() => {
     onCancel && onCancel();
@@ -56,13 +85,17 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
               hitSlop={getButtonHitSlop(4)}
               onPress={onConfirmPress}
             >
-              <Text style={{ color: theme.colors.green[900] }}>Confirm</Text>
+              <Text style={{ color: confirmButtonToUse.color }}>
+                {confirmButtonToUse.text}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               hitSlop={getButtonHitSlop(4)}
               onPress={onCancelPress}
             >
-              <Text style={{ color: theme.colors.danger[900] }}>Cancel</Text>
+              <Text style={{ color: cancelButtonToUse.color }}>
+                {cancelButtonToUse.text}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

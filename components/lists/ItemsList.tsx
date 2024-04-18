@@ -182,6 +182,13 @@ export function ItemsList(props: ItemsListProps) {
         isVisible: true,
         title: 'Delete Item',
         message: `Are you sure you want to delete ${isUpcMessagePart}'${keyToDisplay}'?`,
+        confirmButton: {
+          text: 'Yes',
+          color: theme.colors.danger[900],
+        },
+        cancelButton: {
+          color: theme.colors.green[900],
+        },
         onCancel: () => resetConfirmModalProps(),
         onConfirm: () => {
           dispatch(removeItemsListItems([item]));

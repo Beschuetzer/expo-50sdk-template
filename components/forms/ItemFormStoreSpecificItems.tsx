@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 
 import { InputText } from './InputText';
 import { ItemFormProps } from './ItemForm';
+import { ItemFormStoreSpecificValuesStoreModal } from '../modals/ItemFormStoreSpecificValuesStoreModal';
 
 import {
   EMPTY_NUMBER,
@@ -136,26 +137,32 @@ export function ItemFormStoreSpecific(
   return (
     <Stack>
       {shoulddisplayStoreToUsePicker ? (
-
         <Picker
-        selectedValue={selectedStoreToUse}
-        onValueChange={(value: string | null) => {
-          setSelectedStoreToUse(value || EMPTY_STRING);
-        }}
+          selectedValue={selectedStoreToUse}
+          onValueChange={(value: string | null) => {
+            setSelectedStoreToUse(value || EMPTY_STRING);
+          }}
         >
-        {storesListWithEmptyItem.map((store) => (
-          <Picker.Item
-          key={store.name}
-          label={store.name || 'None'}
-          value={store.name}
-          />
+          {storesListWithEmptyItem.map((store) => (
+            <Picker.Item
+              key={store.name}
+              label={store.name || 'None'}
+              value={store.name}
+            />
           ))}
-      </Picker>
-          ) : (
-            <Button m={0} p={0} variant={"link"} onPress={() => {
-              setShouldDisplayStoreToUsePicker(true);
-            }}>use existing</Button>
-          )}
+        </Picker>
+      ) : (
+        <Button
+          m={0}
+          p={0}
+          variant="link"
+          onPress={() => {
+            setShouldDisplayStoreToUsePicker(true);
+          }}
+        >
+          use existing
+        </Button>
+      )}
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText>Price at '{currentStore.name}'</InputText>
         <Input
@@ -201,6 +208,7 @@ export function ItemFormStoreSpecific(
           }
         />
       </Stack>
+      <ItemFormStoreSpecificValuesStoreModal />
     </Stack>
   );
 }

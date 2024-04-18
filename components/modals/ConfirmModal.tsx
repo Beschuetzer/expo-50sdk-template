@@ -9,25 +9,18 @@ export type ConfirmModalProps = {
   message?: string;
   note?: string;
   title?: string;
-} & ModalWithBlurProps;
+} & Omit<ModalWithBlurProps, 'children'>;
 
 export const ConfirmModal = (props: ConfirmModalProps) => {
   const theme = useTheme();
   const {
-    isVisible = false,
     message = EMPTY_STRING,
     note = EMPTY_STRING,
-    onCancel,
-    onConfirm,
     title = EMPTY_STRING,
   } = props;
 
   return (
-    <ModalWithBlur
-      isVisible={isVisible}
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-    >
+    <ModalWithBlur {...props}>
       {title ? (
         <Heading
           size="sm"

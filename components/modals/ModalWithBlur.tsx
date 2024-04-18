@@ -71,7 +71,13 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
         }}
       >
         <View
-          style={{ padding: 20, backgroundColor: 'white', borderRadius: 10 }}
+          style={{
+            maxHeight: '85%',
+            maxWidth: '85%',
+            padding: 20,
+            backgroundColor: 'white',
+            borderRadius: 10,
+          }}
         >
           {children}
           <View

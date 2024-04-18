@@ -1,6 +1,8 @@
 ## MVP
 -adding "use existing store" button on ItemForm
     --finish ItemFormStoreSpecificValuesStoreModal (should go through each store in storesList and display the ones that have a value for the key; can move the picker and existing stuff into it)
+    --figure out how to pass new values into onConfirm prop
+    --refactor ItemFormStoreSpecificItems to use one POS that has keys for the others (update the modal's onConfirm reponse)
 
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 

@@ -1,4 +1,6 @@
 ## MVP
+-adding "use existing store" button on ItemForm
+    --add the actual button which toggles whether the picker is visible?  Or uses a modal to display possible stores with current values?
 
 -figure out which action to turn on in items and shopping list when multiple items are selected (add reducers that leverage the functionality of the current reducer if it exists [create separate function])
 

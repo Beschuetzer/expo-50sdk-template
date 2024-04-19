@@ -108,14 +108,16 @@ export function ItemFormStoreSpecific(
         <Row flex={1} mr={theme.space[FORM_INTER_ITEM_SPACING]}>
           <StoreManager showStoreList />
         </Row>
-        <TouchableOpacity
-          style={{ paddingBottom: theme.space[4] }}
-          onPress={() => {
-            setShouldDisplayStoreToUseModal(true);
-          }}
-        >
-          <FontAwesome name="copy" size={theme.sizes[6]} />
-        </TouchableOpacity>
+        {keyToUse ? (
+          <TouchableOpacity
+            style={{ paddingBottom: theme.space[4] }}
+            onPress={() => {
+              setShouldDisplayStoreToUseModal(true);
+            }}
+          >
+            <FontAwesome name="copy" size={theme.sizes[6]} />
+          </TouchableOpacity>
+        ) : null}
       </Row>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText>Price at '{currentStore.name}'</InputText>

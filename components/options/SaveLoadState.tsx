@@ -76,7 +76,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
   const onSaveItemsPress = useCallback(async () => {
     setConfirmModalProps({
       isVisible: true,
-      message: 'Are you sure you wan to save items?',
+      message: 'Are you sure you want to save items?',
       onCancel: () => setConfirmModalProps({ isVisible: false }),
       onConfirm: async () => {
         await saveAppStateToFile(FILE_NAMES.items, itemsList);
@@ -109,7 +109,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
   const onSaveStoresPress = useCallback(async () => {
     setConfirmModalProps({
       isVisible: true,
-      message: 'Are you sure you wan to save stores?',
+      message: 'Are you sure you want to save stores?',
       onCancel: () => setConfirmModalProps({ isVisible: false }),
       onConfirm: async () => {
         await saveAppStateToFile(FILE_NAMES.stores, {

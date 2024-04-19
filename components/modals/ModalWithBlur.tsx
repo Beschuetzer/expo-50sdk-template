@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { View, useTheme, Button, Row } from 'native-base';
+import { View, useTheme, Button, Row, Heading } from 'native-base';
 import { ColorSchemeType } from 'native-base/lib/typescript/components/types';
 import React, { useCallback, useMemo } from 'react';
 import { Modal } from 'react-native';
@@ -8,7 +8,6 @@ import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
 import { ChildrenProp } from '@/types/general';
-import { getButtonHitSlop } from '@/utils/helpers';
 
 type ModalWithBlurButton = {
   colorScheme?: ColorSchemeType;
@@ -20,6 +19,7 @@ export type ModalWithBlurProps = {
   cancelButton?: ModalWithBlurButton;
   confirmButton?: ModalWithBlurButton;
   isVisible?: boolean;
+  title: string;
   onConfirm?: () => void;
   onCancel?: () => void;
 } & ChildrenProp;
@@ -29,6 +29,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
     cancelButton,
     confirmButton,
     isVisible = false,
+    title,
     children,
     onCancel,
     onConfirm,
@@ -85,6 +86,13 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
             borderRadius: 10,
           }}
         >
+          <Heading
+            textAlign="center"
+            size="sm"
+            pb={theme.space[FORM_INTER_ITEM_SPACING]}
+          >
+            {title}
+          </Heading>
           {children}
           <Row
             space={theme.space[FORM_INTER_ITEM_SPACING]}
@@ -92,9 +100,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
             mt={theme.space[FORM_INTER_ITEM_SPACING]}
           >
             <Button
-              flex={1}
               variant="ghost"
-              hitSlop={getButtonHitSlop(4)}
               isDisabled={!confirmButtonToUse.isEnabled}
               onPress={onConfirmPress}
               colorScheme={confirmButtonToUse.colorScheme}
@@ -102,9 +108,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
               {confirmButtonToUse.text}
             </Button>
             <Button
-              flex={1}
               variant="ghost"
-              hitSlop={getButtonHitSlop(4)}
               isDisabled={!cancelButtonToUse.isEnabled}
               onPress={onCancelPress}
               colorScheme={cancelButtonToUse.colorScheme}

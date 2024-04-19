@@ -1,5 +1,5 @@
 import { Store } from '@reduxjs/toolkit';
-import { Button, Heading, ScrollView, useTheme } from 'native-base';
+import { Button, ScrollView, useTheme } from 'native-base';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -69,6 +69,7 @@ export function ItemFormStoreSpecificValuesStoreModal(
 
   return (
     <ModalWithBlur
+      title="Select a Store"
       confirmButton={{
         isEnabled: !!currentlySelectedStore,
       }}
@@ -110,13 +111,6 @@ export function ItemFormStoreSpecificValuesStoreModal(
         onConfirm && onConfirm(toReturn);
       }}
     >
-      <Heading
-        textAlign="center"
-        size="sm"
-        pb={theme.space[FORM_INTER_ITEM_SPACING]}
-      >
-        Select a Store
-      </Heading>
       <ScrollView>
         {Array.from(storesWithValues).map((store) => {
           return (

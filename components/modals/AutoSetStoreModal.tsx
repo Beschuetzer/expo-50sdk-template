@@ -71,13 +71,11 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
 
   return (
     <ModalWithBlur
+      title="Auto-set Store"
       isVisible={!!storeToAskAbout}
       onConfirm={() => onConfirmPress(storeToAskAbout)}
       onCancel={onCancelPress}
     >
-      <Heading mb={theme.space[FORM_INTER_ITEM_SPACING]} size="sm">
-        It looks like you are at {storeToAskAbout?.name}
-      </Heading>
       <Text>
         Would you like to set{' '}
         <Text fontWeight={900} fontStyle="italic">

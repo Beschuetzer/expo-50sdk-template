@@ -69,7 +69,7 @@ export function ItemFormStoreSpecificValuesStoreModal(
 
   return (
     <ModalWithBlur
-      title="Select a Store"
+      {...props}
       confirmButton={{
         isEnabled: !!currentlySelectedStore,
       }}

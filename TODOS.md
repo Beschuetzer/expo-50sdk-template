@@ -1,8 +1,4 @@
 ## MVP
--ModalBlur refactor:
-    --should be able to handle isVisible internally (clicking either button should always close)
-    --if onConfirm is not given then it is disabled
-    
 -refactor ItemFormStoreSpecificItems to use one POS that has keys for the others (update the modal's onConfirm reponse)?
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).
     --navigates to a new page which has has the next three items displayed with full details and eventually a text to speech reading of the item

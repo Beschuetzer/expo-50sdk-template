@@ -153,6 +153,7 @@ export function ItemFormStoreSpecific(
         />
       </Stack>
       <ItemFormStoreSpecificValuesStoreModal
+        title="Select a Store"
         itemWithStoreSpecificValues={itemInList}
         isVisible={shouldDisplayStoreToUseModal}
         onCancel={() => setShouldDisplayStoreToUseModal(false)}

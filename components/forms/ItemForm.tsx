@@ -10,7 +10,6 @@ import { UnitInput } from './UnitInput';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { Barcode } from '../Barcode';
 import { InputValidationMessage } from '../InputValidationMessage';
-import { StoreManager } from '../StoreManager';
 
 import {
   DEFAULT_IMAGE_INDEX,
@@ -341,7 +340,6 @@ export function ItemForm(props: ItemFormProps) {
         headingTag={InputText}
         spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
-      <StoreManager showStoreList />
       <ItemFormStoreSpecific
         item={itemToUse}
         onValueChange={onItemSpecificValueChange}

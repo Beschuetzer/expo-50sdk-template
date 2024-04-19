@@ -1,9 +1,12 @@
-import { Stack, Input, useTheme, Button } from 'native-base';
+import { FontAwesome } from '@expo/vector-icons';
+import { Stack, Input, useTheme, Row } from 'native-base';
 import { useEffect, useMemo, useState } from 'react';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
 import { InputText } from './InputText';
 import { ItemFormProps } from './ItemForm';
+import { StoreManager } from '../StoreManager';
 import {
   ItemFormStoreSpecificValuesStoreModal,
   ItemFormStoreSpecificValuesStoreModalOnConfirmValues,
@@ -97,16 +100,19 @@ export function ItemFormStoreSpecific(
   if (!currentStore.name) return null;
   return (
     <Stack>
-      <Button
-        m={0}
-        p={0}
-        variant="link"
-        onPress={() => {
-          setShouldDisplayStoreToUseModal(true);
-        }}
-      >
-        use existing
-      </Button>
+      <Row alignItems="flex-end">
+        <Row flex={1} mr={theme.space[FORM_INTER_ITEM_SPACING]}>
+          <StoreManager showStoreList />
+        </Row>
+        <TouchableOpacity
+          style={{ paddingBottom: theme.space[4] }}
+          onPress={() => {
+            setShouldDisplayStoreToUseModal(true);
+          }}
+        >
+          <FontAwesome name="copy" size={theme.sizes[6]} />
+        </TouchableOpacity>
+      </Row>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText>Price at '{currentStore.name}'</InputText>
         <Input

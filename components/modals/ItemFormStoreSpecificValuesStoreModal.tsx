@@ -1,12 +1,16 @@
 import { Store } from '@reduxjs/toolkit';
-import { Button, Heading, ScrollView, Text, useTheme } from 'native-base';
+import { Button, Heading, ScrollView, useTheme } from 'native-base';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { listToDisplaySelector, ListName } from '@/state/slices/listsSlice';
+import {
+  listToDisplaySelector,
+  ListName,
+  currentStoreSelector,
+} from '@/state/slices/listsSlice';
 import {
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey,
@@ -33,6 +37,7 @@ export function ItemFormStoreSpecificValuesStoreModal(
   const storesList = useSelector(
     listToDisplaySelector(ListName.StoresList),
   ) as Store[];
+  const currentStore = useSelector(currentStoreSelector);
   const [storesWithValues, setStoresWithValues] = useState<Set<string>>(
     new Set(),
   );
@@ -41,9 +46,13 @@ export function ItemFormStoreSpecificValuesStoreModal(
     useState(EMPTY_STRING);
 
   const onButtonPress = useCallback((store: string) => {
-    console.log({ store });
     setCurrentlySelectedStore(store);
   }, []);
+
+  useEffect(() => {
+    haveStoresBeenCalculatedRef.current = false;
+    setCurrentlySelectedStore(EMPTY_STRING);
+  }, [currentStore]);
 
   useEffect(() => {
     if (!isVisible || haveStoresBeenCalculatedRef.current) return;
@@ -53,9 +62,10 @@ export function ItemFormStoreSpecificValuesStoreModal(
       const stores = Object.keys(value as any);
       stores.forEach((store) => storesWithValuesLocal.add(store));
     }
+    storesWithValuesLocal.delete(currentStore.name);
     setStoresWithValues(storesWithValuesLocal);
     haveStoresBeenCalculatedRef.current = true;
-  }, [storesList, itemWithStoreSpecificValues, isVisible]);
+  }, [currentStore, storesList, itemWithStoreSpecificValues, isVisible]);
 
   return (
     <ModalWithBlur

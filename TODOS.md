@@ -11,17 +11,7 @@
 
 //todo: figure out types for useRouter/useNavigation (expo-router)
 //todo: fix bug where editing an item with upc then one without doesn't set the upc to blank
--UpcDetails rendering:
-    --use PagerView to render the thumbnails 
-    --The user will be presented will two different set of options depending on whether  item is already in the itemsList (add to items list if not otherwise the ability to modify the item and add it to the shopping list) .
-    --it should be a form with a save and clear button
-    --any data from the API will pre-populate the fields
-    --use a default thumbnail with the option to press a button to select the another if desired
-    --the fields will be the fields in the type Item
--add store creation form and screen (maybe even a tab?)
--create a component that sets the current store POS (create POS in generalSlice)
 
--Swiping to add to shopping list should not be an option unless a store is selected (or a message should display indicating a store is needed (add an AlertModal for this?))
 -add jest tests to helpers and other testable items (may need to refactor a bit)
 -test everything out on a device with notches and see if SafeView is needed anywhere
 

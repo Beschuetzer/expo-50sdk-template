@@ -16,7 +16,7 @@ type SwipeableRowAction = {
   title: string | ReactNode | ReactNode[];
   backgroundColor: string;
   onPress: () => void;
-};
+} | null;
 
 type SwipeableRowProps = {
   leftActions?: SwipeableRowAction[];
@@ -106,7 +106,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
     action: SwipeableRowAction,
     direction: SwipeableRowDirection,
   ) {
-    const { title, backgroundColor, onPress } = action;
+    const { title, backgroundColor, onPress } = action || {};
 
     return (
       <Animated.View

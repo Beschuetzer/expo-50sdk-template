@@ -34,6 +34,10 @@ type ItemFormStoreSpecificProps<T> = {
 } & Partial<ItemProp<T>> &
   Pick<ItemFormProps, 'shouldAddQuantity'>;
 
+/**
+ *Whenever a new field for {@link StoreSpecificValueKey} is added,
+ *this component needs to be manually updated to handle it.
+ **/
 export function ItemFormStoreSpecific(
   props: ItemFormStoreSpecificProps<ItemWithStoreSpecificValues>,
 ) {
@@ -152,7 +156,7 @@ export function ItemFormStoreSpecific(
           variant="outline"
           p={theme.space[1]}
           placeholder={`Aisle in ${currentStore.name}`}
-          value={aisleNumber.toString()}
+          value={(aisleNumber || EMPTY_STRING).toString()}
           onChangeText={(newValue) =>
             setAisleNumber(parseFloat(newValue) || EMPTY_NUMBER)
           }
@@ -168,7 +172,7 @@ export function ItemFormStoreSpecific(
         ) => {
           const { aisleNumber, itemId, price } = values;
           setShouldDisplayStoreToUseModal(false);
-          setAisleNumber(parseFloat(aisleNumber));
+          setAisleNumber(parseFloat(aisleNumber) || EMPTY_NUMBER);
           setItemId(itemId);
           setPrice(price);
         }}

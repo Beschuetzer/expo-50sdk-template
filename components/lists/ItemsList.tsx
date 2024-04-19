@@ -184,10 +184,10 @@ export function ItemsList(props: ItemsListProps) {
         message: `Are you sure you want to delete ${isUpcMessagePart}'${keyToDisplay}'?`,
         confirmButton: {
           text: 'Yes',
-          color: theme.colors.danger[900],
+          colorScheme: 'danger',
         },
         cancelButton: {
-          color: theme.colors.green[900],
+          colorScheme: 'success',
         },
         onCancel: () => resetConfirmModalProps(),
         onConfirm: () => {

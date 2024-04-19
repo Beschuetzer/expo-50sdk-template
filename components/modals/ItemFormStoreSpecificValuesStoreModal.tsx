@@ -69,6 +69,9 @@ export function ItemFormStoreSpecificValuesStoreModal(
 
   return (
     <ModalWithBlur
+      confirmButton={{
+        isEnabled: !!currentlySelectedStore,
+      }}
       isVisible={isVisible}
       onCancel={onCancel}
       onConfirm={() => {

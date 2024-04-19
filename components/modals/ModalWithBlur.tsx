@@ -1,15 +1,19 @@
 import { BlurView } from 'expo-blur';
-import { View, useTheme, Text } from 'native-base';
+import { View, useTheme, Button, Row } from 'native-base';
+import { ColorSchemeType } from 'native-base/lib/typescript/components/types';
 import React, { useCallback, useMemo } from 'react';
-import { Modal, TouchableOpacity } from 'react-native';
+import { Modal } from 'react-native';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
+import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { maxWidth } from '@/constants/styles';
 import { ChildrenProp } from '@/types/general';
 import { getButtonHitSlop } from '@/utils/helpers';
 
 type ModalWithBlurButton = {
+  colorScheme?: ColorSchemeType;
+  isEnabled?: boolean;
   text?: string;
-  color?: string;
 };
 
 export type ModalWithBlurProps = {
@@ -34,14 +38,16 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
   const cancelButtonToUse = useMemo(() => {
     return {
       text: 'Cancel',
-      color: theme.colors.danger[900],
+      colorScheme: 'red',
+      isEnabled: true,
       ...cancelButton,
     } as ModalWithBlurButton;
   }, [cancelButton, theme]);
   const confirmButtonToUse = useMemo(() => {
     return {
       text: 'Confirm',
-      color: theme.colors.green[900],
+      colorScheme: 'green',
+      isEnabled: true,
       ...confirmButton,
     } as ModalWithBlurButton;
   }, [confirmButton, theme]);
@@ -72,38 +78,40 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
       >
         <View
           style={{
+            ...maxWidth,
             maxHeight: '85%',
-            maxWidth: '85%',
             padding: 20,
             backgroundColor: 'white',
             borderRadius: 10,
           }}
         >
           {children}
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              marginTop: 20,
-            }}
+          <Row
+            space={theme.space[FORM_INTER_ITEM_SPACING]}
+            justifyContent="space-around"
+            mt={theme.space[FORM_INTER_ITEM_SPACING]}
           >
-            <TouchableOpacity
+            <Button
+              flex={1}
+              variant="ghost"
               hitSlop={getButtonHitSlop(4)}
+              isDisabled={!confirmButtonToUse.isEnabled}
               onPress={onConfirmPress}
+              colorScheme={confirmButtonToUse.colorScheme}
             >
-              <Text style={{ color: confirmButtonToUse.color }}>
-                {confirmButtonToUse.text}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              {confirmButtonToUse.text}
+            </Button>
+            <Button
+              flex={1}
+              variant="ghost"
               hitSlop={getButtonHitSlop(4)}
+              isDisabled={!cancelButtonToUse.isEnabled}
               onPress={onCancelPress}
+              colorScheme={cancelButtonToUse.colorScheme}
             >
-              <Text style={{ color: cancelButtonToUse.color }}>
-                {cancelButtonToUse.text}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              {cancelButtonToUse.text}
+            </Button>
+          </Row>
         </View>
       </BlurView>
     </Modal>

@@ -1,8 +1,8 @@
 ## MVP
 -adding "use existing store" button on ItemForm
-    --finish ItemFormStoreSpecificValuesStoreModal (should go through each store in storesList and display the ones that have a value for the key; can move the picker and existing stuff into it)
-    --figure out how to pass new values into onConfirm prop
-    --refactor ItemFormStoreSpecificItems to use one POS that has keys for the others (update the modal's onConfirm reponse)
+    --finish ItemFormStoreSpecificValuesStoreModal implementation in ItemFormStoreSpecificItems
+    --refactor ItemFormStoreSpecificItems to use one POS that has keys for the others (update the modal's onConfirm reponse)?
+    --how to refactor ItemFormStoreSpecificValuesStoreModal.onConfirm
 
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).
     --navigates to a new page which has has the next three items displayed with full details and eventually a text to speech reading of the item

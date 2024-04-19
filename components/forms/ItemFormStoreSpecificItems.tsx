@@ -4,7 +4,10 @@ import { useSelector } from 'react-redux';
 
 import { InputText } from './InputText';
 import { ItemFormProps } from './ItemForm';
-import { ItemFormStoreSpecificValuesStoreModal } from '../modals/ItemFormStoreSpecificValuesStoreModal';
+import {
+  ItemFormStoreSpecificValuesStoreModal,
+  ItemFormStoreSpecificValuesStoreModalOnConfirmValues,
+} from '../modals/ItemFormStoreSpecificValuesStoreModal';
 
 import {
   EMPTY_NUMBER,
@@ -153,7 +156,12 @@ export function ItemFormStoreSpecific(
         itemWithStoreSpecificValues={itemInList}
         isVisible={shouldDisplayStoreToUseModal}
         onCancel={() => setShouldDisplayStoreToUseModal(false)}
-        onConfirm={() => setShouldDisplayStoreToUseModal(false)}
+        onConfirm={(
+          values: ItemFormStoreSpecificValuesStoreModalOnConfirmValues,
+        ) => {
+          console.log({ values });
+          setShouldDisplayStoreToUseModal(false);
+        }}
       />
     </Stack>
   );

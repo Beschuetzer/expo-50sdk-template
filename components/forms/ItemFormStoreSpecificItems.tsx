@@ -159,8 +159,11 @@ export function ItemFormStoreSpecific(
         onConfirm={(
           values: ItemFormStoreSpecificValuesStoreModalOnConfirmValues,
         ) => {
-          console.log({ values });
+          const { aisleNumber, itemId, price } = values;
           setShouldDisplayStoreToUseModal(false);
+          setAisleNumber(parseFloat(aisleNumber));
+          setItemId(itemId);
+          setPrice(price);
         }}
       />
     </Stack>

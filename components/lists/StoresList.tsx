@@ -194,7 +194,7 @@ export function StoresList(props: StoresListProps) {
           style={styles.rectButton}
           onPress={() => {
             navigation.navigate(Routes.StoreModal, {
-              originalKey: getKeyToUse(keyToUse),
+              originalKey: keyToUse,
             });
           }}
         >

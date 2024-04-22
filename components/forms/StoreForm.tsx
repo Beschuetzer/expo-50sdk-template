@@ -60,6 +60,10 @@ export function StoreForm(props: StoreFormProps) {
       }),
     [storeName, storesList],
   );
+  const isUpdatingStore = useMemo(
+    () => originalKeyToUse && storeName.trim() === originalKeyToUse,
+    [storeName, originalKeyToUse],
+  );
 
   const formValidation: StoreFormValdation = useMemo(() => {
     const isValid = storeName.length > 0;
@@ -105,8 +109,9 @@ export function StoreForm(props: StoreFormProps) {
           <Row space={3}>
             <Button
               isDisabled={
-                !formValidation.isValid ||
-                (!canOverrideStore && isProposedStorePresent)
+                (!formValidation.isValid ||
+                  (!canOverrideStore && isProposedStorePresent)) &&
+                !isUpdatingStore
               }
               flex={1}
               onPress={onSavePress}

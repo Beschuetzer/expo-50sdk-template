@@ -1029,11 +1029,13 @@ export const shoppingListSelector = (state: RootState) =>
 export const storesListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.StoresList];
 
-export const storesListItemSelector = (storeName: string) =>
+export const storesListItemSelector = (key: Key | string) =>
   createSelector(
     [(state: RootState) => state[listsSlice.name].storesList.data],
     (storesList) => {
-      return storesList?.find((store) => store.name === storeName) as Store;
+      return storesList?.find(
+        (store) => store.name === getKeyToUse(key),
+      ) as Store;
     },
   );
 

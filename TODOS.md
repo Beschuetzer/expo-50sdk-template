@@ -1,7 +1,9 @@
 ## MVP
+-Unable to update store values when override stores it disabled 
+-Add address field to store form and use that to calculate gps coordinates (find api to use)
+
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).
     --navigates to a new page which has has the next three items displayed with full details and eventually a text to speech reading of the item
-
 
 -Custom thumbnail images:
     --add ability to long press an image which enters delete mode (trash bin show up in headerRight)

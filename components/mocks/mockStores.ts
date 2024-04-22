@@ -22,4 +22,4 @@ export const MOCK_STORES = [
       lon: '-93.0198135',
     },
   },
-] as Store[];
+] as Required<Store>[];

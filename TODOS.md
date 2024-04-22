@@ -1,6 +1,9 @@
 ## MVP
 
--Add address field to store form and use that to calculate gps coordinates (find api to use) (use .env api key)
+-geofencing stuff:
+    --finish api/geofencing (create getGPSFromAddress)
+    --create a form for handling addresses
+    --use form in StoreForm
 
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).
     --navigates to a new page which has has the next three items displayed with full details and eventually a text to speech reading of the item

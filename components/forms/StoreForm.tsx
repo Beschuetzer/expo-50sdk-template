@@ -1,10 +1,11 @@
-import { Stack, Input, Row, useTheme, Button, Center } from 'native-base';
-import { useMemo, useState } from 'react';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { Stack, Input, Row, useTheme, Button } from 'native-base';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { AddressForm } from './AddressForm';
 import { InputText } from './InputText';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
+import { AddressBottomSheet } from '../AddressBottomSheet';
 import { InputValidationMessage } from '../InputValidationMessage';
 
 import {
@@ -47,6 +48,7 @@ export function StoreForm(props: StoreFormProps) {
       ...GPS_COORDINATES_DEFAULT,
     },
   );
+  const addressSheetRef = useRef<BottomSheetModalMethods>(null);
   const canOverrideStore = useSelector(canOverrideStoreSelector);
   const storesList = useSelector(storesListSelector);
   const originalKeyToUse = useMemo(
@@ -102,6 +104,10 @@ export function StoreForm(props: StoreFormProps) {
       setIsLoadingGpscoords(false);
     }
   }
+
+  const onUseAddressPress = useCallback(() => {
+    addressSheetRef.current?.present();
+  }, [addressSheetRef.current]);
 
   return (
     <AbsolutePositionedScreen
@@ -206,15 +212,12 @@ export function StoreForm(props: StoreFormProps) {
           >
             Use Current
           </Button>
-          <Button
-            isDisabled={isLoadingGpscoords}
-            onPress={onGetCurrentCoordinatesPress}
-          >
+          <Button isDisabled={isLoadingGpscoords} onPress={onUseAddressPress}>
             Use Address (Finish this)
           </Button>
         </Row>
       </Stack>
-      <AddressForm />
+      <AddressBottomSheet ref={addressSheetRef} />
     </AbsolutePositionedScreen>
   );
 }

@@ -3,9 +3,10 @@ import { Stack, Input, Row, useTheme, Button } from 'native-base';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { AddressForm } from './AddressForm';
 import { InputText } from './InputText';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
-import { AddressBottomSheet } from '../AddressBottomSheet';
+import { BottomSheetModalWithFixedHeader } from '../BottomSheetModalWithFixedHeader';
 import { InputValidationMessage } from '../InputValidationMessage';
 
 import {
@@ -217,7 +218,9 @@ export function StoreForm(props: StoreFormProps) {
           </Button>
         </Row>
       </Stack>
-      <AddressBottomSheet ref={addressSheetRef} />
+      <BottomSheetModalWithFixedHeader title="Geofencing" ref={addressSheetRef}>
+        <AddressForm />
+      </BottomSheetModalWithFixedHeader>
     </AbsolutePositionedScreen>
   );
 }

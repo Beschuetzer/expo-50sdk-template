@@ -1,6 +1,8 @@
 ## MVP
 
 -geofencing stuff:
+    --add buttons to bottom of BottomSheetModalWithFixedHeader
+    --figure out how to pass values from AddressForm to BottomSheetModalWithFixedHeader
     --finish AddressForm (clicking the button should open a modal with the form and then closing should return the current values)
     --finish api/geofencing (create getGPSFromAddress)
     --use form in StoreForm

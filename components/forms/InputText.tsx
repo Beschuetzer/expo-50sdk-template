@@ -1,14 +1,17 @@
-import { Text, View, ViewStyle } from 'react-native';
+import { Row } from 'native-base';
+import { ReactNode } from 'react';
+import { Text, ViewStyle } from 'react-native';
 
 type InputTextProps = {
   children: string | string[];
+  suffix?: ReactNode | ReactNode[];
   style?: ViewStyle;
 };
 
 export function InputText(props: InputTextProps) {
-  const { children, style } = props;
+  const { children, style, suffix } = props;
   return (
-    <View style={style}>
+    <Row alignItems="center" style={style}>
       <Text
         style={{
           fontWeight: '900',
@@ -16,6 +19,7 @@ export function InputText(props: InputTextProps) {
       >
         {children}
       </Text>
-    </View>
+      {suffix}
+    </Row>
   );
 }

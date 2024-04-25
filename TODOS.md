@@ -1,8 +1,8 @@
 ## MVP
 
 -geofencing stuff:
+    --finish AddressForm (clicking the button should open a modal with the form and then closing should return the current values)
     --finish api/geofencing (create getGPSFromAddress)
-    --create a form for handling addresses
     --use form in StoreForm
 
 -Add way to select an aisle number by using an already given value for an item (provide a way to select an item (e.g. upc, name, etc) and then select the aisle to be the same as the item selected; need to only show items which have aisle number for the current store)

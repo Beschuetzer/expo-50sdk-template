@@ -2,6 +2,7 @@ import { Stack, Input, Row, useTheme, Button, Center } from 'native-base';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { AddressForm } from './AddressForm';
 import { InputText } from './InputText';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { InputValidationMessage } from '../InputValidationMessage';
@@ -194,15 +195,26 @@ export function StoreForm(props: StoreFormProps) {
             isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
           />
         </Row>
-        <Center mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <Row
+          pt={theme.space[FORM_INTER_ITEM_SPACING]}
+          alignItems="center"
+          justifyContent="space-between"
+        >
           <Button
             isDisabled={isLoadingGpscoords}
             onPress={onGetCurrentCoordinatesPress}
           >
-            Get Current
+            Use Current
           </Button>
-        </Center>
+          <Button
+            isDisabled={isLoadingGpscoords}
+            onPress={onGetCurrentCoordinatesPress}
+          >
+            Use Address (Finish this)
+          </Button>
+        </Row>
       </Stack>
+      <AddressForm />
     </AbsolutePositionedScreen>
   );
 }

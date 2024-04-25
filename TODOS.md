@@ -5,6 +5,9 @@
     --create a form for handling addresses
     --use form in StoreForm
 
+-Add way to select an aisle number by using an already given value for an item (provide a way to select an item (e.g. upc, name, etc) and then select the aisle to be the same as the item selected; need to only show items which have aisle number for the current store)
+-Add option to customize the format for how names are arranged after scanning upc
+
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).
     --navigates to a new page which has has the next three items displayed with full details and eventually a text to speech reading of the item
 

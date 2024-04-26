@@ -1,11 +1,13 @@
 ## MVP
 
 -geofencing stuff:
+    --finish doForwardGeoCoding
     --add buttons to bottom of BottomSheetModalWithFixedHeader
     --figure out how to pass values from AddressForm to BottomSheetModalWithFixedHeader
     --finish AddressForm (clicking the button should open a modal with the form and then closing should return the current values)
     --finish api/geofencing (create getGPSFromAddress)
     --use form in StoreForm
+    --add way to disable the submit button for Get Coordinates
 
 -Add way to select an aisle number by using an already given value for an item (provide a way to select an item (e.g. upc, name, etc) and then select the aisle to be the same as the item selected; need to only show items which have aisle number for the current store)
 -Add option to customize the format for how names are arranged after scanning upc

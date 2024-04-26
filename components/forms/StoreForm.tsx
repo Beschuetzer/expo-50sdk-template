@@ -9,6 +9,7 @@ import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { BottomSheetModalWithFixedHeader } from '../BottomSheetModalWithFixedHeader';
 import { InputValidationMessage } from '../InputValidationMessage';
 
+import { doForwardGeoCoding } from '@/api/geofencing';
 import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
@@ -113,6 +114,11 @@ export function StoreForm(props: StoreFormProps) {
     },
     [addressRef.current],
   );
+
+  const onAddressFormSubmitPress = useCallback(async () => {
+    const gpsCoordinates = await doForwardGeoCoding(addressRef.current);
+    console.log({ getGpsCoordinate });
+  }, [addressRef.current]);
 
   const onUseAddressPress = useCallback(() => {
     addressSheetRef.current?.present();
@@ -226,7 +232,11 @@ export function StoreForm(props: StoreFormProps) {
           </Button>
         </Row>
       </Stack>
-      <BottomSheetModalWithFixedHeader ref={addressSheetRef} title="Geofencing">
+      <BottomSheetModalWithFixedHeader
+        ref={addressSheetRef}
+        title="Geofencing"
+        onSubmit={onAddressFormSubmitPress}
+      >
         <AddressForm onValueChange={onAddressChange} />
       </BottomSheetModalWithFixedHeader>
     </AbsolutePositionedScreen>

@@ -8,7 +8,7 @@ import { displayAlert, isAddressValid } from '@/utils/helpers';
 const FORWARD_GEOCODING_API_URL = 'https://geocode.maps.co/search';
 const REVERSE_GEOCODING_API_URL = 'https://geocode.maps.co/reverse';
 
-type ForwardGeocodingPlace = {
+export type ForwardGeocodingPlace = {
   place_id?: number;
   licence?: string;
   osm_type?: string;
@@ -20,9 +20,9 @@ type ForwardGeocodingPlace = {
   class?: string;
   type?: string;
   importance?: number;
-};
+} | null;
 
-type DoForwardGeocodingResponse = ForwardGeocodingPlace[];
+export type DoForwardGeocodingResponse = ForwardGeocodingPlace[];
 
 /**
  *Uses {@link https://geocode.maps.co/ this} free API to perform reverse and regular geocoding

@@ -332,7 +332,7 @@ export function getStoreWithDistance(
 
 export function isAddressValid(address: Address) {
   const { addressLineOne, city, state, zipCode } = address || {};
-  const isAddressValid = !!addressLineOne && addressLineOne?.trim().length >= 5;
+  const isAddressValid = !!addressLineOne;
   const isLocationPresent =
     !!city || state !== State.None || zipCode?.match(POSTAL_CODE_REGEX);
   return !!(isAddressValid && isLocationPresent);

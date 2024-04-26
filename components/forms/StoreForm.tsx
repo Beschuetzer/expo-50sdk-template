@@ -1,6 +1,6 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AddressForm } from './AddressForm';
@@ -8,8 +8,13 @@ import { InputText } from './InputText';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { BottomSheetModalWithFixedHeader } from '../BottomSheetModalWithFixedHeader';
 import { InputValidationMessage } from '../InputValidationMessage';
+import { ForwardGeoCodingModal } from '../modals/ForwardGeoCodingModal';
 
-import { doForwardGeocoding } from '@/api/geofencing';
+import {
+  DoForwardGeocodingResponse,
+  ForwardGeocodingPlace,
+  doForwardGeocoding,
+} from '@/api/geofencing';
 import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
@@ -50,6 +55,9 @@ export function StoreForm(props: StoreFormProps) {
       ...GPS_COORDINATES_DEFAULT,
     },
   );
+  const [placeToUse, setPlaceToUse] = useState<ForwardGeocodingPlace>(null);
+  const [positionsToShowInModal, setPlacesToShowInModal] =
+    useState<DoForwardGeocodingResponse>([]);
   const [isAddressValid, setIsAddressValid] = useState(false);
   const addressSheetRef = useRef<BottomSheetModalMethods>(null);
   const canOverrideStore = useSelector(canOverrideStoreSelector);
@@ -120,17 +128,27 @@ export function StoreForm(props: StoreFormProps) {
   const onAddressFormSubmitPress = useCallback(async () => {
     const places = await doForwardGeocoding(addressRef.current);
 
-    // todo: need to handle case where more than one gpsCoordinates
-    //todo: can create a local obj to cache addresses
-    if (places.length === 1) {
+    if (!places || places.length === 0) {
+      alert('No places found');
+    } else if (places.length === 1) {
+      setPlaceToUse(places[0]);
+    } else {
+      setPlacesToShowInModal(places);
     }
-
-    displayAlert({ places });
   }, [addressRef.current]);
 
   const onUseAddressPress = useCallback(() => {
     addressSheetRef.current?.present();
   }, [addressSheetRef.current]);
+
+  useEffect(() => {
+    if (placeToUse?.lat && placeToUse.lon) {
+      setGpsCoordinates({
+        lat: placeToUse?.lat,
+        lon: placeToUse?.lon,
+      });
+    }
+  }, [placeToUse]);
 
   return (
     <AbsolutePositionedScreen
@@ -255,6 +273,19 @@ export function StoreForm(props: StoreFormProps) {
       >
         <AddressForm onValueChange={onAddressChange} />
       </BottomSheetModalWithFixedHeader>
+      <ForwardGeoCodingModal
+        onConfirm={(place) => {
+          setPlacesToShowInModal([]);
+          setPlaceToUse(place);
+          addressSheetRef.current?.dismiss();
+        }}
+        onCancel={() => {
+          setPlacesToShowInModal([]);
+          setPlaceToUse(null);
+        }}
+        isVisible={positionsToShowInModal.length > 0}
+        places={positionsToShowInModal}
+      />
     </AbsolutePositionedScreen>
   );
 }

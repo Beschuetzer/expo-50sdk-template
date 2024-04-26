@@ -9,7 +9,7 @@ import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { BottomSheetModalWithFixedHeader } from '../BottomSheetModalWithFixedHeader';
 import { InputValidationMessage } from '../InputValidationMessage';
 
-import { doForwardGeoCoding } from '@/api/geofencing';
+import { doForwardGeocoding } from '@/api/geofencing';
 import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
@@ -50,6 +50,7 @@ export function StoreForm(props: StoreFormProps) {
       ...GPS_COORDINATES_DEFAULT,
     },
   );
+  const [isAddressValid, setIsAddressValid] = useState(false);
   const addressSheetRef = useRef<BottomSheetModalMethods>(null);
   const canOverrideStore = useSelector(canOverrideStoreSelector);
   const storesList = useSelector(storesListSelector);
@@ -109,14 +110,15 @@ export function StoreForm(props: StoreFormProps) {
   }
 
   const onAddressChange = useCallback(
-    (address: Address) => {
+    (address: Address, isValid: boolean) => {
       addressRef.current = address;
+      setIsAddressValid(isValid);
     },
     [addressRef.current],
   );
 
   const onAddressFormSubmitPress = useCallback(async () => {
-    const gpsCoordinates = await doForwardGeoCoding(addressRef.current);
+    const gpsCoordinates = await doForwardGeocoding(addressRef.current);
     console.log({ getGpsCoordinate });
   }, [addressRef.current]);
 
@@ -236,6 +238,7 @@ export function StoreForm(props: StoreFormProps) {
         ref={addressSheetRef}
         title="Geofencing"
         onSubmit={onAddressFormSubmitPress}
+        isSubmitEnabled={isAddressValid}
       >
         <AddressForm onValueChange={onAddressChange} />
       </BottomSheetModalWithFixedHeader>

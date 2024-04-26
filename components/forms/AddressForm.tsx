@@ -8,8 +8,15 @@ import { EMPTY_STRING } from '@/constants/general';
 import { Address, State } from '@/types/general';
 
 type AddressFormProps = {
-  onValueChange?: (address: Address) => void;
+  onValueChange?: (address: Address, isValid: boolean) => void;
 };
+
+function isAddressValid(address: Address) {
+  const { addressLineOne, city } = address || {};
+  const isAddressValid = !!addressLineOne && addressLineOne?.trim().length >= 5;
+  const isCityValid = !!city;
+  return isAddressValid && isCityValid;
+}
 
 export function AddressForm(props: AddressFormProps) {
   const { onValueChange } = props;
@@ -22,14 +29,14 @@ export function AddressForm(props: AddressFormProps) {
   const [state, setState] = useState<State>(State.None);
 
   useEffect(() => {
-    onValueChange &&
-      onValueChange({
-        addressLineOne,
-        addressLineTwo,
-        city,
-        state,
-        zipCode,
-      } as Address);
+    const address = {
+      addressLineOne,
+      addressLineTwo,
+      city,
+      state,
+      zipCode,
+    } as Address;
+    onValueChange && onValueChange(address, isAddressValid(address));
   }, [addressLineOne, addressLineTwo, city, zipCode, state]);
 
   return (
@@ -55,13 +62,16 @@ export function AddressForm(props: AddressFormProps) {
         value={addressLineTwo}
         onChangeText={(newValue) => setAddressLineTwo(newValue)}
       />
-      <InputText>City</InputText>
+      <InputText suffix={<Text color={theme.colors.red[900]}> *</Text>}>
+        City
+      </InputText>
       <Input
         variant="outline"
         p={theme.space[1]}
         flex={1}
         placeholder="City"
         value={city}
+        isInvalid={!city.trim()}
         onChangeText={(newValue) => setCity(newValue)}
       />
       <InputText>State</InputText>

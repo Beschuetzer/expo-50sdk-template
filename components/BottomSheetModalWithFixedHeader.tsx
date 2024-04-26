@@ -18,6 +18,8 @@ import React, {
 } from 'react';
 import { Dimensions, LayoutChangeEvent } from 'react-native';
 
+import { useKeyboard } from './hooks/useKeyboard';
+
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
 import { ChildrenProp } from '@/types/general';
@@ -25,6 +27,7 @@ import { ChildrenProp } from '@/types/general';
 type BottomSheetModalWithFixedHeaderProps = {
   onSubmit?: () => void;
   onClose?: () => void;
+  isSubmitEnabled?: boolean;
   title: string;
 } & ChildrenProp &
   Omit<BottomSheetModalProps, 'children' | 'snapPoints' | 'index'>;
@@ -33,11 +36,19 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
   BottomSheetMethods,
   BottomSheetModalWithFixedHeaderProps
 >((props, ref) => {
-  const { onSubmit, onClose: onCancel, title, children, ...rest } = props;
+  const {
+    isSubmitEnabled = true,
+    onSubmit,
+    onClose: onCancel,
+    title,
+    children,
+    ...rest
+  } = props;
   const theme = useTheme();
   const innerRef = useRef<BottomSheetModalMethods>(null);
   useImperativeHandle(ref, () => innerRef.current as BottomSheetModalMethods);
 
+  const isKeyboardVisible = useKeyboard();
   const [contentHeight, setContentHeight] = useState(0);
   const [buttonsHeight, setButtonsHeight] = useState(0);
   const [headingHeight, setHeadingHeight] = useState(0);
@@ -50,10 +61,10 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
   const snapPoints = useMemo(
     () => [
       contentHeight && headingHeight
-        ? `${Math.ceil(((contentHeight + headingHeight + buttonsHeight + 23) / windowDimensions.height) * 100)}%`
+        ? isKeyboardVisible ? '100%' : `${Math.ceil(((contentHeight + headingHeight + buttonsHeight + 23) / windowDimensions.height) * 100)}%`
         : '1%',
     ],
-    [buttonsHeight, contentHeight, headingHeight, windowDimensions],
+    [isKeyboardVisible, buttonsHeight, contentHeight, headingHeight, windowDimensions],
   );
 
   const onGetCoordinatesPress = useCallback(() => {
@@ -118,6 +129,7 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
               flex={1}
               onPress={onGetCoordinatesPress}
               colorScheme="success"
+              isDisabled={!isSubmitEnabled}
             >
               Get Coordinates
             </Button>

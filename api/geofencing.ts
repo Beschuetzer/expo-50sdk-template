@@ -8,14 +8,29 @@ import { displayAlert } from '@/utils/helpers';
 const FORWARD_GEOCODING_API_URL = 'https://geocode.maps.co/search';
 const REVERSE_GEOCODING_API_URL = 'https://geocode.maps.co/reverse';
 
+type ForwardGeocodingData = {
+  place_id?: number;
+  licence?: string;
+  osm_type?: string;
+  osm_id?: number;
+  boundingbox?: string[];
+  lat: string;
+  lon: string;
+  display_name?: string;
+  class?: string;
+  type?: string;
+  importance?: number;
+};
+
+type DoForwardGeocodingResponse = ForwardGeocodingData[];
+
 /**
  *Uses {@link https://geocode.maps.co/ this} free API to perform reverse and regular geocoding
  **/
-export async function doForwardGeoCoding(
-  address: Address,
-): Promise<GpsCoordinate> {
+export async function doForwardGeocoding(address: Address) {
   try {
-    const { addressLineOne, addressLineTwo, city, state, zipCode } = address;
+    const { addressLineOne, addressLineTwo, city, state, zipCode } =
+      address || {};
     const queryString = encodeURIComponent(
       `${addressLineTwo} ${addressLineTwo} ${city} ${state} ${zipCode}`,
     );
@@ -37,17 +52,11 @@ export async function doForwardGeoCoding(
         `${statusMsg}. Unable to use geocoding at the moment.  Please try again shortly.`,
       );
     }
-    const json = await response.json();
-    return {
-      lat: json.lat,
-      lon: json.lon,
-    }
+    const json = (await response.json()) as DoForwardGeocodingResponse;
+    return json;
   } catch (error) {
     displayAlert({ error });
-    return {
-      lat: -1,
-      lon: -1,
-    };
+    return [];
   }
 }
 

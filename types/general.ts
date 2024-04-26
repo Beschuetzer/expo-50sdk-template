@@ -78,7 +78,7 @@ export type Address = {
   city: string;
   state: string;
   zipCode: string;
-};
+} | null;
 
 export type Frequency = {
   number: number;

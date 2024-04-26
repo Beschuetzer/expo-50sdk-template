@@ -20,7 +20,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { canOverrideStoreSelector } from '@/state/slices/optionsSlice';
 import { GpsCoordinate, Store } from '@/types/Store';
-import { StoreProp } from '@/types/general';
+import { Address, StoreProp } from '@/types/general';
 import {
   displayAlert,
   getGpsCoordinate,
@@ -105,6 +105,10 @@ export function StoreForm(props: StoreFormProps) {
       setIsLoadingGpscoords(false);
     }
   }
+
+  const onAddressChange = useCallback((address: Address) => {
+    console.log({ address });
+  }, []);
 
   const onUseAddressPress = useCallback(() => {
     addressSheetRef.current?.present();
@@ -218,8 +222,8 @@ export function StoreForm(props: StoreFormProps) {
           </Button>
         </Row>
       </Stack>
-      <BottomSheetModalWithFixedHeader title="Geofencing" ref={addressSheetRef}>
-        <AddressForm />
+      <BottomSheetModalWithFixedHeader ref={addressSheetRef} title="Geofencing">
+        <AddressForm onValueChange={onAddressChange} />
       </BottomSheetModalWithFixedHeader>
     </AbsolutePositionedScreen>
   );

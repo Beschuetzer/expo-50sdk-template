@@ -1,14 +1,14 @@
 import { Picker } from '@react-native-picker/picker';
 import { Text, Input, useTheme } from 'native-base';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { InputText } from './InputText';
 
 import { EMPTY_STRING } from '@/constants/general';
-import { State } from '@/types/general';
+import { Address, State } from '@/types/general';
 
 type AddressFormProps = {
-  onValueChange?: () => void;
+  onValueChange?: (address: Address) => void;
 };
 
 export function AddressForm(props: AddressFormProps) {
@@ -20,6 +20,17 @@ export function AddressForm(props: AddressFormProps) {
   const [city, setCity] = useState(EMPTY_STRING);
   const [zipCode, setZipCode] = useState(EMPTY_STRING);
   const [state, setState] = useState<State>(State.None);
+
+  useEffect(() => {
+    onValueChange &&
+      onValueChange({
+        addressLineOne,
+        addressLineTwo,
+        city,
+        state,
+        zipCode,
+      } as Address);
+  }, [addressLineOne, addressLineTwo, city, zipCode, state]);
 
   return (
     <>

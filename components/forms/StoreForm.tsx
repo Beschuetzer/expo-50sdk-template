@@ -68,6 +68,7 @@ export function StoreForm(props: StoreFormProps) {
     () => originalKeyToUse && storeName.trim() === originalKeyToUse,
     [storeName, originalKeyToUse],
   );
+  const addressRef = useRef<Address | null>(null);
 
   const formValidation: StoreFormValdation = useMemo(() => {
     const isValid = storeName.length > 0;
@@ -106,9 +107,12 @@ export function StoreForm(props: StoreFormProps) {
     }
   }
 
-  const onAddressChange = useCallback((address: Address) => {
-    console.log({ address });
-  }, []);
+  const onAddressChange = useCallback(
+    (address: Address) => {
+      addressRef.current = address;
+    },
+    [addressRef.current],
+  );
 
   const onUseAddressPress = useCallback(() => {
     addressSheetRef.current?.present();

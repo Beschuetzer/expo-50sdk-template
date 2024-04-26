@@ -1,4 +1,8 @@
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetModal,
+  BottomSheetModalProps,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
 import {
   BottomSheetMethods,
   BottomSheetModalMethods,
@@ -19,13 +23,14 @@ import { ChildrenProp } from '@/types/general';
 
 type BottomSheetModalWithFixedHeaderProps = {
   title: string;
-} & ChildrenProp;
+} & ChildrenProp &
+  Omit<BottomSheetModalProps, 'children' | 'snapPoints' | 'index'>;
 
 export const BottomSheetModalWithFixedHeader = forwardRef<
   BottomSheetMethods,
   BottomSheetModalWithFixedHeaderProps
 >((props, ref) => {
-  const { title, children } = props;
+  const { title, children, ...rest } = props;
   const theme = useTheme();
   const innerRef = useRef<BottomSheetModalMethods>(null);
   useImperativeHandle(ref, () => innerRef.current as BottomSheetModalMethods);
@@ -60,7 +65,12 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
   );
 
   return (
-    <BottomSheetModal ref={innerRef} index={0} snapPoints={snapPoints}>
+    <BottomSheetModal
+      {...rest}
+      ref={innerRef}
+      index={0}
+      snapPoints={snapPoints}
+    >
       <Heading
         size="md"
         textAlign="center"

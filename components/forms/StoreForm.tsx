@@ -97,7 +97,7 @@ export function StoreForm(props: StoreFormProps) {
     onClose && onClose();
   }
 
-  async function onGetCurrentCoordinatesPress() {
+  const onGetCurrentCoordinatesPress = useCallback(async () => {
     try {
       setIsLoadingGpscoords(true);
       const gpsCoordinate = await getGpsCoordinate();
@@ -107,7 +107,7 @@ export function StoreForm(props: StoreFormProps) {
     } finally {
       setIsLoadingGpscoords(false);
     }
-  }
+  }, []);
 
   const onAddressChange = useCallback(
     (address: Address, isValid: boolean) => {
@@ -118,8 +118,16 @@ export function StoreForm(props: StoreFormProps) {
   );
 
   const onAddressFormSubmitPress = useCallback(async () => {
-    const gpsCoordinates = await doForwardGeocoding(addressRef.current);
-    console.log({ getGpsCoordinate });
+    const places = await doForwardGeocoding(addressRef.current);
+
+    // todo: need to handle case where more than one gpsCoordinates
+    //todo: can create a local obj to cache addresses
+    if (places.length === 1) {
+
+    }
+
+
+    displayAlert({places})
   }, [addressRef.current]);
 
   const onUseAddressPress = useCallback(() => {
@@ -230,7 +238,7 @@ export function StoreForm(props: StoreFormProps) {
             Use Current
           </Button>
           <Button isDisabled={isLoadingGpscoords} onPress={onUseAddressPress}>
-            Use Address (Finish this)
+            Use Address
           </Button>
         </Row>
       </Stack>

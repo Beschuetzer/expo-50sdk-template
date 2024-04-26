@@ -2,13 +2,13 @@ import { GEOCODING_API_KEY } from '@env';
 
 import { EMPTY_STRING } from '@/constants/general';
 import { GpsCoordinate } from '@/types/Store';
-import { Address } from '@/types/general';
-import { displayAlert } from '@/utils/helpers';
+import { Address, State } from '@/types/general';
+import { displayAlert, isAddressValid } from '@/utils/helpers';
 
 const FORWARD_GEOCODING_API_URL = 'https://geocode.maps.co/search';
 const REVERSE_GEOCODING_API_URL = 'https://geocode.maps.co/reverse';
 
-type ForwardGeocodingData = {
+type ForwardGeocodingPlace = {
   place_id?: number;
   licence?: string;
   osm_type?: string;
@@ -22,22 +22,14 @@ type ForwardGeocodingData = {
   importance?: number;
 };
 
-type DoForwardGeocodingResponse = ForwardGeocodingData[];
+type DoForwardGeocodingResponse = ForwardGeocodingPlace[];
 
 /**
  *Uses {@link https://geocode.maps.co/ this} free API to perform reverse and regular geocoding
  **/
 export async function doForwardGeocoding(address: Address) {
   try {
-    const { addressLineOne, addressLineTwo, city, state, zipCode } =
-      address || {};
-    const queryString = encodeURIComponent(
-      `${addressLineTwo} ${addressLineTwo} ${city} ${state} ${zipCode}`,
-    );
-    if (!addressLineOne || !queryString) {
-      throw new Error('Please provide a valid address');
-    }
-
+    const queryString = getForwardGeocodingQuery(address);
     const urlParams = new URLSearchParams(`?q=${queryString}`);
     const url = `${FORWARD_GEOCODING_API_URL}?api_key=${GEOCODING_API_KEY}&${urlParams.toString()}`;
     const response = await fetch(url);
@@ -101,4 +93,16 @@ export async function doReverseGeoCoding(
       zipCode: EMPTY_STRING,
     };
   }
+}
+
+export function getForwardGeocodingQuery(address: Address) {
+  if (!isAddressValid(address)) {
+    throw new Error('Please provide a valid address');
+  }
+
+  const { addressLineOne, addressLineTwo, city, state, zipCode } =
+    address || {};
+  return encodeURIComponent(
+    `${addressLineOne || EMPTY_STRING} ${addressLineTwo || EMPTY_STRING} ${city || EMPTY_STRING} ${state === State.None ? EMPTY_STRING : state} ${zipCode || EMPTY_STRING}`,
+  );
 }

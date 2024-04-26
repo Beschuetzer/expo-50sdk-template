@@ -19,6 +19,7 @@ import {
 } from '@/constants/general';
 import {
   LOCAL_FILE_REGEX,
+  POSTAL_CODE_REGEX,
   UPC_REGEX,
   UPC_REQUIRED_CHAR_LENGTH,
 } from '@/constants/regexs';
@@ -26,7 +27,7 @@ import { ListName } from '@/state/slices/listsSlice';
 import { Item, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
-import { Frequency, TimeSpan } from '@/types/general';
+import { Address, Frequency, State, TimeSpan } from '@/types/general';
 
 export function calculateDistance(
   gpsCoordinateStart: GpsCoordinate | null | undefined,
@@ -327,6 +328,14 @@ export function getStoreWithDistance(
       currentLocation,
     ),
   };
+}
+
+export function isAddressValid(address: Address) {
+  const { addressLineOne, city, state, zipCode } = address || {};
+  const isAddressValid = !!addressLineOne && addressLineOne?.trim().length >= 5;
+  const isLocationPresent =
+    !!city || state !== State.None || zipCode?.match(POSTAL_CODE_REGEX);
+  return isAddressValid && isLocationPresent;
 }
 
 export function joinWithAnd(array: (string | undefined)[]) {

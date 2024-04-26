@@ -6,17 +6,11 @@ import { InputText } from './InputText';
 
 import { EMPTY_STRING } from '@/constants/general';
 import { Address, State } from '@/types/general';
+import { isAddressValid } from '@/utils/helpers';
 
 type AddressFormProps = {
   onValueChange?: (address: Address, isValid: boolean) => void;
 };
-
-function isAddressValid(address: Address) {
-  const { addressLineOne, city } = address || {};
-  const isAddressValid = !!addressLineOne && addressLineOne?.trim().length >= 5;
-  const isCityValid = !!city;
-  return isAddressValid && isCityValid;
-}
 
 export function AddressForm(props: AddressFormProps) {
   const { onValueChange } = props;
@@ -62,16 +56,13 @@ export function AddressForm(props: AddressFormProps) {
         value={addressLineTwo}
         onChangeText={(newValue) => setAddressLineTwo(newValue)}
       />
-      <InputText suffix={<Text color={theme.colors.red[900]}> *</Text>}>
-        City
-      </InputText>
+      <InputText>City</InputText>
       <Input
         variant="outline"
         p={theme.space[1]}
         flex={1}
         placeholder="City"
         value={city}
-        isInvalid={!city.trim()}
         onChangeText={(newValue) => setCity(newValue)}
       />
       <InputText>State</InputText>
@@ -93,64 +84,6 @@ export function AddressForm(props: AddressFormProps) {
         value={zipCode}
         onChangeText={(newValue) => setZipCode(newValue)}
       />
-
-      {/* todo: delete this stack */}
-      {/* <Stack
-          px={theme.space[FORM_INTER_ITEM_SPACING] * 2}
-          pb={theme.space[FORM_INTER_ITEM_SPACING] * 2}
-          space={theme.space[FORM_INTER_ITEM_SPACING]}
-          onLayout={onContentLayout}
-        >
-          <InputText suffix={<Text color={theme.colors.red[900]}> *</Text>}>
-            Address Line 1
-          </InputText>
-          <Input
-            variant="outline"
-            p={theme.space[1]}
-            flex={1}
-            placeholder="Address Line 1"
-            value={addressLineOne}
-            onChangeText={(newValue) => setAddressLineOne(newValue)}
-            isInvalid={!addressLineOne.trim()}
-          />
-          <InputText>Address Line 2</InputText>
-          <Input
-            variant="outline"
-            p={theme.space[1]}
-            flex={1}
-            placeholder="Address Line 2"
-            value={addressLineTwo}
-            onChangeText={(newValue) => setAddressLineTwo(newValue)}
-          />
-          <InputText>City</InputText>
-          <Input
-            variant="outline"
-            p={theme.space[1]}
-            flex={1}
-            placeholder="City"
-            value={city}
-            onChangeText={(newValue) => setCity(newValue)}
-          />
-          <InputText>State</InputText>
-          <Picker
-            style={{ flex: 1 }}
-            selectedValue={state}
-            onValueChange={(newValue) => setState(newValue)}
-          >
-            {Object.values(State).map((state) => (
-              <Picker.Item key={state} label={state} value={state} />
-            ))}
-          </Picker>
-          <InputText>Zip/Postal Code</InputText>
-          <Input
-            variant="outline"
-            p={theme.space[1]}
-            flex={1}
-            placeholder="Zip/Postal Code"
-            value={zipCode}
-            onChangeText={(newValue) => setZipCode(newValue)}
-          />
-        </Stack> */}
     </>
   );
 }

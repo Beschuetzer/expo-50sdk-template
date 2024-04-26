@@ -1,3 +1,4 @@
+import { ColorSchemeType } from 'native-base/lib/typescript/components/types';
 import { ReactElement, ReactNode } from 'react';
 import { ViewStyle } from 'react-native';
 
@@ -19,7 +20,7 @@ export enum TimeSpan {
 }
 
 export enum State {
-  None = "Select a State",
+  None = 'Select a State',
   Alabama = 'Alabama',
   Alaska = 'Alaska',
   Arizona = 'Arizona',
@@ -79,6 +80,12 @@ export type Address = {
   state: string;
   zipCode: string;
 } | null;
+
+export type ButtonOptions = {
+  colorScheme?: ColorSchemeType;
+  isEnabled?: boolean;
+  text?: string;
+};
 
 export type Frequency = {
   number: number;

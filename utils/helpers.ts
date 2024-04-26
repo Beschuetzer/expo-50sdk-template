@@ -335,7 +335,7 @@ export function isAddressValid(address: Address) {
   const isAddressValid = !!addressLineOne && addressLineOne?.trim().length >= 5;
   const isLocationPresent =
     !!city || state !== State.None || zipCode?.match(POSTAL_CODE_REGEX);
-  return isAddressValid && isLocationPresent;
+  return !!(isAddressValid && isLocationPresent);
 }
 
 export function joinWithAnd(array: (string | undefined)[]) {

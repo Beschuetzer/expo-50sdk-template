@@ -7,7 +7,7 @@ import {
   BottomSheetMethods,
   BottomSheetModalMethods,
 } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { Stack, useTheme, Heading, Row, Button } from 'native-base';
+import { Stack, useTheme, Heading, Row, Button, Column } from 'native-base';
 import React, {
   forwardRef,
   useCallback,
@@ -18,16 +18,25 @@ import React, {
 } from 'react';
 import { Dimensions, LayoutChangeEvent } from 'react-native';
 
+import {
+  InputValidationMessage,
+  InputValidationMessageProps,
+} from './InputValidationMessage';
 import { useKeyboard } from './hooks/useKeyboard';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
-import { ChildrenProp } from '@/types/general';
+import { ButtonOptions, ChildrenProp } from '@/types/general';
+
+type SubmitButtonProps = {
+  validation: InputValidationMessageProps;
+} & ButtonOptions;
 
 type BottomSheetModalWithFixedHeaderProps = {
-  onSubmit?: () => void;
   onClose?: () => void;
-  isSubmitEnabled?: boolean;
+  onSubmit?: () => void;
+  submitButton?: SubmitButtonProps;
+  closeButton?: ButtonOptions;
   title: string;
 } & ChildrenProp &
   Omit<BottomSheetModalProps, 'children' | 'snapPoints' | 'index'>;
@@ -37,9 +46,10 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
   BottomSheetModalWithFixedHeaderProps
 >((props, ref) => {
   const {
-    isSubmitEnabled = true,
     onSubmit,
     onClose: onCancel,
+    submitButton,
+    closeButton,
     title,
     children,
     ...rest
@@ -58,13 +68,44 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
     [onCancel, onSubmit],
   );
 
+  const submitButtonToUse = useMemo(() => {
+    return {
+      validation: {
+        isValid:
+          submitButton?.validation.isValid != null
+            ? submitButton.validation.isValid
+            : true,
+        message: submitButton?.validation.message || EMPTY_STRING,
+      },
+      colorScheme: submitButton?.colorScheme || 'success',
+      isEnabled: submitButton?.isEnabled != null ? submitButton.isEnabled : true,
+      text: submitButton?.text || 'Submit',
+    } as SubmitButtonProps;
+  }, [submitButton]);
+
+  const closeButtonToUse = useMemo(() => {
+    return {
+      colorScheme: closeButton?.colorScheme || 'secondary',
+      isEnabled: closeButton?.isEnabled != null ? closeButton.isEnabled : true,
+      text: closeButton?.text || 'Close',
+    } as ButtonOptions;
+  }, [closeButton]);
+
   const snapPoints = useMemo(
     () => [
       contentHeight && headingHeight
-        ? isKeyboardVisible ? '100%' : `${Math.ceil(((contentHeight + headingHeight + buttonsHeight + 23) / windowDimensions.height) * 100)}%`
+        ? isKeyboardVisible
+          ? '100%'
+          : `${Math.ceil(((contentHeight + headingHeight + buttonsHeight + 23) / windowDimensions.height) * 100)}%`
         : '1%',
     ],
-    [isKeyboardVisible, buttonsHeight, contentHeight, headingHeight, windowDimensions],
+    [
+      isKeyboardVisible,
+      buttonsHeight,
+      contentHeight,
+      headingHeight,
+      windowDimensions,
+    ],
   );
 
   const onGetCoordinatesPress = useCallback(() => {
@@ -116,36 +157,40 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
           {children}
         </Stack>
       </BottomSheetScrollView>
-      {showButtonsRow ? (
-        <Row
-          space={theme.space[FORM_INTER_ITEM_SPACING]}
-          p={theme.space[1]}
-          justifyContent="space-between"
-          onLayout={onButtonsLayout}
-        >
-          {onSubmit ? (
-            <Button
-              {...maxWidth}
-              flex={1}
-              onPress={onGetCoordinatesPress}
-              colorScheme="success"
-              isDisabled={!isSubmitEnabled}
-            >
-              Get Coordinates
-            </Button>
-          ) : null}
-          {onCancel ? (
+      <Column
+        p={theme.space[1]}
+        pt={theme.space[FORM_INTER_ITEM_SPACING]}
+        onLayout={onButtonsLayout}
+      >
+        <InputValidationMessage {...submitButtonToUse.validation} />
+        {showButtonsRow ? (
+          <Row
+            space={theme.space[FORM_INTER_ITEM_SPACING]}
+            justifyContent="space-between"
+          >
+            {onSubmit ? (
+              <Button
+                {...maxWidth}
+                flex={1}
+                onPress={onGetCoordinatesPress}
+                colorScheme={submitButtonToUse.colorScheme}
+                isDisabled={!submitButtonToUse.isEnabled}
+              >
+                {submitButtonToUse.text}
+              </Button>
+            ) : null}
             <Button
               {...maxWidth}
               flex={1}
               onPress={onClosePress}
-              colorScheme="secondary"
+              colorScheme={closeButtonToUse.colorScheme}
+              isDisabled={!closeButtonToUse.isEnabled}
             >
-              Cancel
+              {closeButtonToUse.text}
             </Button>
-          ) : null}
-        </Row>
-      ) : null}
+          </Row>
+        ) : null}
+      </Column>
     </BottomSheetModal>
   );
 });

@@ -1,23 +1,16 @@
 import { BlurView } from 'expo-blur';
 import { View, useTheme, Button, Row, Heading } from 'native-base';
-import { ColorSchemeType } from 'native-base/lib/typescript/components/types';
 import React, { useCallback, useMemo } from 'react';
 import { Modal } from 'react-native';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
-import { ChildrenProp } from '@/types/general';
-
-type ModalWithBlurButton = {
-  colorScheme?: ColorSchemeType;
-  isEnabled?: boolean;
-  text?: string;
-};
+import { ButtonOptions, ChildrenProp } from '@/types/general';
 
 export type ModalWithBlurProps = {
-  cancelButton?: ModalWithBlurButton;
-  confirmButton?: ModalWithBlurButton;
+  cancelButton?: ButtonOptions;
+  confirmButton?: ButtonOptions;
   isVisible?: boolean;
   title: string;
   onConfirm?: () => void;
@@ -42,7 +35,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
       colorScheme: 'red',
       isEnabled: true,
       ...cancelButton,
-    } as ModalWithBlurButton;
+    } as ButtonOptions;
   }, [cancelButton, theme]);
   const confirmButtonToUse = useMemo(() => {
     return {
@@ -50,7 +43,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
       colorScheme: 'green',
       isEnabled: true,
       ...confirmButton,
-    } as ModalWithBlurButton;
+    } as ButtonOptions;
   }, [confirmButton, theme]);
 
   const onCancelPress = useCallback(() => {

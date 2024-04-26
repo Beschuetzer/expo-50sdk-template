@@ -3,7 +3,7 @@ import { Row, Text, useTheme } from 'native-base';
 
 import { StyleProp } from '@/types/general';
 
-type InputValidationMessageProps = {
+export type InputValidationMessageProps = {
   isValid: boolean;
   message: string;
 } & StyleProp;

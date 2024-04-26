@@ -1,10 +1,10 @@
 import { Picker } from '@react-native-picker/picker';
-import { Text, Input, useTheme } from 'native-base';
+import { Text, Input, useTheme, Column } from 'native-base';
 import React, { useEffect, useState } from 'react';
 
 import { InputText } from './InputText';
 
-import { EMPTY_STRING } from '@/constants/general';
+import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Address, State } from '@/types/general';
 import { isAddressValid } from '@/utils/helpers';
 
@@ -34,7 +34,10 @@ export function AddressForm(props: AddressFormProps) {
   }, [addressLineOne, addressLineTwo, city, zipCode, state]);
 
   return (
-    <>
+    <Column
+      space={theme.space[FORM_INTER_ITEM_SPACING]}
+      py={theme.space[FORM_INTER_ITEM_SPACING]}
+    >
       <InputText suffix={<Text color={theme.colors.red[900]}> *</Text>}>
         Address Line 1
       </InputText>
@@ -56,7 +59,9 @@ export function AddressForm(props: AddressFormProps) {
         value={addressLineTwo}
         onChangeText={(newValue) => setAddressLineTwo(newValue)}
       />
-      <InputText>City</InputText>
+      <InputText suffix={<Text color={theme.colors.red[900]}> **</Text>}>
+        City
+      </InputText>
       <Input
         variant="outline"
         p={theme.space[1]}
@@ -65,7 +70,9 @@ export function AddressForm(props: AddressFormProps) {
         value={city}
         onChangeText={(newValue) => setCity(newValue)}
       />
-      <InputText>State</InputText>
+      <InputText suffix={<Text color={theme.colors.red[900]}> **</Text>}>
+        State
+      </InputText>
       <Picker
         style={{ flex: 1 }}
         selectedValue={state}
@@ -75,7 +82,9 @@ export function AddressForm(props: AddressFormProps) {
           <Picker.Item key={state} label={state} value={state} />
         ))}
       </Picker>
-      <InputText>Zip/Postal Code</InputText>
+      <InputText suffix={<Text color={theme.colors.red[900]}> **</Text>}>
+        Zip/Postal Code
+      </InputText>
       <Input
         variant="outline"
         p={theme.space[1]}
@@ -84,6 +93,6 @@ export function AddressForm(props: AddressFormProps) {
         value={zipCode}
         onChangeText={(newValue) => setZipCode(newValue)}
       />
-    </>
+    </Column>
   );
 }

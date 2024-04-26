@@ -123,11 +123,9 @@ export function StoreForm(props: StoreFormProps) {
     // todo: need to handle case where more than one gpsCoordinates
     //todo: can create a local obj to cache addresses
     if (places.length === 1) {
-
     }
 
-
-    displayAlert({places})
+    displayAlert({ places });
   }, [addressRef.current]);
 
   const onUseAddressPress = useCallback(() => {
@@ -246,7 +244,14 @@ export function StoreForm(props: StoreFormProps) {
         ref={addressSheetRef}
         title="Geofencing"
         onSubmit={onAddressFormSubmitPress}
-        isSubmitEnabled={isAddressValid}
+        submitButton={{
+          validation: {
+            isValid: isAddressValid,
+            message: 'Please enter a city, state, or zip code.',
+          },
+          isEnabled: isAddressValid,
+          text: 'Search',
+        }}
       >
         <AddressForm onValueChange={onAddressChange} />
       </BottomSheetModalWithFixedHeader>

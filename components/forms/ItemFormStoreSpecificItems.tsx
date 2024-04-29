@@ -155,6 +155,19 @@ export function ItemFormStoreSpecific(
           placeholder={`Price at ${currentStore.name}`}
           value={(price || EMPTY_STRING).toString()}
           onChangeText={(newValue) => setPrice(newValue)}
+          InputRightElement={
+            <CopyValue
+              style={{ paddingRight: theme.space[FORM_INTER_ITEM_SPACING] * 4 }}
+              size={theme.sizes[4]}
+              onPress={() => {
+                const values = findItemsWithStoreSpecificValueKey(
+                  StoreSpecificValueKey.Price,
+                );
+                setCopyModalValues(values);
+                setcopyModalKey(StoreSpecificValueKey.Price);
+              }}
+            />
+          }
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -176,6 +189,19 @@ export function ItemFormStoreSpecific(
           placeholder={`Item identifier for ${currentStore.name}`}
           value={itemId}
           onChangeText={(newValue) => setItemId(newValue)}
+          InputRightElement={
+            <CopyValue
+              style={{ paddingRight: theme.space[FORM_INTER_ITEM_SPACING] * 4 }}
+              size={theme.sizes[4]}
+              onPress={() => {
+                const values = findItemsWithStoreSpecificValueKey(
+                  StoreSpecificValueKey.ItemId,
+                );
+                setCopyModalValues(values);
+                setcopyModalKey(StoreSpecificValueKey.ItemId);
+              }}
+            />
+          }
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -208,9 +234,16 @@ export function ItemFormStoreSpecific(
         fieldName={copyModalKey}
         values={copyModalValues}
         onCancel={() => setCopyModalValues({})}
-        onConfirm={(selectedValue) => {
+        onConfirm={(selectedValue: any) => {
           console.log({ selectedValue });
           setCopyModalValues({});
+          if (copyModalKey === StoreSpecificValueKey.AisleNumber) {
+            setAisleNumber(selectedValue);
+          } else if (copyModalKey === StoreSpecificValueKey.ItemId) {
+            setItemId(selectedValue);
+          } else if (copyModalKey === StoreSpecificValueKey.Price) {
+            setPrice(selectedValue);
+          }
         }}
       />
       <ItemFormStoreSpecificValuesStoreModal

@@ -1,12 +1,12 @@
-import { FontAwesome } from '@expo/vector-icons';
 import { Stack, Input, useTheme, Row } from 'native-base';
-import { useEffect, useMemo, useState } from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { InputText } from './InputText';
 import { ItemFormProps } from './ItemForm';
+import { CopyValue } from '../CopyValue';
 import { StoreManager } from '../StoreManager';
+import CopyValueModal, { CopyModalValues } from '../modals/CopyValueModal';
 import {
   ItemFormStoreSpecificValuesStoreModal,
   ItemFormStoreSpecificValuesStoreModalOnConfirmValues,
@@ -20,6 +20,7 @@ import {
 import {
   currentStoreSelector,
   itemsListWithStoreSpecificValuesSelector,
+  storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
 import {
   ItemWithStoreSpecificValues,
@@ -28,6 +29,7 @@ import {
 } from '@/types/Item';
 import { ItemProp } from '@/types/general';
 import { getKeyToUse } from '@/utils/helpers';
+import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
 
 type ItemFormStoreSpecificProps<T> = {
   onValueChange: (storeSpecificValues: StoreSpecificValues) => void;
@@ -55,6 +57,7 @@ export function ItemFormStoreSpecific(
   const itemInList = useSelector(
     itemsListWithStoreSpecificValuesSelector(keyToUse),
   );
+  const storeSpecificValuesMap = useSelector(storeSpecificValuesMapSelector);
 
   //initial values are set in useEffect below
   const [aisleNumber, setAisleNumber] = useState(EMPTY_NUMBER);
@@ -63,6 +66,32 @@ export function ItemFormStoreSpecific(
   const [quantity, setQuantity] = useState(EMPTY_NUMBER);
   const [shouldDisplayStoreToUseModal, setShouldDisplayStoreToUseModal] =
     useState(false);
+
+  const [copyModalValues, setCopyModalValues] = useState<CopyModalValues>({});
+  const [copyModalKey, setcopyModalKey] = useState<string>(EMPTY_STRING);
+
+  const findItemsWithStoreSpecificValueKey = useCallback(
+    (storeSpecificValueKeyInput: StoreSpecificValueKey) => {
+      const valuesToShow: CopyModalValues = {};
+      iterateStoreSpecificValuesMap({
+        storeSpecificValuesMap,
+        onNewStoreSpecificValue(input) {
+          const { itemKey, storeSpecificValueKey, storeSpecificValueKeyValue } =
+            input;
+          if (storeSpecificValueKey === storeSpecificValueKeyInput) {
+            const currentStoreValue =
+              storeSpecificValueKeyValue?.[currentStore.name];
+
+            if (currentStoreValue) {
+              valuesToShow[itemKey] = currentStoreValue;
+            }
+          }
+        },
+      });
+      return valuesToShow;
+    },
+    [storeSpecificValuesMap, currentStore],
+  );
 
   useEffect(() => {
     if (!currentStore?.name) return;
@@ -109,14 +138,12 @@ export function ItemFormStoreSpecific(
           <StoreManager showStoreList />
         </Row>
         {keyToUse ? (
-          <TouchableOpacity
+          <CopyValue
             style={{ paddingBottom: theme.space[4] }}
             onPress={() => {
               setShouldDisplayStoreToUseModal(true);
             }}
-          >
-            <FontAwesome name="copy" size={theme.sizes[6]} />
-          </TouchableOpacity>
+          />
         ) : null}
       </Row>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -162,8 +189,30 @@ export function ItemFormStoreSpecific(
           onChangeText={(newValue) =>
             setAisleNumber(parseFloat(newValue) || EMPTY_NUMBER)
           }
+          InputRightElement={
+            <CopyValue
+              style={{ paddingRight: theme.space[FORM_INTER_ITEM_SPACING] * 4 }}
+              size={theme.sizes[4]}
+              onPress={() => {
+                const values = findItemsWithStoreSpecificValueKey(
+                  StoreSpecificValueKey.AisleNumber,
+                );
+                setCopyModalValues(values);
+                setcopyModalKey(StoreSpecificValueKey.AisleNumber);
+              }}
+            />
+          }
         />
       </Stack>
+      <CopyValueModal
+        title={`Copy ${copyModalKey.toString()}`}
+        values={copyModalValues}
+        onCancel={() => setCopyModalValues({})}
+        onConfirm={(selectedValue) => {
+          console.log({ selectedValue });
+          setCopyModalValues({});
+        }}
+      />
       <ItemFormStoreSpecificValuesStoreModal
         title="Select a Store"
         itemWithStoreSpecificValues={itemInList}

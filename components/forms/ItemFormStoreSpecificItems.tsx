@@ -174,9 +174,16 @@ export function ItemFormStoreSpecific(
         ) => {
           const { aisleNumber, itemId, price } = values;
           setShouldDisplayStoreToUseModal(false);
-          setAisleNumber(parseFloat(aisleNumber) || EMPTY_NUMBER);
-          setItemId(itemId);
-          setPrice(price);
+
+          if (aisleNumber) {
+            setAisleNumber(parseFloat(aisleNumber) || EMPTY_NUMBER);
+          }
+          if (itemId) {
+            setItemId(itemId);
+          }
+          if (price) {
+            setPrice(price);
+          }
         }}
       />
     </Stack>

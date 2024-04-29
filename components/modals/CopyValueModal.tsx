@@ -1,5 +1,6 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { theme, Button, View } from 'native-base';
+import { theme, Button, View, Column, Heading, Input } from 'native-base';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Dimensions } from 'react-native';
 
@@ -51,7 +52,24 @@ export default function CopyValueModal(props: CopyValueModalProps) {
       }}
       onConfirm={onConfirmPress}
       onCancel={onCancelPress}
-      title={`Copy ${fieldName}${currentlySelectedKey ? ` (${valueToUse})` : ''}`}
+      title={
+        <Column
+          pb={theme.space[FORM_INTER_ITEM_SPACING]}
+          px={theme.space[FORM_INTER_ITEM_SPACING]}
+        >
+          <Heading textAlign="center" size="sm">
+            Copy {fieldName} {currentlySelectedKey ? `(${valueToUse})` : ''}
+          </Heading>
+          <Input
+            placeholder="Filter"
+            InputRightElement={
+              <View pr={theme.space[FORM_INTER_ITEM_SPACING]}>
+                <FontAwesome name="search" />
+              </View>
+            }
+          />
+        </Column>
+      }
     >
       <View width={windowDimensions.width} flex={1}>
         <FlashList
@@ -61,8 +79,8 @@ export default function CopyValueModal(props: CopyValueModalProps) {
             return (
               <Button
                 key={key}
-                mt={theme.space[FORM_INTER_ITEM_SPACING]}
-                variant="subtle"
+                // mt={theme.space[FORM_INTER_ITEM_SPACING]}
+                variant="outline"
                 isDisabled={currentlySelectedKey === key}
                 onPress={() => setCurrentlySelectedKey(key)}
                 justifyContent="space-between"

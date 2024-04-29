@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { View, useTheme, Button, Row, Heading } from 'native-base';
-import React, { useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { Modal } from 'react-native';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
@@ -12,7 +12,7 @@ export type ModalWithBlurProps = {
   cancelButton?: ButtonOptions;
   confirmButton?: ButtonOptions;
   isVisible?: boolean;
-  title: string;
+  title: string | ReactNode | ReactNode[];
   onConfirm?: () => void;
   onCancel?: () => void;
 } & ChildrenProp;
@@ -79,13 +79,17 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
             borderRadius: 10,
           }}
         >
-          <Heading
-            textAlign="center"
-            size="sm"
-            pb={theme.space[FORM_INTER_ITEM_SPACING]}
-          >
-            {title}
-          </Heading>
+          {typeof title === 'string' ? (
+            <Heading
+              textAlign="center"
+              size="sm"
+              pb={theme.space[FORM_INTER_ITEM_SPACING]}
+            >
+              {title}
+            </Heading>
+          ) : (
+            <View>{title}</View>
+          )}
           {children}
           <Row
             space={theme.space[FORM_INTER_ITEM_SPACING]}

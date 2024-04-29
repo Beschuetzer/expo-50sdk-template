@@ -205,7 +205,7 @@ export function ItemFormStoreSpecific(
         />
       </Stack>
       <CopyValueModal
-        title={`Copy ${copyModalKey.toString()}`}
+        fieldName={copyModalKey}
         values={copyModalValues}
         onCancel={() => setCopyModalValues({})}
         onConfirm={(selectedValue) => {

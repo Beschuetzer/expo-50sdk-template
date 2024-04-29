@@ -2,6 +2,7 @@
 
 -Add way to select an aisle number by using an already given value for an item (provide a way to select an item (e.g. upc, name, etc) and then select the aisle to be the same as the item selected; need to only show items which have aisle number for the current store):
     --finish CopyValueModal tile (replace the current key value with a new tile that shows a pick, the name, and relevant value)
+    --add a way to filter/search for items
 
 -Add option to customize the format for how names are arranged after scanning upc
 

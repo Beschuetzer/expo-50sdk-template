@@ -1,40 +1,41 @@
 import { FlashList } from '@shopify/flash-list';
-import { theme, Button } from 'native-base';
+import { theme, Button, View } from 'native-base';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { Dimensions } from 'react-native';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
+import { ItemTileCopyModal } from '../tiles/ItemTileCopyModal';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { itemsListSelector } from '@/state/slices/listsSlice';
 
 export type CopyModalValues = { [key: string]: unknown };
 
 type CopyValueModalProps = {
+  fieldName: string;
   onConfirm: (selectedValue: unknown) => void;
   values: CopyModalValues;
-} & Omit<ModalWithBlurProps, 'children' | 'onConfirm'>;
+} & Omit<ModalWithBlurProps, 'children' | 'onConfirm' | 'title'>;
 
 export default function CopyValueModal(props: CopyValueModalProps) {
-  const { onConfirm, onCancel, values } = props;
-  const itemsList = useSelector(itemsListSelector);
+  const { fieldName, onConfirm, onCancel, values } = props;
   const [currentlySelectedKey, setCurrentlySelectedKey] =
     useState<string>(EMPTY_STRING);
 
-  const itemsToShow = useMemo(() => {
-    //todo:
-    // return itemsList.data.filter(item => getKeyToUse(item) === )
-    return Object.entries(values);
-  }, [itemsList, values]);
+  const valuesList = useMemo(() => Object.entries(values || {}), [values]);
+  const windowDimensions = useMemo(() => Dimensions.get('window'), []);
+  const valueToUse = useMemo(
+    () => values[currentlySelectedKey],
+    [values, currentlySelectedKey],
+  );
 
   const reset = useCallback(() => {
     setCurrentlySelectedKey(EMPTY_STRING);
   }, []);
 
   const onConfirmPress = useCallback(() => {
-    onConfirm && onConfirm(values[currentlySelectedKey]);
+    onConfirm && onConfirm(valueToUse);
     reset();
-  }, [onConfirm, reset, currentlySelectedKey]);
+  }, [onConfirm, reset, valueToUse]);
 
   const onCancelPress = useCallback(() => {
     onCancel && onCancel();
@@ -44,31 +45,36 @@ export default function CopyValueModal(props: CopyValueModalProps) {
   return (
     <ModalWithBlur
       {...props}
-      isVisible={itemsToShow && itemsToShow.length > 0}
+      isVisible={valuesList.length > 0}
       confirmButton={{
         isEnabled: !!currentlySelectedKey,
       }}
       onConfirm={onConfirmPress}
       onCancel={onCancelPress}
+      title={`Copy ${fieldName}${currentlySelectedKey ? ` (${valueToUse})` : ''}`}
     >
-      <FlashList
-        renderItem={(item) => {
-          const { item: itemToRender } = item;
-          const [key, value] = itemToRender;
-          return (
-            <Button
-              key={key}
-              mt={theme.space[FORM_INTER_ITEM_SPACING]}
-              variant="subtle"
-              isDisabled={currentlySelectedKey === key}
-              onPress={() => setCurrentlySelectedKey(key)}
-            >
-              {key}
-            </Button>
-          );
-        }}
-        data={itemsToShow}
-      />
+      <View width={windowDimensions.width} flex={1}>
+        <FlashList
+          renderItem={(item) => {
+            const { item: itemToRender } = item;
+            const [key, value] = itemToRender;
+            return (
+              <Button
+                key={key}
+                mt={theme.space[FORM_INTER_ITEM_SPACING]}
+                variant="subtle"
+                isDisabled={currentlySelectedKey === key}
+                onPress={() => setCurrentlySelectedKey(key)}
+                justifyContent="space-between"
+              >
+                <ItemTileCopyModal itemKey={key} value={String(value)} />
+              </Button>
+            );
+          }}
+          estimatedItemSize={117}
+          data={Object.entries(values)}
+        />
+      </View>
     </ModalWithBlur>
   );
 }

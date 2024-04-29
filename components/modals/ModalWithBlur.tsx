@@ -91,6 +91,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
             space={theme.space[FORM_INTER_ITEM_SPACING]}
             justifyContent="space-around"
             mt={theme.space[FORM_INTER_ITEM_SPACING]}
+            mb={-theme.space[FORM_INTER_ITEM_SPACING]}
           >
             <Button
               variant="ghost"

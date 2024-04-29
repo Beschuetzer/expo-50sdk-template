@@ -1194,14 +1194,6 @@ function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
       });
   }
 
-  // console.log({
-  //   newItem,
-  //   originalKey,
-  //   originalKeyToUse,
-  //   keyToUse,
-  //   originalItemIndex,
-  //   newItemIndex,
-  // });
   if (originalItemIndex >= 0) {
     if (originalKeyToUse === newKeyToUse) {
       console.log('updating existing item');

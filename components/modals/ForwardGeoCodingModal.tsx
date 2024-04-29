@@ -22,8 +22,6 @@ export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
   const [currentlySelectedPlace, setCurrentlySelectedPlace] =
     useState<ForwardGeocodingPlace>(null);
 
-  console.log({ currentlySelectedPlace });
-
   const onCancelPress = useCallback(() => {
     restProps.onCancel && restProps.onCancel();
     setCurrentlySelectedPlace(null);

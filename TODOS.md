@@ -1,8 +1,5 @@
 ## MVP
 
--getcoding stuff:
-    --finish the handler (if only one place vs multiple places [show modal to select?;  should all places be stored in a temporary cache?])
-
 -Add way to select an aisle number by using an already given value for an item (provide a way to select an item (e.g. upc, name, etc) and then select the aisle to be the same as the item selected; need to only show items which have aisle number for the current store)
 -Add option to customize the format for how names are arranged after scanning upc
 

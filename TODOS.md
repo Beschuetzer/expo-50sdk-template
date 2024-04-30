@@ -1,7 +1,4 @@
 ## MVP
-
-
-
 -Add option to customize the format for how names are arranged after scanning upc
 
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).

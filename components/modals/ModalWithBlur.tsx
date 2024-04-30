@@ -73,7 +73,6 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
         <View
           style={{
             ...maxWidth,
-            maxHeight: '85%',
             padding: 20,
             backgroundColor: 'white',
             borderRadius: 10,

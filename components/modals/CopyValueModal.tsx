@@ -1,13 +1,17 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { theme, Button, View, Column, Heading, Input } from 'native-base';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions } from 'react-native';
+import { useSelector } from 'react-redux';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
 import { ItemTileCopyModal } from '../tiles/ItemTileCopyModal';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { itemsListSelector } from '@/state/slices/listsSlice';
+import { Item } from '@/types/Item';
+import { getItemFromList } from '@/utils/helpers';
 
 export type CopyModalValues = { [key: string]: unknown };
 
@@ -19,15 +23,28 @@ type CopyValueModalProps = {
 
 export default function CopyValueModal(props: CopyValueModalProps) {
   const { fieldName, onConfirm, onCancel, values } = props;
+  const itemsList = useSelector(itemsListSelector);
   const [currentlySelectedKey, setCurrentlySelectedKey] =
     useState<string>(EMPTY_STRING);
+  const [filterValue, setFilterValue] = useState(EMPTY_STRING);
 
-  const valuesList = useMemo(() => Object.entries(values || {}), [values]);
+  const valuesList = useMemo(() => {
+    const entries: [string, unknown, Item | null][] = [];
+    let i = 0;
+    for (const [key, value] of Object.entries(values || {})) {
+      const item = getItemFromList(itemsList.data, key);
+      entries[i] = [key, value, item];
+      i++;
+    }
+    return entries;
+  }, [values, itemsList?.data?.length]);
   const windowDimensions = useMemo(() => Dimensions.get('window'), []);
   const valueToUse = useMemo(
     () => values[currentlySelectedKey],
     [values, currentlySelectedKey],
   );
+
+  const [valuesToShow, setValuesToShow] = useState(valuesList);
 
   const reset = useCallback(() => {
     setCurrentlySelectedKey(EMPTY_STRING);
@@ -42,6 +59,19 @@ export default function CopyValueModal(props: CopyValueModalProps) {
     onCancel && onCancel();
     reset();
   }, [onCancel, reset]);
+
+  useEffect(() => {
+    const filteredValues = valuesList.filter(([key, value, item]) => {
+      if (
+        !!filterValue &&
+        (key?.match(filterValue) || item?.name?.match(filterValue))
+      ) {
+        return [key, value];
+      }
+    });
+
+    setValuesToShow(filteredValues);
+  }, [filterValue, valuesList]);
 
   return (
     <ModalWithBlur
@@ -61,6 +91,8 @@ export default function CopyValueModal(props: CopyValueModalProps) {
             Copy {fieldName} {currentlySelectedKey ? `(${valueToUse})` : ''}
           </Heading>
           <Input
+            value={filterValue}
+            onChangeText={(newValue) => setFilterValue(newValue)}
             placeholder="Filter"
             InputRightElement={
               <View pr={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -79,7 +111,6 @@ export default function CopyValueModal(props: CopyValueModalProps) {
             return (
               <Button
                 key={key}
-                // mt={theme.space[FORM_INTER_ITEM_SPACING]}
                 variant="outline"
                 isDisabled={currentlySelectedKey === key}
                 onPress={() => setCurrentlySelectedKey(key)}
@@ -90,7 +121,7 @@ export default function CopyValueModal(props: CopyValueModalProps) {
             );
           }}
           estimatedItemSize={117}
-          data={Object.entries(values)}
+          data={valuesToShow}
         />
       </View>
     </ModalWithBlur>

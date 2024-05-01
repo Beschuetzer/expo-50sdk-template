@@ -1,5 +1,4 @@
 ## MVP
--Add a better way to specify how nameOrderTemplate is created (use drop down with a list of currently used fields PR)
 -focus on name field when adding a new store (but not when viewing existing store)
 
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).

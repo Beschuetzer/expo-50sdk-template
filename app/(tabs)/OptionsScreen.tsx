@@ -11,6 +11,7 @@ import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
 import { CanOverrideItemToggle } from '@/components/options/CanOverrideItemToggle';
 import { CanOverrideStoreToggle } from '@/components/options/CanOverrideStoreToggle';
 import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider';
+import { NameOrderSpecifier } from '@/components/options/NameOrderSpecifier';
 import { SaveLoadState } from '@/components/options/SaveLoadState';
 import {
   FORM_INTER_ITEM_SPACING,
@@ -76,6 +77,7 @@ export default function OptionsScreen() {
       }
     >
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <NameOrderSpecifier />
         <SaveLoadState />
         <AutoSetStoreToggle />
         <CanOverrideItemToggle />
@@ -84,7 +86,7 @@ export default function OptionsScreen() {
           Item Row Open Threshold (default ={' '}
           {SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT}):
         </FormControl.Label>
-        <Row>
+        <Row space={theme.space[FORM_INTER_ITEM_SPACING]} alignItems="center">
           <Input
             flex={1}
             variant="outline"

@@ -1,3 +1,8 @@
+import {
+  NAME_ORDER_BRANDS_STRING,
+  NAME_ORDER_PRODUCT_NAME_STRING,
+} from '@/constants/general';
+
 /**
  *There are many more fields, just using the relevant ones for now.
  *See {@link https://world.openfoodfacts.org/api/v0/product/072273487253 this}.
@@ -10,7 +15,7 @@ export type UpcResponse = {
 };
 
 export type UpcProduct = {
-  brands?: string;
+  [NAME_ORDER_BRANDS_STRING]?: string;
   code?: string;
   id?: string;
   image_front_small_url?: string;
@@ -25,5 +30,5 @@ export type UpcProduct = {
   image_small_url?: string;
   image_thumb_url?: string;
   image_url?: string;
-  product_name: string;
+  [NAME_ORDER_PRODUCT_NAME_STRING]: string;
 };

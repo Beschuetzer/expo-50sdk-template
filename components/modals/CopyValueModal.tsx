@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { theme, Button, View, Column, Heading, Input } from 'native-base';
+import { theme, Button, View, Column, Heading, Input, Text, Center } from 'native-base';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -103,27 +103,33 @@ export default function CopyValueModal(props: CopyValueModalProps) {
         </Column>
       }
     >
-      <View width={windowDimensions.width} flex={1}>
-        <FlashList
-          renderItem={(item) => {
-            const { item: itemToRender } = item;
-            const [key, value] = itemToRender;
-            return (
-              <Button
-                key={key}
-                variant="outline"
-                isDisabled={currentlySelectedKey === key}
-                onPress={() => setCurrentlySelectedKey(key)}
-                justifyContent="space-between"
-              >
-                <ItemTileCopyModal itemKey={key} value={String(value)} />
-              </Button>
-            );
-          }}
-          estimatedItemSize={117}
-          data={valuesToShow}
-        />
-      </View>
+      {valuesToShow.length <= 0 ? (
+        <Center width={windowDimensions.width} flex={1}>
+          <Text>No values to show...</Text>
+        </Center>
+      ) : (
+        <View width={windowDimensions.width} flex={1}>
+          <FlashList
+            renderItem={(item) => {
+              const { item: itemToRender } = item;
+              const [key, value] = itemToRender;
+              return (
+                <Button
+                  key={key}
+                  variant="outline"
+                  isDisabled={currentlySelectedKey === key}
+                  onPress={() => setCurrentlySelectedKey(key)}
+                  justifyContent="space-between"
+                >
+                  <ItemTileCopyModal itemKey={key} value={String(value)} />
+                </Button>
+              );
+            }}
+            estimatedItemSize={117}
+            data={valuesToShow}
+          />
+        </View>
+      )}
     </ModalWithBlur>
   );
 }

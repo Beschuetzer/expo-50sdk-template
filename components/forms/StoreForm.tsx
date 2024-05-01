@@ -48,6 +48,7 @@ type StoreFormProps = {
 export function StoreForm(props: StoreFormProps) {
   const { originalKey, onClose, onSave, store } = props;
   const theme = useTheme();
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const [storeName, setStoreName] = useState(store?.name || EMPTY_STRING);
   const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
   const [gpsCoordinates, setGpsCoordinates] = useState<GpsCoordinate>(
@@ -150,6 +151,12 @@ export function StoreForm(props: StoreFormProps) {
     }
   }, [placeToUse]);
 
+  useEffect(() => {
+    if (!originalKey) {
+      nameInputRef.current?.focus();
+    }
+  }, [originalKey]);
+
   return (
     <AbsolutePositionedScreen
       absolutelyPositionedJsx={
@@ -187,6 +194,7 @@ export function StoreForm(props: StoreFormProps) {
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText>Name</InputText>
         <Input
+          ref={nameInputRef}
           variant="outline"
           p={theme.space[1]}
           placeholder="Store Name"

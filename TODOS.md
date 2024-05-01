@@ -1,5 +1,4 @@
 ## MVP
--focus on name field when adding a new store (but not when viewing existing store)
 
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).
     --navigates to a new page which has has the next three items displayed with full details and eventually a text to speech reading of the item

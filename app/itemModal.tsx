@@ -16,7 +16,10 @@ import {
   itemsListItemSelector,
   itemsListSelector,
 } from '@/state/slices/listsSlice';
-import { canOverrideItemSelector } from '@/state/slices/optionsSlice';
+import {
+  canOverrideItemSelector,
+  nameOrderTemplateSelector,
+} from '@/state/slices/optionsSlice';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 import { getKeyToUse } from '@/utils/helpers';
@@ -43,11 +46,12 @@ export default function ItemModal() {
     shouldSkip: !!itemInList,
   });
   const currentStore = useSelector(currentStoreSelector);
+  const nameOrderTemplate = useSelector(nameOrderTemplateSelector);
   const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
   const itemsList = useSelector(itemsListSelector);
 
   function getItemFromUpc(upcProduct: UpcProduct | null) {
-    const item = getItem(upcProduct);
+    const item = getItem({ upcProduct, nameOrderTemplate });
     if (itemInList) {
       item.images = itemInList.images;
       item.imageToUseIndex = itemInList.imageToUseIndex;

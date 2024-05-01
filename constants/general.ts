@@ -43,7 +43,7 @@ export const ITEM_TILE_WIDTH = 30;
 export const ITEM_TILE_ICON_SIZE = 5;
 export const NAME_ORDER_BRANDS_STRING = 'brands';
 export const NAME_ORDER_PRODUCT_NAME_STRING = 'product_name';
-export const NAME_ORDER_INITIAL = `${NAME_ORDER_BRANDS_STRING} - ${NAME_ORDER_PRODUCT_NAME_STRING}`;
+export const NAME_ORDER_TEMPLATE_INITIAL = `${NAME_ORDER_BRANDS_STRING} - ${NAME_ORDER_PRODUCT_NAME_STRING}`;
 export const SORT_ORDER_VALUE_BY_NAME_DEFAULT: SortOrderValue = Object.freeze({
   sortOrder: SortOrder.Ascending,
   sortBy: SortType.Name,

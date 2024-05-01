@@ -5,6 +5,9 @@ import {
   EMPTY_NUMBER,
   EMPTY_STRING,
   IMAGE_PRIORITY_MAPPING,
+  NAME_ORDER_BRANDS_STRING,
+  NAME_ORDER_PRODUCT_NAME_STRING,
+  NAME_ORDER_TEMPLATE_INITIAL,
   UNIT_INITIAL,
 } from '@/constants/general';
 import {
@@ -15,20 +18,42 @@ import {
 } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 
-export function getItem(input?: UpcProduct | null): Item {
+type GetItemParams = {
+  upcProduct?: UpcProduct | null;
+  nameOrderTemplate?: string;
+};
+export function getItem(input: GetItemParams): Item {
+  const { upcProduct, nameOrderTemplate } = input;
   return {
     frequency: EMPTY_NUMBER,
-    images: getImagesFromUpcProduct(input) || [],
+    images: getImagesFromUpcProduct(upcProduct) || [],
     imageToUseIndex: DEFAULT_IMAGE_INDEX,
     name:
-      input?.brands && input?.product_name
-        ? `${input.brands} - ${input?.product_name}`
-        : input?.product_name || EMPTY_STRING,
-    upc: getStandardizedUpcValue(input?.code) || input?.id || EMPTY_STRING,
+      upcProduct?.brands && upcProduct?.product_name
+        ? getItemName({ upcProduct, nameOrderTemplate })
+        : upcProduct?.product_name || EMPTY_STRING,
+    upc:
+      getStandardizedUpcValue(upcProduct?.code) ||
+      upcProduct?.id ||
+      EMPTY_STRING,
     unit: UNIT_INITIAL,
     addedDate: 0,
     lastUpdatedDate: 0,
   };
+}
+
+export function getItemName(input: GetItemParams): string {
+  const { upcProduct, nameOrderTemplate = NAME_ORDER_TEMPLATE_INITIAL } = input;
+  const replaced = nameOrderTemplate
+    ?.replaceAll(
+      NAME_ORDER_PRODUCT_NAME_STRING,
+      upcProduct?.[NAME_ORDER_PRODUCT_NAME_STRING] || EMPTY_STRING,
+    )
+    ?.replaceAll(
+      NAME_ORDER_BRANDS_STRING,
+      upcProduct?.[NAME_ORDER_BRANDS_STRING] || EMPTY_STRING,
+    );
+  return replaced;
 }
 
 export function getItemWithStoreSpecificValues(

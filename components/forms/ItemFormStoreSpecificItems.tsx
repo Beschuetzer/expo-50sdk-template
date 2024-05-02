@@ -235,7 +235,6 @@ export function ItemFormStoreSpecific(
         values={copyModalValues}
         onCancel={() => setCopyModalValues({})}
         onConfirm={(selectedValue: any) => {
-          console.log({ selectedValue });
           setCopyModalValues({});
           if (copyModalKey === StoreSpecificValueKey.AisleNumber) {
             setAisleNumber(selectedValue);

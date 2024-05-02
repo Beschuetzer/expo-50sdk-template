@@ -1,7 +1,7 @@
 import { useRoute } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { Center, theme, Heading, Text } from 'native-base';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -52,6 +52,17 @@ export default function ItemModal() {
   const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
   const itemsList = useSelector(itemsListSelector);
 
+  const onClosePress = useCallback(() => {
+    navigation.canGoBack() && navigation.goBack();
+  }, [navigation]);
+
+  const onSavePress = useCallback(
+    (addItemsListItemPayload: AddItemsListItemPayload) => {
+      dispatch(addItemsListItem(addItemsListItemPayload));
+    },
+    [],
+  );
+
   function getItemFromUpc(upcProduct: UpcProduct | null) {
     const item = getItem({ upcProduct, nameOrderTemplate });
     if (itemInList) {
@@ -88,10 +99,8 @@ export default function ItemModal() {
         items={itemsList.data}
         item={fallbackItem as ItemWithStoreSpecificValues}
         itemInList={itemInList}
-        onClose={() => navigation.canGoBack() && navigation.goBack()}
-        onSave={(addItemsListItemPayload: AddItemsListItemPayload) => {
-          dispatch(addItemsListItem(addItemsListItemPayload));
-        }}
+        onClose={onClosePress}
+        onSave={onSavePress}
         showOverrideMsgInitial={showOverrideMsg}
         shouldFocusFirstField={!itemInList}
         shouldAddQuantity={callerList === ListName.ShoppingList}

@@ -131,13 +131,25 @@ export function ItemForm(props: ItemFormProps) {
   const fieldBeingUsedInKey = useMemo(() => {
     return formData.upc && formData.upc.trim().length > 0 ? 'upc' : 'name';
   }, [formData.upc]);
+  const isSavingDisabled = useMemo(
+    () =>
+      !formValidation.isValid ||
+      !formData.name ||
+      (!canOverrideItem && isProposedItemPresent),
+    [
+      formData.name,
+      formValidation.isValid,
+      canOverrideItem,
+      isProposedItemPresent,
+    ],
+  );
 
   const onClosePress = useCallback(() => {
     shouldDeleteLastImageRef.current = true;
     onClose && onClose();
   }, [onClose, shouldDeleteLastImageRef]);
 
-  function onSavePress() {
+  const onSavePress = useCallback(() => {
     const now = Date.now();
     const itemToSave = {
       frequency: frequencyInMsRef.current,
@@ -176,7 +188,20 @@ export function ItemForm(props: ItemFormProps) {
         originalKey: originalKey || EMPTY_STRING,
       });
     onClose && onClose();
-  }
+  }, [
+    currentStore,
+    formData,
+    frequencyInMsRef,
+    itemToUse,
+    onClose,
+    onSave,
+    originalKey,
+    selectedUrl,
+    shouldAddToCart,
+    shouldDeleteLastImageRef,
+    storeSpecificValuesRef,
+    unitRef,
+  ]);
 
   const onFrequencyChange = useCallback(
     (frequencyInMs: number) => {
@@ -196,6 +221,7 @@ export function ItemForm(props: ItemFormProps) {
     unitRef.current = unit;
   }, []);
 
+  //handle deleting images
   useEffect(() => {
     if (shouldFocusFirstField) {
       nameRef.current?.focus();
@@ -223,17 +249,15 @@ export function ItemForm(props: ItemFormProps) {
       absolutelyPositionedJsx={
         <>
           <Row space={3}>
-            <Button
-              isDisabled={
-                !formValidation.isValid ||
-                !formData.name ||
-                (!canOverrideItem && isProposedItemPresent)
-              }
-              flex={1}
-              onPress={onSavePress}
-            >
-              Save
-            </Button>
+            {!autoSave ? (
+              <Button
+                isDisabled={isSavingDisabled}
+                flex={1}
+                onPress={onSavePress}
+              >
+                Save
+              </Button>
+            ) : null}
             <Button flex={1} onPress={onClosePress}>
               Close
             </Button>

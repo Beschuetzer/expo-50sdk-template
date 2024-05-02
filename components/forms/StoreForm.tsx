@@ -1,4 +1,5 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import _ from 'lodash';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -16,6 +17,7 @@ import {
   doForwardGeocoding,
 } from '@/api/geofencing';
 import {
+  AUTO_SAVE_DEBOUNCE_THRESHOLD,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
   GPS_COORDINATES_DEFAULT,
@@ -24,11 +26,15 @@ import {
   AddStoresListItemPayload,
   storesListSelector,
 } from '@/state/slices/listsSlice';
-import { canOverrideStoreSelector } from '@/state/slices/optionsSlice';
+import {
+  autoSaveSelector,
+  canOverrideStoreSelector,
+} from '@/state/slices/optionsSlice';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { Address, StoreProp } from '@/types/general';
 import {
   displayAlert,
+  getAreStoresEqual,
   getGpsCoordinate,
   getItemFromList,
   getKeyToUse,
@@ -45,6 +51,9 @@ type StoreFormProps = {
 } & StoreProp &
   Pick<AddStoresListItemPayload, 'originalKey'>;
 
+/**
+ *Handles store inputs
+ **/
 export function StoreForm(props: StoreFormProps) {
   const { originalKey, onClose, onSave, store } = props;
   const theme = useTheme();
@@ -63,6 +72,7 @@ export function StoreForm(props: StoreFormProps) {
   const addressSheetRef = useRef<BottomSheetModalMethods>(null);
   const canOverrideStore = useSelector(canOverrideStoreSelector);
   const storesList = useSelector(storesListSelector);
+  const autoSave = useSelector(autoSaveSelector);
   const originalKeyToUse = useMemo(
     () => getKeyToUse(originalKey),
     [originalKey],
@@ -88,23 +98,38 @@ export function StoreForm(props: StoreFormProps) {
       message: isValid ? EMPTY_STRING : 'A store name must be given',
     };
   }, [storeName]);
+  const isSavingDisabled = useMemo(
+    () =>
+      (!formValidation.isValid ||
+        (!canOverrideStore && isProposedStorePresent)) &&
+      !isUpdatingStore,
+    [formValidation, canOverrideStore, isProposedStorePresent, isUpdatingStore],
+  );
+  const autoSaveTimeoutRef = useRef<any>();
 
-  function onClosePress() {
-    onClose && onClose();
-  }
-
-  function onSavePress() {
-    const newStore = {
+  const getNewStore = useCallback(() => {
+    return {
       name: storeName,
       gpsCoordinates,
     } as Store;
-    onSave &&
-      onSave({
-        newStore,
-        originalKey,
-      });
+  }, [gpsCoordinates, storeName]);
+
+  const onClosePress = useCallback(() => {
     onClose && onClose();
-  }
+  }, [onClose]);
+
+  const onSavePress = useCallback(
+    (shouldClose = true) => {
+      onSave &&
+        onSave({
+          newStore: getNewStore(),
+          originalKey,
+        });
+      if (!shouldClose) return;
+      onClose && onClose();
+    },
+    [onClose, onSave, getNewStore, storeName, gpsCoordinates, originalKey],
+  );
 
   const onGetCurrentCoordinatesPress = useCallback(async () => {
     try {
@@ -157,22 +182,47 @@ export function StoreForm(props: StoreFormProps) {
     }
   }, [originalKey]);
 
+  //handling autoSave
+  useEffect(() => {
+    clearInterval(autoSaveTimeoutRef.current);
+    if (!autoSave || isSavingDisabled) return;
+
+    const currentItem = storesList.data.find(
+      (store) => getKeyToUse(store) === storeName,
+    );
+    const newStore = getNewStore();
+    const key = getKeyToUse(newStore);
+
+    if (getAreStoresEqual(currentItem, newStore)) return;
+
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      if (!key) return;
+      onSavePress(false);
+    }, AUTO_SAVE_DEBOUNCE_THRESHOLD);
+  }, [
+    storeName,
+    isSavingDisabled,
+    autoSave,
+    getNewStore,
+    onSavePress,
+    storesList.data,
+    autoSaveTimeoutRef,
+  ]);
+
   return (
     <AbsolutePositionedScreen
       absolutelyPositionedJsx={
         <>
           <Row space={3}>
-            <Button
-              isDisabled={
-                (!formValidation.isValid ||
-                  (!canOverrideStore && isProposedStorePresent)) &&
-                !isUpdatingStore
-              }
-              flex={1}
-              onPress={onSavePress}
-            >
-              Save
-            </Button>
+            {!autoSave ? (
+              <Button
+                isDisabled={isSavingDisabled}
+                flex={1}
+                onPress={() => onSavePress()}
+              >
+                Save
+              </Button>
+            ) : null}
             <Button flex={1} onPress={onClosePress}>
               Close
             </Button>

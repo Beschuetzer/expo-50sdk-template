@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import _ from 'lodash';
 import { Insets } from 'react-native';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
@@ -104,6 +105,26 @@ export async function deleteFile(path: string) {
 
 export function displayAlert(object: object | null) {
   alert(object ? JSON.stringify(object, null, 2) : object);
+}
+
+export function getAreStoresEqual(storeOne?: Store, storeTwo?: Store) {
+  if (!storeOne || !storeTwo) return false;
+  return _.isEqualWith(
+    storeOne,
+    storeTwo,
+    (storeOneLocal: Store, storeTwoLocal: Store) => {
+      if (
+        _.isEqual(
+          storeOneLocal?.gpsCoordinates,
+          storeTwoLocal?.gpsCoordinates,
+        ) &&
+        storeOneLocal.name === storeTwoLocal.name
+      ) {
+        return true;
+      }
+      return false;
+    },
+  );
 }
 
 /**

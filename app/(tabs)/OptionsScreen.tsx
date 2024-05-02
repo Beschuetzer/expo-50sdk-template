@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
 import { InputValidationMessage } from '@/components/InputValidationMessage';
+import { AutoSaveToggle } from '@/components/options/AutoSaveToggle';
 import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
 import { CanOverrideItemToggle } from '@/components/options/CanOverrideItemToggle';
 import { CanOverrideStoreToggle } from '@/components/options/CanOverrideStoreToggle';
@@ -79,6 +80,7 @@ export default function OptionsScreen() {
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <NameOrderSpecifier />
         <SaveLoadState />
+        <AutoSaveToggle />
         <AutoSetStoreToggle />
         <CanOverrideItemToggle />
         <CanOverrideStoreToggle />

@@ -43,7 +43,10 @@ type ItemFormValdation = {
   message: string;
 };
 
+type ItemFormData = Required<Pick<Item, 'name' | 'upc'>>;
+
 export type ItemFormProps = {
+  autoSave?: boolean;
   itemInList?: Item | null;
   canOverrideItem?: boolean;
   currentStore?: Store;
@@ -59,6 +62,7 @@ export type ItemFormProps = {
 
 export function ItemForm(props: ItemFormProps) {
   const {
+    autoSave = false,
     canOverrideItem,
     currentStore,
     item,
@@ -88,43 +92,50 @@ export function ItemForm(props: ItemFormProps) {
   const [showOverrideMsg, setShowOverrideMsg] = useState(
     showOverrideMsgInitial,
   );
-  const [upcValue, setUpcValue] = useState(itemToUse?.upc || EMPTY_STRING);
-  const [productNameValue, setProductNameValue] = useState(
-    itemToUse?.name || EMPTY_STRING,
-  );
+  const [formData, setFormData] = useState<ItemFormData>({
+    upc: itemToUse?.upc || EMPTY_STRING,
+    name: itemToUse?.name || EMPTY_STRING,
+  });
   const frequencyInMsRef = useRef<number>(itemToUse?.frequency || -1);
   const unitRef = useRef<string>(EMPTY_STRING);
   const isUpcValid = useMemo(
-    () => upcValue?.length === 0 || !!UPC_REGEX.test(upcValue || EMPTY_STRING),
-    [upcValue],
+    () =>
+      formData.upc?.length === 0 ||
+      !!UPC_REGEX.test(formData.upc || EMPTY_STRING),
+    [formData.upc],
   );
   const storeSpecificValuesRef = useRef<StoreSpecificValues>(null);
   const formValidation: ItemFormValdation = useMemo(() => {
-    const isValid = !!productNameValue;
+    const isValid = !!formData.name;
     return {
       isValid,
       message: isValid ? EMPTY_STRING : 'Please enter a name',
     };
-  }, [isUpcValid, upcValue, productNameValue]);
+  }, [isUpcValid, formData.upc, formData.name]);
   const customImagesToDeleteOnUnloadRef = useRef<string[]>([]);
   const shouldDeleteLastImageRef = useRef(true);
   const isProposedItemPresent = useMemo(
     () =>
-      getIsItemAlreadyPresent(items, upcValue, productNameValue, originalKey),
-    [items, upcValue, productNameValue, originalKey],
+      getIsItemAlreadyPresent(
+        items,
+        formData.upc || EMPTY_STRING,
+        formData.name || EMPTY_STRING,
+        originalKey,
+      ),
+    [items, formData.upc, formData.name, originalKey],
   );
   const keyBeingOverriden = useMemo(
-    () => upcValue || productNameValue,
-    [upcValue, productNameValue],
+    () => formData.upc || formData.name,
+    [formData.upc, formData.name],
   );
   const fieldBeingUsedInKey = useMemo(() => {
-    return upcValue?.trim().length > 0 ? 'upc' : 'name';
-  }, [upcValue]);
+    return formData.upc && formData.upc.trim().length > 0 ? 'upc' : 'name';
+  }, [formData.upc]);
 
-  function onClosePress() {
+  const onClosePress = useCallback(() => {
     shouldDeleteLastImageRef.current = true;
     onClose && onClose();
-  }
+  }, [onClose, shouldDeleteLastImageRef]);
 
   function onSavePress() {
     const now = Date.now();
@@ -136,8 +147,8 @@ export function ItemForm(props: ItemFormProps) {
         itemToUse?.images.findIndex((image) => {
           return image === selectedUrl;
         }) || DEFAULT_IMAGE_INDEX,
-      name: productNameValue,
-      upc: upcValue,
+      name: formData.name,
+      upc: formData.upc,
       addedDate: itemToUse?.addedDate || now,
       lastUpdatedDate: now,
     } as Item;
@@ -215,7 +226,7 @@ export function ItemForm(props: ItemFormProps) {
             <Button
               isDisabled={
                 !formValidation.isValid ||
-                !productNameValue ||
+                !formData.name ||
                 (!canOverrideItem && isProposedItemPresent)
               }
               flex={1}
@@ -249,12 +260,15 @@ export function ItemForm(props: ItemFormProps) {
           variant="outline"
           p={theme.space[1]}
           placeholder="Product Name"
-          value={productNameValue}
+          value={formData.name}
           onChangeText={(newText) => {
-            setProductNameValue(newText);
+            setFormData((current) => ({
+              ...current,
+              name: newText,
+            }));
             setShowOverrideMsg(true);
           }}
-          isInvalid={productNameValue.length <= 0}
+          isInvalid={formData.name.length <= 0}
         />
       </Stack>
       <Stack>
@@ -266,13 +280,17 @@ export function ItemForm(props: ItemFormProps) {
             keyboardType="numeric"
             p={theme.space[1]}
             placeholder="UPC Code"
-            value={upcValue}
+            value={formData.upc}
             onChangeText={(newText) => {
-              setUpcValue(newText);
+              setFormData((current) => ({
+                ...current,
+                upc: newText,
+              }));
               setShowOverrideMsg(true);
             }}
             isInvalid={
-              !UPC_REGEX.test(upcValue || EMPTY_STRING) && upcValue.length !== 0
+              !UPC_REGEX.test(formData.upc || EMPTY_STRING) &&
+              formData.upc.length !== 0
             }
             InputRightElement={
               <Barcode
@@ -286,7 +304,10 @@ export function ItemForm(props: ItemFormProps) {
                       upc,
                     });
                   }
-                  setUpcValue(upc);
+                  setFormData((current) => ({
+                    ...current,
+                    upc,
+                  }));
                 }}
                 size={37}
               />
@@ -295,7 +316,7 @@ export function ItemForm(props: ItemFormProps) {
         </Row>
         <InputValidationMessage
           isValid={isUpcValid}
-          message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} or ${UPC_REQUIRED_CHAR_LENGTH + 1} numbers (currently ${upcValue.length})`}
+          message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} or ${UPC_REQUIRED_CHAR_LENGTH + 1} numbers (currently ${formData.upc.length})`}
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>

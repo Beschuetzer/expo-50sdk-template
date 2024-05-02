@@ -17,6 +17,7 @@ import {
   itemsListSelector,
 } from '@/state/slices/listsSlice';
 import {
+  autoSaveItemsSelector,
   canOverrideItemSelector,
   nameOrderTemplateSelector,
 } from '@/state/slices/optionsSlice';
@@ -46,6 +47,7 @@ export default function ItemModal() {
     shouldSkip: !!itemInList,
   });
   const currentStore = useSelector(currentStoreSelector);
+  const autoSaveItems = useSelector(autoSaveItemsSelector);
   const nameOrderTemplate = useSelector(nameOrderTemplateSelector);
   const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
   const itemsList = useSelector(itemsListSelector);
@@ -94,6 +96,7 @@ export default function ItemModal() {
         shouldFocusFirstField={!itemInList}
         shouldAddQuantity={callerList === ListName.ShoppingList}
         shouldAddToCart={callerList === ListName.InCartList}
+        autoSave={autoSaveItems}
       />
     );
   }

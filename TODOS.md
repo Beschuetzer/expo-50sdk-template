@@ -1,8 +1,9 @@
 ## MVP
 -add options to auto-save items:
     -ItemForm
+        -use autoSave prop to conditionally render save button
         -finish hook for autosaving and other changes 
-        -use single POS for formData
+        -convert all functions to useCallback (also in ItemModal)
     -test thoroughly with auto-save on/off
 
 -create a basic backend for grocify and see if heroku can host it on current plan

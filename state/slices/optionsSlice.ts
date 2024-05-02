@@ -4,7 +4,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 import {
-  AUTO_SAVE_INITIAL,
+  AUTO_SAVE_STORES_INITIAL,
   AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   AUTO_SET_STORE_WHEN_CLOSE_ENOUGH_INITIAL,
   CAN_OVERRIDE_DEFAULT,
@@ -20,7 +20,7 @@ type AutoSetStore = {
 };
 
 export type OptionsState = {
-  autoSave: boolean;
+  autoSaveStores: boolean;
   autoSetStore: AutoSetStore;
   canOverrideItem: boolean;
   canOverrideStore: boolean;
@@ -31,7 +31,7 @@ export type OptionsState = {
 };
 
 const initialState: OptionsState = {
-  autoSave: AUTO_SAVE_INITIAL,
+  autoSaveStores: AUTO_SAVE_STORES_INITIAL,
   autoSetStore: {
     enabled: AUTO_SET_STORE_WHEN_CLOSE_ENOUGH_INITIAL,
     maxDistanceInMiles: AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
@@ -48,11 +48,11 @@ export const optionsSlice = createSlice({
   name: 'options',
   initialState,
   reducers: {
-    setAutoSave: (
+    setAutoSaveStores: (
       state: OptionsState,
-      action: PayloadAction<OptionsState['autoSave']>,
+      action: PayloadAction<OptionsState['autoSaveStores']>,
     ) => {
-      state.autoSave = action.payload;
+      state.autoSaveStores = action.payload;
     },
     setAutoSetStore: (
       state: OptionsState,
@@ -108,7 +108,7 @@ export const optionsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   resetOptions,
-  setAutoSave,
+  setAutoSaveStores,
   setAutoSetStore,
   setCanOverrideItem,
   setCanOverrideStore,
@@ -118,8 +118,8 @@ export const {
   setCustomImageQuality,
 } = optionsSlice.actions;
 
-export const autoSaveSelector = (state: RootState) =>
-  state[optionsSlice.name].autoSave;
+export const autoSaveStoresSelector = (state: RootState) =>
+  state[optionsSlice.name].autoSaveStores;
 
 export const autoSetStoreSelector = (state: RootState) =>
   state[optionsSlice.name].autoSetStore;

@@ -27,10 +27,10 @@ import {
   storesListSelector,
 } from '@/state/slices/listsSlice';
 import {
-  autoSaveSelector,
+  autoSaveStoresSelector,
   canOverrideStoreSelector,
 } from '@/state/slices/optionsSlice';
-import { GpsCoordinate, Store } from '@/types/Store';
+import { Store } from '@/types/Store';
 import { Address, StoreProp } from '@/types/general';
 import {
   displayAlert,
@@ -51,6 +51,7 @@ type StoreFormProps = {
 } & StoreProp &
   Pick<AddStoresListItemPayload, 'originalKey'>;
 
+type StoreFormData = Omit<Store, 'calculatedDistance'>;
 /**
  *Handles store inputs
  **/
@@ -58,13 +59,13 @@ export function StoreForm(props: StoreFormProps) {
   const { originalKey, onClose, onSave, store } = props;
   const theme = useTheme();
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const [storeName, setStoreName] = useState(store?.name || EMPTY_STRING);
-  const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
-  const [gpsCoordinates, setGpsCoordinates] = useState<GpsCoordinate>(
-    store?.gpsCoordinates || {
+  const [formData, setFormData] = useState<StoreFormData>({
+    name: store?.name || EMPTY_STRING,
+    gpsCoordinates: store?.gpsCoordinates || {
       ...GPS_COORDINATES_DEFAULT,
     },
-  );
+  });
+  const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
   const [placeToUse, setPlaceToUse] = useState<ForwardGeocodingPlace>(null);
   const [positionsToShowInModal, setPlacesToShowInModal] =
     useState<DoForwardGeocodingResponse>([]);
@@ -72,7 +73,7 @@ export function StoreForm(props: StoreFormProps) {
   const addressSheetRef = useRef<BottomSheetModalMethods>(null);
   const canOverrideStore = useSelector(canOverrideStoreSelector);
   const storesList = useSelector(storesListSelector);
-  const autoSave = useSelector(autoSaveSelector);
+  const autoSaveStores = useSelector(autoSaveStoresSelector);
   const originalKeyToUse = useMemo(
     () => getKeyToUse(originalKey),
     [originalKey],
@@ -80,24 +81,24 @@ export function StoreForm(props: StoreFormProps) {
   const isProposedStorePresent = useMemo(
     () =>
       !!getItemFromList(storesList.data, {
-        name: storeName || EMPTY_STRING,
+        name: formData.name || EMPTY_STRING,
         upc: EMPTY_STRING,
       }),
-    [storeName, storesList],
+    [formData.name, storesList],
   );
   const isUpdatingStore = useMemo(
-    () => originalKeyToUse && storeName.trim() === originalKeyToUse,
-    [storeName, originalKeyToUse],
+    () => originalKeyToUse && formData.name.trim() === originalKeyToUse,
+    [formData.name, originalKeyToUse],
   );
   const addressRef = useRef<Address | null>(null);
 
   const formValidation: StoreFormValdation = useMemo(() => {
-    const isValid = storeName.length > 0;
+    const isValid = formData.name.length > 0;
     return {
       isValid,
       message: isValid ? EMPTY_STRING : 'A store name must be given',
     };
-  }, [storeName]);
+  }, [formData.name]);
   const isSavingDisabled = useMemo(
     () =>
       (!formValidation.isValid ||
@@ -107,13 +108,6 @@ export function StoreForm(props: StoreFormProps) {
   );
   const autoSaveTimeoutRef = useRef<any>();
 
-  const getNewStore = useCallback(() => {
-    return {
-      name: storeName,
-      gpsCoordinates,
-    } as Store;
-  }, [gpsCoordinates, storeName]);
-
   const onClosePress = useCallback(() => {
     onClose && onClose();
   }, [onClose]);
@@ -122,20 +116,23 @@ export function StoreForm(props: StoreFormProps) {
     (shouldClose = true) => {
       onSave &&
         onSave({
-          newStore: getNewStore(),
+          newStore: formData,
           originalKey,
         });
       if (!shouldClose) return;
       onClose && onClose();
     },
-    [onClose, onSave, getNewStore, storeName, gpsCoordinates, originalKey],
+    [onClose, onSave, formData, originalKey],
   );
 
   const onGetCurrentCoordinatesPress = useCallback(async () => {
     try {
       setIsLoadingGpscoords(true);
       const gpsCoordinate = await getGpsCoordinate();
-      setGpsCoordinates(gpsCoordinate);
+      setFormData((current) => ({
+        ...current,
+        gpsCoordinates: gpsCoordinate,
+      }));
     } catch (error: any) {
       displayAlert(error);
     } finally {
@@ -169,10 +166,13 @@ export function StoreForm(props: StoreFormProps) {
 
   useEffect(() => {
     if (placeToUse?.lat && placeToUse.lon) {
-      setGpsCoordinates({
-        lat: placeToUse?.lat,
-        lon: placeToUse?.lon,
-      });
+      setFormData((current) => ({
+        ...current,
+        gpsCoordinates: {
+          lat: placeToUse?.lat,
+          lon: placeToUse?.lon,
+        },
+      }));
     }
   }, [placeToUse]);
 
@@ -185,25 +185,27 @@ export function StoreForm(props: StoreFormProps) {
   //handling autoSave
   useEffect(() => {
     clearInterval(autoSaveTimeoutRef.current);
-    if (!autoSave || isSavingDisabled) return;
+    if (!autoSaveStores || isSavingDisabled) return;
 
     const currentItem = storesList.data.find(
-      (store) => getKeyToUse(store) === storeName,
+      (store) => getKeyToUse(store) === formData.name,
     );
-    const newStore = getNewStore();
-    const key = getKeyToUse(newStore);
+    const key = getKeyToUse(formData);
 
-    if (getAreStoresEqual(currentItem, newStore)) return;
+    if (getAreStoresEqual(currentItem, formData)) return;
 
     autoSaveTimeoutRef.current = setTimeout(() => {
       if (!key) return;
       onSavePress(false);
     }, AUTO_SAVE_DEBOUNCE_THRESHOLD);
+
+    return () => {
+      clearInterval(autoSaveTimeoutRef.current);
+    };
   }, [
-    storeName,
     isSavingDisabled,
-    autoSave,
-    getNewStore,
+    autoSaveStores,
+    formData,
     onSavePress,
     storesList.data,
     autoSaveTimeoutRef,
@@ -214,7 +216,7 @@ export function StoreForm(props: StoreFormProps) {
       absolutelyPositionedJsx={
         <>
           <Row space={3}>
-            {!autoSave ? (
+            {!autoSaveStores ? (
               <Button
                 isDisabled={isSavingDisabled}
                 flex={1}
@@ -229,13 +231,13 @@ export function StoreForm(props: StoreFormProps) {
           </Row>
           <InputValidationMessage
             isValid={
-              (!!originalKeyToUse && originalKeyToUse === storeName) ||
+              (!!originalKeyToUse && originalKeyToUse === formData.name) ||
               !isProposedStorePresent
             }
             message={
               canOverrideStore
-                ? `An store with the name of '${storeName}' is already in the list and will be overriden.`
-                : `Please enable overriding stores or remove the store with name of '${storeName}'`
+                ? `An store with the name of '${formData.name}' is already in the list and will be overriden.`
+                : `Please enable overriding stores or remove the store with name of '${formData.name}'`
             }
           />
         </>
@@ -248,9 +250,11 @@ export function StoreForm(props: StoreFormProps) {
           variant="outline"
           p={theme.space[1]}
           placeholder="Store Name"
-          value={storeName}
-          onChangeText={(newText) => setStoreName(newText)}
-          isInvalid={storeName.length <= 0}
+          value={formData.name}
+          onChangeText={(newText) =>
+            setFormData((current) => ({ ...current, name: newText }))
+          }
+          isInvalid={formData.name.length <= 0}
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
@@ -266,16 +270,19 @@ export function StoreForm(props: StoreFormProps) {
             p={theme.space[1]}
             flex={1}
             placeholder="latitude"
-            value={gpsCoordinates.lat.toString()}
+            value={formData.gpsCoordinates?.lat.toString()}
             onChangeText={(newLat) =>
-              setGpsCoordinates((current: GpsCoordinate) => {
-                return {
-                  ...current,
+              setFormData((current) => ({
+                ...current,
+                gpsCoordinates: {
+                  ...current.gpsCoordinates,
                   lat: newLat,
-                };
-              })
+                },
+              }))
             }
-            isInvalid={isNaN(parseFloat(gpsCoordinates.lat))}
+            isInvalid={isNaN(
+              parseFloat(formData?.gpsCoordinates?.lat || EMPTY_STRING),
+            )}
           />
           <InputText
             style={{ marginHorizontal: theme.space[FORM_INTER_ITEM_SPACING] }}
@@ -283,21 +290,24 @@ export function StoreForm(props: StoreFormProps) {
             Long:&nbsp;
           </InputText>
           <Input
-            flex={1}
             variant="outline"
             keyboardType="numeric"
             p={theme.space[1]}
+            flex={1}
             placeholder="longitude"
-            value={gpsCoordinates.lon.toString()}
-            onChangeText={(newLong) =>
-              setGpsCoordinates((current: GpsCoordinate) => {
-                return {
-                  ...current,
-                  lon: newLong,
-                };
-              })
+            value={formData.gpsCoordinates?.lon.toString()}
+            onChangeText={(newLon) =>
+              setFormData((current) => ({
+                ...current,
+                gpsCoordinates: {
+                  ...current.gpsCoordinates,
+                  lon: newLon,
+                },
+              }))
             }
-            isInvalid={isNaN(parseFloat(gpsCoordinates.lon))}
+            isInvalid={isNaN(
+              parseFloat(formData?.gpsCoordinates?.lon || EMPTY_STRING),
+            )}
           />
         </Row>
         <Row

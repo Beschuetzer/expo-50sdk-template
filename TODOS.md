@@ -1,7 +1,6 @@
 ## MVP
 -add options to auto-save items:
     -ItemForm
-        -use autoSave prop to conditionally render save button
         -finish hook for autosaving and other changes 
     -test thoroughly with auto-save on/off
 

@@ -4,6 +4,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 import {
+  AUTO_SAVE_ITEMS_INITIAL,
   AUTO_SAVE_STORES_INITIAL,
   AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   AUTO_SET_STORE_WHEN_CLOSE_ENOUGH_INITIAL,
@@ -20,6 +21,7 @@ type AutoSetStore = {
 };
 
 export type OptionsState = {
+  autoSaveItems: boolean;
   autoSaveStores: boolean;
   autoSetStore: AutoSetStore;
   canOverrideItem: boolean;
@@ -31,6 +33,7 @@ export type OptionsState = {
 };
 
 const initialState: OptionsState = {
+  autoSaveItems: AUTO_SAVE_ITEMS_INITIAL,
   autoSaveStores: AUTO_SAVE_STORES_INITIAL,
   autoSetStore: {
     enabled: AUTO_SET_STORE_WHEN_CLOSE_ENOUGH_INITIAL,
@@ -48,6 +51,12 @@ export const optionsSlice = createSlice({
   name: 'options',
   initialState,
   reducers: {
+    setAutoSaveItems: (
+      state: OptionsState,
+      action: PayloadAction<OptionsState['autoSaveItems']>,
+    ) => {
+      state.autoSaveItems = action.payload;
+    },
     setAutoSaveStores: (
       state: OptionsState,
       action: PayloadAction<OptionsState['autoSaveStores']>,
@@ -108,6 +117,7 @@ export const optionsSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const {
   resetOptions,
+  setAutoSaveItems,
   setAutoSaveStores,
   setAutoSetStore,
   setCanOverrideItem,
@@ -117,6 +127,9 @@ export const {
   setSwipeableRowOpenThreshold,
   setCustomImageQuality,
 } = optionsSlice.actions;
+
+export const autoSaveItemsSelector = (state: RootState) =>
+  state[optionsSlice.name].autoSaveItems;
 
 export const autoSaveStoresSelector = (state: RootState) =>
   state[optionsSlice.name].autoSaveStores;

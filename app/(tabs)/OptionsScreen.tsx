@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
 import { InputValidationMessage } from '@/components/InputValidationMessage';
-import { AutoSaveToggle } from '@/components/options/AutoSaveToggle';
+import { AutoSaveStoresToggle } from '@/components/options/AutoSaveStoresToggle';
 import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
 import { CanOverrideItemToggle } from '@/components/options/CanOverrideItemToggle';
 import { CanOverrideStoreToggle } from '@/components/options/CanOverrideStoreToggle';
@@ -25,6 +25,7 @@ import {
   swipeableRowOpenThresholdSelector,
 } from '@/state/slices/optionsSlice';
 import { getGpsCoordinate } from '@/utils/helpers';
+import { AutoSaveItemsToggle } from '@/components/options/AutoSaveItemsToggle';
 
 const DEBOUNCE_TIMEOUT = 500;
 
@@ -80,9 +81,10 @@ export default function OptionsScreen() {
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <NameOrderSpecifier />
         <SaveLoadState />
-        <AutoSaveToggle />
         <AutoSetStoreToggle />
+        <AutoSaveItemsToggle />
         <CanOverrideItemToggle />
+        <AutoSaveStoresToggle />
         <CanOverrideStoreToggle />
         <FormControl.Label>
           Item Row Open Threshold (default ={' '}

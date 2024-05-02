@@ -10,7 +10,7 @@ import {
   setAutoSaveStores,
 } from '@/state/slices/optionsSlice';
 
-export function AutoSaveToggle() {
+export function AutoSaveStoresToggle() {
   const theme = useTheme();
   const autoSaveStores = useSelector(autoSaveStoresSelector);
   const dispatch = useDispatch();

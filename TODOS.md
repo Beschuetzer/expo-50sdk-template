@@ -4,6 +4,9 @@
         -finish hook for autosaving and other changes 
     -test thoroughly with auto-save on/off
 
+-add ErrorBoundary lib
+-add free mongodb or sql server integration into bff to be able to save things 
+
 -create a basic backend for grocify and see if heroku can host it on current plan
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).
     --navigates to a new page which has has the next three items displayed with full details and eventually a text to speech reading of the item

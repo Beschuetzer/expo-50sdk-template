@@ -1,7 +1,7 @@
 ## MVP
 -add options to auto-save items:
     -ItemForm
-        -finish hook for autosaving and other changes 
+        -figure out how to bypass the issue where changing the key after opening an item causes useUpcProduct to be called again when auto-save is true
     -test thoroughly with auto-save on/off
 
 -add ErrorBoundary lib

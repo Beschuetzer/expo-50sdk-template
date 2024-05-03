@@ -12,6 +12,7 @@ import { Barcode } from '../Barcode';
 import { InputValidationMessage } from '../InputValidationMessage';
 
 import {
+  AUTO_SAVE_DEBOUNCE_THRESHOLD,
   DEFAULT_IMAGE_INDEX,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
@@ -43,7 +44,9 @@ type ItemFormValdation = {
   message: string;
 };
 
-type ItemFormData = Required<Pick<Item, 'name' | 'upc'>>;
+type ItemFormData = {
+  selectedUrl: string;
+} & Required<Pick<Item, 'name' | 'upc'>>;
 
 export type ItemFormProps = {
   autoSave?: boolean;
@@ -86,18 +89,18 @@ export function ItemForm(props: ItemFormProps) {
     [item, itemInList],
   ) as ItemWithStoreSpecificValues;
 
-  const [selectedUrl, setSelectedUrl] = useState(
-    itemToUse?.images[itemToUse?.imageToUseIndex] || EMPTY_STRING,
-  );
   const [showOverrideMsg, setShowOverrideMsg] = useState(
     showOverrideMsgInitial,
   );
   const [formData, setFormData] = useState<ItemFormData>({
     upc: itemToUse?.upc || EMPTY_STRING,
     name: itemToUse?.name || EMPTY_STRING,
+    selectedUrl: itemToUse?.images[itemToUse?.imageToUseIndex] || EMPTY_STRING,
   });
   const frequencyInMsRef = useRef<number>(itemToUse?.frequency || -1);
   const unitRef = useRef<string>(EMPTY_STRING);
+  const lastSavedKeyRef = useRef<string>(EMPTY_STRING);
+  const autoSaveTimeoutRef = useRef<any>();
   const isUpcValid = useMemo(
     () =>
       formData.upc?.length === 0 ||
@@ -149,63 +152,88 @@ export function ItemForm(props: ItemFormProps) {
     onClose && onClose();
   }, [onClose, shouldDeleteLastImageRef]);
 
-  const onSavePress = useCallback(() => {
-    const now = Date.now();
-    const itemToSave = {
-      frequency: frequencyInMsRef.current,
-      unit: unitRef.current,
-      images: itemToUse?.images || [],
-      imageToUseIndex:
-        itemToUse?.images.findIndex((image) => {
-          return image === selectedUrl;
-        }) || DEFAULT_IMAGE_INDEX,
-      name: formData.name,
-      upc: formData.upc,
-      addedDate: itemToUse?.addedDate || now,
-      lastUpdatedDate: now,
-    } as Item;
+  const onSavePress = useCallback(
+    (shouldClose = true) => {
+      const now = Date.now();
+      const itemToSave = {
+        frequency: frequencyInMsRef.current,
+        unit: unitRef.current,
+        images: itemToUse?.images || [],
+        imageToUseIndex:
+          itemToUse?.images.findIndex((image) => {
+            return image === formData.selectedUrl;
+          }) || DEFAULT_IMAGE_INDEX,
+        name: formData.name,
+        upc: formData.upc,
+        addedDate: itemToUse?.addedDate || now,
+        lastUpdatedDate: now,
+      } as Item;
 
-    if (!itemToSave.images.includes(selectedUrl)) {
-      itemToSave.images = [...itemToSave.images, selectedUrl];
-      itemToSave.imageToUseIndex = itemToSave.images.length - 1;
-    }
+      if (!itemToSave.images.includes(formData.selectedUrl)) {
+        itemToSave.images = [...itemToSave.images, formData.selectedUrl];
+        itemToSave.imageToUseIndex = itemToSave.images.length - 1;
+      }
 
-    shouldDeleteLastImageRef.current = false;
+      shouldDeleteLastImageRef.current = false;
 
-    const storeSpecificValuesToUse = {
-      ...storeSpecificValuesRef.current,
-      [StoreSpecificValueKey.IsInCart]: {
-        ...storeSpecificValuesRef.current?.[StoreSpecificValueKey.IsInCart],
-        [currentStore?.name || EMPTY_STRING]: shouldAddToCart,
-      },
-    } as StoreSpecificValues;
+      const storeSpecificValuesToUse = {
+        ...storeSpecificValuesRef.current,
+        [StoreSpecificValueKey.IsInCart]: {
+          ...storeSpecificValuesRef.current?.[StoreSpecificValueKey.IsInCart],
+          [currentStore?.name || EMPTY_STRING]: shouldAddToCart,
+        },
+      } as StoreSpecificValues;
 
-    onSave &&
-      onSave({
-        item: itemToSave,
-        storeSpecificValues: storeSpecificValuesToUse,
-        currentStore,
-        originalKey: originalKey || EMPTY_STRING,
-      });
-    onClose && onClose();
-  }, [
-    currentStore,
-    formData,
-    frequencyInMsRef,
-    itemToUse,
-    onClose,
-    onSave,
-    originalKey,
-    selectedUrl,
-    shouldAddToCart,
-    shouldDeleteLastImageRef,
-    storeSpecificValuesRef,
-    unitRef,
-  ]);
+      const originalKeyToUse =
+        (lastSavedKeyRef.current
+          ? { upc: lastSavedKeyRef.current }
+          : originalKey) || EMPTY_STRING;
+      onSave &&
+        onSave({
+          item: itemToSave,
+          storeSpecificValues: storeSpecificValuesToUse,
+          currentStore,
+          originalKey: originalKeyToUse,
+        });
+      lastSavedKeyRef.current = getKeyToUse(originalKeyToUse);
+      shouldClose && onClose && onClose();
+    },
+    [
+      currentStore,
+      formData,
+      frequencyInMsRef,
+      itemToUse,
+      lastSavedKeyRef,
+      onClose,
+      onSave,
+      originalKey,
+      shouldAddToCart,
+      shouldDeleteLastImageRef,
+      storeSpecificValuesRef,
+      unitRef,
+    ],
+  );
+
+  const handleAutoSave = useCallback(() => {
+    clearInterval(autoSaveTimeoutRef.current);
+    if (!autoSave || isSavingDisabled) return;
+
+    const key = getKeyToUse(formData);
+
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      if (!key) return;
+      onSavePress(false);
+    }, AUTO_SAVE_DEBOUNCE_THRESHOLD);
+
+    return () => {
+      clearInterval(autoSaveTimeoutRef.current);
+    };
+  }, [autoSave, isSavingDisabled, autoSaveTimeoutRef, formData, onSavePress]);
 
   const onFrequencyChange = useCallback(
     (frequencyInMs: number) => {
       frequencyInMsRef.current = frequencyInMs;
+      handleAutoSave();
     },
     [frequencyInMsRef],
   );
@@ -213,12 +241,14 @@ export function ItemForm(props: ItemFormProps) {
   const onItemSpecificValueChange = useCallback(
     (storeSpecificValuesLocal: StoreSpecificValues) => {
       storeSpecificValuesRef.current = storeSpecificValuesLocal;
+      handleAutoSave();
     },
     [storeSpecificValuesRef],
   );
 
   const onUnitChange = useCallback((unit: string) => {
     unitRef.current = unit;
+    handleAutoSave();
   }, []);
 
   //handle deleting images
@@ -244,6 +274,10 @@ export function ItemForm(props: ItemFormProps) {
     };
   }, []);
 
+  useEffect(() => {
+    handleAutoSave();
+  }, [formData]);
+
   return (
     <AbsolutePositionedScreen
       absolutelyPositionedJsx={
@@ -253,7 +287,7 @@ export function ItemForm(props: ItemFormProps) {
               <Button
                 isDisabled={isSavingDisabled}
                 flex={1}
-                onPress={onSavePress}
+                onPress={() => onSavePress()}
               >
                 Save
               </Button>
@@ -349,11 +383,11 @@ export function ItemForm(props: ItemFormProps) {
           variant="outline"
           p={theme.space[1]}
           placeholder="Thumbnail Image Url"
-          value={selectedUrl}
+          value={formData.selectedUrl}
         />
         <ThumbnailPicker
           spacing={theme.space[FORM_INTER_ITEM_SPACING]}
-          selectedUrl={selectedUrl}
+          selectedUrl={formData.selectedUrl}
           onSelectImage={(url, isCustomImage) => {
             if (isCustomImage) {
               customImagesToDeleteOnUnloadRef.current.push(url);
@@ -368,7 +402,10 @@ export function ItemForm(props: ItemFormProps) {
               });
               itemToUse?.images.push(url);
             }
-            setSelectedUrl(url);
+            setFormData((current) => ({
+              ...current,
+              selectedUrl: url,
+            }));
           }}
           imagesToRender={new Set(itemToUse?.images)}
         />

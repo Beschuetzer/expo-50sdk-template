@@ -1,11 +1,21 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { theme, Button, View, Column, Heading, Input, Text, Center } from 'native-base';
+import {
+  theme,
+  Button,
+  View,
+  Column,
+  Heading,
+  Input,
+  Text,
+  Center,
+} from 'native-base';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
+import { useRenderCount } from '../hooks/useRenderCount';
 import { ItemTileCopyModal } from '../tiles/ItemTileCopyModal';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -43,6 +53,7 @@ export default function CopyValueModal(props: CopyValueModalProps) {
     () => values[currentlySelectedKey],
     [values, currentlySelectedKey],
   );
+  const renderCountRef = useRenderCount();
 
   const [valuesToShow, setValuesToShow] = useState(valuesList);
 
@@ -61,11 +72,13 @@ export default function CopyValueModal(props: CopyValueModalProps) {
   }, [onCancel, reset]);
 
   useEffect(() => {
+    if (!filterValue) {
+      setValuesToShow(valuesList);
+      return;
+    }
+
     const filteredValues = valuesList.filter(([key, value, item]) => {
-      if (
-        !!filterValue &&
-        (key?.match(filterValue) || item?.name?.match(filterValue))
-      ) {
+      if (key?.match(filterValue) || item?.name?.match(filterValue)) {
         return [key, value];
       }
     });

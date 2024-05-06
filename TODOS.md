@@ -7,6 +7,9 @@
 
 -add ErrorBoundary lib
 -add free mongodb or sql server integration into bff to be able to save things 
+-add a way to copy a store
+    --a button which copies the store specific values but uses the name/address/gps/etc on the StoreForm.
+    --there would need to be a way to keep the values in sync (need new POS which tracks copies and then runs once every time the app starts or just checks the new POS to also make changes for any "copies") 
 
 -create a basic backend for grocify and see if heroku can host it on current plan
 -add a button/menu option in shopping tab to for "shopping mode", which opens a drawer that scans barcodes and then moves that barcode (if found in shopping list to in cart list).

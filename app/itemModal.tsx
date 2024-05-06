@@ -1,15 +1,14 @@
 import { useRoute } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { Center, theme, Heading, Text } from 'native-base';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemForm } from '@/components/forms/ItemForm';
+import { ItemForm, ItemFormOnSave } from '@/components/forms/ItemForm';
 import { useUpcProduct } from '@/components/hooks/useUpcProduct';
 import { EMPTY_STRING } from '@/constants/general';
 import {
-  AddItemsListItemPayload,
   ListName,
   addItemsListItem,
   currentStoreSelector,
@@ -21,7 +20,7 @@ import {
   canOverrideItemSelector,
   nameOrderTemplateSelector,
 } from '@/state/slices/optionsSlice';
-import { ItemWithStoreSpecificValues } from '@/types/Item';
+import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 import { getKeyToUse } from '@/utils/helpers';
 import { getItem } from '@/utils/model-mappings';
@@ -40,11 +39,13 @@ export default function ItemModal() {
   const itemInList = useSelector(
     itemsListItemSelector(keyToUse || EMPTY_STRING),
   );
+  const originalKeyRef = useRef<Key>(key);
+  const canSkipUseUpcProductRef = useRef(false);
   const canOverrideItem = useSelector(canOverrideItemSelector);
 
   const { upcProduct, errorMsg } = useUpcProduct({
     upc: key?.upc,
-    shouldSkip: !!itemInList,
+    shouldSkip: !!itemInList && canSkipUseUpcProductRef.current,
   });
   const currentStore = useSelector(currentStoreSelector);
   const autoSaveItems = useSelector(autoSaveItemsSelector);
@@ -52,15 +53,20 @@ export default function ItemModal() {
   const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
   const itemsList = useSelector(itemsListSelector);
 
-  const onClosePress = useCallback(() => {
+  const handleClose = useCallback(() => {
     navigation.canGoBack() && navigation.goBack();
   }, [navigation]);
 
-  const onSavePress = useCallback(
-    (addItemsListItemPayload: AddItemsListItemPayload) => {
-      dispatch(addItemsListItem(addItemsListItemPayload));
+  const handleSave = useCallback(
+    (onSavePayload: ItemFormOnSave) => {
+      const { hasKeyChanged, item } = onSavePayload;
+      if (hasKeyChanged) {
+        originalKeyRef.current = item;
+      }
+      canSkipUseUpcProductRef.current = onSavePayload.hasKeyChanged;
+      dispatch(addItemsListItem(onSavePayload));
     },
-    [],
+    [canSkipUseUpcProductRef, originalKeyRef],
   );
 
   function getItemFromUpc(upcProduct: UpcProduct | null) {
@@ -93,14 +99,14 @@ export default function ItemModal() {
 
     return (
       <ItemForm
-        originalKey={key}
+        originalKey={originalKeyRef.current}
         canOverrideItem={canOverrideItem}
         currentStore={currentStore}
         items={itemsList.data}
         item={fallbackItem as ItemWithStoreSpecificValues}
         itemInList={itemInList}
-        onClose={onClosePress}
-        onSave={onSavePress}
+        onClose={handleClose}
+        onSave={handleSave}
         showOverrideMsgInitial={showOverrideMsg}
         shouldFocusFirstField={!itemInList}
         shouldAddQuantity={callerList === ListName.ShoppingList}

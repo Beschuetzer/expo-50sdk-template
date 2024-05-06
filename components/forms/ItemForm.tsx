@@ -44,6 +44,10 @@ type ItemFormValdation = {
   message: string;
 };
 
+export type ItemFormOnSave = {
+  hasKeyChanged: boolean;
+} & AddItemsListItemPayload;
+
 type ItemFormData = {
   selectedUrl: string;
 } & Required<Pick<Item, 'name' | 'upc'>>;
@@ -54,7 +58,7 @@ export type ItemFormProps = {
   canOverrideItem?: boolean;
   currentStore?: Store;
   onClose: () => void;
-  onSave: (addItemsListItemPayload: AddItemsListItemPayload) => void;
+  onSave: (onSavePayload: ItemFormOnSave) => void;
   showOverrideMsgInitial?: boolean;
   shouldFocusFirstField?: boolean;
   shouldAddQuantity?: boolean;
@@ -188,14 +192,16 @@ export function ItemForm(props: ItemFormProps) {
         (lastSavedKeyRef.current
           ? { upc: lastSavedKeyRef.current }
           : originalKey) || EMPTY_STRING;
+      const lastSaveKey = getKeyToUse(originalKeyToUse);
+      const currentKey = getKeyToUse(itemToSave);
       onSave &&
         onSave({
           item: itemToSave,
           storeSpecificValues: storeSpecificValuesToUse,
           currentStore,
           originalKey: originalKeyToUse,
+          hasKeyChanged: currentKey !== lastSaveKey,
         });
-      lastSavedKeyRef.current = getKeyToUse(originalKeyToUse);
       shouldClose && onClose && onClose();
     },
     [

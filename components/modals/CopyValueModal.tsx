@@ -53,8 +53,6 @@ export default function CopyValueModal(props: CopyValueModalProps) {
     () => values[currentlySelectedKey],
     [values, currentlySelectedKey],
   );
-  const renderCountRef = useRenderCount();
-
   const [valuesToShow, setValuesToShow] = useState(valuesList);
 
   const reset = useCallback(() => {

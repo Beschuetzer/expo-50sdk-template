@@ -1,61 +1,118 @@
-import { useRoute } from "@react-navigation/native";
-import { useNavigation } from "expo-router";
-import { Center, theme, Heading, Text } from "native-base";
-import { useMemo } from "react";
-import { ActivityIndicator } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useRoute } from '@react-navigation/native';
+import { useNavigation } from 'expo-router';
+import { Center, theme, Heading, Text } from 'native-base';
+import { useCallback, useMemo, useRef } from 'react';
+import { ActivityIndicator } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { ItemForm } from "@/components/ItemForm";
-import { useUpcProduct } from "@/components/useUpcData";
+import { ItemForm, ItemFormOnSave } from '@/components/forms/ItemForm';
+import { useUpcProduct } from '@/components/hooks/useUpcProduct';
+import { EMPTY_STRING } from '@/constants/general';
 import {
+  ListName,
   addItemsListItem,
+  currentStoreSelector,
   itemsListItemSelector,
-} from "@/state/slices/listsSlice";
-import { getItem } from "@/utils/model-mappings";
+  itemsListSelector,
+} from '@/state/slices/listsSlice';
+import {
+  autoSaveItemsSelector,
+  canOverrideItemSelector,
+  nameOrderTemplateSelector,
+} from '@/state/slices/optionsSlice';
+import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
+import { UpcProduct } from '@/types/UpcResponse';
+import { getKeyToUse } from '@/utils/helpers';
+import { getItem } from '@/utils/model-mappings';
 
 export default function ItemModal() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const route = useRoute();
-  const { key, showOverrideMsg } = route.params as any;
+  const {
+    key,
+    showOverrideMsg,
+    showBlank = false,
+    callerList,
+  } = (route.params || {}) as any;
+  const keyToUse = getKeyToUse(key);
+  const itemInList = useSelector(
+    itemsListItemSelector(keyToUse || EMPTY_STRING),
+  );
+  const originalKeyRef = useRef<Key>(key);
+  const canSkipUseUpcProductRef = useRef(false);
+  const canOverrideItem = useSelector(canOverrideItemSelector);
+
   const { upcProduct, errorMsg } = useUpcProduct({
-    upc: key,
+    upc: key?.upc,
+    shouldSkip: !!itemInList && canSkipUseUpcProductRef.current,
   });
-  const itemInList = useSelector(itemsListItemSelector(key));
+  const currentStore = useSelector(currentStoreSelector);
+  const autoSaveItems = useSelector(autoSaveItemsSelector);
+  const nameOrderTemplate = useSelector(nameOrderTemplateSelector);
+  const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
+  const itemsList = useSelector(itemsListSelector);
+
+  const handleClose = useCallback(() => {
+    navigation.canGoBack() && navigation.goBack();
+  }, [navigation]);
+
+  const handleSave = useCallback(
+    (onSavePayload: ItemFormOnSave) => {
+      const { hasKeyChanged, item } = onSavePayload;
+      if (hasKeyChanged) {
+        originalKeyRef.current = item;
+      }
+      canSkipUseUpcProductRef.current = onSavePayload.hasKeyChanged;
+      dispatch(addItemsListItem(onSavePayload));
+    },
+    [canSkipUseUpcProductRef, originalKeyRef],
+  );
+
+  function getItemFromUpc(upcProduct: UpcProduct | null) {
+    const item = getItem({ upcProduct, nameOrderTemplate });
+    if (itemInList) {
+      item.images = itemInList.images;
+      item.imageToUseIndex = itemInList.imageToUseIndex;
+    }
+    return item;
+  }
 
   function renderContent() {
-    if (upcProduct) {
-      const item = getItem(upcProduct);
-      if (itemInList) {
-        item.images = itemInList.images;
-        item.imageToUseIndex = itemInList.imageToUseIndex;
-      }
-
+    if (!itemInList && !upcProduct && !showBlank) {
       return (
-        <ItemForm
-          onClose={() => navigation.canGoBack() && navigation.goBack()}
-          onSave={(item) => {
-            dispatch(addItemsListItem(item));
-          }}
-          item={item}
-          showOverrideMsg={showOverrideMsg}
-        />
+        <Center height="100%">
+          {errorMsg ? (
+            <>
+              <Heading>Error Fetching Data</Heading>
+              <Text>{errorMsg}</Text>
+            </>
+          ) : (
+            <>
+              <ActivityIndicator size="large" color={theme.colors.black} />
+              <Text>Checking for Upc data...</Text>
+            </>
+          )}
+        </Center>
       );
     }
+
     return (
-      <Center height="100%">
-        {errorMsg ? (
-          <>
-            <Heading>Error Fetching Data</Heading>
-            <Text>{errorMsg}</Text>
-          </>
-        ) : (
-          <>
-            <ActivityIndicator size="large" color={theme.colors.black} />
-            <Text>Checking for Upc data...</Text>
-          </>
-        )}
-      </Center>
+      <ItemForm
+        originalKey={originalKeyRef.current}
+        canOverrideItem={canOverrideItem}
+        currentStore={currentStore}
+        items={itemsList.data}
+        item={fallbackItem as ItemWithStoreSpecificValues}
+        itemInList={itemInList}
+        onClose={handleClose}
+        onSave={handleSave}
+        showOverrideMsgInitial={showOverrideMsg}
+        shouldFocusFirstField={!itemInList}
+        shouldAddQuantity={callerList === ListName.ShoppingList}
+        shouldAddToCart={callerList === ListName.InCartList}
+        autoSave={autoSaveItems && (!!itemInList || !!callerList)}
+      />
     );
   }
 

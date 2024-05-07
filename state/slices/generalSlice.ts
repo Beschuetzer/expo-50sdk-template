@@ -1,34 +1,31 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
 
-import { RootState } from "../store";
+import { RootState } from '../store';
 
-import { UpcProduct } from "@/types/UpcResponse";
-import { getEmptyObject } from "@/utils/helpers";
+const SHOULD_MOCK_SCANNED_RESPONSES = false;
 
 export type GeneralState = {
-  lastUpcScanned: string;
-  upcProductToDisplay: UpcProduct;
+  shouldMockScannedResponses: boolean;
 };
 
-const LAST_UPC_SCANNED_INITIAL = "";
-
 const initialState: GeneralState = {
-  lastUpcScanned: LAST_UPC_SCANNED_INITIAL,
-  upcProductToDisplay: getEmptyObject(),
+  shouldMockScannedResponses: SHOULD_MOCK_SCANNED_RESPONSES,
 };
 
 export const generalSlice = createSlice({
-  name: "general",
+  name: 'general',
   initialState,
   reducers: {
-   
+    toggleShouldShouldMockScannedResponses: (state: GeneralState) => {
+      state.shouldMockScannedResponses = !state.shouldMockScannedResponses;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const {
-} = generalSlice.actions;
+export const { toggleShouldShouldMockScannedResponses } = generalSlice.actions;
 
 export default generalSlice.reducer;
 
+export const shouldShouldMockScannedResponsesSelector = (state: RootState) =>
+  state[generalSlice.name].shouldMockScannedResponses;

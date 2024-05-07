@@ -1,9 +1,9 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { Row, Text, useTheme } from "native-base";
+import { FontAwesome } from '@expo/vector-icons';
+import { Row, Text, useTheme } from 'native-base';
 
-import { StyleProp } from "@/types/general";
+import { StyleProp } from '@/types/general';
 
-type InputValidationMessageProps = {
+export type InputValidationMessageProps = {
   isValid: boolean;
   message: string;
 } & StyleProp;
@@ -13,7 +13,7 @@ export function InputValidationMessage(props: InputValidationMessageProps) {
 
   return (
     <Row
-      display={!isValid ? "block" : "none"}
+      display={!isValid ? 'block' : 'none'}
       justifyContent="flex-start"
       style={style}
       alignItems="center"
@@ -27,7 +27,7 @@ export function InputValidationMessage(props: InputValidationMessageProps) {
       <Text
         fontSize={theme.fontSizes.xs}
         pl={3}
-        color={isValid ? "black" : "red.900"}
+        color={isValid ? 'black' : 'red.900'}
       >
         {message}
       </Text>

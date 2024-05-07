@@ -1,6 +1,31 @@
-import { XOR } from "ts-xor";
+import { XOR } from 'ts-xor';
 
-import { Store } from "./Store";
+import { Store } from './Store';
+
+import { ListFilterFilters } from '@/components/lists/ListFilter';
+import { ListName, SortOrderValue } from '@/state/slices/listsSlice';
+
+export enum ItemUnit {
+  Bar = 'bar',
+  Bunch = 'bunch',
+  Can = 'can',
+  Case = 'case',
+  Cups = 'c',
+  Dozen = 'dozen',
+  Each = 'ea',
+  FluidOunce = 'fl oz',
+  Gallon = 'gal',
+  Jar = 'jar',
+  Kilogram = 'kg',
+  Ounce = 'oz',
+  Package = 'package',
+  Pint = 'pt',
+  Pound = 'lb',
+  Quart = 'qt',
+  Tablespoon = 'tbsp',
+  Teaspoon = 'tsp',
+  Custom = 'Custom',
+}
 
 export type Key = XOR<
   {
@@ -13,41 +38,72 @@ export type Key = XOR<
   }
 >;
 
-/**
- *This represents something that can be added to any store
- **/
-export type Item = Key & {
-  images: string[];
-  imageToUseIndex: number;
+export type ItemBase = {
+  addedDate: number;
   /**
    *This is in milliseconds
    **/
   frequency?: number;
+  fullscreenImage?: string;
+  images: string[];
+  imageToUseIndex: number;
+  lastUpdatedDate: number;
+  unit: string;
 };
 
 /**
- *This is an item when it is in the shoppingList (and has a store associated with it)
+ *This represents something that can be added to any store
  **/
-export type ShoppingItem = {
-  aisle?: string;
-  quantity: number;
-  price?: number;
-  /**
-  *This is the id unique to this store (could be useful if able to scan receipts and extract pricing item based on item id)
-  **/
-  itemId?: string;
-  /**
-   *Something like 'box', 'kg', or 'bottle'
-   **/
-  unit?: string;
-} & Item;
+export type Item = Key & ItemBase;
+export type ItemWithStoreSpecificValues = Item & StoreSpecificValues;
+export type PrevioulsyPurchasedItem = ItemWithStoreSpecificValues & {
+  isRecommended: boolean;
+};
+
+export enum StoreSpecificValueKey {
+  AisleNumber = 'aisleNumber',
+  ItemId = 'itemId',
+  Price = 'price',
+  Quantity = 'quantity',
+  IsInCart = 'isInCart',
+}
+
+/**
+ *Maps the item key to the store specific values
+ **/
+export type StoreSpecificValuesMap = { [key: string]: StoreSpecificValues };
+export type LastPurchasedMap = { [key: string]: StoreSpecificValue<number> };
+
+/**
+ *These are fields which vary based on the store
+ **/
+export type StoreSpecificValues = {
+  [StoreSpecificValueKey.AisleNumber]: StoreSpecificValue<number>;
+  [StoreSpecificValueKey.IsInCart]: StoreSpecificValue<boolean>;
+  [StoreSpecificValueKey.ItemId]: StoreSpecificValue<string>;
+  [StoreSpecificValueKey.Price]: StoreSpecificValue<number>;
+  [StoreSpecificValueKey.Quantity]: StoreSpecificValue<number>;
+} | null;
+
+export type StoreSpecificValue<T> =
+  | { [storeKey: string]: T }
+  | null
+  | undefined;
+export type StoreSpecificValueUpdater = Partial<{
+  [key in StoreSpecificValueKey]: (currentValue: any) => any;
+}>;
 
 export type LastPurchasedItem = Key & {
   lastPurchaseDate: number;
 };
 
-type UpcOrName = string;
-export type ItemsList = { [upcOrName: UpcOrName]: Item };
-export type ShoppingList = { [upcOrName: UpcOrName]: ShoppingItem };
-export type LastPurchasedList = { [upcOrName: UpcOrName]: LastPurchasedItem };
-export type StoreList = { [name: string]: Store };
+export type List<T> = {
+  data: T[];
+  sortOrderValue: SortOrderValue;
+  filters: ListFilterFilters<T>;
+};
+export type ListFilters = { [key in ListName]: ListFilterFilters<any> };
+export type ItemsList = List<Item>;
+export type ShoppingList = List<ItemWithStoreSpecificValues>;
+export type LastPurchasedList = List<LastPurchasedItem>;
+export type StoreList = List<Store>;

@@ -1,10 +1,11 @@
-import { createSelector, createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { RootState } from "../store";
+import { RootState } from '../store';
 
-import { UpcProduct, UpcResponse } from "@/types/UpcResponse";
-import { getKeyToUse } from "@/utils/helpers";
+import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import { UpcProduct } from '@/types/UpcResponse';
+import { getKeyToUse } from '@/utils/helpers';
 
 type Upc = string;
 export type TimeStamp = {
@@ -22,7 +23,7 @@ const initialState: ScannerState = {
 };
 
 export const scannerSlice = createSlice({
-  name: "scanner",
+  name: 'scanner',
   initialState,
   reducers: {
     addUpcProduct: (state: ScannerState, action: PayloadAction<UpcProduct>) => {
@@ -41,6 +42,7 @@ export const scannerSlice = createSlice({
         );
         return;
       }
+
       state.upcProducts[keyToUse] = {
         ...action.payload,
         timestamp: Date.now(),
@@ -56,12 +58,23 @@ export const scannerSlice = createSlice({
     resetUpcProducts: (state: ScannerState) => {
       state.upcProducts = UPC_PRODUCTS_INITIAL;
     },
+    setUpcProducts: (
+      state: ScannerState,
+      action: PayloadAction<UpcProducts>,
+    ) => {
+      if (!action.payload) return;
+      state.upcProducts = action.payload;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { addUpcProduct, deleteUpcProduct, resetUpcProducts } =
-  scannerSlice.actions;
+export const {
+  addUpcProduct,
+  deleteUpcProduct,
+  resetUpcProducts,
+  setUpcProducts,
+} = scannerSlice.actions;
 
 export default scannerSlice.reducer;
 
@@ -75,7 +88,10 @@ export const upcProductSelector = (id: string) =>
         (state[scannerSlice.name] as ScannerState).upcProducts,
     ],
     (upcProducts) => {
-      const value = (upcProducts as any)?.[id];
-      return value as UpcProduct;
+      const valueOne =
+        upcProducts?.[id.padStart(UPC_REQUIRED_CHAR_LENGTH + 1, '0')];
+      const valueTwo = upcProducts?.[id];
+      const valueThree = upcProducts?.[id.substring(1)];
+      return (valueOne || valueTwo || valueThree) as UpcProduct;
     },
   );

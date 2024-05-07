@@ -1,0 +1,141 @@
+import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import { useNavigation } from 'expo-router';
+import { Button, Row, FormControl, Input, useTheme, Stack } from 'native-base';
+import { useEffect, useState, useRef } from 'react';
+import { Dimensions } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
+import { InputValidationMessage } from '@/components/InputValidationMessage';
+import { AutoSaveStoresToggle } from '@/components/options/AutoSaveStoresToggle';
+import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
+import { CanOverrideItemToggle } from '@/components/options/CanOverrideItemToggle';
+import { CanOverrideStoreToggle } from '@/components/options/CanOverrideStoreToggle';
+import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider';
+import { NameOrderSpecifier } from '@/components/options/NameOrderSpecifier';
+import { SaveLoadState } from '@/components/options/SaveLoadState';
+import {
+  FORM_INTER_ITEM_SPACING,
+  SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
+} from '@/constants/general';
+import { Routes } from '@/constants/navigation';
+import { setCurrentLocation } from '@/state/slices/listsSlice';
+import {
+  setSwipeableRowOpenThreshold,
+  swipeableRowOpenThresholdSelector,
+} from '@/state/slices/optionsSlice';
+import { getGpsCoordinate } from '@/utils/helpers';
+import { AutoSaveItemsToggle } from '@/components/options/AutoSaveItemsToggle';
+
+const DEBOUNCE_TIMEOUT = 500;
+
+export default function OptionsScreen() {
+  const openThreshhold = useSelector(swipeableRowOpenThresholdSelector);
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const theme = useTheme();
+  const windowDimensions = Dimensions.get('window');
+  const debounceHandlerRef = useRef<{ [key: string]: any }>({});
+
+  const maxAllowableSwipeThreshold = Math.round(
+    (windowDimensions.width * 47.5) / 100,
+  );
+
+  //any new state should be updated in useEffect below when it changes, due to how values are being updated in redux
+  const [swipeableRowOpenThresholdValue, setSwipeableRowOpenThresholdValue] =
+    useState(openThreshhold.toString());
+
+  function onDonePress() {
+    navigation.goBack();
+  }
+
+  function handleReduxUpdate(
+    key: string,
+    text: string,
+    toDispatch: ActionCreatorWithPayload<any>,
+    textTransformer: (text: string) => void,
+  ) {
+    clearTimeout(debounceHandlerRef.current[key]);
+    debounceHandlerRef.current[key] = setTimeout(() => {
+      const transformed = textTransformer ? textTransformer(text) : text;
+      dispatch(toDispatch(transformed));
+    }, DEBOUNCE_TIMEOUT);
+  }
+
+  useEffect(() => {
+    setSwipeableRowOpenThresholdValue(openThreshhold.toString());
+  }, [openThreshhold]);
+
+  return (
+    <AbsolutePositionedScreen
+      absolutelyPositionedJsx={
+        <>
+          <Row space={3}>
+            <Button flex={1} onPress={onDonePress}>
+              Done
+            </Button>
+          </Row>
+        </>
+      }
+    >
+      <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <NameOrderSpecifier />
+        <SaveLoadState />
+        <AutoSetStoreToggle />
+        <AutoSaveItemsToggle />
+        <CanOverrideItemToggle />
+        <AutoSaveStoresToggle />
+        <CanOverrideStoreToggle />
+        <FormControl.Label>
+          Item Row Open Threshold (default ={' '}
+          {SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT}):
+        </FormControl.Label>
+        <Row space={theme.space[FORM_INTER_ITEM_SPACING]} alignItems="center">
+          <Input
+            flex={1}
+            variant="outline"
+            keyboardType="numeric"
+            p={theme.space[1]}
+            placeholder="Value in pixels"
+            value={swipeableRowOpenThresholdValue}
+            onChangeText={(text) => {
+              handleReduxUpdate(
+                'swipeOpenThreshold',
+                text,
+                setSwipeableRowOpenThreshold,
+                (text) => {
+                  const parsedInt = parseInt(text, 10);
+                  const toReturn = Math.max(
+                    0,
+                    Math.min(parsedInt, maxAllowableSwipeThreshold),
+                  );
+                  return toReturn;
+                },
+              );
+              setSwipeableRowOpenThresholdValue(text);
+            }}
+          />
+          <FormControl.Label>px</FormControl.Label>
+        </Row>
+        <InputValidationMessage
+          isValid={Math.round(openThreshhold) < maxAllowableSwipeThreshold}
+          message={`The current value will be set to ${maxAllowableSwipeThreshold}, since that is the max allowed for this device.`}
+        />
+        <CustomImageQualitySlider />
+      </Stack>
+      <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <Button
+          onPress={async () => {
+            const currentGpsCoordinate = await getGpsCoordinate();
+            dispatch(setCurrentLocation(currentGpsCoordinate));
+          }}
+        >
+          Update Current Location
+        </Button>
+        <Button onPress={() => navigation.navigate(Routes.DevOptionsScreen)}>
+          Developer Options
+        </Button>
+      </Stack>
+    </AbsolutePositionedScreen>
+  );
+}

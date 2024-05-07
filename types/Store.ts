@@ -1,9 +1,10 @@
 export type Store = {
   gpsCoordinates?: GpsCoordinate;
   name: string;
+  calculatedDistance?: number;
 };
 
-type GpsCoordinate = {
-  lat: number;
-  long: number;
+export type GpsCoordinate = {
+  lat: string;
+  lon: string;
 };

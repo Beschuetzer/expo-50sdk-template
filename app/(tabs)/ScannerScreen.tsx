@@ -65,6 +65,7 @@ export default function ScannerScreen() {
         navigation.navigate(Routes.ItemModal, {
           key: { upc, name: EMPTY_STRING },
           showOverrideMsg: false,
+          callerList: EMPTY_STRING,
         });
       }
     },

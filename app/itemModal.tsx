@@ -111,7 +111,7 @@ export default function ItemModal() {
         shouldFocusFirstField={!itemInList}
         shouldAddQuantity={callerList === ListName.ShoppingList}
         shouldAddToCart={callerList === ListName.InCartList}
-        autoSave={autoSaveItems}
+        autoSave={autoSaveItems && (!!itemInList || !!callerList)}
       />
     );
   }

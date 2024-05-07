@@ -1,7 +1,5 @@
 ## MVP
 -add options to auto-save items:
-    -ItemForm
-        -fix issue where each scanned item is automatically added when auto save is true?
     -test thoroughly with auto-save on/off
 
 -add ErrorBoundary lib

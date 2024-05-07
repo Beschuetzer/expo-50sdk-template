@@ -97,6 +97,7 @@ export function ItemsList(props: ItemsListProps) {
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
       key: { upc: EMPTY_STRING, name: EMPTY_STRING },
+      callerList: listName,
     });
   }
 

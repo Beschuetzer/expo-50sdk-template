@@ -1,8 +1,11 @@
 ## MVP
 -ideas for making saving to db easiest:
     -use a GUID that the frontend creates for each item.  This is then used as the id on the db 
+        -add _id to item field
         -how hard would this be to implement since getKeyToUse is used in many places
         -https://www.npmjs.com/package/uuid (use v5 with `${name}${upc}` as name string? or just use v4)
+
+-need to save stores the same way that items are saved
 
 -add ErrorBoundary lib
 -add a way to copy a store

@@ -5,7 +5,7 @@ import { GpsCoordinate } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
 import { Frequency, TimeSpan } from '@/types/general';
 
-export const AUTO_SAVE_ITEMS_INITIAL = true;
+export const AUTO_SAVE_ITEMS_INITIAL = false;
 export const AUTO_SAVE_STORES_INITIAL = false;
 export const AUTO_SAVE_DEBOUNCE_THRESHOLD = 500;
 export const AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL = 0.25;

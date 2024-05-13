@@ -1,4 +1,8 @@
 ## MVP
+-New feature to intelligently add items to the cart.  When scanning to add to cart, go through the previously purchased map:
+    1. If item only ever bought at any one store, add to that store.
+    2. Otherwise add to current store.
+
 -ideas for making saving to db easiest:
     -use a GUID that the frontend creates for each item.  This is then used as the id on the db 
         -add _id to item field

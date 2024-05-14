@@ -1,5 +1,6 @@
 ## MVP
 -New feature to intelligently add items to the cart.  When scanning to add to cart, go through the previously purchased map:
+    -add modal to ask if you want to add to the current store
     1. If item only ever bought at any one store, add to that store.
     2. Otherwise add to current store.
 

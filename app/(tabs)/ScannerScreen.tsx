@@ -2,7 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { CameraType } from 'expo-camera';
 import { useNavigation } from 'expo-router';
 import { Button, View, Row, Text, Heading, useTheme } from 'native-base';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,6 +17,7 @@ import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
 import {
   currentStoreSelector,
+  lastPurchasedMapSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import {
@@ -24,12 +25,17 @@ import {
   setScanningMode,
 } from '@/state/slices/optionsSlice';
 import { ScanningMode } from '@/types/general';
-import { getIsValidUpcValue, getStandardizedUpcValue } from '@/utils/helpers';
+import {
+  displayAlert,
+  getIsValidUpcValue,
+  getStandardizedUpcValue,
+} from '@/utils/helpers';
 
 const SNACKBAR_VISIBILITY_DURATION = 2500;
 export default function ScannerScreen() {
   const currentStore = useSelector(currentStoreSelector);
   const scanningMode = useSelector(scanningModeSelector);
+  const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
   const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
@@ -39,6 +45,7 @@ export default function ScannerScreen() {
   const lastScanTimeRef = useRef(-1);
   const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
   const [lastUpcScanned, setLastUpcScanned] = useState(EMPTY_STRING);
+  const storeNameToAddToListRef = useRef<string>(currentStore.name);
 
   const handleUpcNavigation = useCallback(
     (value: string, mode: ScanningMode, isItemInList: boolean) => {
@@ -49,6 +56,22 @@ export default function ScannerScreen() {
 
         if (modeToUse === ScanningMode.AddToCart) {
           if (isItemInList) {
+            const previouslyPurchasedItem = Object.entries(
+              lastPurchasedMap,
+            ).find(([key, value]) => {
+              return key === upc;
+            });
+            const storesPurchasedAt = Object.keys(
+              previouslyPurchasedItem?.[1] || {},
+            );
+
+            if (storesPurchasedAt.length === 1) {
+              const storeName = Object.keys(
+                previouslyPurchasedItem?.[1] || {},
+              )[0];
+              storeNameToAddToListRef.current = storeName;
+            }
+
             dispatch(
               updateStoreSpecificValues({
                 key: { upc },
@@ -56,6 +79,7 @@ export default function ScannerScreen() {
                   quantity: (currentQuantity: number) =>
                     currentQuantity > 0 ? currentQuantity + 1 : 1,
                 },
+                storeName: storeNameToAddToListRef.current,
               }),
             );
             setIsSnackbarVisible(true);
@@ -69,7 +93,7 @@ export default function ScannerScreen() {
         });
       }
     },
-    [scanningMode],
+    [scanningMode, lastPurchasedMap, storeNameToAddToListRef],
   );
 
   const onBarcodeScanned = useCallback(
@@ -96,6 +120,10 @@ export default function ScannerScreen() {
   const onModeChange = useCallback((newValue: ScanningMode) => {
     dispatch(setScanningMode(newValue));
   }, []);
+
+  useEffect(() => {
+    storeNameToAddToListRef.current = currentStore.name;
+  }, [currentStore.name]);
 
   if (hasPermission === null) {
     return <FullscreenSpinner />;
@@ -158,7 +186,8 @@ export default function ScannerScreen() {
         duration={SNACKBAR_VISIBILITY_DURATION}
       >
         <Text>
-          Added {lastUpcScanned} to shopping list for '{currentStore.name}'.
+          Added {lastUpcScanned} to shopping list for '
+          {storeNameToAddToListRef.current}'.
         </Text>
       </Snackbar>
     </View>

@@ -3,6 +3,7 @@ import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import _ from 'lodash';
+import React from 'react';
 import { Insets } from 'react-native';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
@@ -29,6 +30,7 @@ import { Item, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
 import { Address, Frequency, State, TimeSpan } from '@/types/general';
+import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
 
 export function calculateDistance(
   gpsCoordinateStart: GpsCoordinate | null | undefined,
@@ -409,6 +411,14 @@ export async function pickImage() {
   } catch (error) {
     console.log({ error });
   }
+}
+
+export function resetConfirmModalProps(
+  setConfirmModalProps: (
+    value: React.SetStateAction<ConfirmModalProps>,
+  ) => void,
+) {
+  setConfirmModalProps({ isVisible: false });
 }
 
 export async function retrieveImagePathFromAsyncStorage(key: Key) {

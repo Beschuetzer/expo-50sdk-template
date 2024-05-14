@@ -12,6 +12,10 @@ import { FullscreenSpinner } from '@/components/FullscreenSpinner';
 import { StoreManager } from '@/components/StoreManager';
 import { ManualUpcInput } from '@/components/forms/ManualUpcInput';
 import { useRequestCameraPermissions } from '@/components/hooks/useRequestCameraPermissions';
+import {
+  ConfirmModal,
+  ConfirmModalProps,
+} from '@/components/modals/ConfirmModal';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
@@ -26,9 +30,9 @@ import {
 } from '@/state/slices/optionsSlice';
 import { ScanningMode } from '@/types/general';
 import {
-  displayAlert,
   getIsValidUpcValue,
   getStandardizedUpcValue,
+  resetConfirmModalProps,
 } from '@/utils/helpers';
 
 const SNACKBAR_VISIBILITY_DURATION = 2500;
@@ -45,7 +49,27 @@ export default function ScannerScreen() {
   const lastScanTimeRef = useRef(-1);
   const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
   const [lastUpcScanned, setLastUpcScanned] = useState(EMPTY_STRING);
+  const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
+    {},
+  );
   const storeNameToAddToListRef = useRef<string>(currentStore.name);
+
+  const handleAddToList = useCallback(
+    (upc: string, storeName?: string) => {
+      dispatch(
+        updateStoreSpecificValues({
+          key: { upc },
+          storeSpecificValuesToUpdate: {
+            quantity: (currentQuantity: number) =>
+              currentQuantity > 0 ? currentQuantity + 1 : 1,
+          },
+          storeName,
+        }),
+      );
+      setIsSnackbarVisible(true);
+    },
+    [storeNameToAddToListRef],
+  );
 
   const handleUpcNavigation = useCallback(
     (value: string, mode: ScanningMode, isItemInList: boolean) => {
@@ -69,20 +93,34 @@ export default function ScannerScreen() {
               const storeName = Object.keys(
                 previouslyPurchasedItem?.[1] || {},
               )[0];
-              storeNameToAddToListRef.current = storeName;
+              if (currentStore.name !== storeName) {
+                setConfirmModalProps({
+                  isVisible: true,
+                  title: 'Add to a Different Store',
+                  message: `The item with upc of '${upc}' has only ever been purchased at ${storeName}.  Would you like to add it to ${storeName} instead of ${currentStore.name}?`,
+                  confirmButton: {
+                    text: 'Yes',
+                  },
+                  cancelButton: {
+                    text: 'No',
+                  },
+                  onCancel: () => {
+                    handleAddToList(upc, currentStore.name);
+                    storeNameToAddToListRef.current = currentStore.name;
+                    resetConfirmModalProps(setConfirmModalProps);
+                  },
+                  onConfirm: () => {
+                    handleAddToList(upc, storeName);
+                    resetConfirmModalProps(setConfirmModalProps);
+                    storeNameToAddToListRef.current = storeName;
+                  },
+                });
+              }
+              return;
             }
 
-            dispatch(
-              updateStoreSpecificValues({
-                key: { upc },
-                storeSpecificValuesToUpdate: {
-                  quantity: (currentQuantity: number) =>
-                    currentQuantity > 0 ? currentQuantity + 1 : 1,
-                },
-                storeName: storeNameToAddToListRef.current,
-              }),
-            );
-            setIsSnackbarVisible(true);
+            storeNameToAddToListRef.current = currentStore.name;
+            handleAddToList(upc, currentStore.name);
             return;
           }
         }
@@ -93,7 +131,13 @@ export default function ScannerScreen() {
         });
       }
     },
-    [scanningMode, lastPurchasedMap, storeNameToAddToListRef],
+    [
+      handleAddToList,
+      scanningMode,
+      lastPurchasedMap,
+      storeNameToAddToListRef,
+      currentStore,
+    ],
   );
 
   const onBarcodeScanned = useCallback(
@@ -190,6 +234,7 @@ export default function ScannerScreen() {
           {storeNameToAddToListRef.current}'.
         </Text>
       </Snackbar>
+      <ConfirmModal {...confirmModalProps} />
     </View>
   );
 }

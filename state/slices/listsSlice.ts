@@ -93,6 +93,7 @@ export type UpdateStoreSpecificValuesPayload = {
    *The new value for each store specific value
    **/
   storeSpecificValuesToUpdate: StoreSpecificValueUpdater;
+  storeName?: string;
 };
 //#endregion
 
@@ -757,7 +758,7 @@ export const listsSlice = createSlice({
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
     ) => {
       if (!action.payload) return;
-      const { storeSpecificValuesToUpdate, key } = action.payload;
+      const { storeSpecificValuesToUpdate, key, storeName } = action.payload;
       const keyToUse = getKeyToUse(key);
       if (!keyToUse || !storeSpecificValuesToUpdate) {
         alert(
@@ -766,7 +767,12 @@ export const listsSlice = createSlice({
         return;
       }
 
-      updateStoreSpecificValueMap(state, key, storeSpecificValuesToUpdate);
+      updateStoreSpecificValueMap(
+        state,
+        key,
+        storeSpecificValuesToUpdate,
+        storeName,
+      );
     },
   },
 });

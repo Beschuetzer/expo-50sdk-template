@@ -39,7 +39,7 @@ import {
 import { Key } from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ListRow } from '@/types/general';
-import { getKeyToUse } from '@/utils/helpers';
+import { getKeyToUse, resetConfirmModalProps } from '@/utils/helpers';
 
 type StoresListProps = object;
 
@@ -66,10 +66,6 @@ export function StoresList(props: StoresListProps) {
   const lastSortTypeRef = useRef(storesListSortTypes[0]);
   const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: storesList, title: 'Stores List' });
-
-  const resetConfirmModalProps = useCallback(() => {
-    setConfirmModalProps({ isVisible: false });
-  }, []);
 
   const closeMenu = useCallback(() => {
     menuRef.current?.close();
@@ -120,11 +116,11 @@ export function StoresList(props: StoresListProps) {
         title: 'Deleting Store',
         message: `Are you sure you want to delete '${keyToUse.name}'?`,
         note: 'This will remove all store-specific data related to this store.',
-        onCancel: () => resetConfirmModalProps(),
+        onCancel: () => resetConfirmModalProps(setConfirmModalProps),
         onConfirm: () => {
           dispatch(removeStoresListItem(keyToUse));
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-          resetConfirmModalProps();
+          resetConfirmModalProps(setConfirmModalProps);
         },
       });
     },

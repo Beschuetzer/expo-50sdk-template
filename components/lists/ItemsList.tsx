@@ -44,7 +44,12 @@ import {
 } from '@/state/slices/listsSlice';
 import { Item, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
-import { getKeyToUse, getNewViewingMode, joinWithAnd } from '@/utils/helpers';
+import {
+  getKeyToUse,
+  getNewViewingMode,
+  joinWithAnd,
+  resetConfirmModalProps,
+} from '@/utils/helpers';
 
 type ItemsListProps = object;
 
@@ -84,10 +89,6 @@ export function ItemsList(props: ItemsListProps) {
     return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
   }, [viewingMode]);
 
-  const resetConfirmModalProps = useCallback(() => {
-    setConfirmModalProps({ isVisible: false });
-  }, []);
-
   const closeMenu = useCallback(() => {
     menuRef.current?.close();
   }, [menuRef]);
@@ -124,11 +125,11 @@ export function ItemsList(props: ItemsListProps) {
       isVisible: true,
       title: 'Deleting Items',
       message: `Are you sure you want to delete ${joinWithAnd(selectedItems.map((item) => `'${item.name || item.upc}'`))}?`,
-      onCancel: () => resetConfirmModalProps(),
+      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: () => {
         dispatch(removeItemsListItems(selectedItems));
         resetMultiSelectionMode();
-        resetConfirmModalProps();
+        resetConfirmModalProps(setConfirmModalProps);
       },
     });
   }, [selectedItems, resetMultiSelectionMode]);
@@ -190,11 +191,11 @@ export function ItemsList(props: ItemsListProps) {
         cancelButton: {
           colorScheme: 'success',
         },
-        onCancel: () => resetConfirmModalProps(),
+        onCancel: () => resetConfirmModalProps(setConfirmModalProps),
         onConfirm: () => {
           dispatch(removeItemsListItems([item]));
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-          resetConfirmModalProps();
+          resetConfirmModalProps(setConfirmModalProps);
         },
       });
     },

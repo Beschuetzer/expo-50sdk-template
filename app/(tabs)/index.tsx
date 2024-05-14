@@ -61,7 +61,7 @@ import {
   addAllToShoppingCart,
   itemsPurchasedAtStoreSelector,
 } from '@/state/slices/listsSlice';
-import { getNewViewingMode } from '@/utils/helpers';
+import { getNewViewingMode, resetConfirmModalProps } from '@/utils/helpers';
 
 export default function TabOneScreen() {
   const theme = useTheme();
@@ -249,10 +249,10 @@ export default function TabOneScreen() {
     setConfirmModalProps({
       isVisible: true,
       message: 'Are you sure you want to clear the cart?',
-      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: () => {
         dispatch(clearShopping());
-        setConfirmModalProps({ isVisible: false });
+        resetConfirmModalProps(setConfirmModalProps);
       },
     });
   }, []);

@@ -23,7 +23,11 @@ import {
   setUpcProducts,
   upcProductsSelector,
 } from '@/state/slices/scannerSlice';
-import { loadAppStateFromFile, saveAppStateToFile } from '@/utils/helpers';
+import {
+  loadAppStateFromFile,
+  resetConfirmModalProps,
+  saveAppStateToFile,
+} from '@/utils/helpers';
 
 type SaveLoadStateProps = object;
 
@@ -54,7 +58,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       isVisible: true,
       message:
         'Loading items will delete all of your current items.  Continue?',
-      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: async () => {
         const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items);
         const storeSpecificValues = await loadAppStateFromFile(
@@ -68,7 +72,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         dispatch(setItemsList(itemsLoaded));
         dispatch(setLastPurchasedMap(lastPurchasedMap));
         dispatch(setUpcProducts(upcProducts));
-        setConfirmModalProps({ isVisible: false });
+        resetConfirmModalProps(setConfirmModalProps);
       },
     });
   }, []);
@@ -77,7 +81,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
     setConfirmModalProps({
       isVisible: true,
       message: 'Are you sure you want to save items?',
-      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: async () => {
         await saveAppStateToFile(FILE_NAMES.items, itemsList);
         await saveAppStateToFile(
@@ -86,7 +90,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         );
         await saveAppStateToFile(FILE_NAMES.lastPurchasedMap, lastPurchasedMap);
         await saveAppStateToFile(FILE_NAMES.upcProducts, upcProducts);
-        setConfirmModalProps({ isVisible: false });
+        resetConfirmModalProps(setConfirmModalProps);
       },
     });
   }, [upcProducts, itemsList, storeSpecificValues]);
@@ -96,12 +100,12 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       isVisible: true,
       message:
         'Loading stores will delete all of your current stores.  Continue?',
-      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: async () => {
         const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores);
         dispatch(setStoresList(storesLoaded));
         dispatch(setCurrentStoreName());
-        setConfirmModalProps({ isVisible: false });
+        resetConfirmModalProps(setConfirmModalProps);
       },
     });
   }, []);
@@ -110,13 +114,13 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
     setConfirmModalProps({
       isVisible: true,
       message: 'Are you sure you want to save stores?',
-      onCancel: () => setConfirmModalProps({ isVisible: false }),
+      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: async () => {
         await saveAppStateToFile(FILE_NAMES.stores, {
           ...stores,
           currentStoreName: currentStore.name,
         });
-        setConfirmModalProps({ isVisible: false });
+        resetConfirmModalProps(setConfirmModalProps);
       },
     });
   }, [stores]);

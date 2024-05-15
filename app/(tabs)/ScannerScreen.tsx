@@ -89,34 +89,48 @@ export default function ScannerScreen() {
               previouslyPurchasedItem?.[1] || {},
             );
 
-            if (storesPurchasedAt.length === 1) {
-              const storeName = Object.keys(
-                previouslyPurchasedItem?.[1] || {},
-              )[0];
-              if (currentStore.name !== storeName) {
+            if (storesPurchasedAt.length >= 1) {
+              if (!storesPurchasedAt.includes(currentStore.name)) {
+                const storeName = Object.keys(
+                  previouslyPurchasedItem?.[1] || {},
+                )[0];
+                const message =
+                  storesPurchasedAt.length === 1
+                    ? `The item with upc of '${upc}' has only ever been purchased at ${storeName}.  Would you like to add it to ${storeName} instead of ${currentStore.name}?`
+                    : `The upc '${upc}' has never been purchased at ${currentStore.name}.  Would you like to add it to one of these stores instead?`;
+                const textYes =
+                  storesPurchasedAt.length === 1 ? 'Yes' : `Add to Selected`;
+                const textNo =
+                  storesPurchasedAt.length === 1 ? 'No' : `Add to Current`;
+
                 setConfirmModalProps({
                   isVisible: true,
                   title: 'Add to a Different Store',
-                  message: `The item with upc of '${upc}' has only ever been purchased at ${storeName}.  Would you like to add it to ${storeName} instead of ${currentStore.name}?`,
+                  message,
                   confirmButton: {
-                    text: 'Yes',
+                    text: textYes,
                   },
                   cancelButton: {
-                    text: 'No',
+                    text: textNo,
                   },
+                  items: storesPurchasedAt,
                   onCancel: () => {
                     handleAddToList(upc, currentStore.name);
                     storeNameToAddToListRef.current = currentStore.name;
                     resetConfirmModalProps(setConfirmModalProps);
                   },
-                  onConfirm: () => {
-                    handleAddToList(upc, storeName);
+                  onConfirm: (selectedStore?: string) => {
                     resetConfirmModalProps(setConfirmModalProps);
-                    storeNameToAddToListRef.current = storeName;
+                    if (!selectedStore && storesPurchasedAt.length > 1) {
+                      return;
+                    }
+                    const storeToUse = selectedStore || storeName;
+                    handleAddToList(upc, storeToUse);
+                    storeNameToAddToListRef.current = storeToUse;
                   },
                 });
+                return;
               }
-              return;
             }
 
             storeNameToAddToListRef.current = currentStore.name;

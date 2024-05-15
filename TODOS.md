@@ -1,7 +1,5 @@
 ## MVP
--make a modal component called SelectorModal, which allows one to select an item from many items (refernce ItemFormStoreSpecificValuesStoreModal and ForwardGeoCodingModal)
-    -alternatively, can just add a prop in ConfirmModal and have it handle that case
--change ConfirmModal to select from all previously purchased stores when scanning to an item if the storeName count > 1 and the current store is not in the list of stores previously purchased from
+
 
 -ideas for making saving to db easiest:
     -use a GUID that the frontend creates for each item.  This is then used as the id on the db 

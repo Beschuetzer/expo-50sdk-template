@@ -1,14 +1,16 @@
-import { Text, useTheme } from 'native-base';
-import React from 'react';
+import { Button, ScrollView, Text, useTheme } from 'native-base';
+import React, { useCallback, useState } from 'react';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 
 export type ConfirmModalProps = {
+  items?: string[];
   message?: string;
   note?: string;
-} & Omit<ModalWithBlurProps, 'children' | 'title'> &
+  onConfirm?: (selectedItem?: string) => void;
+} & Omit<ModalWithBlurProps, 'children' | 'title' | 'onConfirm'> &
   Partial<Pick<ModalWithBlurProps, 'title'>>;
 
 export const ConfirmModal = (props: ConfirmModalProps) => {
@@ -16,11 +18,40 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
   const {
     message = EMPTY_STRING,
     note = EMPTY_STRING,
+    items = [],
     title = EMPTY_STRING,
+    onCancel,
+    onConfirm,
+    ...rest
   } = props;
+  const [currentlySelectedItem, setCurrentlySelectedItem] =
+    useState(EMPTY_STRING);
+
+  const onButtonPress = useCallback((item: string) => {
+    setCurrentlySelectedItem(item);
+  }, []);
+
+  const reset = useCallback(() => {
+    setCurrentlySelectedItem(EMPTY_STRING);
+  }, []);
+
+  const onCancelPress = useCallback(() => {
+    onCancel && onCancel();
+    reset();
+  }, [reset, onCancel]);
+
+  const onConfirmPress = useCallback(() => {
+    onConfirm && onConfirm(currentlySelectedItem);
+    reset();
+  }, [currentlySelectedItem, reset, onConfirm]);
 
   return (
-    <ModalWithBlur {...props} title={title}>
+    <ModalWithBlur
+      {...rest}
+      title={title}
+      onConfirm={onConfirmPress}
+      onCancel={onCancelPress}
+    >
       {message ? <Text>{message}</Text> : null}
       {note ? (
         <Text
@@ -31,6 +62,21 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
         >
           *{note}
         </Text>
+      ) : null}
+      {items.length > 1 ? (
+        <ScrollView>
+          {items.map((item, index) => {
+            return (
+              <Button
+                key={index}
+                isDisabled={item === currentlySelectedItem}
+                onPress={() => onButtonPress(item)}
+              >
+                {item}
+              </Button>
+            );
+          })}
+        </ScrollView>
       ) : null}
     </ModalWithBlur>
   );

@@ -78,7 +78,8 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
         message: submitButton?.validation.message || EMPTY_STRING,
       },
       colorScheme: submitButton?.colorScheme || 'success',
-      isEnabled: submitButton?.isEnabled != null ? submitButton.isEnabled : true,
+      isEnabled:
+        submitButton?.isEnabled != null ? submitButton.isEnabled : true,
       text: submitButton?.text || 'Submit',
     } as SubmitButtonProps;
   }, [submitButton]);

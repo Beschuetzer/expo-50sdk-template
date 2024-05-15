@@ -7,6 +7,7 @@ import React from 'react';
 import { Insets } from 'react-native';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
+import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import {
   DAY_IN_MS,
@@ -30,7 +31,6 @@ import { Item, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
 import { Address, Frequency, State, TimeSpan } from '@/types/general';
-import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
 
 export function calculateDistance(
   gpsCoordinateStart: GpsCoordinate | null | undefined,

@@ -48,7 +48,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     getCustomImage(captureImage, (result) => {
       setCustomImageUri(result);
       handleSelect(result, true);
-    })
+    });
   }, [handleSelect]);
 
   return (

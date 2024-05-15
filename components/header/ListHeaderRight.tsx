@@ -27,7 +27,7 @@ type ListHeaderRightProps = {
   onFilterPress?: () => void;
   onResetPress?: () => void;
   options?: ListHeaderRightOptions[];
-}
+};
 export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
   (props, ref) => {
     const { options, onClose, onSortPress, onFilterPress, onResetPress } =

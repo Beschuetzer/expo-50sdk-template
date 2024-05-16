@@ -15,6 +15,8 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
+import { ErrorBoundary } from './ErrorBoundary';
+
 import { Text } from '@/components/Themed';
 import { CloseButton } from '@/components/header/CloseButton';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
@@ -65,56 +67,58 @@ function RootLayoutNav() {
   // useFlushRedux()
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Provider store={store}>
-        <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
-          <NativeBaseProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <MenuProvider>
-                <BottomSheetModalProvider>
-                  <AutoSetStoreModal />
-                  <Stack>
-                    <Stack.Screen
-                      name="(tabs)"
-                      options={{
-                        headerShown: false,
-                        headerTitleAlign: 'center',
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.ItemModal}
-                      options={{
-                        presentation: 'modal',
-                        title: 'Item Details',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.StoreModal}
-                      options={{
-                        presentation: 'modal',
-                        title: 'Store Details',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.FullscreenImageScreen}
-                      options={{
-                        presentation: 'modal',
-                        title: IMAGE_RENDERER_TITLE_DEFAULT,
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                  </Stack>
-                </BottomSheetModalProvider>
-              </MenuProvider>
-            </GestureHandlerRootView>
-          </NativeBaseProvider>
-        </PersistGate>
-      </Provider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Provider store={store}>
+          <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
+            <NativeBaseProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <MenuProvider>
+                  <BottomSheetModalProvider>
+                    <AutoSetStoreModal />
+                    <Stack>
+                      <Stack.Screen
+                        name="(tabs)"
+                        options={{
+                          headerShown: false,
+                          headerTitleAlign: 'center',
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.ItemModal}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Item Details',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.StoreModal}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Store Details',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.FullscreenImageScreen}
+                        options={{
+                          presentation: 'modal',
+                          title: IMAGE_RENDERER_TITLE_DEFAULT,
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                    </Stack>
+                  </BottomSheetModalProvider>
+                </MenuProvider>
+              </GestureHandlerRootView>
+            </NativeBaseProvider>
+          </PersistGate>
+        </Provider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

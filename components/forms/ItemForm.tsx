@@ -241,7 +241,7 @@ export function ItemForm(props: ItemFormProps) {
       frequencyInMsRef.current = frequencyInMs;
       handleAutoSave();
     },
-    [frequencyInMsRef],
+    [frequencyInMsRef, handleAutoSave],
   );
 
   const onItemSpecificValueChange = useCallback(
@@ -249,13 +249,16 @@ export function ItemForm(props: ItemFormProps) {
       storeSpecificValuesRef.current = storeSpecificValuesLocal;
       handleAutoSave();
     },
-    [storeSpecificValuesRef],
+    [storeSpecificValuesRef, handleAutoSave],
   );
 
-  const onUnitChange = useCallback((unit: string) => {
-    unitRef.current = unit;
-    handleAutoSave();
-  }, []);
+  const onUnitChange = useCallback(
+    (unit: string) => {
+      unitRef.current = unit;
+      handleAutoSave();
+    },
+    [handleAutoSave],
+  );
 
   //handle deleting images
   useEffect(() => {

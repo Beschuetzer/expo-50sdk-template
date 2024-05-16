@@ -1,5 +1,5 @@
 ## MVP
--fix bug where deleting a new item with just a name that is also in a list causes a crash?
+-fix bug where deleting a new item with just a name that has been added via the shopping list tab causes a crash?
 
 -ideas for making saving to db easiest:
     -use a GUID that the frontend creates for each item.  This is then used as the id on the db 

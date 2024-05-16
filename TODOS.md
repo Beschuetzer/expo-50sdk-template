@@ -1,6 +1,5 @@
 ## MVP
 
--fix bug where deleting a new item with just a name that has been added via the shopping list tab causes a crash?
 
 -ideas for making saving to db easiest:
     -use a GUID that the frontend creates for each item.  This is then used as the id on the db 
@@ -55,4 +54,4 @@ the ability to create a store layout and have a map/route be generated based on 
 
 ## Bugs
 -ItemForm: figure out issue where autosave happens on component mount when auto save is enabled
-
+-fix bug where deleting a new item with just a name that has been added via the shopping list tab causes a crash?

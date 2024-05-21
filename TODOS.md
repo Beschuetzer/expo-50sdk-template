@@ -7,6 +7,8 @@
 
 -need to save stores the same way that items are saved
 
+-fix issue with useUpcProduct being called whenever an item is opened
+
 -add a way to copy a store
     --a button which copies the store specific values but uses the name/address/gps/etc on the StoreForm.
     --there would need to be a way to keep the values in sync (need new POS which tracks copies and then runs once every time the app starts or just checks the new POS to also make changes for any "copies") 

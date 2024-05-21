@@ -25,6 +25,7 @@ import {
 } from '@/state/slices/scannerSlice';
 import { Item, StoreSpecificValuesMap } from '@/types/Item';
 import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers';
+import { EMPTY_STRING } from '@/constants/general';
 
 const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 1000;
 const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000;
@@ -133,11 +134,13 @@ export function ReduxViewer() {
                   } else {
                     lastUpcIndexRef.current += 1;
                   }
+                  const randomItem = getRandomItem(lastUpcIndexRef.current);
                   dispatch(
                     addItemsListItem({
-                      item: getRandomItem(lastUpcIndexRef.current),
+                      item: randomItem,
                       storeSpecificValues: getRandomStoreSpecificValues(),
                       currentStore: MOCK_STORES[1],
+                      originalKey: randomItem,
                     }),
                   );
                 }}

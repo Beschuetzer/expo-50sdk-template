@@ -7,8 +7,6 @@
 
 -need to save stores the same way that items are saved
 
--fix issue with useUpcProduct being called whenever an item is opened
-
 -add a way to copy a store
     --a button which copies the store specific values but uses the name/address/gps/etc on the StoreForm.
     --there would need to be a way to keep the values in sync (need new POS which tracks copies and then runs once every time the app starts or just checks the new POS to also make changes for any "copies") 
@@ -53,4 +51,5 @@ the ability to create a store layout and have a map/route be generated based on 
 
 ## Bugs
 -ItemForm: figure out issue where autosave happens on component mount when auto save is enabled
+-ItemModal: fix issue with useUpcProduct being called whenever an item is opened and autoSave is enabled
 -fix bug where deleting a new item with just a name that has been added via the shopping list tab causes a crash?

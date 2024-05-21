@@ -39,19 +39,26 @@ export default function ItemModal() {
   const itemInList = useSelector(
     itemsListItemSelector(keyToUse || EMPTY_STRING),
   );
-  const originalKeyRef = useRef<Key>(key);
-  const canSkipUseUpcProductRef = useRef(false);
   const canOverrideItem = useSelector(canOverrideItemSelector);
-
-  const { upcProduct, errorMsg } = useUpcProduct({
-    upc: key?.upc,
-    shouldSkip: !!itemInList && canSkipUseUpcProductRef.current,
-  });
   const currentStore = useSelector(currentStoreSelector);
   const autoSaveItems = useSelector(autoSaveItemsSelector);
   const nameOrderTemplate = useSelector(nameOrderTemplateSelector);
-  const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
   const itemsList = useSelector(itemsListSelector);
+
+  const originalKeyRef = useRef<Key>(key);
+  const canSkipUseUpcProductRef = useRef(false);
+
+  const isAutoSaveEnabled = useMemo(() => {
+    return !!(autoSaveItems && (!!itemInList || !!callerList));
+  }, [autoSaveItems, itemInList, callerList]);
+
+  const { upcProduct, errorMsg } = useUpcProduct({
+    upc: key?.upc,
+    shouldSkip: isAutoSaveEnabled
+      ? !!itemInList && canSkipUseUpcProductRef.current
+      : !!itemInList,
+  });
+  const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
 
   const handleClose = useCallback(() => {
     navigation.canGoBack() && navigation.goBack();
@@ -111,7 +118,7 @@ export default function ItemModal() {
         shouldFocusFirstField={!itemInList}
         shouldAddQuantity={callerList === ListName.ShoppingList}
         shouldAddToCart={callerList === ListName.InCartList}
-        autoSave={autoSaveItems && (!!itemInList || !!callerList)}
+        autoSave={isAutoSaveEnabled}
       />
     );
   }

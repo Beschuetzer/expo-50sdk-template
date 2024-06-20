@@ -1,4 +1,6 @@
 ## MVP
+-does it make sense to add an option to select dir where images taken are saved (defaults to app dir)?
+    --this would allow for the ability to just re-add them when restoring data
 -ideas for making saving to db easiest:
     -use a GUID that the frontend creates for each item.  This is then used as the id on the db 
         -add _id to item field

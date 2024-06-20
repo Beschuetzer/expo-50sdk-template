@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
+import { StorageAccessFramework } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import _ from 'lodash';
@@ -12,6 +13,7 @@ import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import {
   DAY_IN_MS,
   EMPTY_STRING,
+  FILE_NAMES,
   FREQUENCY_INITIAL,
   HOUR_IN_MS,
   IMAGE_PICKER_QUALITY_INITIAL,
@@ -386,6 +388,17 @@ export async function getCustomImage(
   }
 }
 
+/**
+ *Attempts to get permissions to save to a directory and return the selected path in the filesystem.  Throws all errors.
+ **/
+export async function getDirectory() {
+  const permissions =
+    await StorageAccessFramework.requestDirectoryPermissionsAsync();
+  if (!permissions.granted)
+    throw new Error('You must allow permission to save.');
+  return permissions.directoryUri;
+}
+
 export async function captureImage() {
   try {
     const result = await ImagePicker.launchCameraAsync(getImagePickerOptions());
@@ -396,6 +409,41 @@ export async function captureImage() {
   } catch (error) {
     console.log({ error });
   }
+}
+
+export async function makeNewDirectory(dir: string, name: string) {
+  try {
+    if (!dir || !name) return EMPTY_STRING;
+    const newDir = await StorageAccessFramework.makeDirectoryAsync(dir, name);
+    const result =
+      await StorageAccessFramework.requestDirectoryPermissionsAsync(newDir);
+    return (result as any)?.directoryUri;
+  } catch {
+    return dir;
+  }
+}
+
+export async function importAppData(directory: string) {
+  const toReturn = {} as { [key in keyof typeof FILE_NAMES]: any };
+  try {
+    const files = await StorageAccessFramework.readDirectoryAsync(directory);
+    for (const file of files) {
+      const content = await StorageAccessFramework.readAsStringAsync(file);
+      if (content) {
+        const parsed = JSON.parse(content);
+        const toFind = '%2F';
+        const lastSlashIndex = file.lastIndexOf(toFind);
+        const fileName = file
+          .slice(lastSlashIndex + toFind.length)
+          .replace('.json', '');
+        toReturn[fileName as keyof typeof FILE_NAMES] = parsed;
+      }
+    }
+    return toReturn;
+  } catch (error) {
+    displayAlert({ message: 'Error loading app state:', error });
+  }
+  return toReturn;
 }
 
 export async function pickImage() {
@@ -479,30 +527,18 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
   }
 }
 
-export async function saveAppStateToFile(fileName: string, toSave: object) {
-  try {
-    const content = JSON.stringify(toSave);
-    const filePath = `${FileSystem.documentDirectory}${fileName}.json`;
-
-    await FileSystem.writeAsStringAsync(filePath, content);
-  } catch (error) {
-    displayAlert({ message: 'Error saving app state:', error });
-  }
-}
-
-export async function loadAppStateFromFile(fileName: string) {
-  try {
-    const filePath = `${FileSystem.documentDirectory}${fileName}.json`;
-    const content = await FileSystem.readAsStringAsync(filePath);
-
-    if (content) {
-      const state = JSON.parse(content);
-      return state;
-    }
-  } catch (error) {
-    displayAlert({ message: 'Error loading app state:', error });
-  }
-  return null;
+export async function saveAppStateToFile(
+  fileName: string,
+  directory: string,
+  toSave: object,
+) {
+  const content = JSON.stringify(toSave);
+  const fileUri = await StorageAccessFramework.createFileAsync(
+    directory,
+    fileName,
+    'application/json',
+  );
+  await FileSystem.writeAsStringAsync(fileUri, content);
 }
 
 export async function measureExecutionTime(

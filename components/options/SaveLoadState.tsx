@@ -1,12 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { Row, useTheme, Stack, FormControl } from 'native-base';
-import React, { useCallback, useMemo, useState } from 'react';
+import { Row, useTheme, Stack, Text } from 'native-base';
+import React, { useCallback, useMemo } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
-
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { FILE_NAMES, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   currentStoreSelector,
   itemsListSelector,
@@ -24,20 +22,14 @@ import {
   upcProductsSelector,
 } from '@/state/slices/scannerSlice';
 import {
-  loadAppStateFromFile,
-  resetConfirmModalProps,
+  displayAlert,
+  getDirectory,
+  importAppData,
+  makeNewDirectory,
   saveAppStateToFile,
 } from '@/utils/helpers';
 
 type SaveLoadStateProps = object;
-
-const FILE_NAMES = {
-  items: 'items',
-  stores: 'stores',
-  storeSpecificValues: 'storeSpecificValues',
-  lastPurchasedMap: 'lastPurchasedMap',
-  upcProducts: 'upcProducts',
-};
 
 export const SaveLoadState = (props: SaveLoadStateProps) => {
   const theme = useTheme();
@@ -49,103 +41,82 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
   const currentStore = useSelector(currentStoreSelector);
   const dispatch = useDispatch();
   const iconSize = useMemo(() => theme.sizes[6], [theme]);
-  const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
-    {},
-  );
 
   const onLoadItemsPress = useCallback(async () => {
-    setConfirmModalProps({
-      isVisible: true,
-      message:
-        'Loading items will delete all of your current items.  Continue?',
-      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
-      onConfirm: async () => {
-        const itemsLoaded = await loadAppStateFromFile(FILE_NAMES.items);
-        const storeSpecificValues = await loadAppStateFromFile(
-          FILE_NAMES.storeSpecificValues,
-        );
-        const upcProducts = await loadAppStateFromFile(FILE_NAMES.upcProducts);
-        const lastPurchasedMap = await loadAppStateFromFile(
-          FILE_NAMES.lastPurchasedMap,
-        );
-        dispatch(setStoreSpecificValues(storeSpecificValues));
-        dispatch(setItemsList(itemsLoaded));
-        dispatch(setLastPurchasedMap(lastPurchasedMap));
-        dispatch(setUpcProducts(upcProducts));
-        resetConfirmModalProps(setConfirmModalProps);
-      },
-    });
+    try {
+      const dir = await getDirectory();
+      const {
+        storeSpecificValues: storeSpecificValuesLoaded,
+        upcProducts: upcProductsLoaded,
+        lastPurchasedMap: lastPurchasedMapLoaded,
+        stores: storesLoaded,
+        items: itemsLoaded,
+      } = await importAppData(dir);
+      dispatch(setStoreSpecificValues(storeSpecificValuesLoaded));
+      dispatch(setItemsList(itemsLoaded));
+      dispatch(setLastPurchasedMap(lastPurchasedMapLoaded));
+      dispatch(setUpcProducts(upcProductsLoaded));
+      dispatch(setStoresList(storesLoaded));
+      dispatch(setCurrentStoreName());
+    } catch (error) {
+      displayAlert({
+        msg: 'Unable to import app data.',
+        error,
+      });
+    }
   }, []);
 
-  const onSaveItemsPress = useCallback(async () => {
-    setConfirmModalProps({
-      isVisible: true,
-      message: 'Are you sure you want to save items?',
-      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
-      onConfirm: async () => {
-        await saveAppStateToFile(FILE_NAMES.items, itemsList);
-        await saveAppStateToFile(
-          FILE_NAMES.storeSpecificValues,
-          storeSpecificValues,
-        );
-        await saveAppStateToFile(FILE_NAMES.lastPurchasedMap, lastPurchasedMap);
-        await saveAppStateToFile(FILE_NAMES.upcProducts, upcProducts);
-        resetConfirmModalProps(setConfirmModalProps);
-      },
-    });
-  }, [upcProducts, itemsList, storeSpecificValues]);
-
-  const onLoadStoresPress = useCallback(async () => {
-    setConfirmModalProps({
-      isVisible: true,
-      message:
-        'Loading stores will delete all of your current stores.  Continue?',
-      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
-      onConfirm: async () => {
-        const storesLoaded = await loadAppStateFromFile(FILE_NAMES.stores);
-        dispatch(setStoresList(storesLoaded));
-        dispatch(setCurrentStoreName());
-        resetConfirmModalProps(setConfirmModalProps);
-      },
-    });
-  }, []);
-
-  const onSaveStoresPress = useCallback(async () => {
-    setConfirmModalProps({
-      isVisible: true,
-      message: 'Are you sure you want to save stores?',
-      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
-      onConfirm: async () => {
-        await saveAppStateToFile(FILE_NAMES.stores, {
-          ...stores,
-          currentStoreName: currentStore.name,
-        });
-        resetConfirmModalProps(setConfirmModalProps);
-      },
-    });
-  }, [stores]);
+  const onBackupPress = useCallback(async () => {
+    try {
+      const dir = await getDirectory();
+      const newFolderName = new Date().toISOString();
+      const madeDirectory = await makeNewDirectory(dir, newFolderName);
+      await saveAppStateToFile(FILE_NAMES.items, madeDirectory, itemsList);
+      await saveAppStateToFile(
+        FILE_NAMES.storeSpecificValues,
+        madeDirectory,
+        storeSpecificValues,
+      );
+      await saveAppStateToFile(
+        FILE_NAMES.lastPurchasedMap,
+        madeDirectory,
+        lastPurchasedMap,
+      );
+      await saveAppStateToFile(
+        FILE_NAMES.upcProducts,
+        madeDirectory,
+        upcProducts,
+      );
+      await saveAppStateToFile(FILE_NAMES.stores, madeDirectory, {
+        ...stores,
+        currentStoreName: currentStore.name,
+      });
+    } catch (error) {
+      displayAlert({
+        msg: 'Unable to save app data.',
+        error,
+      });
+    }
+  }, [
+    currentStore.name,
+    itemsList,
+    lastPurchasedMap,
+    stores,
+    storeSpecificValues,
+    upcProducts,
+  ]);
 
   return (
     <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
       <Row space={theme.space[5]} alignItems="center">
-        <FormControl.Label>Items:</FormControl.Label>
+        <Text>Data (Restore/Backup):</Text>
         <TouchableOpacity onPress={onLoadItemsPress}>
           <FontAwesome name="download" size={iconSize} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={onSaveItemsPress}>
+        <TouchableOpacity onPress={onBackupPress}>
           <FontAwesome name="save" size={iconSize} />
         </TouchableOpacity>
       </Row>
-      <Row space={theme.space[5]} alignItems="center">
-        <FormControl.Label>Stores:</FormControl.Label>
-        <TouchableOpacity onPress={onLoadStoresPress}>
-          <FontAwesome name="download" size={iconSize} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onSaveStoresPress}>
-          <FontAwesome name="save" size={iconSize} />
-        </TouchableOpacity>
-      </Row>
-      <ConfirmModal {...confirmModalProps} />
     </Stack>
   );
 };

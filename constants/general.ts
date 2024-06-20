@@ -17,6 +17,13 @@ export const EMPTY_STRING = '';
 export const ESTIMATED_SIZE_FOR_ITEMS_LIST = 108;
 export const ESTIMATED_SIZE_FOR_SHOPPING_LISTS = 133;
 export const ESTIMATED_SIZE_FOR_STORES_LIST = 61;
+export const FILE_NAMES = {
+  items: 'items',
+  stores: 'stores',
+  storeSpecificValues: 'storeSpecificValues',
+  lastPurchasedMap: 'lastPurchasedMap',
+  upcProducts: 'upcProducts',
+};
 export const FORM_INTER_ITEM_SPACING = 0.5;
 export const FREQUENCY_INITIAL = Object.freeze({
   number: 1,

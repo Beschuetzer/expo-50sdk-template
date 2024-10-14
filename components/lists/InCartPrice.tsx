@@ -1,4 +1,4 @@
-import { View, Text, useTheme, Heading } from 'native-base';
+import { View, useTheme, Heading } from 'native-base';
 import { useSelector } from 'react-redux';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';

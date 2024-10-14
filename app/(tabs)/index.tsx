@@ -11,7 +11,6 @@ import {
 import { useWindowDimensions } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { AddButton } from '@/components/header/AddButton';
 import {
@@ -19,6 +18,7 @@ import {
   ListHeaderRightOptions,
 } from '@/components/header/ListHeaderRight';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
+import { useInitializer } from '@/components/hooks/useInitializer';
 import { InCartList } from '@/components/lists/InCartList';
 import { ListSorter } from '@/components/lists/ListSorter';
 import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
@@ -36,7 +36,6 @@ import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
   ListName,
-  completePurchase,
   currentStoreSelector,
   inCartListSelector,
   moveAllToInCart,
@@ -61,33 +60,38 @@ import {
   addAllToShoppingCart,
   itemsPurchasedAtStoreSelector,
 } from '@/state/slices/listsSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
+import { savePurchase } from '@/state/thunks';
 import { getNewViewingMode, resetConfirmModalProps } from '@/utils/helpers';
 
 export default function TabOneScreen() {
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   useGpsCoordinate({
     onSuccess: (gpsCoordinate) => {
       dispatch(setCurrentLocation(gpsCoordinate));
     },
   });
+  useInitializer();
   const layout = useWindowDimensions();
-  const shoppingList = useSelector(shoppingListSelector);
-  const inCartList = useSelector(inCartListSelector);
-  const itemsPurchasedAtStore = useSelector(itemsPurchasedAtStoreSelector);
-  const previouslyPurchasedList = useSelector(previouslyPurchasedListSelector);
-  const currentStore = useSelector(currentStoreSelector);
-  const shoppingListItems = useSelector(
+  const shoppingList = useAppSelector(shoppingListSelector);
+  const inCartList = useAppSelector(inCartListSelector);
+  const itemsPurchasedAtStore = useAppSelector(itemsPurchasedAtStoreSelector);
+  const previouslyPurchasedList = useAppSelector(
+    previouslyPurchasedListSelector,
+  );
+  const currentStore = useAppSelector(currentStoreSelector);
+  const shoppingListItems = useAppSelector(
     storeSpecificListSelector(ListName.ShoppingList),
   );
-  const inCartListItems = useSelector(
+  const inCartListItems = useAppSelector(
     storeSpecificListSelector(ListName.InCartList),
   );
-  const selectedShoppingCartItems = useSelector(
+  const selectedShoppingCartItems = useAppSelector(
     selectedItemsFromShoppingCartSelector,
   );
-  const selectedInCartItems = useSelector(selectedItemsFromInCartSelector);
-  const selectedPreviouslyPurchasedItems = useSelector(
+  const selectedInCartItems = useAppSelector(selectedItemsFromInCartSelector);
+  const selectedPreviouslyPurchasedItems = useAppSelector(
     selectedItemsFromPreviouslyPurchasedSelector,
   );
 
@@ -258,7 +262,7 @@ export default function TabOneScreen() {
   }, []);
 
   const onCompletePurchasePress = useCallback(() => {
-    dispatch(completePurchase());
+    dispatch(savePurchase());
   }, []);
 
   const onMoveAllRecommendedToShoppingPress = useCallback(() => {

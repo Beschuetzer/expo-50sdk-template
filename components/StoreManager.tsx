@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from 'expo-router';
-import { FormControl, Row, Stack } from 'native-base';
+import { FormControl, Row, Stack, Text } from 'native-base';
 import { useCallback } from 'react';
 import { ViewStyle } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -12,12 +12,14 @@ import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
 import {
   ListName,
+  currentStoreIdSelector,
   currentStoreSelector,
   listToDisplaySelector,
-  setCurrentStoreName,
+  setCurrentStoreId,
 } from '@/state/slices/listsSlice';
 import { Store } from '@/types/Store';
 import { HeadingTagProp } from '@/types/general';
+import { getKeyToUse } from '@/utils/helpers';
 
 type StorageManagerProps = {
   showAddStore?: boolean;
@@ -37,6 +39,7 @@ export function StoreManager(props: StorageManagerProps) {
   } = props;
 
   const currentStore = useSelector(currentStoreSelector);
+  const currentStoreId = useSelector(currentStoreIdSelector);
   const storesList = useSelector(
     listToDisplaySelector(ListName.StoresList),
   ) as Store[];
@@ -48,17 +51,23 @@ export function StoreManager(props: StorageManagerProps) {
   }, []);
 
   const onChangeStore = useCallback((storeName: string) => {
-    dispatch(setCurrentStoreName(storeName));
+    dispatch(setCurrentStoreId(storeName));
   }, []);
 
   return (
     <Stack style={style}>
       <Row {...maxWidth} justifyContent="space-between" alignItems="center">
         {showTag ? (
-          <Tag>
-            Current {useAbbreviatedVerbiage ? EMPTY_STRING : 'Store'}:{' '}
-            {currentStore?.name || 'No store selected'}
-          </Tag>
+          <Text>
+            <Tag>
+              Current {useAbbreviatedVerbiage ? EMPTY_STRING : 'Store'}:&nbsp;
+            </Tag>
+            <Tag>
+              {currentStore?.addressLineOne ||
+                currentStore?.name ||
+                'No store selected'}
+            </Tag>
+          </Text>
         ) : null}
         {showAddStore ? (
           <TouchableOpacity onPress={onAddPress}>
@@ -67,15 +76,12 @@ export function StoreManager(props: StorageManagerProps) {
         ) : null}
       </Row>
       {showStoreList ? (
-        <Picker
-          selectedValue={currentStore?.name || EMPTY_STRING}
-          onValueChange={onChangeStore}
-        >
+        <Picker selectedValue={currentStoreId} onValueChange={onChangeStore}>
           {storesList.map((store) => (
             <Picker.Item
-              key={store?.name}
+              key={getKeyToUse(store)}
               label={store?.name}
-              value={store?.name}
+              value={getKeyToUse(store)}
             />
           ))}
         </Picker>

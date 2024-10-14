@@ -1,3 +1,5 @@
+import { EMPTY_STRING } from '@/constants/general';
+
 /**
  *The string values have to match the field names for {@link ItemWithStoreSpecificValues}
  **/
@@ -36,18 +38,19 @@ export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
 
 export function getSorter(
   key: SortType,
-  currentStoreName: string,
+  currentStoreId: string = EMPTY_STRING,
   direction: SortOrder = SortOrder.Ascending,
 ) {
   return (next: any, current: any) => {
     let currentItem = current[key];
     let nextItem = next[key];
     if (
-      current?.[key][currentStoreName] !== undefined &&
-      next[key]?.[currentStoreName] !== undefined
+      currentStoreId &&
+      current?.[key][currentStoreId] !== undefined &&
+      next[key]?.[currentStoreId] !== undefined
     ) {
-      currentItem = currentItem[currentStoreName];
-      nextItem = nextItem[currentStoreName];
+      currentItem = currentItem[currentStoreId];
+      nextItem = nextItem[currentStoreId];
       if (
         key === SortType.AisleNumber ||
         key === SortType.ItemId ||

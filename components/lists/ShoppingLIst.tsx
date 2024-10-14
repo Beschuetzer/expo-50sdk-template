@@ -94,10 +94,6 @@ export function ShoppingList(props: ShoppingListProps) {
   );
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
-    const key = {
-      name: item.name,
-      upc: item.upc,
-    } as Key;
     return (
       <SwipeableRow
         leftSwipe={{
@@ -112,7 +108,7 @@ export function ShoppingList(props: ShoppingListProps) {
             </Stack>
           ),
           backgroundColor: theme.colors.red[900],
-          onPress: onSwipeLeft.bind(null, key),
+          onPress: onSwipeLeft.bind(null, item),
         }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],

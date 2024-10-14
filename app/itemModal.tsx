@@ -3,23 +3,25 @@ import { useNavigation } from 'expo-router';
 import { Center, theme, Heading, Text } from 'native-base';
 import { useCallback, useMemo, useRef } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { ItemForm, ItemFormOnSave } from '@/components/forms/ItemForm';
 import { useUpcProduct } from '@/components/hooks/useUpcProduct';
 import { EMPTY_STRING } from '@/constants/general';
 import {
   ListName,
-  addItemsListItem,
   currentStoreSelector,
   itemsListItemSelector,
   itemsListSelector,
+  storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
 import {
   autoSaveItemsSelector,
   canOverrideItemSelector,
   nameOrderTemplateSelector,
 } from '@/state/slices/optionsSlice';
+import { useAppDispatch } from '@/state/store';
+import { saveItem } from '@/state/thunks';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 import { getKeyToUse } from '@/utils/helpers';
@@ -27,7 +29,7 @@ import { getItem } from '@/utils/model-mappings';
 
 export default function ItemModal() {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const route = useRoute();
   const {
     key,
@@ -44,6 +46,7 @@ export default function ItemModal() {
   const autoSaveItems = useSelector(autoSaveItemsSelector);
   const nameOrderTemplate = useSelector(nameOrderTemplateSelector);
   const itemsList = useSelector(itemsListSelector);
+  const storeSpecificValuesMap = useSelector(storeSpecificValuesMapSelector);
 
   const originalKeyRef = useRef<Key>(key);
   const canSkipUseUpcProductRef = useRef(false);
@@ -71,7 +74,7 @@ export default function ItemModal() {
         originalKeyRef.current = item;
       }
       canSkipUseUpcProductRef.current = onSavePayload.hasKeyChanged;
-      dispatch(addItemsListItem(onSavePayload));
+      dispatch(saveItem(onSavePayload));
     },
     [canSkipUseUpcProductRef, originalKeyRef],
   );
@@ -116,9 +119,13 @@ export default function ItemModal() {
         onSave={handleSave}
         showOverrideMsgInitial={showOverrideMsg}
         shouldFocusFirstField={!itemInList}
-        shouldAddQuantity={callerList === ListName.ShoppingList}
+        shouldAddQuantity={
+          callerList === ListName.ShoppingList ||
+          callerList === ListName.PreviouslyPurchased
+        }
         shouldAddToCart={callerList === ListName.InCartList}
         autoSave={isAutoSaveEnabled}
+        storeSpecificValuesMap={storeSpecificValuesMap}
       />
     );
   }

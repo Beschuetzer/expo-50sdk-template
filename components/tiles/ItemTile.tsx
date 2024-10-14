@@ -1,5 +1,5 @@
 import { useNavigation } from 'expo-router';
-import { Row, Column, Text, useTheme } from 'native-base';
+import { Row, Column, Text } from 'native-base';
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
@@ -10,11 +10,11 @@ import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { ITEM_UNIT_INITIAL } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import { lastPurchasedSelector } from '@/state/slices/listsSlice';
-import { Item, ItemUnit } from '@/types/Item';
+import { Item } from '@/types/Item';
 import { ItemProp, ListNameProp } from '@/types/general';
 import { getFrequencyValue } from '@/utils/helpers';
 
@@ -32,7 +32,6 @@ export type ItemTileProps<T> = {
   ListNameProp;
 
 export function ItemTile(props: ItemTileProps<Item>) {
-  const theme = useTheme();
   const navigation = useNavigation();
   const {
     isSelected = false,
@@ -71,7 +70,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
             </Column>
             <ItemTileNameAndUpcColumn item={item}>
               <Text>
-                1 {item.unit || ItemUnit.Package} every{' '}
+                1 {item.unit || ITEM_UNIT_INITIAL} every{' '}
                 {frequencyObj.number > 1
                   ? `${frequencyObj.number} ${frequencyObj.timeSpan}s`
                   : `${frequencyObj.timeSpan}`}
@@ -81,6 +80,13 @@ export function ItemTile(props: ItemTileProps<Item>) {
                 {lastPurchased
                   ? new Date(lastPurchased).toLocaleString()
                   : 'N/A'}
+              </Text>
+              <Text>Db Id: {item._id}</Text>
+              <Text>
+                Needs Saving: {item.needsSaving === false ? 'false' : 'true'}
+              </Text>
+              <Text>
+                Has been Saved: {item.hasBeenSaved === true ? 'true' : 'false'}
               </Text>
             </ItemTileNameAndUpcColumn>
             <ItemTileIsSelectedColumn
@@ -101,7 +107,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
           onSelect && onSelect(item);
         } else {
           navigation.navigate(Routes.ItemModal, {
-            key: { upc: item.upc, name: item.name },
+            key: item,
             showOverrideMsg: false,
             callerList: listName,
           });

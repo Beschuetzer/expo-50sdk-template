@@ -1,19 +1,19 @@
-import { Text, useTheme, Heading } from 'native-base';
+import { Text } from 'native-base';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ModalWithBlur } from './ModalWithBlur';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { EMPTY_STRING } from '@/constants/general';
 import {
   currentLocationSelector,
   currentStoreSelector,
-  setCurrentStoreName,
+  setCurrentStoreId,
   storesListSelector,
 } from '@/state/slices/listsSlice';
 import { autoSetStoreSelector } from '@/state/slices/optionsSlice';
 import { Store } from '@/types/Store';
-import { getIndexOfSmallestField } from '@/utils/helpers';
+import { getIndexOfSmallestField, getKeyToUse } from '@/utils/helpers';
 
 export type AutoSetStoreModalProps = object;
 
@@ -26,7 +26,6 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
   const autoSetStore = useSelector(autoSetStoreSelector);
   const storesList = useSelector(storesListSelector);
   const dispatch = useDispatch();
-  const theme = useTheme();
   const [storeToAskAbout, setStoreToAskAbout] = useState<Store | null>(null);
 
   const onCancelPress = useCallback(() => {
@@ -34,7 +33,7 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
   }, []);
 
   const onConfirmPress = useCallback((store: Store | null) => {
-    dispatch(setCurrentStoreName(store?.name));
+    dispatch(setCurrentStoreId(getKeyToUse(store || EMPTY_STRING)));
     onCancelPress();
   }, []);
 

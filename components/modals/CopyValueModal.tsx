@@ -15,7 +15,6 @@ import { Dimensions } from 'react-native';
 import { useSelector } from 'react-redux';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
-import { useRenderCount } from '../hooks/useRenderCount';
 import { ItemTileCopyModal } from '../tiles/ItemTileCopyModal';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -23,11 +22,12 @@ import { itemsListSelector } from '@/state/slices/listsSlice';
 import { Item } from '@/types/Item';
 import { getItemFromList } from '@/utils/helpers';
 
-export type CopyModalValues = { [key: string]: unknown };
+type CopyModalValueType = string;
+export type CopyModalValues = { [key: string]: CopyModalValueType };
 
 type CopyValueModalProps = {
   fieldName: string;
-  onConfirm: (selectedValue: unknown) => void;
+  onConfirm: (selectedValue: CopyModalValueType) => void;
   values: CopyModalValues;
 } & Omit<ModalWithBlurProps, 'children' | 'onConfirm' | 'title'>;
 
@@ -39,13 +39,25 @@ export default function CopyValueModal(props: CopyValueModalProps) {
   const [filterValue, setFilterValue] = useState(EMPTY_STRING);
 
   const valuesList = useMemo(() => {
-    const entries: [string, unknown, Item | null][] = [];
+    const entries: [string, CopyModalValueType, Item | null][] = [];
     let i = 0;
     for (const [key, value] of Object.entries(values || {})) {
       const item = getItemFromList(itemsList.data, key);
       entries[i] = [key, value, item];
       i++;
     }
+
+    //sort entries by name if available otherwise by store specific value
+    entries.sort((a, b) => {
+      let valueA = a[1];
+      let valueB = b[1];
+      if (a[2]?.name && b[2]?.name) {
+        valueA = a[2]?.name;
+        valueB = b[2]?.name;
+      }
+      if (valueA === valueB) return 0;
+      return valueA > valueB ? 1 : -1;
+    });
     return entries;
   }, [values, itemsList?.data?.length]);
   const windowDimensions = useMemo(() => Dimensions.get('window'), []);

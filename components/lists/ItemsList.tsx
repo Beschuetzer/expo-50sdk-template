@@ -11,13 +11,13 @@ import React, {
 } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { ListFilter, ListFilterFilters } from './ListFilter';
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
+import { AlphabeticalScroll } from '../AlphabeticalScroll';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
@@ -42,6 +42,8 @@ import {
   setSortOrder,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
+import { deleteItems } from '@/state/thunks';
 import { Item, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
 import {
@@ -64,13 +66,13 @@ const itemsListSortTypes = [
 const listName: ListName = ListName.ItemsList;
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation();
-  const itemsList = useSelector(itemsListSelector);
-  const itemsListToDisplay = useSelector(
+  const itemsList = useAppSelector(itemsListSelector);
+  const itemsListToDisplay = useAppSelector(
     listToDisplaySelector(listName),
   ) as Item[];
-  const currentStore = useSelector(currentStoreSelector);
+  const currentStore = useAppSelector(currentStoreSelector);
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const listRef = useRef<FlashList<Item> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
@@ -127,7 +129,12 @@ export function ItemsList(props: ItemsListProps) {
       message: `Are you sure you want to delete ${joinWithAnd(selectedItems.map((item) => `'${item.name || item.upc}'`))}?`,
       onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: () => {
-        dispatch(removeItemsListItems(selectedItems));
+        dispatch(
+          deleteItems({
+            items: selectedItems,
+          }),
+        );
+        removeItemsListItems(selectedItems);
         resetMultiSelectionMode();
         resetConfirmModalProps(setConfirmModalProps);
       },
@@ -193,7 +200,11 @@ export function ItemsList(props: ItemsListProps) {
         },
         onCancel: () => resetConfirmModalProps(setConfirmModalProps),
         onConfirm: () => {
-          dispatch(removeItemsListItems([item]));
+          dispatch(
+            deleteItems({
+              items: [item],
+            }),
+          );
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           resetConfirmModalProps(setConfirmModalProps);
         },
@@ -239,10 +250,6 @@ export function ItemsList(props: ItemsListProps) {
   });
 
   function renderItem({ item, index }: ListRow<Item>) {
-    const key = {
-      name: item.name,
-      upc: item.upc,
-    } as Key;
     return (
       <SwipeableRow
         swipeableProps={{
@@ -263,7 +270,7 @@ export function ItemsList(props: ItemsListProps) {
         }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
-          onPress: onSwipeRight.bind(null, key),
+          onPress: onSwipeRight.bind(null, item),
           title: currentStore.name ? (
             <Stack
               paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
@@ -339,7 +346,9 @@ export function ItemsList(props: ItemsListProps) {
         }}
         data={itemsListToDisplay}
         renderItem={renderItem}
-        keyExtractor={(item: Item, index: number) => getKeyToUse(item)}
+        keyExtractor={(item: Item, index: number) =>
+          item._id || getKeyToUse(item)
+        }
         estimatedItemSize={ESTIMATED_SIZE_FOR_ITEMS_LIST}
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />
@@ -361,6 +370,15 @@ export function ItemsList(props: ItemsListProps) {
         onValueChange={onFilterValueChange}
       />
       <ConfirmModal {...confirmModalProps} />
+      <AlphabeticalScroll
+        items={itemsListToDisplay}
+        onCharPress={(index) => {
+          if (listRef?.current) {
+            listRef.current.scrollToIndex({ animated: false, index });
+          }
+        }}
+        sortOrderValue={itemsList.sortOrderValue}
+      />
     </>
   );
 }

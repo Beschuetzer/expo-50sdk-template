@@ -11,7 +11,10 @@ import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  FORM_INTER_ITEM_SPACING,
+  ITEM_UNIT_INITIAL,
+} from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import {
@@ -19,7 +22,6 @@ import {
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import {
-  ItemUnit,
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey,
 } from '@/types/Item';
@@ -53,6 +55,9 @@ export function ItemTileWithStoreSpecificValues(
   const aisleNumberAtStore = useSelector(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.AisleNumber),
   );
+  const noteAtStore = useSelector(
+    storeSpecificValuesSelector(item, StoreSpecificValueKey.Note),
+  );
 
   const decrementQuantity = useCallback(() => {
     dispatch(
@@ -76,33 +81,52 @@ export function ItemTileWithStoreSpecificValues(
     );
   }, [item]);
 
-  const quantityAtStoreJsx = useMemo(() => {
+  const isBasicViewingMode = useMemo(
+    () => viewingMode === ItemTileViewingMode.Basic,
+    [viewingMode],
+  );
+  const basicContentJsx = useMemo(() => {
+    const TagToUse = isBasicViewingMode ? Row : Column;
     return (
-      <Row>
+      <TagToUse>
         <TouchableOpacity
           hitSlop={getButtonHitSlop()}
           onPress={incrementQuantity}
           onLongPress={decrementQuantity}
         >
           <Text style={{ color: theme.colors.info[900] }}>
-            {quantityAtStore} {item.unit || ItemUnit.Package}
+            {quantityAtStore} {item.unit || ITEM_UNIT_INITIAL}
             {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
               ? 's'
               : ''}
           </Text>
         </TouchableOpacity>
-      </Row>
+        {priceAtStore ? <Text> at ${priceAtStore}</Text> : null}
+        {isBasicViewingMode && aisleNumberAtStore ? (
+          <Text> (aisle {aisleNumberAtStore})</Text>
+        ) : null}
+      </TagToUse>
     );
-  }, [quantityAtStore, item, incrementQuantity, decrementQuantity]);
+  }, [
+    decrementQuantity,
+    incrementQuantity,
+    item,
+    priceAtStore,
+    quantityAtStore,
+  ]);
 
   const mainContentJsx = useMemo(() => {
     return (
       <>
         {aisleNumberAtStore ? <Text>Aisle #: {aisleNumberAtStore}</Text> : null}
-        {priceAtStore ? <Text>${priceAtStore}</Text> : null}
+        {noteAtStore ? (
+          <Text fontStyle="italic" fontSize={theme.fontSizes.xs}>
+            {noteAtStore}
+          </Text>
+        ) : null}
       </>
     );
-  }, [priceAtStore, aisleNumberAtStore]);
+  }, [noteAtStore, priceAtStore, aisleNumberAtStore]);
 
   function renderContent() {
     switch (viewingMode) {
@@ -114,7 +138,7 @@ export function ItemTileWithStoreSpecificValues(
             isSelected={isSelected}
             showUpc={false}
           >
-            {quantityAtStoreJsx}
+            <Row>{basicContentJsx}</Row>
           </ItemTileBasicContent>
         );
       default:
@@ -126,6 +150,7 @@ export function ItemTileWithStoreSpecificValues(
                 source={item.images[item.imageToUseIndex]}
                 useMarginRight
               />
+              {basicContentJsx}
             </Column>
             <ItemTileNameAndUpcColumn item={item}>
               {mainContentJsx}
@@ -148,7 +173,7 @@ export function ItemTileWithStoreSpecificValues(
           onSelect && onSelect(item);
         } else {
           navigation.navigate(Routes.ItemModal, {
-            key: { upc: item.upc, name: item.name },
+            key: item,
             showOverrideMsg: false,
             callerList: listName,
           });
@@ -157,7 +182,6 @@ export function ItemTileWithStoreSpecificValues(
     >
       <Column>
         <Row backgroundColor={theme.colors.white}>{renderContent()}</Row>
-        {viewingMode === ItemTileViewingMode.Basic ? null : quantityAtStoreJsx}
       </Column>
     </RectButton>
   );

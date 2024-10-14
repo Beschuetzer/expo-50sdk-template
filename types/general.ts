@@ -2,11 +2,24 @@ import { ColorSchemeType } from 'native-base/lib/typescript/components/types';
 import { ReactElement, ReactNode } from 'react';
 import { ViewStyle } from 'react-native';
 
-import { Item, ItemWithStoreSpecificValues, Key } from './Item';
-import { Store } from './Store';
+import {
+  Item,
+  ItemsList,
+  ItemWithStoreSpecificValues,
+  Key,
+  LastPurchasedMap,
+  StoreList,
+  StoreSpecificValuesMap,
+} from './Item';
+import { GpsCoordinate, Store } from './Store';
 import { UpcProduct } from './UpcResponse';
 
+import {
+  CurrentStoreNeeded,
+  DispatchNeeded,
+} from '@/components/services/BffService';
 import { ListName } from '@/state/slices/listsSlice';
+import { UpcProducts } from '@/state/slices/scannerSlice';
 
 export enum ScanningMode {
   AddToCart = 'Add to Cart',
@@ -21,70 +34,101 @@ export enum TimeSpan {
 
 export enum State {
   None = 'Select a State',
-  Alabama = 'Alabama',
-  Alaska = 'Alaska',
-  Arizona = 'Arizona',
-  Arkansas = 'Arkansas',
-  California = 'California',
-  Colorado = 'Colorado',
-  Connecticut = 'Connecticut',
-  Delaware = 'Delaware',
-  Florida = 'Florida',
-  Georgia = 'Georgia',
-  Hawaii = 'Hawaii',
-  Idaho = 'Idaho',
-  Illinois = 'Illinois',
-  Indiana = 'Indiana',
-  Iowa = 'Iowa',
-  Kansas = 'Kansas',
-  Kentucky = 'Kentucky',
-  Louisiana = 'Louisiana',
-  Maine = 'Maine',
-  Maryland = 'Maryland',
-  Massachusetts = 'Massachusetts',
-  Michigan = 'Michigan',
-  Minnesota = 'Minnesota',
-  Mississippi = 'Mississippi',
-  Missouri = 'Missouri',
-  Montana = 'Montana',
-  Nebraska = 'Nebraska',
-  Nevada = 'Nevada',
-  NewHampshire = 'New Hampshire',
-  NewJersey = 'New Jersey',
-  NewMexico = 'New Mexico',
-  NewYork = 'New York',
-  NorthCarolina = 'North Carolina',
-  NorthDakota = 'North Dakota',
-  Ohio = 'Ohio',
-  Oklahoma = 'Oklahoma',
-  Oregon = 'Oregon',
-  Pennsylvania = 'Pennsylvania',
-  RhodeIsland = 'Rhode Island',
-  SouthCarolina = 'South Carolina',
-  SouthDakota = 'South Dakota',
-  Tennessee = 'Tennessee',
-  Texas = 'Texas',
-  Utah = 'Utah',
-  Vermont = 'Vermont',
-  Virginia = 'Virginia',
-  Washington = 'Washington',
-  WestVirginia = 'West Virginia',
-  Wisconsin = 'Wisconsin',
-  Wyoming = 'Wyoming',
+  Alabama = 'AL',
+  Alaska = 'AK',
+  AmericanSamoa = 'AS',
+  Arizona = 'AZ',
+  Arkansas = 'AR',
+  California = 'CA',
+  Colorado = 'CO',
+  Connecticut = 'CT',
+  Delaware = 'DE',
+  DistrictOfColumbia = 'DC',
+  Florida = 'FL',
+  Georgia = 'GA',
+  Guam = 'GU',
+  Hawaii = 'HI',
+  Idaho = 'ID',
+  Illinois = 'IL',
+  Indiana = 'IN',
+  Iowa = 'IA',
+  Kansas = 'KS',
+  Kentucky = 'KY',
+  Louisiana = 'LA',
+  Maine = 'ME',
+  Maryland = 'MD',
+  Massachusetts = 'MA',
+  Michigan = 'MI',
+  Minnesota = 'MN',
+  Mississippi = 'MS',
+  Missouri = 'MO',
+  Montana = 'MT',
+  Nebraska = 'NE',
+  Nevada = 'NV',
+  NewHampshire = 'NH',
+  NewJersey = 'NJ',
+  NewMexico = 'NM',
+  NewYork = 'NY',
+  NorthCarolina = 'NC',
+  NorthDakota = 'ND',
+  NorthernMarianaIslands = 'MP',
+  Ohio = 'OH',
+  Oklahoma = 'OK',
+  Oregon = 'OR',
+  Pennsylvania = 'PA',
+  PuertoRico = 'PR',
+  RhodeIsland = 'RI',
+  SouthCarolina = 'SC',
+  SouthDakota = 'SD',
+  Tennessee = 'TN',
+  Texas = 'TX',
+  Utah = 'UT',
+  Vermont = 'VT',
+  Virginia = 'VA',
+  VirginIslands = 'VI',
+  Washington = 'WA',
+  WestVirginia = 'WV',
+  Wisconsin = 'WI',
+  Wyoming = 'WY',
 }
 
-export type Address = {
-  addressLineOne: string;
-  addressLineTwo?: string;
-  city: string;
-  state: string;
-  zipCode: string;
-} | null;
+export type AddressGeneric<T> = {
+  addressLineOne: T;
+  addressLineTwo?: T;
+  city: T;
+  country: T;
+  state: T;
+  zipCode: T;
+};
+
+export type Address = AddressGeneric<string>;
 
 export type ButtonOptions = {
   colorScheme?: ColorSchemeType;
   isEnabled?: boolean;
+  isVisible?: boolean;
   text?: string;
+};
+
+export type CurrentLocation = GpsCoordinate | null;
+
+export type ErrorNative = {
+  stack?: string;
+  message?: string;
+};
+export type Error = {
+  error?: ErrorNative;
+  message: string;
+  statusCode?: number;
+};
+
+/**
+ *This is how the server responds when an error occurs
+ **/
+export type ErrorMessage = {
+  errorResponse: {
+    message: string;
+  };
 };
 
 export type Frequency = {
@@ -156,3 +200,13 @@ export type FlatListItem = {
   jsx: ReactElement;
   key: number | string;
 };
+
+export type FileNames = {
+  items: ItemsList;
+  stores: StoreList & CurrentStoreNeeded;
+  storeSpecificValues: StoreSpecificValuesMap;
+  lastPurchasedMap: LastPurchasedMap;
+  upcProducts: UpcProducts;
+};
+export type ResolvedType<T> = T extends Promise<infer R> ? R : T;
+export type SetAppDataInput = FileNames & DispatchNeeded;

@@ -1,12 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useFocusEffect, useNavigation } from 'expo-router';
-import { Text, useTheme, Stack, Row } from 'native-base';
+import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { LayoutAnimation, StyleSheet } from 'react-native';
-import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
+import { LayoutAnimation } from 'react-native';
 import { Menu } from 'react-native-popup-menu';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { ListFilter, ListFilterFilters } from './ListFilter';
 import { ListItemSeparator } from './ListItemSeparator';
@@ -17,25 +15,26 @@ import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
+import { StoreTile } from '../tiles/StoreTIle';
 
 import {
-  EMPTY_STRING,
   ESTIMATED_SIZE_FOR_STORES_LIST,
   FORM_INTER_ITEM_SPACING,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
-import { tileContainerStyles } from '@/constants/styles';
 import {
   ListName,
   currentStoreSelector,
   listToDisplaySelector,
-  removeStoresListItem,
   setFilters,
   setSortOrder,
-  setCurrentStoreName,
+  setCurrentStoreId,
   storesListSelector,
   resetListToDisplay,
+  currentStoreIdSelector,
 } from '@/state/slices/listsSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
+import { deleteStores } from '@/state/thunks';
 import { Key } from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ListRow } from '@/types/general';
@@ -48,13 +47,14 @@ const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[];
 const listName: ListName = ListName.StoresList;
 export function StoresList(props: StoresListProps) {
   const navigation = useNavigation();
-  const storesList = useSelector(storesListSelector);
-  const storesListToDisplay = useSelector(
+  const storesList = useAppSelector(storesListSelector);
+  const storesListToDisplay = useAppSelector(
     listToDisplaySelector(listName),
   ) as Store[];
-  const currentStore = useSelector(currentStoreSelector);
+  const currentStore = useAppSelector(currentStoreSelector);
+  const currentStoreId = useAppSelector(currentStoreIdSelector);
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const listRef = useRef<FlashList<Store> | null>(null);
   const [listKey, setListKey] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -103,22 +103,26 @@ export function StoresList(props: StoresListProps) {
   const onSwipeRight = useCallback(
     (key: Key) => {
       closeMenu();
-      dispatch(setCurrentStoreName(key?.name));
+      dispatch(setCurrentStoreId(getKeyToUse(key)));
     },
     [closeMenu],
   );
 
   const onSwipeLeft = useCallback(
-    (keyToUse: Key) => {
+    (store: Store) => {
       closeMenu();
       setConfirmModalProps({
         isVisible: true,
         title: 'Deleting Store',
-        message: `Are you sure you want to delete '${keyToUse.name}'?`,
+        message: `Are you sure you want to delete '${store.name}'?`,
         note: 'This will remove all store-specific data related to this store.',
         onCancel: () => resetConfirmModalProps(setConfirmModalProps),
         onConfirm: () => {
-          dispatch(removeStoresListItem(keyToUse));
+          dispatch(
+            deleteStores({
+              stores: [store],
+            }),
+          );
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           resetConfirmModalProps(setConfirmModalProps);
         },
@@ -129,7 +133,7 @@ export function StoresList(props: StoresListProps) {
 
   useEffect(() => {
     setListKey((current) => current + 1);
-  }, [currentStore]);
+  }, [currentStoreId]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -150,11 +154,6 @@ export function StoresList(props: StoresListProps) {
   });
 
   function renderItem({ item, index }: ListRow<Store>) {
-    const keyToUse = {
-      name: item.name,
-      upc: EMPTY_STRING,
-    } as Key;
-
     return (
       <SwipeableRow
         swipeableProps={{
@@ -171,11 +170,11 @@ export function StoresList(props: StoresListProps) {
             </Stack>
           ),
           backgroundColor: theme.colors.red[900],
-          onPress: onSwipeLeft.bind(null, keyToUse),
+          onPress: onSwipeLeft.bind(null, item),
         }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
-          onPress: onSwipeRight.bind(null, keyToUse),
+          onPress: onSwipeRight.bind(null, item),
           title: (
             <Stack
               paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
@@ -186,42 +185,11 @@ export function StoresList(props: StoresListProps) {
           ),
         }}
       >
-        <RectButton
-          style={styles.rectButton}
-          onPress={() => {
-            navigation.navigate(Routes.StoreModal, {
-              originalKey: keyToUse,
-            });
-          }}
-        >
-          <Stack>
-            <Row
-              px={theme.space[FORM_INTER_ITEM_SPACING]}
-              space={theme.space[2]}
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Stack flex={1} justifyContent="center">
-                <Text fontSize={theme.fontSizes['lg']}>{item.name}</Text>
-                {item.calculatedDistance != null &&
-                item.calculatedDistance >= 0 ? (
-                  <Text>Estimated Distance: {item.calculatedDistance}mi.</Text>
-                ) : null}
-              </Stack>
-              <Stack>
-                {currentStore?.name !== keyToUse.name ? (
-                  <TouchableOpacity
-                    onPress={() => dispatch(setCurrentStoreName(keyToUse.name))}
-                  >
-                    <Text color={theme.colors.info[900]}>Set as Current</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <Text>Current</Text>
-                )}
-              </Stack>
-            </Row>
-          </Stack>
-        </RectButton>
+        <StoreTile
+          currentStore={currentStore}
+          currentStoreId={currentStoreId}
+          store={item}
+        />
       </SwipeableRow>
     );
   }
@@ -265,7 +233,3 @@ export function StoresList(props: StoresListProps) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  rectButton: tileContainerStyles,
-});

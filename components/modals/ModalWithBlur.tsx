@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import { View, useTheme, Button, Row, Heading } from 'native-base';
 import React, { ReactNode, useCallback, useMemo } from 'react';
-import { Modal } from 'react-native';
+import { Modal, ViewStyle } from 'react-native';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -34,17 +34,19 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
       text: 'Cancel',
       colorScheme: 'red',
       isEnabled: true,
+      isVisible: true,
       ...cancelButton,
     } as ButtonOptions;
-  }, [cancelButton, theme]);
+  }, [cancelButton]);
   const confirmButtonToUse = useMemo(() => {
     return {
       text: 'Confirm',
       colorScheme: 'green',
       isEnabled: true,
+      isVisible: true,
       ...confirmButton,
     } as ButtonOptions;
-  }, [confirmButton, theme]);
+  }, [confirmButton]);
 
   const onCancelPress = useCallback(() => {
     onCancel && onCancel();
@@ -71,12 +73,14 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
         }}
       >
         <View
-          style={{
-            ...maxWidth,
-            padding: 20,
-            backgroundColor: 'white',
-            borderRadius: 10,
-          }}
+          style={
+            {
+              padding: 20,
+              backgroundColor: 'white',
+              borderRadius: 10,
+              ...maxWidth,
+            } as ViewStyle
+          }
         >
           {typeof title === 'string' ? (
             <Heading
@@ -96,22 +100,26 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
             mt={theme.space[FORM_INTER_ITEM_SPACING]}
             mb={-theme.space[FORM_INTER_ITEM_SPACING]}
           >
-            <Button
-              variant="ghost"
-              isDisabled={!confirmButtonToUse.isEnabled}
-              onPress={onConfirmPress}
-              colorScheme={confirmButtonToUse.colorScheme}
-            >
-              {confirmButtonToUse.text}
-            </Button>
-            <Button
-              variant="ghost"
-              isDisabled={!cancelButtonToUse.isEnabled}
-              onPress={onCancelPress}
-              colorScheme={cancelButtonToUse.colorScheme}
-            >
-              {cancelButtonToUse.text}
-            </Button>
+            {confirmButtonToUse.isVisible ? (
+              <Button
+                variant="ghost"
+                isDisabled={!confirmButtonToUse.isEnabled}
+                onPress={onConfirmPress}
+                colorScheme={confirmButtonToUse.colorScheme}
+              >
+                {confirmButtonToUse.text}
+              </Button>
+            ) : null}
+            {cancelButtonToUse.isVisible ? (
+              <Button
+                variant="ghost"
+                isDisabled={!cancelButtonToUse.isEnabled}
+                onPress={onCancelPress}
+                colorScheme={cancelButtonToUse.colorScheme}
+              >
+                {cancelButtonToUse.text}
+              </Button>
+            ) : null}
           </Row>
         </View>
       </BlurView>

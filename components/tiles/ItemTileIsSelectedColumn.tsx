@@ -1,7 +1,4 @@
-import { FontAwesome } from '@expo/vector-icons';
-import { Column, theme } from 'native-base';
-
-import { ITEM_TILE_ICON_SIZE } from '@/constants/general';
+import { Center, theme } from 'native-base';
 
 type ItemTileIsSelectedColumnProps = {
   isMultiSelectMode: boolean;
@@ -9,22 +6,19 @@ type ItemTileIsSelectedColumnProps = {
 };
 
 export function ItemTileIsSelectedColumn(props: ItemTileIsSelectedColumnProps) {
-  const { isMultiSelectMode, isSelected } = props;
+  const { isSelected, isMultiSelectMode } = props;
+  const colorToUse = theme.colors.green[900];
+  const opacity = !isMultiSelectMode || !isSelected ? 0 : 0.25;
 
   return (
-    <Column
-      justifyContent="center"
-      alignItems="flex-end"
-      flex={0}
-      width={theme.sizes[2]}
-    >
-      {isMultiSelectMode ? (
-        <FontAwesome
-          name={`${isSelected ? 'circle' : 'circle-o'}`}
-          color={theme.colors.primary[900]}
-          size={theme.sizes[ITEM_TILE_ICON_SIZE]}
-        />
-      ) : null}
-    </Column>
+    <Center
+      position="absolute"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      opacity={opacity}
+      backgroundColor={colorToUse}
+    />
   );
 }

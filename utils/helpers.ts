@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Dispatch } from '@reduxjs/toolkit';
 import * as FileSystem from 'expo-file-system';
 import { StorageAccessFramework } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
@@ -6,18 +7,27 @@ import * as Location from 'expo-location';
 import _ from 'lodash';
 import React from 'react';
 import { Insets } from 'react-native';
+import 'react-native-get-random-values';
+import { v4 as uuidV4 } from 'uuid';
+
+import { handleLastPurchasedMapImport } from './handleLastPurchasedMapImport';
+import { handleStoreSpecificValuesImport } from './handleStoreSpecificValuesImport';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
+import {
+  UserAccount,
+  CredentialsNeeded,
+} from '@/components/services/BffService';
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import {
   DAY_IN_MS,
   EMPTY_STRING,
+  ERROR_MODAL_STATUS_CODE_DEFAULT,
   FILE_NAMES,
   FREQUENCY_INITIAL,
   HOUR_IN_MS,
   IMAGE_PICKER_QUALITY_INITIAL,
-  IMAGE_PRIORITY_MAPPING,
   SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT,
   SORT_ORDER_VALUE_BY_NAME_DEFAULT,
   WEEK_IN_MS,
@@ -28,15 +38,40 @@ import {
   UPC_REGEX,
   UPC_REQUIRED_CHAR_LENGTH,
 } from '@/constants/regexs';
-import { ListName } from '@/state/slices/listsSlice';
-import { Item, Key, List } from '@/types/Item';
+import { setError } from '@/state/slices/generalSlice';
+import {
+  ListName,
+  setItemsList,
+  setLastPurchasedMap,
+  setStoresList,
+  setStoreSpecificValues,
+} from '@/state/slices/listsSlice';
+import { setUpcProducts } from '@/state/slices/scannerSlice';
+import { Item, ItemsList, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
-import { UpcProduct } from '@/types/UpcResponse';
-import { Address, Frequency, State, TimeSpan } from '@/types/general';
+import {
+  Address,
+  CurrentLocation,
+  Error,
+  FileNames,
+  Frequency,
+  SetAppDataInput,
+  State,
+  TimeSpan,
+} from '@/types/general';
+
+export async function wait(ms: number) {
+  if (ms <= 0) return;
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(null);
+    }, ms);
+  });
+}
 
 export function calculateDistance(
-  gpsCoordinateStart: GpsCoordinate | null | undefined,
-  gpsCoordinateEnd: GpsCoordinate | null | undefined,
+  gpsCoordinateStart: CurrentLocation | undefined,
+  gpsCoordinateEnd: CurrentLocation | undefined,
 ) {
   const { lat: lat1, lon: lon1 } = gpsCoordinateStart || {};
   const { lat: lat2, lon: lon2 } = gpsCoordinateEnd || {};
@@ -111,6 +146,25 @@ export function displayAlert(object: object | null) {
   alert(object ? JSON.stringify(object, null, 2) : object);
 }
 
+export function getAddressString(
+  address: Address | null,
+  includePreposition = false,
+) {
+  const cityToUse = address?.city ? ` ${address.city}` : EMPTY_STRING;
+  const stateToUse =
+    address?.state !== State.None ? ` ${address?.state}` : EMPTY_STRING;
+  const zipToUse = address?.zipCode ? ` ${address.zipCode}` : EMPTY_STRING;
+  const separatingComma = cityToUse && stateToUse ? ', ' : EMPTY_STRING;
+  const preposition = cityToUse || stateToUse ? 'in' : 'at';
+  const prepositionString = includePreposition
+    ? `${preposition} `
+    : EMPTY_STRING;
+  return `${prepositionString}${cityToUse.trim()}${separatingComma}${stateToUse.trim()}${zipToUse}`.replaceAll(
+    '  ',
+    ' ',
+  );
+}
+
 export function getAreStoresEqual(storeOne?: Store, storeTwo?: Store) {
   if (!storeOne || !storeTwo) return false;
   return _.isEqualWith(
@@ -170,6 +224,14 @@ export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {
   });
 }
 
+export function getId() {
+  return uuidV4();
+}
+
+export function getIsDevelopmentMode() {
+  return process.env.EXPO_PUBLIC_ENV?.match(/dev/);
+}
+
 export function getIsPreviouslyPurchasedItemRecommended(
   item: Item,
   lastPurchaseDate: number | undefined,
@@ -188,8 +250,12 @@ export function getIsValidUpcValue(value: string) {
 
 export function getKeyToUse(key: string | Key, displayAlert = false) {
   if (typeof key === 'string') return key;
-  standardizeKey(key);
-  const toReturn = key?.upc || key?.name || EMPTY_STRING;
+  const sanitizedKey = sanitizeKey(key);
+  const toReturn =
+    sanitizedKey?._id ||
+    sanitizedKey?.upc ||
+    sanitizedKey?.name ||
+    EMPTY_STRING;
 
   if (!toReturn && displayAlert) {
     alert(
@@ -259,7 +325,7 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   try {
     await Location.enableNetworkProviderAsync();
   } catch (error) {
-    console.log('Continuing without high accuracy mode');
+    console.log('Continuing without high accuracy mode:' + error);
   }
 
   const location = await Location.getCurrentPositionAsync({
@@ -287,20 +353,31 @@ export function getImagePickerOptions(quality = IMAGE_PICKER_QUALITY_INITIAL) {
   } as ImagePicker.ImagePickerOptions;
 }
 
+export function getItemForImport<T extends Key>(itemKey: string, items: T[]) {
+  if (!itemKey || !items || items.length === 0) return null;
+  return items.find((item) => {
+    if (item.upc) {
+      return (item.upc || item.name) === itemKey;
+    }
+    return item.name === itemKey;
+  });
+}
+
 export function getItemFromList<T extends Key>(list: T[], key: string | Key) {
   const keyToUse = getKeyToUse(key);
   const itemFound =
     list.find((item) => {
+      if (typeof key === 'string') {
+        const fieldToUse = key.match(UPC_REGEX)
+          ? item.upc
+          : item._id || item.name;
+        return fieldToUse === keyToUse;
+      }
+      if (item?._id) return item._id === keyToUse;
       if (item?.name && item?.upc) return item.upc === keyToUse;
       return item?.name === keyToUse;
     }) || null;
   return itemFound ? (itemFound as T) : null;
-}
-
-export function getImagesFromUpcProduct(upcProduct?: UpcProduct | null) {
-  return Object.values(IMAGE_PRIORITY_MAPPING).map(
-    (key) => upcProduct?.[key] || EMPTY_STRING,
-  );
 }
 
 export function getIndexOfSmallestField<T>(arr: T[], key: keyof T) {
@@ -333,6 +410,7 @@ export function getSortOrderValues(listName: ListName) {
     case ListName.PreviouslyPurchased:
     case ListName.StoresList:
     case ListName.ItemsList:
+    default:
       return SORT_ORDER_VALUE_BY_NAME_DEFAULT;
   }
 }
@@ -342,9 +420,17 @@ export function getStandardizedUpcValue(upc?: string) {
   return upc?.length === UPC_REQUIRED_CHAR_LENGTH + 1 ? upc.substring(1) : upc;
 }
 
+export function getStateFromString(stateStr?: string): State {
+  if (!stateStr) return State.None;
+  if (Object.values(State).includes(stateStr as State))
+    return stateStr as State;
+  const value = State[stateStr as keyof typeof State];
+  return value ? value : State.None;
+}
+
 export function getStoreWithDistance(
   store: Store,
-  currentLocation: GpsCoordinate | null,
+  currentLocation: CurrentLocation,
 ) {
   return {
     ...store,
@@ -353,6 +439,29 @@ export function getStoreWithDistance(
       currentLocation,
     ),
   };
+}
+
+export function getUserCredentials(
+  userAccount: UserAccount,
+): CredentialsNeeded {
+  return {
+    userId: userAccount._id || EMPTY_STRING,
+    password: userAccount.password || EMPTY_STRING,
+  };
+}
+
+export function handleError(
+  dispatch: Dispatch,
+  error: Error,
+  message?: string,
+) {
+  dispatch(
+    setError({
+      message: message || error.message,
+      error,
+      statusCode: ERROR_MODAL_STATUS_CODE_DEFAULT,
+    }),
+  );
 }
 
 export function isAddressValid(address: Address) {
@@ -373,18 +482,6 @@ export function joinWithAnd(array: (string | undefined)[]) {
   } else {
     const lastItem = array.pop(); // Remove the last item from the array
     return array.join(', ') + ', and ' + lastItem;
-  }
-}
-
-export async function getCustomImage(
-  resultFetcher: () => Promise<string | undefined>,
-  onResultFound: (result: string) => void,
-) {
-  try {
-    const result = (await resultFetcher()) || EMPTY_STRING;
-    onResultFound && onResultFound(result);
-  } catch (error) {
-    console.error('Error obtaining a custom image: ' + error);
   }
 }
 
@@ -424,7 +521,7 @@ export async function makeNewDirectory(dir: string, name: string) {
 }
 
 export async function importAppData(directory: string) {
-  const toReturn = {} as { [key in keyof typeof FILE_NAMES]: any };
+  const toReturn = {} as FileNames;
   try {
     const files = await StorageAccessFramework.readDirectoryAsync(directory);
     for (const file of files) {
@@ -459,6 +556,29 @@ export async function pickImage() {
   } catch (error) {
     console.log({ error });
   }
+}
+
+/**
+ *Currently this just removes images that are locally cached from the saved data
+ **/
+export function prepareItemsListForSaving(itemsList: ItemsList) {
+  const newData = [] as Item[];
+  for (const item of itemsList.data) {
+    const shouldResetIndex =
+      !!item?.images?.[item.imageToUseIndex]?.match(LOCAL_FILE_REGEX) || false;
+    const filteredImages = item.images.filter(
+      (image) => !image.match(LOCAL_FILE_REGEX),
+    );
+    newData.push({
+      ...item,
+      images: filteredImages,
+      imageToUseIndex: shouldResetIndex ? 0 : item.imageToUseIndex,
+    });
+  }
+  return {
+    ...itemsList,
+    data: newData,
+  };
 }
 
 export function resetConfirmModalProps(
@@ -541,6 +661,50 @@ export async function saveAppStateToFile(
   await FileSystem.writeAsStringAsync(fileUri, content);
 }
 
+export function setAppData(input: SetAppDataInput) {
+  const {
+    dispatch,
+    items,
+    lastPurchasedMap,
+    storeSpecificValues,
+    stores,
+    upcProducts,
+  } = input;
+  items.data.forEach((item) => {
+    if (!item._id) {
+      item._id = getId();
+    }
+    if (item.needsSaving == null) {
+      item.needsSaving = true;
+    }
+  });
+  stores.data.forEach((store) => {
+    if (!store._id) {
+      store._id = getId();
+    }
+    if (store.needsSaving == null) {
+      store.needsSaving = true;
+    }
+  });
+  dispatch(
+    setStoreSpecificValues(
+      handleStoreSpecificValuesImport(
+        storeSpecificValues,
+        items.data,
+        stores.data,
+      ),
+    ),
+  );
+  dispatch(
+    setLastPurchasedMap(
+      handleLastPurchasedMapImport(lastPurchasedMap, items.data, stores.data),
+    ),
+  );
+  dispatch(setItemsList(items));
+  dispatch(setStoresList(stores));
+  dispatch(setUpcProducts(upcProducts));
+}
+
 export async function measureExecutionTime(
   func: () => void,
   key = 'Func',
@@ -552,11 +716,21 @@ export async function measureExecutionTime(
   if (shouldLog) console.log({ [`executionTimeOf${key}`]: end - start });
 }
 
-export function standardizeKey(key: Key) {
-  if (key?.name !== undefined) {
-    key.name = key.name.trim();
+export function sanitizeKey<T extends Key>(key: T) {
+  const copy = { ...key };
+  if (copy?.name) {
+    copy.name = sanitize(copy.name);
   }
-  if (key?.upc !== undefined) {
-    key.upc = key.upc.trim();
+  if (copy?.upc) {
+    copy.upc = sanitize(copy.upc);
   }
+  return copy;
+}
+
+/**
+ *This is used to sanitize the keys used in documents with a values field (e.g. LastPurchasedMapSchema and StoreSpecificValuesSchema)
+ **/
+export function sanitize(str?: string) {
+  if (!str) return '';
+  return str?.replace(/\./g, '');
 }

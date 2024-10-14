@@ -2,7 +2,6 @@ import { useRoute } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { Center, Row, Text, useTheme } from 'native-base';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { FullscreenSpinner } from '@/components/FullscreenSpinner';
 import { ImageCapturer } from '@/components/ImageCapturer';
@@ -10,13 +9,13 @@ import { ImageRenderer } from '@/components/ImageRenderer';
 import { useUpcProduct } from '@/components/hooks/useUpcProduct';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { LOCAL_FILE_REGEX } from '@/constants/regexs';
-import { addItemsListItem } from '@/state/slices/listsSlice';
+import { useAppDispatch } from '@/state/store';
+import { saveItem } from '@/state/thunks';
 import { Item } from '@/types/Item';
-import { getCustomImage, pickImage, captureImage } from '@/utils/helpers';
 
 export default function FullscreenImageScreen() {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const route = useRoute();
   const theme = useTheme();
   const { item } = (route.params || {}) as {
@@ -48,7 +47,8 @@ export default function FullscreenImageScreen() {
         fullscreenImage: result,
       } as Item;
       dispatch(
-        addItemsListItem({
+        saveItem({
+          hasKeyChanged: false,
           item: newItem,
           originalKey: newItem,
         }),
@@ -57,17 +57,12 @@ export default function FullscreenImageScreen() {
     [item, customImageUri],
   );
 
-  const onSelectPress = useCallback(() => {
-    getCustomImage(pickImage, (result) => {
+  const onImageChange = useCallback(
+    (result: string) => {
       onCustomImageCallback(result);
-    });
-  }, [onCustomImageCallback]);
-
-  const onCameraPress = useCallback(() => {
-    getCustomImage(captureImage, (result) => {
-      onCustomImageCallback(result);
-    });
-  }, [onCustomImageCallback]);
+    },
+    [onCustomImageCallback],
+  );
 
   useEffect(() => {
     if (!item?.name) return;
@@ -87,10 +82,7 @@ export default function FullscreenImageScreen() {
           space={theme.space[FORM_INTER_ITEM_SPACING]}
           mt={theme.space[FORM_INTER_ITEM_SPACING]}
         >
-          <ImageCapturer
-            onCameraPress={onCameraPress}
-            onSelectPress={onSelectPress}
-          />
+          <ImageCapturer onImageChange={onImageChange} />
         </Row>
       </Center>
     );

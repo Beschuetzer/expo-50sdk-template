@@ -1,19 +1,33 @@
-import { Column, Row, Text } from 'native-base';
-import React from 'react';
+import { Column, Heading, Text } from 'native-base';
+import React, { useMemo } from 'react';
 
-import { ForwardGeocodingPlace } from '@/api/geofencing';
+import { ForwardGeocodingPlaceWithDistance } from '../modals/ForwardGeoCodingModal';
+
+import { parseAddress } from '@/utils/parseAddress';
 
 type PlaceTileProps = {
-  place: ForwardGeocodingPlace;
+  place: ForwardGeocodingPlaceWithDistance;
 };
 
 export default function PlaceTile(props: PlaceTileProps) {
   const { place } = props;
+  const address = useMemo(
+    () => parseAddress(place?.display_name),
+    [place?.display_name],
+  );
+
   return (
     <Column>
-      <Row>
-        <Text>{place?.display_name}</Text>
-      </Row>
+      {address.addressLineOne ? <Text>{address.addressLineOne}</Text> : null}
+      {address.addressLineTwo ? <Text>{address.addressLineTwo}</Text> : null}
+      <Text>
+        {address.city}, {address.state} {address.zipCode}
+      </Text>
+      {address.country ? <Text>{address.country}</Text> : null}
+      {place?.calculatedDistance ? (
+        <Heading size="xs">{place.calculatedDistance} mi.</Heading>
+      ) : null}
+      <Text />
     </Column>
   );
 }

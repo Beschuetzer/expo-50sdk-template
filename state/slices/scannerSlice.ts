@@ -4,6 +4,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import { Key } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 import { getKeyToUse } from '@/utils/helpers';
 
@@ -11,7 +12,7 @@ type Upc = string;
 export type TimeStamp = {
   timestamp: number;
 };
-type UpcProducts = { [key: Upc]: UpcProduct & TimeStamp };
+export type UpcProducts = { [key: Upc]: UpcProduct & TimeStamp };
 export type ScannerState = {
   upcProducts: UpcProducts;
 };
@@ -27,10 +28,12 @@ export const scannerSlice = createSlice({
   initialState,
   reducers: {
     addUpcProduct: (state: ScannerState, action: PayloadAction<UpcProduct>) => {
-      const keyToUse = getKeyToUse({
-        name: action.payload.product_name,
-        upc: action.payload.id || action.payload.code,
-      });
+      const upcProduct = action.payload || {};
+      const key = {
+        name: upcProduct.product_name,
+        upc: upcProduct.id || upcProduct.code,
+      } as Key;
+      const keyToUse = getKeyToUse(key);
 
       if (!action?.payload || !keyToUse) {
         alert(
@@ -44,7 +47,7 @@ export const scannerSlice = createSlice({
       }
 
       state.upcProducts[keyToUse] = {
-        ...action.payload,
+        ...upcProduct,
         timestamp: Date.now(),
       };
     },

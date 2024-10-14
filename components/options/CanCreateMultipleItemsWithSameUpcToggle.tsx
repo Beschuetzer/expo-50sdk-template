@@ -10,7 +10,9 @@ import {
   setCanOverrideItem,
 } from '@/state/slices/optionsSlice';
 
-export function CanOverrideItemToggle() {
+export const ALLOW_OVERRIDE_WHEN_SAME_UPC_MESSAGE =
+  'Allow creation of items with the same UPC';
+export function CanCreateMultipleItemsWithSameUpcToggle() {
   const theme = useTheme();
   const canOverrideItem = useSelector(canOverrideItemSelector);
   const dispatch = useDispatch();
@@ -27,7 +29,7 @@ export function CanOverrideItemToggle() {
       }}
     >
       <Text mr={theme.space[FORM_INTER_ITEM_SPACING]}>
-        Items can be overriden
+        {ALLOW_OVERRIDE_WHEN_SAME_UPC_MESSAGE}
       </Text>
     </ToggleWithText>
   );

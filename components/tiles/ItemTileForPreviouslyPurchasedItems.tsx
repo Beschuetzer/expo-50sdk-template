@@ -10,11 +10,7 @@ import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
-import {
-  FORM_INTER_ITEM_SPACING,
-  ITEM_TILE_ICON_SIZE,
-  ITEM_TILE_WIDTH,
-} from '@/constants/general';
+import { ITEM_TILE_ICON_SIZE, ITEM_TILE_WIDTH } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import { ItemWithStoreSpecificValues } from '@/types/Item';
@@ -46,16 +42,29 @@ export function ItemTileForPreviouslyPurchased(
   const navigation = useNavigation();
 
   const isRecommendedAndNotAdded = isRecommended && !isInCart && !isInShopping;
+  const greenColor = theme.colors.green[900];
+  const redBackgroundColor = theme.colors.red[900];
+  const greenBackgroundColor = theme.colors.green[100];
   const dynamicBackgroundColor = useMemo(
     () =>
-      isRecommendedAndNotAdded ? theme.colors.red[900] : theme.colors.white,
-    [isRecommendedAndNotAdded, theme],
+      isInCart || isInShopping
+        ? greenBackgroundColor
+        : isRecommendedAndNotAdded
+          ? redBackgroundColor
+          : theme.colors.white,
+    [
+      isInShopping,
+      isInCart,
+      isRecommendedAndNotAdded,
+      theme,
+      redBackgroundColor,
+      greenBackgroundColor,
+    ],
   );
   const dynamicTextColor = useMemo(
     () => (isRecommendedAndNotAdded ? theme.colors.white : theme.colors.black),
     [isRecommendedAndNotAdded, theme],
   );
-  const greenColor = theme.colors.green[900];
   const dynamicAddColor = useMemo(
     () => (isRecommendedAndNotAdded ? theme.colors.white : theme.colors.black),
     [isRecommendedAndNotAdded, theme],
@@ -74,7 +83,7 @@ export function ItemTileForPreviouslyPurchased(
           onSelect && onSelect(item);
         } else {
           navigation.navigate(Routes.ItemModal, {
-            key: { upc: item.upc, name: item.name },
+            key: item,
             showOverrideMsg: false,
             callerList: listName,
           });

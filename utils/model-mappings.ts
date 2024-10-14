@@ -1,4 +1,5 @@
-import { getImagesFromUpcProduct, getStandardizedUpcValue } from './helpers';
+import { getImagesFromUpcProduct } from './getImagesFromUpcProducts';
+import { getId, getStandardizedUpcValue } from './helpers';
 
 import {
   DEFAULT_IMAGE_INDEX,
@@ -8,14 +9,9 @@ import {
   NAME_ORDER_BRANDS_STRING,
   NAME_ORDER_PRODUCT_NAME_STRING,
   NAME_ORDER_TEMPLATE_INITIAL,
-  UNIT_INITIAL,
+  ITEM_UNIT_INITIAL,
 } from '@/constants/general';
-import {
-  Item,
-  ItemWithStoreSpecificValues,
-  StoreSpecificValueKey,
-  StoreSpecificValues,
-} from '@/types/Item';
+import { Item } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 
 type GetItemParams = {
@@ -25,6 +21,7 @@ type GetItemParams = {
 export function getItem(input: GetItemParams): Item {
   const { upcProduct, nameOrderTemplate } = input;
   return {
+    _id: getId(),
     frequency: EMPTY_NUMBER,
     images: getImagesFromUpcProduct(upcProduct) || [],
     imageToUseIndex: DEFAULT_IMAGE_INDEX,
@@ -36,10 +33,11 @@ export function getItem(input: GetItemParams): Item {
       getStandardizedUpcValue(upcProduct?.code) ||
       upcProduct?.id ||
       EMPTY_STRING,
-    unit: UNIT_INITIAL,
+    unit: ITEM_UNIT_INITIAL,
     addedDate: 0,
     lastUpdatedDate: 0,
-  };
+    needsSaving: true,
+  } as Item;
 }
 
 export function getItemName(input: GetItemParams): string {
@@ -54,25 +52,6 @@ export function getItemName(input: GetItemParams): string {
       upcProduct?.[NAME_ORDER_BRANDS_STRING] || EMPTY_STRING,
     );
   return replaced;
-}
-
-export function getItemWithStoreSpecificValues(
-  item: Item,
-  storeSpecificValues: StoreSpecificValues,
-): ItemWithStoreSpecificValues {
-  return {
-    ...item,
-    [StoreSpecificValueKey.AisleNumber]:
-      storeSpecificValues?.[StoreSpecificValueKey.AisleNumber] || {},
-    [StoreSpecificValueKey.IsInCart]:
-      storeSpecificValues?.[StoreSpecificValueKey.IsInCart] || {},
-    [StoreSpecificValueKey.ItemId]:
-      storeSpecificValues?.[StoreSpecificValueKey.ItemId] || {},
-    [StoreSpecificValueKey.Price]:
-      storeSpecificValues?.[StoreSpecificValueKey.Price] || {},
-    [StoreSpecificValueKey.Quantity]:
-      storeSpecificValues?.[StoreSpecificValueKey.Quantity] || {},
-  };
 }
 
 export function getUpcProduct(item: Item, addLeadingZero = true): UpcProduct {

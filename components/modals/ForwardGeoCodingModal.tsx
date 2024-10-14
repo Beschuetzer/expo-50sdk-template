@@ -1,26 +1,44 @@
 import { Button, ScrollView, useTheme } from 'native-base';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
+import { SortType, getSorter } from '../lists/sorters';
 import PlaceTile from '../tiles/PlaceTile';
 
 import {
-  DoForwardGeocodingResponse,
+  ForwardGeocodingResponse,
   ForwardGeocodingPlace,
-} from '@/api/geofencing';
+} from '@/components/services/GeoCodingService';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { currentLocationSelector } from '@/state/slices/listsSlice';
+import { Store } from '@/types/Store';
+import { calculateDistance } from '@/utils/helpers';
+
+export type ForwardGeocodingPlaceWithDistance =
+  | (ForwardGeocodingPlace & Required<Pick<Store, 'calculatedDistance'>>)
+  | null;
 
 type FowardGeocodingModalProps = {
-  places: DoForwardGeocodingResponse;
-  onConfirm: (place: ForwardGeocodingPlace) => void;
+  places: ForwardGeocodingResponse;
+  onConfirm: (place: ForwardGeocodingPlaceWithDistance) => void;
 } & Omit<ModalWithBlurProps, 'title' | 'onConfirm'>;
 
 export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
   const { places, ...restProps } = props;
+  const currentLocation = useSelector(currentLocationSelector);
   const theme = useTheme();
+  const sortedPlaces = useMemo(() => {
+    return places
+      .map((place) => ({
+        ...place,
+        calculatedDistance: calculateDistance(currentLocation, place),
+      }))
+      .sort(getSorter(SortType.Distance));
+  }, [places]) as ForwardGeocodingPlaceWithDistance[];
 
   const [currentlySelectedPlace, setCurrentlySelectedPlace] =
-    useState<ForwardGeocodingPlace>(null);
+    useState<ForwardGeocodingPlaceWithDistance>(null);
 
   const onCancelPress = useCallback(() => {
     restProps.onCancel && restProps.onCancel();
@@ -41,8 +59,8 @@ export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
       onCancel={onCancelPress}
       onConfirm={onConfirmPress}
     >
-      <ScrollView>
-        {Array.from(places).map((place) => {
+      <ScrollView keyboardShouldPersistTaps="handled">
+        {Array.from(sortedPlaces).map((place) => {
           return (
             <Button
               key={place?.place_id}

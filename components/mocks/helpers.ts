@@ -2,6 +2,7 @@ import { MOCK_STORES } from './mockStores';
 
 import {
   TIME_SPAN_TO_MILLISECONDS_MAPPING,
+  ITEM_UNIT_INITIAL,
   WEEK_IN_MS,
 } from '@/constants/general';
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
@@ -12,6 +13,7 @@ import {
   StoreSpecificValues,
 } from '@/types/Item';
 import { TimeSpan } from '@/types/general';
+import { getId } from '@/utils/helpers';
 
 const MOCK_NAMES = [
   'Apple',
@@ -86,6 +88,7 @@ export function getRandomItem(lastUpcNumber: number): Item {
     .padStart(UPC_REQUIRED_CHAR_LENGTH, '0');
 
   return {
+    _id: getId(),
     addedDate: Date.now() - getRandomInt(0, WEEK_IN_MS * 52),
     lastUpdatedDate: Date.now(),
     frequency:
@@ -99,7 +102,7 @@ export function getRandomItem(lastUpcNumber: number): Item {
     name: `${MOCK_NAMES[getRandomInt(0, MOCK_NAMES.length - 1)]}-${Math.random()}`,
     unit: Object.values(ItemUnit || {}).find((item) => {
       let randomValue = getRandomEnumValue<ItemUnit>(ItemUnit);
-      if (randomValue === ItemUnit.Custom) randomValue = ItemUnit.Package;
+      if (randomValue === ItemUnit.Custom) randomValue = ITEM_UNIT_INITIAL;
       return item === randomValue;
     }) as any,
     upc: upcToUse,

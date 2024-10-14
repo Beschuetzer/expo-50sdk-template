@@ -2,7 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Input, Stack, Heading, useTheme } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { EMPTY_STRING, UNIT_INITIAL } from '@/constants/general';
+import { EMPTY_STRING, ITEM_UNIT_INITIAL } from '@/constants/general';
 import { ItemUnit } from '@/types/Item';
 import { HeadingTagProp, SpacingProp } from '@/types/general';
 
@@ -27,7 +27,7 @@ export function UnitInput(props: UnitInputProps) {
   }, [initialValue, ItemUnit]);
 
   const [unit, setUnit] = useState<string>(
-    isInitialCustom ? ItemUnit.Custom : initialValue || UNIT_INITIAL,
+    isInitialCustom ? ItemUnit.Custom : initialValue || ITEM_UNIT_INITIAL,
   );
   const [customUnit, setCustomUnit] = useState(
     isInitialCustom ? initialValue : EMPTY_STRING,
@@ -67,7 +67,7 @@ export function UnitInput(props: UnitInputProps) {
 
   useEffect(() => {
     hasComponentLoadedRef.current = true;
-    onValueChange && onValueChange(initialValue || UNIT_INITIAL);
+    onValueChange && onValueChange(initialValue || ITEM_UNIT_INITIAL);
   }, []);
 
   return (

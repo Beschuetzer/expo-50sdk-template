@@ -2,7 +2,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Image, ImageProps } from 'expo-image';
 import { useNavigation } from 'expo-router';
 import { AspectRatio, View, useTheme } from 'native-base';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import {
@@ -37,15 +37,16 @@ export function ImageRenderer(props: ImageRendererProps) {
     useMarginRight = false,
   } = props;
   const marginRight = useMarginRight ? theme.space[FORM_INTER_ITEM_SPACING] : 0;
+  const [isError, setIsError] = useState(false);
 
   const onImagePress = useCallback(() => {
-    if (!showFullscreenOnPress) return;
+    if (!showFullscreenOnPress || !item) return;
     navigation.navigate(Routes.FullscreenImageScreen, { item });
   }, [navigation, source, showFullscreenOnPress]);
 
   return (
     <TouchableOpacity onPress={onImagePress}>
-      {!source ? (
+      {!source || isError ? (
         <View
           height={height}
           width={width}
@@ -74,7 +75,11 @@ export function ImageRenderer(props: ImageRendererProps) {
           }}
           mr={marginRight}
         >
-          <Image cachePolicy={cachePolicy} {...props} />
+          <Image
+            cachePolicy={cachePolicy}
+            {...props}
+            onError={() => setIsError(true)}
+          />
         </AspectRatio>
       )}
     </TouchableOpacity>

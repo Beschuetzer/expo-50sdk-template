@@ -1,4 +1,6 @@
 export enum Routes {
+  AccountScreen = 'AccountScreen',
+  BffServiceTestScreen = 'BffServiceTestScreen',
   DevOptionsScreen = 'DevOptionsScreen',
   FullscreenImageScreen = 'FullscreenImageScreen',
   ItemModal = 'itemModal',

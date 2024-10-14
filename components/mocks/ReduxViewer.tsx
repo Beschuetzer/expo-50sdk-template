@@ -1,28 +1,30 @@
 import { Button, FlatList, Heading, Row, Stack, Text, View } from 'native-base';
-import React, { useRef, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useRef } from 'react';
 
 import { getRandomItem, getRandomStoreSpecificValues } from './helpers';
 import { MOCK_STORES } from './mockStores';
-import { MOCKS_UPCS } from './mockUpcData';
 
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import {
-  addItemsListItem,
   setItemsList,
   addStoresListItem,
   currentLocationSelector,
   currentStoreSelector,
   resetCurrentLocation,
-  resetCurrentStoreName,
+  resetCurrentStoreId,
   resetItemsList,
   resetStoresList,
   setStoreSpecificValues,
+  addItemsListItem,
+  currentLocationStateSelector,
+  resetCurrentLocationState,
 } from '@/state/slices/listsSlice';
 import {
   resetUpcProducts,
   upcProductsSelector,
 } from '@/state/slices/scannerSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
+import { saveItem, saveStore } from '@/state/thunks';
 import { Item, StoreSpecificValuesMap } from '@/types/Item';
 import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers';
 
@@ -32,13 +34,11 @@ export function ReduxViewer() {
   const lastUpcIndexRef = useRef(0);
   const lastUpcNumberRef = useRef(1);
   const lastStoreIndexRef = useRef(0);
-  const [numberOfMockItems, setNumberOfMockItems] = useState(
-    NUMBER_OF_ITEM_TO_MOCK_INITIAL,
-  );
-  const upcProducts = useSelector(upcProductsSelector);
-  const currentLocation = useSelector(currentLocationSelector);
-  const currentStore = useSelector(currentStoreSelector);
-  const dispatch = useDispatch();
+  const upcProducts = useAppSelector(upcProductsSelector);
+  const currentLocationState = useAppSelector(currentLocationStateSelector);
+  const currentLocation = useAppSelector(currentLocationSelector);
+  const currentStore = useAppSelector(currentStoreSelector);
+  const dispatch = useAppDispatch();
 
   // useEffect(() => {
   //   dispatch(resetItemsList())
@@ -91,19 +91,24 @@ export function ReduxViewer() {
               >
                 Lists
               </Button>
-              <Button onPress={() => dispatch(resetCurrentLocation())}>
+              <Button
+                onPress={() => {
+                  dispatch(resetCurrentLocation());
+                  dispatch(resetCurrentLocationState());
+                }}
+              >
                 currentLocation
               </Button>
             </Row>
             <Row space={1}>
-              <Button onPress={() => dispatch(resetCurrentStoreName())}>
-                currentStoreName
+              <Button onPress={() => dispatch(resetCurrentStoreId())}>
+                currentStoreId
               </Button>
               <Button
                 onPress={() => {
                   lastStoreIndexRef.current = 0;
                   dispatch(resetStoresList());
-                  dispatch(resetCurrentStoreName());
+                  dispatch(resetCurrentStoreId());
                 }}
               >
                 storeList
@@ -121,30 +126,67 @@ export function ReduxViewer() {
                   } else {
                     lastStoreIndexRef.current += 1;
                   }
-                  dispatch(addStoresListItem({ newStore: storeToUse }));
+                  dispatch(
+                    saveStore({
+                      newStore: storeToUse,
+                    }),
+                  );
                 }}
               >
                 Store
               </Button>
               <Button
                 onPress={() => {
-                  if (lastUpcIndexRef.current >= MOCKS_UPCS.length - 1) {
-                    lastUpcIndexRef.current = 0;
+                  const storeToUse = MOCK_STORES?.[lastStoreIndexRef.current];
+                  if (lastStoreIndexRef.current >= MOCK_STORES.length - 1) {
+                    lastStoreIndexRef.current = 0;
                   } else {
-                    lastUpcIndexRef.current += 1;
+                    lastStoreIndexRef.current += 1;
                   }
+                  dispatch(
+                    addStoresListItem({
+                      newStore: {
+                        ...storeToUse,
+                        needsSaving: true,
+                      },
+                    }),
+                  );
+                }}
+              >
+                Store Local
+              </Button>
+              <Button
+                onPress={() => {
+                  lastUpcIndexRef.current += 1;
                   const randomItem = getRandomItem(lastUpcIndexRef.current);
                   dispatch(
-                    addItemsListItem({
+                    saveItem({
                       item: randomItem,
                       storeSpecificValues: getRandomStoreSpecificValues(),
-                      currentStore: MOCK_STORES[1],
                       originalKey: randomItem,
+                      hasKeyChanged: false,
                     }),
                   );
                 }}
               >
                 Item
+              </Button>
+              <Button
+                onPress={() => {
+                  lastUpcIndexRef.current += 1;
+                  const randomItem = getRandomItem(lastUpcIndexRef.current);
+                  dispatch(
+                    addItemsListItem({
+                      item: {
+                        ...randomItem,
+                        needsSaving: true,
+                      },
+                      storeSpecificValues: getRandomStoreSpecificValues(),
+                    }),
+                  );
+                }}
+              >
+                Item Local
               </Button>
             </Row>
             <Row space={1}>
@@ -153,7 +195,11 @@ export function ReduxViewer() {
                   const itemsList = getEmptyList<Item>();
                   const storeSpecificValuesMap: StoreSpecificValuesMap = {};
 
-                  for (let index = 0; index < numberOfMockItems; index++) {
+                  for (
+                    let index = 0;
+                    index < NUMBER_OF_ITEM_TO_MOCK_INITIAL;
+                    index++
+                  ) {
                     const upcToUse = lastUpcNumberRef.current
                       .toString()
                       .padStart(UPC_REQUIRED_CHAR_LENGTH, '0');
@@ -170,7 +216,7 @@ export function ReduxViewer() {
                   dispatch(setStoreSpecificValues(storeSpecificValuesMap));
                 }}
               >
-                Add {numberOfMockItems} items
+                Add {NUMBER_OF_ITEM_TO_MOCK_INITIAL} items
               </Button>
             </Row>
             <Button
@@ -202,7 +248,7 @@ export function ReduxViewer() {
 
           <Text>
             Current Location: (Lat: {currentLocation?.lat}, Lon:{' '}
-            {currentLocation?.lon})
+            {currentLocation?.lon}, State: {currentLocationState})
           </Text>
           <Text>
             Distance to Store from Current:{' '}

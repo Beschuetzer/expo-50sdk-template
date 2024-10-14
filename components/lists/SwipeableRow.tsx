@@ -146,6 +146,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
       {...swipeableProps}
       key={id}
       ref={swipeableRef}
+      containerStyle={{ position: 'relative' }}
       friction={2}
       leftThreshold={openThreshhold}
       rightThreshold={openThreshhold}

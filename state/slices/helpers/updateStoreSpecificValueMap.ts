@@ -11,20 +11,23 @@ export function updateStoreSpecificValueMap(
   state: ListsState,
   key: Key,
   storeSpecificValuesToUpdate: StoreSpecificValueUpdater,
-  storeName?: string,
+  storeId?: string,
 ) {
   const keyToUse = getKeyToUse(key);
   for (const [valueName, value] of Object.entries(
     storeSpecificValuesToUpdate || {},
   )) {
-    const storeNameToUse = storeName || state.currentStoreName;
+    const storeIdToUse = storeId || state.currentStoreId;
     const currentItem = state.storeSpecificValuesMap?.[keyToUse] as any;
     const currentValues = currentItem?.[valueName];
-    const currentValueAtCurrentStore = currentValues?.[storeNameToUse];
+    const currentValueAtCurrentStore = currentValues?.[storeIdToUse];
     const newValueAtCurrentStore = (value as any)?.(currentValueAtCurrentStore);
 
     console.log({
-      storeNameToUse,
+      valueName,
+      value,
+      keyToUse,
+      storeIdToUse,
       currentItem,
       currentValues,
       currentValueAtCurrentStore,
@@ -36,11 +39,11 @@ export function updateStoreSpecificValueMap(
         ...state.storeSpecificValuesMap[keyToUse],
         [valueName]: {
           ...currentValues,
-          [storeNameToUse]: newValueAtCurrentStore,
+          [storeIdToUse]: newValueAtCurrentStore,
         },
       } as StoreSpecificValues;
     } else {
-      currentItem[valueName][storeNameToUse] = newValueAtCurrentStore;
+      currentItem[valueName][storeIdToUse] = newValueAtCurrentStore;
     }
   }
 }

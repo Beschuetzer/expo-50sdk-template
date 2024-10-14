@@ -5,28 +5,24 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { FILE_NAMES, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { maxWidth } from '@/constants/styles';
 import {
   currentStoreSelector,
   itemsListSelector,
   lastPurchasedMapSelector,
-  setCurrentStoreName,
-  setItemsList,
-  setLastPurchasedMap,
-  setStoresList,
-  setStoreSpecificValues,
   storesListSelector,
   storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
-import {
-  setUpcProducts,
-  upcProductsSelector,
-} from '@/state/slices/scannerSlice';
+import { upcProductsSelector } from '@/state/slices/scannerSlice';
 import {
   displayAlert,
   getDirectory,
+  getKeyToUse,
   importAppData,
   makeNewDirectory,
+  prepareItemsListForSaving,
   saveAppStateToFile,
+  setAppData,
 } from '@/utils/helpers';
 
 type SaveLoadStateProps = object;
@@ -45,23 +41,12 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
   const onLoadItemsPress = useCallback(async () => {
     try {
       const dir = await getDirectory();
-      const {
-        storeSpecificValues: storeSpecificValuesLoaded,
-        upcProducts: upcProductsLoaded,
-        lastPurchasedMap: lastPurchasedMapLoaded,
-        stores: storesLoaded,
-        items: itemsLoaded,
-      } = await importAppData(dir);
-      dispatch(setStoreSpecificValues(storeSpecificValuesLoaded));
-      dispatch(setItemsList(itemsLoaded));
-      dispatch(setLastPurchasedMap(lastPurchasedMapLoaded));
-      dispatch(setUpcProducts(upcProductsLoaded));
-      dispatch(setStoresList(storesLoaded));
-      dispatch(setCurrentStoreName());
+      const data = await importAppData(dir);
+      setAppData({ ...data, dispatch });
     } catch (error) {
       displayAlert({
         msg: 'Unable to import app data.',
-        error,
+        error: (error as Error).message,
       });
     }
   }, []);
@@ -71,7 +56,12 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       const dir = await getDirectory();
       const newFolderName = new Date().toISOString();
       const madeDirectory = await makeNewDirectory(dir, newFolderName);
-      await saveAppStateToFile(FILE_NAMES.items, madeDirectory, itemsList);
+
+      await saveAppStateToFile(
+        FILE_NAMES.items,
+        madeDirectory,
+        prepareItemsListForSaving(itemsList),
+      );
       await saveAppStateToFile(
         FILE_NAMES.storeSpecificValues,
         madeDirectory,
@@ -89,7 +79,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       );
       await saveAppStateToFile(FILE_NAMES.stores, madeDirectory, {
         ...stores,
-        currentStoreName: currentStore.name,
+        currentStoreId: getKeyToUse(currentStore),
       });
     } catch (error) {
       displayAlert({
@@ -108,7 +98,12 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
 
   return (
     <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
-      <Row space={theme.space[5]} alignItems="center">
+      <Row
+        space={theme.space[2]}
+        justifyContent="space-between"
+        alignItems="center"
+        {...maxWidth}
+      >
         <Text>Data (Restore/Backup):</Text>
         <TouchableOpacity onPress={onLoadItemsPress}>
           <FontAwesome name="download" size={iconSize} />

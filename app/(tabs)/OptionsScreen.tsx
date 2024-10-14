@@ -3,36 +3,40 @@ import { useNavigation } from 'expo-router';
 import { Button, Row, FormControl, Input, useTheme, Stack } from 'native-base';
 import { useEffect, useState, useRef } from 'react';
 import { Dimensions } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
 import { InputValidationMessage } from '@/components/InputValidationMessage';
 import { AutoSaveItemsToggle } from '@/components/options/AutoSaveItemsToggle';
 import { AutoSaveStoresToggle } from '@/components/options/AutoSaveStoresToggle';
 import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
-import { CanOverrideItemToggle } from '@/components/options/CanOverrideItemToggle';
-import { CanOverrideStoreToggle } from '@/components/options/CanOverrideStoreToggle';
+import { CanCreateMultipleItemsWithSameUpcToggle } from '@/components/options/CanCreateMultipleItemsWithSameUpcToggle';
 import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider';
 import { NameOrderSpecifier } from '@/components/options/NameOrderSpecifier';
+import { SaveImagesToGallerySlider } from '@/components/options/SaveImagesToGallerySlider';
 import { SaveLoadState } from '@/components/options/SaveLoadState';
+import { SaveLoadStateViaDb } from '@/components/options/SaveLoadStateFromDb';
+import { ShouldSaveOnLoginToggle } from '@/components/options/ShouldSaveOnLoginToggle';
 import {
   FORM_INTER_ITEM_SPACING,
   SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
+import { setLoading } from '@/state/slices/generalSlice';
 import { setCurrentLocation } from '@/state/slices/listsSlice';
 import {
   setSwipeableRowOpenThreshold,
   swipeableRowOpenThresholdSelector,
 } from '@/state/slices/optionsSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
+import { getCurrentState } from '@/state/thunks';
 import { getGpsCoordinate } from '@/utils/helpers';
 
 const DEBOUNCE_TIMEOUT = 500;
 
 export default function OptionsScreen() {
-  const openThreshhold = useSelector(swipeableRowOpenThresholdSelector);
+  const openThreshhold = useAppSelector(swipeableRowOpenThresholdSelector);
   const navigation = useNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const theme = useTheme();
   const windowDimensions = Dimensions.get('window');
   const debounceHandlerRef = useRef<{ [key: string]: any }>({});
@@ -81,11 +85,13 @@ export default function OptionsScreen() {
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <NameOrderSpecifier />
         <SaveLoadState />
+        <SaveLoadStateViaDb />
+        <ShouldSaveOnLoginToggle />
+        <SaveImagesToGallerySlider />
         <AutoSetStoreToggle />
         <AutoSaveItemsToggle />
-        <CanOverrideItemToggle />
+        <CanCreateMultipleItemsWithSameUpcToggle />
         <AutoSaveStoresToggle />
-        <CanOverrideStoreToggle />
         <FormControl.Label>
           Item Row Open Threshold (default ={' '}
           {SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT}):
@@ -126,8 +132,10 @@ export default function OptionsScreen() {
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Button
           onPress={async () => {
+            dispatch(setLoading('Obtaining current gps coordinate...'));
             const currentGpsCoordinate = await getGpsCoordinate();
             dispatch(setCurrentLocation(currentGpsCoordinate));
+            dispatch(getCurrentState(currentGpsCoordinate));
           }}
         >
           Update Current Location

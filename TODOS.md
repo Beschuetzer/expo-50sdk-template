@@ -1,13 +1,24 @@
 ## MVP
--does it make sense to add an option to select dir where images taken are saved (defaults to app dir)?
-    --this would allow for the ability to just re-add them when restoring data
--ideas for making saving to db easiest:
-    -use a GUID that the frontend creates for each item.  This is then used as the id on the db 
-        -add _id to item field
-        -how hard would this be to implement since getKeyToUse is used in many places
-        -https://www.npmjs.com/package/uuid (use v5 with `${name}${upc}` as name string? or just use v4)
+-add button for each store with an address call "Navigate" which opens the direction in the map app for the device 
+    --https://stackoverflow.com/questions/43214062/open-maps-google-maps-in-react-native
+-fix issue where selecting an image causes it to still be saved in the grocify folder even if the source image is from there
+-instead of current/set current label for store, use background color like in ItemTile
 
--need to save stores the same way that items are saved
+- ideas for options to add
+    --add an option which removes all the store data in storeSpecificValues when deleting a store via DELETE /store
+    --add an option to show developer info like _id and needsSaving fields in the tiles
+
+-now that each item has it's own _id, add an option to merge different items (in the case where a user mistakenly adds the same upc or name to an item)?
+
+-add a feature to take a pic of an image and populate the currently selected store's list with the results
+
+-move the store specific values to be higher up in the form?
+-Move the store selection stuff to a menu option in the ItemModal?
+
+-go through each BffService method and create request types in the types file for services/types.ts
+
+-Add component called FormInput which has a title, input, and the spacing Stack (use in forms [e.g. ItemForm, ItemFormStoreSpecificItems, AccountScreen, etc.])
+Check forms and other components for cases where a component is being reset via a useffect hook.  If the state is being reset when a prop changes, the key field can be used to reset the component
 
 -add a way to copy a store
     --a button which copies the store specific values but uses the name/address/gps/etc on the StoreForm.
@@ -43,6 +54,9 @@ the ability to create a store layout and have a map/route be generated based on 
 ## Enhancements
 -Holding an item in a list should enter multi-selction mode, which allows selecting multiple items and then performing some action
 -Need to figure out how to drag and drop rows for easier custom sorting?
+-AlphabeticalScroll:
+    --add ability to scroll along the container and then navigate to section on release?
+    --add tracking of current scroll amount (pass in the value from the list if desired)
 
 
 ## Testing
@@ -55,3 +69,4 @@ the ability to create a store layout and have a map/route be generated based on 
 -ItemForm: figure out issue where autosave happens on component mount when auto save is enabled
 -ItemModal: fix issue with useUpcProduct being called whenever an item is opened and autoSave is enabled
 -fix bug where deleting a new item with just a name that has been added via the shopping list tab causes a crash?
+-StoreForm: when editing an existing item, it is not possible to set the state back to None (Select a State) when saving

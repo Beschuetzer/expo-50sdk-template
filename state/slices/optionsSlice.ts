@@ -11,6 +11,7 @@ import {
   CAN_OVERRIDE_DEFAULT,
   IMAGE_PICKER_QUALITY_INITIAL,
   NAME_ORDER_TEMPLATE_INITIAL,
+  SAVE_IMAGES_TO_GALLERY_INITIAL,
   SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 } from '@/constants/general';
 import { ScanningMode } from '@/types/general';
@@ -25,8 +26,8 @@ export type OptionsState = {
   autoSaveStores: boolean;
   autoSetStore: AutoSetStore;
   canOverrideItem: boolean;
-  canOverrideStore: boolean;
   customImageQuality: number;
+  saveImagesToGallery: boolean;
   nameOrderTemplate: string;
   scanningMode: ScanningMode;
   swipeableRowOpenThreshold: number;
@@ -40,9 +41,9 @@ const initialState: OptionsState = {
     maxDistanceInMiles: AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   },
   canOverrideItem: CAN_OVERRIDE_DEFAULT,
-  canOverrideStore: CAN_OVERRIDE_DEFAULT,
   customImageQuality: IMAGE_PICKER_QUALITY_INITIAL,
   nameOrderTemplate: NAME_ORDER_TEMPLATE_INITIAL,
+  saveImagesToGallery: SAVE_IMAGES_TO_GALLERY_INITIAL,
   scanningMode: ScanningMode.AddToCart,
   swipeableRowOpenThreshold: SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 };
@@ -75,18 +76,18 @@ export const optionsSlice = createSlice({
     ) => {
       state.canOverrideItem = action.payload;
     },
-    setCanOverrideStore: (
-      state: OptionsState,
-      action: PayloadAction<OptionsState['canOverrideStore']>,
-    ) => {
-      state.canOverrideStore = action.payload;
-    },
     setCustomImageQuality: (
       state: OptionsState,
       action: PayloadAction<OptionsState['customImageQuality']>,
     ) => {
       if (!action.payload) return;
       state.customImageQuality = action.payload;
+    },
+    setSaveImagesToGallery: (
+      state: OptionsState,
+      action: PayloadAction<OptionsState['saveImagesToGallery']>,
+    ) => {
+      state.saveImagesToGallery = action.payload;
     },
     setNameOrderTemplate: (
       state: OptionsState,
@@ -121,7 +122,7 @@ export const {
   setAutoSaveStores,
   setAutoSetStore,
   setCanOverrideItem,
-  setCanOverrideStore,
+  setSaveImagesToGallery,
   setNameOrderTemplate,
   setScanningMode,
   setSwipeableRowOpenThreshold,
@@ -140,14 +141,14 @@ export const autoSetStoreSelector = (state: RootState) =>
 export const canOverrideItemSelector = (state: RootState) =>
   state[optionsSlice.name].canOverrideItem;
 
-export const canOverrideStoreSelector = (state: RootState) =>
-  state[optionsSlice.name].canOverrideStore;
-
 export const customImageQualitySelector = (state: RootState) =>
   state[optionsSlice.name].customImageQuality;
 
 export const nameOrderTemplateSelector = (state: RootState) =>
   state[optionsSlice.name].nameOrderTemplate;
+
+export const saveImagesToGallerySelector = (state: RootState) =>
+  state[optionsSlice.name].saveImagesToGallery;
 
 export const scanningModeSelector = (state: RootState) =>
   state[optionsSlice.name].scanningMode;

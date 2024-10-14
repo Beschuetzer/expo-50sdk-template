@@ -17,8 +17,6 @@ import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpeci
 import { ESTIMATED_SIZE_FOR_SHOPPING_LISTS } from '@/constants/general';
 import {
   ListName,
-  addItemToCart,
-  currentStoreSelector,
   isMultiSelectModeForInCartSelector,
   moveItemToShoppingList,
   selectedItemsFromInCartSelector,
@@ -47,7 +45,6 @@ export function InCartList(props: InCartListProps) {
   const { viewingMode } = props;
   const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(storeSpecificListSelector(listName));
-  const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
@@ -66,11 +63,6 @@ export function InCartList(props: InCartListProps) {
     );
   }, []);
 
-  const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
-    setRefreshing(false);
-    dispatch(addItemToCart(item));
-  }, []);
-
   const onSwipeLeft = useCallback(
     (key: Key) => {
       dispatch(moveItemToShoppingList(key));
@@ -80,11 +72,6 @@ export function InCartList(props: InCartListProps) {
   );
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
-    const key = {
-      name: item.name,
-      upc: item.upc,
-    } as Key;
-
     return (
       <SwipeableRow
         leftSwipe={{
@@ -99,34 +86,8 @@ export function InCartList(props: InCartListProps) {
             </Stack>
           ),
           backgroundColor: theme.colors.red[900],
-          onPress: onSwipeLeft.bind(null, key),
+          onPress: onSwipeLeft.bind(null, item),
         }}
-        // rightSwipe={{
-        //   backgroundColor: theme.colors.primary[900],
-        //   onPress: onSwipeRight.bind(null, item),
-        //   title: currentStore.name ? (
-        //     <Stack
-        //       paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-        //       alignItems="center"
-        //     >
-        //       <FontAwesome
-        //         name="plus"
-        //         color={theme.colors.white}
-        //         size={iconSize}
-        //       />
-        //       <Text color={theme.colors.white}>To Cart</Text>
-        //     </Stack>
-        //   ) : (
-        //     <Text
-        //       width={150}
-        //       numberOfLines={2}
-        //       paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
-        //       color={theme.colors.white}
-        //     >
-        //       Select a Store to Add to Shopping List
-        //     </Text>
-        //   ),
-        // }}
       >
         {index === 0 ? (
           <InCartPrice />

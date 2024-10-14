@@ -10,10 +10,16 @@
       "autoIncrement": true
     },
     "preview": {
+      "env": {
+        "EXPO_PUBLIC_ENV": "production"
+      },
       "distribution": "internal",
       "autoIncrement": true
     },
     "production": {
+      "env": {
+        "EXPO_PUBLIC_ENV": "production"
+      },
       "autoIncrement": true
     }
   },

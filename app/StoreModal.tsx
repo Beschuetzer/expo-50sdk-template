@@ -1,25 +1,21 @@
 import { useRoute } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { StoreForm } from '@/components/forms/StoreForm';
-import {
-  AddStoresListItemPayload,
-  addStoresListItem,
-  storesListItemSelector,
-} from '@/state/slices/listsSlice';
+import { AddStoresListItemPayload } from '@/state/slices/listsSlice';
+import { useAppDispatch } from '@/state/store';
+import { saveStore } from '@/state/thunks';
 
 export default function StoreModal() {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const route = useRoute();
-  const { originalKey } = (route?.params || {}) as any;
-  const store = useSelector(storesListItemSelector(originalKey));
+  const { store } = (route?.params || {}) as any;
 
   const onSavePress = useCallback(
     (addStoresListItemPayload: AddStoresListItemPayload) => {
-      dispatch(addStoresListItem(addStoresListItemPayload));
+      dispatch(saveStore(addStoresListItemPayload));
     },
     [],
   );
@@ -30,11 +26,6 @@ export default function StoreModal() {
   );
 
   return (
-    <StoreForm
-      onClose={onClosePress}
-      onSave={onSavePress}
-      store={store}
-      originalKey={originalKey}
-    />
+    <StoreForm onClose={onClosePress} onSave={onSavePress} store={store} />
   );
 }

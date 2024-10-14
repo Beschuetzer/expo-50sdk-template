@@ -9,7 +9,6 @@ import { useIsDarkMode } from '../hooks/useIsDarkTheme';
 import { EMPTY_STRING } from '@/constants/general';
 import { LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { SpacingProp, StyleProp } from '@/types/general';
-import { captureImage, getCustomImage, pickImage } from '@/utils/helpers';
 
 type ThumbnailPickerProps = {
   imagesToRender: Set<string>;
@@ -37,19 +36,13 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     [onSelectImage],
   );
 
-  const onSelectPress = useCallback(() => {
-    getCustomImage(pickImage, (result) => {
+  const onImageReturned = useCallback(
+    (result: string) => {
       setCustomImageUri(result);
       handleSelect(result, true);
-    });
-  }, [handleSelect]);
-
-  const onCameraPress = useCallback(() => {
-    getCustomImage(captureImage, (result) => {
-      setCustomImageUri(result);
-      handleSelect(result, true);
-    });
-  }, [handleSelect]);
+    },
+    [handleSelect],
+  );
 
   return (
     <Column mt={spacing}>
@@ -78,8 +71,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
       />
       <Row space={spacing} mt={spacing}>
         <ImageCapturer
-          onCameraPress={onCameraPress}
-          onSelectPress={onSelectPress}
+          onImageChange={onImageReturned}
           borderColor={modeColor}
         />
       </Row>

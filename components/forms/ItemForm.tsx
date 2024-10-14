@@ -1,4 +1,5 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import _ from 'lodash';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -10,6 +11,7 @@ import { UnitInput } from './UnitInput';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { Barcode } from '../Barcode';
 import { InputValidationMessage } from '../InputValidationMessage';
+import { ALLOW_OVERRIDE_WHEN_SAME_UPC_MESSAGE } from '../options/CanCreateMultipleItemsWithSameUpcToggle';
 
 import {
   AUTO_SAVE_DEBOUNCE_THRESHOLD,
@@ -29,6 +31,7 @@ import {
   Key,
   StoreSpecificValueKey,
   StoreSpecificValues,
+  StoreSpecificValuesMap,
 } from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ItemProp, ItemsProp, OriginalKeyProp } from '@/types/general';
@@ -36,8 +39,11 @@ import {
   deleteFile,
   displayAlert,
   getFrequencyValue,
+  getId,
   getKeyToUse,
+  sanitize,
 } from '@/utils/helpers';
+import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
 
 type ItemFormValdation = {
   isValid: boolean;
@@ -46,11 +52,12 @@ type ItemFormValdation = {
 
 export type ItemFormOnSave = {
   hasKeyChanged: boolean;
-} & AddItemsListItemPayload;
+} & AddItemsListItemPayload &
+  OriginalKeyProp;
 
 type ItemFormData = {
   selectedUrl: string;
-} & Required<Pick<Item, 'name' | 'upc'>>;
+} & Required<Pick<Item, '_id' | 'name' | 'upc'>>;
 
 export type ItemFormProps = {
   autoSave?: boolean;
@@ -63,6 +70,7 @@ export type ItemFormProps = {
   shouldFocusFirstField?: boolean;
   shouldAddQuantity?: boolean;
   shouldAddToCart?: boolean;
+  storeSpecificValuesMap: StoreSpecificValuesMap;
 } & Partial<ItemProp<ItemWithStoreSpecificValues>> &
   ItemsProp<Item> &
   OriginalKeyProp;
@@ -82,6 +90,7 @@ export function ItemForm(props: ItemFormProps) {
     shouldAddToCart = false,
     shouldFocusFirstField = true,
     showOverrideMsgInitial = true,
+    storeSpecificValuesMap,
   } = props;
 
   const theme = useTheme();
@@ -97,6 +106,7 @@ export function ItemForm(props: ItemFormProps) {
     showOverrideMsgInitial,
   );
   const [formData, setFormData] = useState<ItemFormData>({
+    _id: itemToUse._id || EMPTY_STRING,
     upc: itemToUse?.upc || EMPTY_STRING,
     name: itemToUse?.name || EMPTY_STRING,
     selectedUrl: itemToUse?.images[itemToUse?.imageToUseIndex] || EMPTY_STRING,
@@ -122,13 +132,7 @@ export function ItemForm(props: ItemFormProps) {
   const customImagesToDeleteOnUnloadRef = useRef<string[]>([]);
   const shouldDeleteLastImageRef = useRef(true);
   const isProposedItemPresent = useMemo(
-    () =>
-      getIsItemAlreadyPresent(
-        items,
-        formData.upc || EMPTY_STRING,
-        formData.name || EMPTY_STRING,
-        originalKey,
-      ),
+    () => getIsItemAlreadyPresent(items, itemInList, formData, originalKey),
     [items, formData.upc, formData.name, originalKey],
   );
   const keyBeingOverriden = useMemo(
@@ -158,35 +162,84 @@ export function ItemForm(props: ItemFormProps) {
 
   const onSavePress = useCallback(
     (shouldClose = true) => {
+      const foundIndex = itemToUse?.images.findIndex((image) => {
+        return image === formData.selectedUrl;
+      });
       const now = Date.now();
       const itemToSave = {
+        ...itemInList,
         frequency: frequencyInMsRef.current,
         unit: unitRef.current,
         images: itemToUse?.images || [],
-        imageToUseIndex:
-          itemToUse?.images.findIndex((image) => {
-            return image === formData.selectedUrl;
-          }) || DEFAULT_IMAGE_INDEX,
+        imageToUseIndex: foundIndex >= 0 ? foundIndex : DEFAULT_IMAGE_INDEX,
         name: formData.name,
         upc: formData.upc,
         addedDate: itemToUse?.addedDate || now,
         lastUpdatedDate: now,
       } as Item;
 
+      const storeSpecificValuesToUse = {
+        ...storeSpecificValuesRef.current,
+        [StoreSpecificValueKey.IsInCart]: {
+          ...storeSpecificValuesRef.current?.[StoreSpecificValueKey.IsInCart],
+          [getKeyToUse(currentStore || EMPTY_STRING)]: shouldAddToCart,
+        },
+      } as StoreSpecificValues;
+
+      //Detering if item needs saving
+      itemToSave.needsSaving = true;
+      if (itemInList) {
+        const areItemsEqual = _.isEqual(
+          {
+            ...itemToSave,
+            ...getStandardizedItemValuesForComparison(),
+          } as Item,
+          {
+            ...itemInList,
+            ...getStandardizedItemValuesForComparison(),
+          } as Item,
+        );
+
+        const itemInListStoreSpecificValues =
+          storeSpecificValuesMap[getKeyToUse(itemInList)];
+
+        let areStoreSpecificValuesEqual = true;
+        iterateStoreSpecificValuesMap({
+          storeSpecificValuesMap: {
+            [getKeyToUse(itemToSave)]: storeSpecificValuesToUse,
+          } as StoreSpecificValuesMap,
+          onNewStoreValue: ({
+            storeSpecificValueKey,
+            storeKey,
+            storeValue,
+          }) => {
+            const originalValue = (itemInListStoreSpecificValues as any)?.[
+              storeSpecificValueKey
+            ]?.[storeKey];
+            if (originalValue !== storeValue) {
+              areStoreSpecificValuesEqual = false;
+            }
+          },
+        });
+
+        itemToSave.needsSaving =
+          itemInList.needsSaving ||
+          !areItemsEqual ||
+          !areStoreSpecificValuesEqual;
+      }
+
+      //update image stuff
       if (!itemToSave.images.includes(formData.selectedUrl)) {
         itemToSave.images = [...itemToSave.images, formData.selectedUrl];
         itemToSave.imageToUseIndex = itemToSave.images.length - 1;
       }
 
-      shouldDeleteLastImageRef.current = false;
+      //ensure id present
+      if (!itemToSave._id) {
+        itemToSave._id = getId();
+      }
 
-      const storeSpecificValuesToUse = {
-        ...storeSpecificValuesRef.current,
-        [StoreSpecificValueKey.IsInCart]: {
-          ...storeSpecificValuesRef.current?.[StoreSpecificValueKey.IsInCart],
-          [currentStore?.name || EMPTY_STRING]: shouldAddToCart,
-        },
-      } as StoreSpecificValues;
+      shouldDeleteLastImageRef.current = false;
 
       const originalKeyToUse =
         (lastSavedKeyRef.current
@@ -198,7 +251,6 @@ export function ItemForm(props: ItemFormProps) {
         onSave({
           item: itemToSave,
           storeSpecificValues: storeSpecificValuesToUse,
-          currentStore,
           originalKey: originalKeyToUse,
           hasKeyChanged: currentKey !== lastSaveKey,
         });
@@ -209,6 +261,7 @@ export function ItemForm(props: ItemFormProps) {
       formData,
       frequencyInMsRef,
       itemToUse,
+      itemInList,
       lastSavedKeyRef,
       onClose,
       onSave,
@@ -216,6 +269,7 @@ export function ItemForm(props: ItemFormProps) {
       shouldAddToCart,
       shouldDeleteLastImageRef,
       storeSpecificValuesRef,
+      storeSpecificValuesMap,
       unitRef,
     ],
   );
@@ -250,6 +304,31 @@ export function ItemForm(props: ItemFormProps) {
       handleAutoSave();
     },
     [storeSpecificValuesRef, handleAutoSave],
+  );
+
+  const onSelectImage = useCallback(
+    (url: string, isCustomImage: boolean) => {
+      if (isCustomImage) {
+        customImagesToDeleteOnUnloadRef.current.push(url);
+        if (!itemToUse) return;
+
+        itemToUse.images = itemToUse?.images.filter((imageUrl) => {
+          const shouldKeep = !imageUrl?.match(LOCAL_FILE_REGEX);
+          if (!shouldKeep) {
+            deleteFile(imageUrl);
+          }
+          return shouldKeep;
+        });
+        itemToUse?.images.push(url);
+      }
+
+      handleAutoSave();
+      setFormData((current) => ({
+        ...current,
+        selectedUrl: url,
+      }));
+    },
+    [customImagesToDeleteOnUnloadRef, itemToUse, handleAutoSave],
   );
 
   const onUnitChange = useCallback(
@@ -314,7 +393,7 @@ export function ItemForm(props: ItemFormProps) {
             message={
               canOverrideItem
                 ? `An item with the ${fieldBeingUsedInKey} of '${keyBeingOverriden}' is already in the list and will be overriden.`
-                : `Please enable overriding items or remove the item with ${fieldBeingUsedInKey} of '${keyBeingOverriden}'`
+                : `The ${fieldBeingUsedInKey} '${keyBeingOverriden}' is currently in use.  You can enable '${ALLOW_OVERRIDE_WHEN_SAME_UPC_MESSAGE}' in the options menu, but this may result in unexpected behavior when trying to use the scanner.`
             }
           />
         </>
@@ -331,14 +410,14 @@ export function ItemForm(props: ItemFormProps) {
           onChangeText={(newText) => {
             setFormData((current) => ({
               ...current,
-              name: newText,
+              name: sanitize(newText),
             }));
             setShowOverrideMsg(true);
           }}
           isInvalid={formData.name.length <= 0}
         />
       </Stack>
-      <Stack>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText>Upc</InputText>
         <Row>
           <Input
@@ -397,25 +476,7 @@ export function ItemForm(props: ItemFormProps) {
         <ThumbnailPicker
           spacing={theme.space[FORM_INTER_ITEM_SPACING]}
           selectedUrl={formData.selectedUrl}
-          onSelectImage={(url, isCustomImage) => {
-            if (isCustomImage) {
-              customImagesToDeleteOnUnloadRef.current.push(url);
-              if (!itemToUse) return;
-
-              itemToUse.images = itemToUse?.images.filter((imageUrl) => {
-                const shouldKeep = !imageUrl?.match(LOCAL_FILE_REGEX);
-                if (!shouldKeep) {
-                  deleteFile(imageUrl);
-                }
-                return shouldKeep;
-              });
-              itemToUse?.images.push(url);
-            }
-            setFormData((current) => ({
-              ...current,
-              selectedUrl: url,
-            }));
-          }}
+          onSelectImage={onSelectImage}
           imagesToRender={new Set(itemToUse?.images)}
         />
       </Stack>
@@ -441,20 +502,33 @@ export function ItemForm(props: ItemFormProps) {
 }
 
 function getIsItemAlreadyPresent(
-  items: Item[],
-  upcValue: string,
-  name: string,
+  items: ItemFormProps['items'],
+  itemInList: ItemFormProps['itemInList'],
+  formData: ItemFormData,
   originalKey: Key,
 ) {
   const originalKeyToUse = getKeyToUse(originalKey);
   if (
-    (!upcValue && !name) ||
-    originalKeyToUse === name ||
-    originalKeyToUse === upcValue
+    (originalKey._id === formData._id && formData.upc === itemInList?.upc) ||
+    (!formData.upc && !formData.name) ||
+    originalKeyToUse === formData.name ||
+    originalKeyToUse === formData.upc
   )
     return false;
-  return !!items.find((item) => {
-    const key = getKeyToUse(item);
-    return key === (upcValue ? upcValue.trim() : name);
+  const toReturn = !!items.find((item) => {
+    const key = item.upc || item.name;
+    return key === (formData.upc ? formData.upc.trim() : name);
   });
+  return toReturn;
+}
+
+/**
+ *This returns an item with values that don't need to be compared
+ **/
+function getStandardizedItemValuesForComparison() {
+  return {
+    needsSaving: false,
+    addedDate: 0,
+    lastUpdatedDate: 0,
+  } as Partial<Item>;
 }

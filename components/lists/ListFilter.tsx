@@ -1,5 +1,6 @@
-import { useTheme, Text, View } from 'native-base';
+import { useTheme, Text, View, Input } from 'native-base';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { TextInput } from 'react-native';
 import Dialog from 'react-native-dialog';
 import { useDispatch } from 'react-redux';
 
@@ -38,6 +39,7 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
   );
   const theme = useTheme();
   const debounceRef = useRef<any>(-1);
+  const firstInputRef = useRef<TextInput>(null);
   const dispatch = useDispatch();
 
   const onClearPress = useCallback(() => {
@@ -76,16 +78,24 @@ export function ListFilter<T>(props: ListFilterProps<T>) {
     setFilters(list.filters);
   }, [list]);
 
+  useEffect(() => {
+    if (!isVisible) return;
+    setTimeout(() => {
+      firstInputRef.current?.focus();
+    }, 1);
+  }, [isVisible, firstInputRef.current]);
+
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
       <Dialog.Title style={{ textAlign: 'center' }}>Filter</Dialog.Title>
-      {filterNames.map((filterName: keyof T) => {
+      {filterNames.map((filterName: keyof T, index) => {
         return (
           <View key={filterName?.toString()}>
             <Text ml={theme.space[FORM_INTER_ITEM_SPACING]}>
               {filterName.toString()}
             </Text>
-            <Dialog.Input
+            <Input
+              ref={index === 0 ? firstInputRef : undefined}
               value={filters?.[filterName] || EMPTY_STRING}
               onChangeText={(value) => onChange(filterName, value)}
               placeholder="Term or regular expression"

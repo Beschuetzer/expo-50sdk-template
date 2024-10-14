@@ -18,7 +18,7 @@ export function ItemTileNameAndUpcColumn(props: ItemTileNameAndUpcColumnProps) {
       <Text noOfLines={1} color={color}>
         {item?.name}
       </Text>
-      {showUpc ? <Text color={color}>{item?.upc}</Text> : null}
+      {showUpc && item.upc ? <Text color={color}>{item?.upc}</Text> : null}
       {children}
     </Column>
   );

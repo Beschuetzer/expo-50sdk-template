@@ -15,13 +15,12 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
-import { ErrorBoundary } from './ErrorBoundary';
-
 import { Text } from '@/components/Themed';
 import { CloseButton } from '@/components/header/CloseButton';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
-import { useFlushRedux } from '@/components/hooks/useFlushRedux';
 import { AutoSetStoreModal } from '@/components/modals/AutoSetStoreModal';
+import { ErrorModal } from '@/components/modals/ErrorModal';
+import { LoadingModal } from '@/components/modals/LoadingModal';
 import { IMAGE_RENDERER_TITLE_DEFAULT } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { persistor, store } from '@/state/store';
@@ -64,7 +63,6 @@ export default function RootLayout() {
 }
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  // useFlushRedux()
 
   return (
     // <ErrorBoundary>
@@ -76,6 +74,8 @@ function RootLayoutNav() {
               <MenuProvider>
                 <BottomSheetModalProvider>
                   <AutoSetStoreModal />
+                  <ErrorModal />
+                  <LoadingModal />
                   <Stack>
                     <Stack.Screen
                       name="(tabs)"

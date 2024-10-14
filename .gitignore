@@ -29,8 +29,7 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
-.env
+.env*
 
 # typescript
 *.tsbuildinfo
@@ -40,3 +39,5 @@ yarn-error.*
 
 expo-env.d.ts
 # @end expo-cli
+
+test.json

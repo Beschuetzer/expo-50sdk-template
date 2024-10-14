@@ -19,7 +19,10 @@
       "supportsTablet": true,
       "photosPermission": "Allow $(PRODUCT_NAME) to access your photos for selecting items",
       "cameraPermission": "Allow $(PRODUCT_NAME) to access your photos for taking pictures of items",
-      "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to easily create new stores"
+      "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to easily create new stores",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +34,9 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.FOREGROUND_SERVICE"
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE"
       ],
       "package": "com.beschuetzer.grocify"
     },
@@ -51,13 +56,21 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to pick an image for an item"
+          "photosPermission": "The app accesses your photos to pick an image for an item",
         }
       ],
       [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
         }
       ]
     ],

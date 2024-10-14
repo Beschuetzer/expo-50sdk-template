@@ -16,21 +16,30 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from '@/components/modals/ConfirmModal';
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  EMPTY_STRING,
+  FORM_INTER_ITEM_SPACING,
+  NOT_APPLICABLE_STRING,
+} from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
 import {
+  currentStoreIdSelector,
   currentStoreSelector,
+  itemsListSelector,
   lastPurchasedMapSelector,
+  storesListSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import {
   scanningModeSelector,
   setScanningMode,
 } from '@/state/slices/optionsSlice';
+import { Item } from '@/types/Item';
 import { ScanningMode } from '@/types/general';
 import {
   getIsValidUpcValue,
+  getKeyToUse,
   getStandardizedUpcValue,
   resetConfirmModalProps,
 } from '@/utils/helpers';
@@ -38,8 +47,11 @@ import {
 const SNACKBAR_VISIBILITY_DURATION = 2500;
 export default function ScannerScreen() {
   const currentStore = useSelector(currentStoreSelector);
+  const currentStoreId = useSelector(currentStoreIdSelector);
   const scanningMode = useSelector(scanningModeSelector);
   const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
+  const itemsList = useSelector(itemsListSelector);
+  const storesList = useSelector(storesListSelector);
   const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
@@ -48,22 +60,22 @@ export default function ScannerScreen() {
   const theme = useTheme();
   const lastScanTimeRef = useRef(-1);
   const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
-  const [lastUpcScanned, setLastUpcScanned] = useState(EMPTY_STRING);
+  const lastItemScannedRef = useRef<Item | undefined>(undefined);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {},
   );
   const storeNameToAddToListRef = useRef<string>(currentStore.name);
 
   const handleAddToList = useCallback(
-    (upc: string, storeName?: string) => {
+    (itemId: string, storeId?: string) => {
       dispatch(
         updateStoreSpecificValues({
-          key: { upc },
+          key: { _id: itemId, upc: EMPTY_STRING },
           storeSpecificValuesToUpdate: {
             quantity: (currentQuantity: number) =>
               currentQuantity > 0 ? currentQuantity + 1 : 1,
           },
-          storeName,
+          storeId,
         }),
       );
       setIsSnackbarVisible(true);
@@ -76,28 +88,34 @@ export default function ScannerScreen() {
       const modeToUse = mode || scanningMode;
       if (getIsValidUpcValue(value)) {
         const upc = getStandardizedUpcValue(value);
-        setLastUpcScanned(upc);
 
         if (modeToUse === ScanningMode.AddToCart) {
           if (isItemInList) {
+            const itemToUse = itemsList.data.find((item) => item.upc === upc);
+            lastItemScannedRef.current = itemToUse;
+
+            const itemKeyToUse = getKeyToUse(itemToUse || EMPTY_STRING);
             const previouslyPurchasedItem = Object.entries(
               lastPurchasedMap,
             ).find(([key, value]) => {
-              return key === upc;
+              return key === itemKeyToUse;
             });
             const storesPurchasedAt = Object.keys(
               previouslyPurchasedItem?.[1] || {},
             );
 
+            const storeId = Object.keys(previouslyPurchasedItem?.[1] || {})[0];
+            const storeToUse = storesList.data.find(
+              (store) => getKeyToUse(store) === storeId,
+            );
+
             if (storesPurchasedAt.length >= 1) {
-              if (!storesPurchasedAt.includes(currentStore.name)) {
-                const storeName = Object.keys(
-                  previouslyPurchasedItem?.[1] || {},
-                )[0];
+              if (!storesPurchasedAt.includes(currentStoreId)) {
+                const storeName = storeToUse?.name || NOT_APPLICABLE_STRING;
                 const message =
                   storesPurchasedAt.length === 1
-                    ? `The item with upc of '${upc}' has only ever been purchased at ${storeName}.  Would you like to add it to ${storeName} instead of ${currentStore.name}?`
-                    : `The upc '${upc}' has never been purchased at ${currentStore.name}.  Would you like to add it to one of these stores instead?`;
+                    ? `The item with upc of '${upc}' has only ever been purchased at '${storeName}'.  Would you like to add it to '${storeName}' instead of '${currentStore.name}'?`
+                    : `The upc '${upc}' has never been purchased at '${currentStore.name}'.  Would you like to add it to one of these stores instead?`;
                 const textYes =
                   storesPurchasedAt.length === 1 ? 'Yes' : `Add to Selected`;
                 const textNo =
@@ -115,7 +133,10 @@ export default function ScannerScreen() {
                   },
                   items: storesPurchasedAt,
                   onCancel: () => {
-                    handleAddToList(upc, currentStore.name);
+                    handleAddToList(
+                      itemToUse?._id || EMPTY_STRING,
+                      currentStoreId,
+                    );
                     storeNameToAddToListRef.current = currentStore.name;
                     resetConfirmModalProps(setConfirmModalProps);
                   },
@@ -124,9 +145,12 @@ export default function ScannerScreen() {
                     if (!selectedStore && storesPurchasedAt.length > 1) {
                       return;
                     }
-                    const storeToUse = selectedStore || storeName;
-                    handleAddToList(upc, storeToUse);
-                    storeNameToAddToListRef.current = storeToUse;
+                    handleAddToList(
+                      itemToUse?._id || EMPTY_STRING,
+                      selectedStore || getKeyToUse(storeToUse || EMPTY_STRING),
+                    );
+                    storeNameToAddToListRef.current =
+                      storeToUse?.name || EMPTY_STRING;
                   },
                 });
                 return;
@@ -134,7 +158,7 @@ export default function ScannerScreen() {
             }
 
             storeNameToAddToListRef.current = currentStore.name;
-            handleAddToList(upc, currentStore.name);
+            handleAddToList(itemToUse?._id || EMPTY_STRING, currentStoreId);
             return;
           }
         }
@@ -149,6 +173,9 @@ export default function ScannerScreen() {
       handleAddToList,
       scanningMode,
       lastPurchasedMap,
+      itemsList,
+      storesList,
+      lastItemScannedRef,
       storeNameToAddToListRef,
       currentStore,
     ],
@@ -244,8 +271,11 @@ export default function ScannerScreen() {
         duration={SNACKBAR_VISIBILITY_DURATION}
       >
         <Text>
-          Added {lastUpcScanned} to shopping list for '
-          {storeNameToAddToListRef.current}'.
+          Added '
+          {lastItemScannedRef.current?.name ||
+            lastItemScannedRef.current?.upc ||
+            lastItemScannedRef.current?._id}
+          ' to shopping list for '{storeNameToAddToListRef.current}'.
         </Text>
       </Snackbar>
       <ConfirmModal {...confirmModalProps} />

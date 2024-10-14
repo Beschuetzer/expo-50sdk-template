@@ -1,11 +1,11 @@
 import { theme } from 'native-base';
 import { ResponsiveValue } from 'native-base/lib/typescript/components/types';
-import { ImageStyle } from 'react-native';
+import { Dimensions, ImageStyle } from 'react-native';
 
 import { FORM_INTER_ITEM_SPACING } from './general';
 
 export const maxWidth = {
-  maxWidth: 800,
+  maxWidth: Dimensions.get('window').width >= 800 ? 800 : '100%',
 };
 
 export const maxWidthCentered = {

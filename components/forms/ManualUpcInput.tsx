@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 
 import { BarcodeScannerProps } from '../BarcodeScanner';
 import { InputValidationMessage } from '../InputValidationMessage';
-import { MOCKS_UPCS } from '../mocks/mockUpcData';
+import { MOCK_UPCS } from '../mocks/constants';
 
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import { listToDisplaySelector, ListName } from '@/state/slices/listsSlice';
@@ -82,7 +82,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${value.length} chars)`}
       />
       <Row space={1}>
-        {MOCKS_UPCS.map((mock, index) => {
+        {MOCK_UPCS.map((mock, index) => {
           return (
             <Button key={index} flex={1} onPress={() => onValueChange(mock)}>
               Mock {mock}

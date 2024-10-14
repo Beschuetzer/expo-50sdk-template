@@ -3,6 +3,7 @@ import { ListsState } from '../listsSlice';
 
 import {
   Item,
+  StoreSpecificValueKey,
   StoreSpecificValueUpdater,
   StoreSpecificValues,
   StoreSpecificValuesMap,
@@ -17,26 +18,36 @@ jest.mock('@/utils/helpers', () => {
   };
 });
 
+const MOCK_CURRENT_STORE = 'Cub';
+const MOCK_CURRENT_STORE_QUANTITY = 3;
 const currentItems = {
   one: {
-    aisleNumber: { Costco: 0, Cub: 0, 'Target in North St. Paul, MN': 1910 },
+    aisleNumber: {
+      Costco: 0,
+      [MOCK_CURRENT_STORE]: 0,
+      'Target in North St. Paul, MN': 1910,
+    },
     isInCart: {
       Costco: false,
-      Cub: false,
+      [MOCK_CURRENT_STORE]: false,
       'Target in North St. Paul, MN': false,
     },
     itemId: {
       Costco: '0000418264',
-      Cub: '44',
+      [MOCK_CURRENT_STORE]: '44',
       'Target in North St. Paul, MN': '0000296993',
     },
-    price: { Costco: 1, Cub: 2, 'Target in North St. Paul, MN': 148 },
-    quantity: { Cub: 3 },
+    price: {
+      Costco: 1,
+      [MOCK_CURRENT_STORE]: 2,
+      'Target in North St. Paul, MN': 148,
+    },
+    quantity: { [MOCK_CURRENT_STORE]: MOCK_CURRENT_STORE_QUANTITY },
   },
 } as { [key: string]: StoreSpecificValues };
 
 const MOCK_STATE = Object.freeze({
-  currentStoreName: '3',
+  currentStoreId: MOCK_CURRENT_STORE,
   storeSpecificValuesMap: {
     [KEY_TO_USE]: currentItems.one,
     upc2: currentItems.one,
@@ -55,13 +66,21 @@ describe('updateStoreSpecificValueMap', () => {
         upc: '',
       } as Item,
       {
-        quantity: (current) => current++,
+        quantity: (current) => {
+          console.log({ current });
+          return current + 1;
+        },
       } as StoreSpecificValueUpdater,
+      MOCK_CURRENT_STORE,
     );
 
     logState(state);
 
-    expect(true).toBe(false);
+    expect(
+      state.storeSpecificValuesMap?.[KEY_TO_USE]?.[
+        StoreSpecificValueKey.Quantity
+      ]?.[MOCK_CURRENT_STORE],
+    ).toStrictEqual(MOCK_CURRENT_STORE_QUANTITY + 1);
   });
 });
 
@@ -70,7 +89,7 @@ function logState(state: ListsState) {
 
   iterateStoreSpecificValuesMap({
     storeSpecificValuesMap: state.storeSpecificValuesMap,
-    onNewStoreSpecificValue(input) {
+    onNewStoreSpecificValueStart: (input) => {
       console.log(input);
     },
   });

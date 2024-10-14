@@ -1,12 +1,17 @@
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import _ from 'lodash';
 
 import { updateStoreSpecificValueMap } from './helpers/updateStoreSpecificValueMap';
 import { RootState } from '../store';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { SortOrder, SortType, getSorter } from '@/components/lists/sorters';
-import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
+import {
+  LoadAllResponse,
+  SaveAllResponse,
+} from '@/components/services/BffService';
+import { EMPTY_STRING } from '@/constants/general';
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -24,7 +29,13 @@ import {
   StoreSpecificValuesMap,
 } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
-import { ListNameProp, OriginalKeyProp } from '@/types/general';
+import {
+  CurrentLocation,
+  ListNameProp,
+  OriginalKeyProp,
+  State,
+} from '@/types/general';
+import { getItemWithStoreSpecificValues } from '@/utils/getItemWithStoreSpecificValues';
 import {
   calculateDistance,
   deleteImages,
@@ -39,7 +50,6 @@ import {
   getStoreWithDistance,
 } from '@/utils/helpers';
 import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
-import { getItemWithStoreSpecificValues } from '@/utils/model-mappings';
 
 export enum ListName {
   InCartList = 'inCartList',
@@ -60,12 +70,24 @@ export type AddAllToShoppingCartPayload = Item[];
 export type AddItemsListItemPayload = {
   item: Item;
   storeSpecificValues?: StoreSpecificValues;
-  currentStore?: Store;
-} & OriginalKeyProp;
+};
 
 export type AddStoresListItemPayload = {
   newStore: Store;
-} & OriginalKeyProp;
+};
+
+export type CompletePurchasePayload = LastPurchasedMap | undefined;
+
+export type HandleSaveAllResponsePayload = SaveAllResponse & {
+  /**
+   *The items that should have been saved
+   **/
+  itemsSaved: Item[];
+  /**
+   *The stores that should have been saved
+   **/
+  storesSaved: Store[];
+};
 
 export type ResetListToDisplayFiltersPayload = ListNameProp;
 
@@ -93,12 +115,13 @@ export type UpdateStoreSpecificValuesPayload = {
    *The new value for each store specific value
    **/
   storeSpecificValuesToUpdate: StoreSpecificValueUpdater;
-  storeName?: string;
+  storeId?: string;
 };
 //#endregion
 
 //#region State
 const CURRENT_LOCATION_INITIAL = null;
+const CURRENT_LOCATION_STATE_INITIAL = State.None;
 const IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL = false;
 
 /**
@@ -108,8 +131,9 @@ const IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL = false;
  * {@link ListsState.stores stores} is a list of the stores created
  **/
 export type ListsState = {
-  currentLocation: GpsCoordinate | null;
-  currentStoreName: string;
+  currentLocation: CurrentLocation;
+  currentLocationState: State;
+  currentStoreId: string;
   [ListName.InCartList]: ShoppingList;
   [ListName.ItemsList]: ItemsList;
   [ListName.PreviouslyPurchased]: LastPurchasedList;
@@ -127,7 +151,8 @@ export type ListsState = {
 
 const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
-  currentStoreName: EMPTY_STRING,
+  currentLocationState: CURRENT_LOCATION_STATE_INITIAL,
+  currentStoreId: EMPTY_STRING,
   isMultiSelectModeForInCart: IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   isMultiSelectModeForPreviouslyPurchased:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
@@ -195,20 +220,17 @@ export const listsSlice = createSlice({
         ] = {} as StoreSpecificValue<boolean>;
       }
 
-      (
-        (state.storeSpecificValuesMap[keyToUse] as any)[
-          StoreSpecificValueKey.IsInCart
-        ] as any
-      )[state.currentStoreName] = true;
+      (state.storeSpecificValuesMap[keyToUse] as any)[
+        StoreSpecificValueKey.IsInCart
+      ][state.currentStoreId] = true;
     },
     addItemsListItem: (
       state: ListsState,
       action: PayloadAction<AddItemsListItemPayload>,
     ) => {
-      const { originalKey, item, storeSpecificValues, currentStore } =
-        action.payload || {};
+      const { item, storeSpecificValues } = action.payload || {};
+      const { currentStoreId } = state;
       const keyToUse = getKeyToUse(item);
-      const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
 
       if (item.images) {
         let indexOffset = 0;
@@ -226,12 +248,11 @@ export const listsSlice = createSlice({
       updateListWithItem({
         state,
         listName: ListName.ItemsList,
-        newItem: item,
-        originalKey,
+        item,
       });
 
       //add store specific values if they exist
-      if (storeSpecificValues && currentStore?.name) {
+      if (storeSpecificValues && currentStoreId) {
         if (!state.storeSpecificValuesMap[keyToUse]) {
           state.storeSpecificValuesMap[keyToUse] = {
             ...storeSpecificValues,
@@ -255,117 +276,21 @@ export const listsSlice = createSlice({
           }
         }
       }
-      if (originalKeyToUse && originalKeyToUse !== keyToUse) {
-        delete state.storeSpecificValuesMap[originalKeyToUse];
-      }
     },
     addStoresListItem: (
       state: ListsState,
       action: PayloadAction<AddStoresListItemPayload>,
     ) => {
-      const { newStore, originalKey } = action.payload;
+      const { newStore } = action.payload;
 
       updateListWithItem({
         state,
         listName: ListName.StoresList,
-        newItem: getStoreWithDistance(newStore, state.currentLocation),
-        originalKey,
-        onKeyChange: (input) => {
-          const { newKey, oldKey } = input;
-
-          // console.log(input);
-          // displayAlert(input);
-          // console.log(''.padEnd(200, '-'));
-          // const start = performance.now();
-
-          //handle storeSpecificValuesMap merging
-          iterateStoreSpecificValuesMap({
-            storeSpecificValuesMap: state.storeSpecificValuesMap,
-            onNewStoreSpecificValue(input) {
-              const {
-                itemKey,
-                storeSpecificValueKeyValue,
-                storeSpecificValueKey,
-              } = input;
-              const oldKeyValue = storeSpecificValueKeyValue?.[oldKey];
-              const newKeyValue = storeSpecificValueKeyValue?.[newKey];
-              if (storeSpecificValueKeyValue && oldKeyValue !== undefined) {
-                if (storeSpecificValueKey === 'quantity') {
-                  console.log({
-                    case: '1',
-                    storeSpecificValueKeyValue,
-                    oldKeyValue,
-                    newKeyValue,
-                    currentStore: state.currentStoreName,
-                    storeSpecificValueKey,
-                    itemKey,
-                  });
-                }
-                if (typeof oldKeyValue === 'object') {
-                  storeSpecificValueKeyValue[newKey] = {
-                    ...(newKeyValue as unknown as object),
-                    ...(oldKeyValue as unknown as object),
-                  } as any;
-                } else {
-                  storeSpecificValueKeyValue[newKey] =
-                    newKeyValue || oldKeyValue;
-                }
-              }
-              delete storeSpecificValueKeyValue?.[oldKey];
-            },
-          });
-
-          //handle lastPurchasedMap merging (uses the most recent value between the two stores)
-          for (const [, storeSpecificValue] of Object.entries(
-            state.lastPurchasedMap || {},
-          )) {
-            const oldKeyValue = storeSpecificValue?.[oldKey];
-            const newKeyValue = storeSpecificValue?.[newKey];
-            if (storeSpecificValue && oldKeyValue !== undefined) {
-              storeSpecificValue[newKey] = Math.max(
-                newKeyValue || EMPTY_NUMBER,
-                oldKeyValue || EMPTY_NUMBER,
-              );
-            }
-            delete storeSpecificValue?.[oldKey];
-          }
-
-          // const end = performance.now();
-          // console.log({ timeToRun: end - start });
-          // console.log('done with work'.padEnd(200, '-'));
-
-          // //validating storeSpecificValuesMap
-          // for (const [key, storeSpecificValues] of Object.entries(
-          //   state.storeSpecificValuesMap || {},
-          // )) {
-          //   // console.log({
-          //   //   key,
-          //   //   storeSpecificValuesAfter: storeSpecificValues,
-          //   // });
-          //   for (const [storeSpecificValueKey, value] of Object.entries(
-          //     storeSpecificValues || {},
-          //   )) {
-          //     if (storeSpecificValueKey === 'quantity') {
-          //       console.log({ key, storeSpecificValueKey, value });
-          //     }
-          //   }
-          // }
-
-          // //validating lastPurcahsedMap
-          // for (const [key, storeSpecificValue] of Object.entries(
-          //   state.lastPurchasedMap || {},
-          // )) {
-          //   console.log({ storeSpecificValue });
-          // }
-
-          // console.log('done with print out'.padEnd(200, '-'));
-
-          state.currentStoreName = newKey;
-        },
+        item: getStoreWithDistance(newStore, state.currentLocation),
       });
 
       if (state.storesList.data.length === 1) {
-        state.currentStoreName = newStore.name;
+        state.currentStoreId = getKeyToUse(newStore);
       }
     },
     clearShopping: (state: ListsState) => {
@@ -375,36 +300,44 @@ export const listsSlice = createSlice({
           const { storeSpecificValues } = input;
           if (
             storeSpecificValues?.[StoreSpecificValueKey.IsInCart]?.[
-              state.currentStoreName
+              state.currentStoreId
             ]
           ) {
             storeSpecificValues[StoreSpecificValueKey.IsInCart][
-              state.currentStoreName
+              state.currentStoreId
             ] = false;
           }
           if (
             storeSpecificValues?.[StoreSpecificValueKey.Quantity]?.[
-              state.currentStoreName
+              state.currentStoreId
             ]
           ) {
             storeSpecificValues[StoreSpecificValueKey.Quantity][
-              state.currentStoreName
+              state.currentStoreId
             ] = 0;
           }
         },
       });
     },
-    completePurchase: (state: ListsState) => {
-      const { currentStoreName, storeSpecificValuesMap } = state;
+    completePurchase: (
+      state: ListsState,
+      action: PayloadAction<CompletePurchasePayload>,
+    ) => {
+      const { currentStoreId, storeSpecificValuesMap } = state;
+      const lastPurchasedMap = action.payload || {};
+      const now = Date.now();
+
       for (const key of Object.keys(storeSpecificValuesMap)) {
         if (
           storeSpecificValuesMap[key]?.[StoreSpecificValueKey.IsInCart]?.[
-            currentStoreName
+            currentStoreId
           ]
         ) {
+          const savedValue = lastPurchasedMap?.[key]?.[state.currentStoreId];
+
           state.lastPurchasedMap[key] = {
             ...state.lastPurchasedMap[key],
-            [state.currentStoreName]: Date.now(),
+            [state.currentStoreId]: savedValue || now,
           };
 
           (storeSpecificValuesMap[key] as any) = {
@@ -413,27 +346,115 @@ export const listsSlice = createSlice({
               ...(storeSpecificValuesMap[key] as any)[
                 StoreSpecificValueKey.IsInCart
               ],
-              [currentStoreName]: false,
+              [currentStoreId]: false,
             },
             [StoreSpecificValueKey.Quantity]: {
               ...(storeSpecificValuesMap[key] as any)[
                 StoreSpecificValueKey.Quantity
               ],
-              [currentStoreName]: 0,
+              [currentStoreId]: 0,
             },
           };
         }
       }
     },
-    migrateItems: (state: ListsState) => {
-      for (const key of Object.keys(state.storeSpecificValuesMap)) {
-        if ((state.storeSpecificValuesMap?.[key] as any)?.['aisle']) {
-          (state.storeSpecificValuesMap[key] as any)[
-            StoreSpecificValueKey.AisleNumber
-          ] =
-            (state.storeSpecificValuesMap?.[key] as any)?.['aisle'] ||
-            ({} as any);
-          delete (state.storeSpecificValuesMap?.[key] as any)['aisle'];
+    handleLoadAllResponse: (
+      state: ListsState,
+      action: PayloadAction<LoadAllResponse>,
+    ) => {
+      if (!action.payload) return;
+      const { items, lastPurchasedMap, storeSpecificValues, stores, settings } =
+        action.payload;
+      if (lastPurchasedMap) {
+        state.lastPurchasedMap = lastPurchasedMap;
+      }
+      if (items && items.length > 0) {
+        state[ListName.ItemsList].data = items;
+      }
+      if (stores && stores.length > 0) {
+        state[ListName.StoresList].data = stores;
+      }
+      if (storeSpecificValues) {
+        state.storeSpecificValuesMap = storeSpecificValues;
+      }
+      if (settings) {
+        state[ListName.ItemsList].sortOrderValue =
+          settings.sortOrderValues.items;
+        state[ListName.StoresList].sortOrderValue =
+          settings.sortOrderValues.stores;
+
+        const isCurrentStorePresent = stores?.find(
+          (store) => store._id === settings.currentStoreId,
+        );
+        if (isCurrentStorePresent) {
+          state.currentStoreId = settings.currentStoreId;
+        }
+      }
+      for (const item of state[ListName.ItemsList]?.data) {
+        item.needsSaving = false;
+        item.hasBeenSaved = true;
+      }
+      for (const store of state[ListName.StoresList]?.data) {
+        store.needsSaving = false;
+        store.hasBeenSaved = true;
+      }
+    },
+    handleSaveAllResponse: (
+      state: ListsState,
+      action: PayloadAction<HandleSaveAllResponsePayload>,
+    ) => {
+      const { payload } = action;
+      if (!payload) {
+        throw new Error('No payload found in handleSaveAllResponse');
+      }
+      const {
+        itemsResult,
+        storesResult,
+        storeSpecificValuesResult,
+        itemsSaved,
+        storesSaved,
+      } = payload || {};
+
+      //set all items to false for needsSaving if the itemResult is successful
+      if (
+        itemsResult?.result?.ok ||
+        (itemsResult?.insertedCount +
+          itemsResult?.upsertedCount +
+          itemsResult.modifiedCount || -1) >= itemsSaved.length
+      ) {
+        for (const item of state[ListName.ItemsList]?.data) {
+          item.needsSaving = false;
+          item.hasBeenSaved = true;
+        }
+      }
+
+      //set all stores to false for needsSaving if the storeResult is successful
+      if (
+        storesResult?.result?.ok ||
+        (storesResult?.insertedCount +
+          storesResult?.upsertedCount +
+          storesResult.modifiedCount || -1) >= storesSaved.length
+      ) {
+        for (const store of state[ListName.StoresList]?.data) {
+          store.needsSaving = false;
+          store.hasBeenSaved = true;
+        }
+      }
+
+      // check that the storeSpecificValuesResult contains the expected values
+      // if not, set needsSaving to true for that item
+      if (storeSpecificValuesResult?.values) {
+        for (const item of itemsSaved) {
+          const key = getKeyToUse(item);
+          const valuesInMap = storeSpecificValuesResult.values[key];
+          const stateValuesMap = state.storeSpecificValuesMap[key];
+          const areValuesTheSame = _.isEqual(valuesInMap, stateValuesMap);
+          if (!areValuesTheSame) {
+            const item = getItemFromList(state[ListName.ItemsList].data, key);
+            if (item) {
+              item.needsSaving = true;
+            }
+          }
         }
       }
     },
@@ -458,7 +479,7 @@ export const listsSlice = createSlice({
 
       (state.storeSpecificValuesMap[keyToUse] as any)[
         StoreSpecificValueKey.IsInCart
-      ][state.currentStoreName] = false;
+      ][state.currentStoreId] = false;
     },
     moveSelectedToCart: (state: ListsState) => {
       moveItems(
@@ -514,33 +535,27 @@ export const listsSlice = createSlice({
       state.isMultiSelectModeForShoppingCart = false;
       state.selectedItemsFromShoppingCart = [];
     },
-    removeStoresListItem: (state: ListsState, action: PayloadAction<Key>) => {
-      const keyToUse = getKeyToUse(action.payload);
-      if (!keyToUse) {
+    removeStoresListItems: (
+      state: ListsState,
+      action: PayloadAction<Store[]>,
+    ) => {
+      const keysToUse = action.payload.map((key) => getKeyToUse(key));
+      if (!keysToUse || keysToUse.length <= 0) {
         alert(
-          'A key must be provided in order to remove an item from the storesList.',
+          'At least one key must be provided in order to remove an item from the storesList.',
         );
         return;
       }
-      state.storesList.data = state.storesList.data.filter(
-        (store) => store.name !== keyToUse,
-      );
-
-      iterateStoreSpecificValuesMap({
-        storeSpecificValuesMap: state.storeSpecificValuesMap,
-        onNewStoreSpecificValue: (input) => {
-          const { storeSpecificValueKeyValue } = input;
-          if (storeSpecificValueKeyValue?.[keyToUse] !== undefined) {
-            delete storeSpecificValueKeyValue[keyToUse];
-          }
-        },
-      });
+      removeItems<Store>(state, action.payload, ListName.StoresList);
     },
     resetCurrentLocation: (state: ListsState) => {
       state.currentLocation = CURRENT_LOCATION_INITIAL;
       for (const store of state.storesList.data) {
         store.calculatedDistance = -1;
       }
+    },
+    resetCurrentLocationState: (state: ListsState) => {
+      state.currentLocationState = CURRENT_LOCATION_STATE_INITIAL;
     },
     resetListToDisplay: (
       state: ListsState,
@@ -596,10 +611,10 @@ export const listsSlice = createSlice({
     },
     resetStoresList: (state: ListsState) => {
       state.storesList = getEmptyList(ListName.StoresList);
-      state.currentStoreName = EMPTY_STRING;
+      state.currentStoreId = EMPTY_STRING;
     },
-    resetCurrentStoreName: (state: ListsState) => {
-      state.currentStoreName = EMPTY_STRING;
+    resetCurrentStoreId: (state: ListsState) => {
+      state.currentStoreId = EMPTY_STRING;
     },
     setCurrentLocation: (
       state: ListsState,
@@ -614,12 +629,19 @@ export const listsSlice = createSlice({
         );
       }
     },
-    setCurrentStoreName: (
+    setCurrentLocationState: (
+      state: ListsState,
+      action: PayloadAction<State>,
+    ) => {
+      if (!action.payload) return;
+      state.currentLocationState = action.payload;
+    },
+    setCurrentStoreId: (
       state: ListsState,
       action: PayloadAction<string | undefined>,
     ) => {
       if (!action.payload) return;
-      state.currentStoreName = action.payload;
+      state.currentStoreId = action.payload;
     },
     setFilters: (
       state: ListsState,
@@ -669,7 +691,7 @@ export const listsSlice = createSlice({
       const newSortOrder =
         sortOrder || state[listName].sortOrderValue.sortOrder;
       listToSort.data?.sort(
-        getSorter(newSortBy, state.currentStoreName, newSortOrder),
+        getSorter(newSortBy, state.currentStoreId, newSortOrder),
       );
 
       state[listName].sortOrderValue = {
@@ -680,14 +702,14 @@ export const listsSlice = createSlice({
     setStoresList: (
       state: ListsState,
       action: PayloadAction<
-        ListsState['storesList'] & { currentStoreName?: string }
+        ListsState['storesList'] & { currentStoreId?: string }
       >,
     ) => {
       if (!action.payload) return;
-      const { currentStoreName } = action.payload;
-      delete action.payload.currentStoreName;
+      const { currentStoreId } = action.payload;
+      delete action.payload.currentStoreId;
 
-      state.currentStoreName = currentStoreName || EMPTY_STRING;
+      state.currentStoreId = currentStoreId || EMPTY_STRING;
       state[ListName.StoresList] = action.payload;
     },
     setStoreSpecificValues: (
@@ -758,7 +780,7 @@ export const listsSlice = createSlice({
       action: PayloadAction<UpdateStoreSpecificValuesPayload>,
     ) => {
       if (!action.payload) return;
-      const { storeSpecificValuesToUpdate, key, storeName } = action.payload;
+      const { storeSpecificValuesToUpdate, key, storeId } = action.payload;
       const keyToUse = getKeyToUse(key);
       if (!keyToUse || !storeSpecificValuesToUpdate) {
         alert(
@@ -771,7 +793,7 @@ export const listsSlice = createSlice({
         state,
         key,
         storeSpecificValuesToUpdate,
-        storeName,
+        storeId,
       );
     },
   },
@@ -780,21 +802,21 @@ export const listsSlice = createSlice({
 export const currentLocationSelector = (state: RootState) =>
   state[listsSlice.name].currentLocation;
 
+export const currentLocationStateSelector = (state: RootState) =>
+  state[listsSlice.name].currentLocationState;
+
 export const currentStoreSelector = createSelector(
   [
     (state: RootState) => state[listsSlice.name].storesList.data,
-    (state: RootState) => state[listsSlice.name].currentStoreName,
+    (state: RootState) => state[listsSlice.name].currentStoreId,
   ],
-  (storesList, currentStoreName) => {
-    const foundStore = (storesList.find(
-      (store) => store.name === currentStoreName,
-    ) || {
-      name: EMPTY_STRING,
-      gpsCoordinates: null,
-    }) as Store;
-    return foundStore;
+  (storesList, currentStoreId) => {
+    return getCurrentStore(storesList, currentStoreId);
   },
 );
+
+export const currentStoreIdSelector = (state: RootState) =>
+  state[listsSlice.name].currentStoreId;
 
 export const itemsListItemSelector = (id: string) =>
   createSelector(
@@ -844,10 +866,10 @@ export const lastPurchasedSelector = (key: Key) =>
   createSelector(
     [
       (state: RootState) => state[listsSlice.name].lastPurchasedMap,
-      (state: RootState) => state[listsSlice.name].currentStoreName,
+      (state: RootState) => state[listsSlice.name].currentStoreId,
     ],
-    (lastPurchasedMap, currentStoreName) => {
-      return lastPurchasedMap?.[getKeyToUse(key)]?.[currentStoreName];
+    (lastPurchasedMap, currentStoreId) => {
+      return lastPurchasedMap?.[getKeyToUse(key)]?.[currentStoreId];
     },
   );
 
@@ -863,7 +885,11 @@ export const listToDisplaySelector = (listName: ListName) =>
 
       const filteredList = getFilteredList<unknown>(data, filters);
       filteredList.sort(
-        getSorter(sortOrderValue.sortBy, '', sortOrderValue.sortOrder),
+        getSorter(
+          sortOrderValue.sortBy,
+          EMPTY_STRING,
+          sortOrderValue.sortOrder,
+        ),
       );
       return filteredList;
     },
@@ -875,19 +901,19 @@ export const itemsPurchasedAtStoreSelector = createSelector(
     (state: RootState) => state[listsSlice.name][ListName.PreviouslyPurchased],
     (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
     (state: RootState) => state[listsSlice.name].lastPurchasedMap,
-    (state: RootState) => state[listsSlice.name].currentStoreName,
+    (state: RootState) => state[listsSlice.name].currentStoreId,
   ],
   (
     itemsList,
     previouslyPurchasedList,
     storeSpecificValuesMap,
     lastPurchasedMap,
-    currentStoreName,
+    currentStoreId,
   ) => {
     const previoulsyPurchasedItems: PrevioulsyPurchasedItem[] = [];
     for (const item of itemsList.data) {
       const key = getKeyToUse(item);
-      const lastPurchaseDate = lastPurchasedMap?.[key]?.[currentStoreName];
+      const lastPurchaseDate = lastPurchasedMap?.[key]?.[currentStoreId];
       if (lastPurchaseDate) {
         const storeSpecificValues = storeSpecificValuesMap[key];
         previoulsyPurchasedItems.push({
@@ -902,7 +928,7 @@ export const itemsPurchasedAtStoreSelector = createSelector(
     return previoulsyPurchasedItems.sort(
       getSorter(
         previouslyPurchasedList.sortOrderValue?.sortBy,
-        currentStoreName,
+        currentStoreId,
         previouslyPurchasedList.sortOrderValue?.sortOrder,
       ),
     );
@@ -917,16 +943,16 @@ export const priceOfItemsSelector = (listname: ListName) =>
     [
       (state: RootState) => state[listsSlice.name][listname],
       (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
-      (state: RootState) => state[listsSlice.name].currentStoreName,
+      (state: RootState) => state[listsSlice.name].currentStoreId,
     ],
-    (list, storeSpecificValuesMap, currentStoreName) => {
+    (list, storeSpecificValuesMap, currentStoreId) => {
       let totalPrice = 0;
       for (const value of Object.values(storeSpecificValuesMap)) {
-        if (value?.[StoreSpecificValueKey.IsInCart]?.[currentStoreName]) {
+        if (value?.[StoreSpecificValueKey.IsInCart]?.[currentStoreId]) {
           const quantity =
-            value?.[StoreSpecificValueKey.Quantity]?.[currentStoreName] || 0;
+            value?.[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 0;
           const price =
-            value?.[StoreSpecificValueKey.Price]?.[currentStoreName] || 0;
+            value?.[StoreSpecificValueKey.Price]?.[currentStoreId] || 0;
           const itemPrice = quantity * price;
           totalPrice += itemPrice;
         }
@@ -957,7 +983,7 @@ export const storeSpecificListSelector = (listname: ListName) =>
       (state: RootState) => state[listsSlice.name][ListName.ItemsList],
       (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
       (state: RootState) => state[listsSlice.name].storesList.data,
-      (state: RootState) => state[listsSlice.name].currentStoreName,
+      (state: RootState) => state[listsSlice.name].currentStoreId,
     ],
     (
       shoppingList,
@@ -965,11 +991,9 @@ export const storeSpecificListSelector = (listname: ListName) =>
       itemsList,
       storeSpecificValuesMap,
       storesList,
-      currentStoreName,
+      currentStoreId,
     ) => {
-      const currentStore = storesList.find(
-        (store) => store.name === currentStoreName,
-      );
+      const currentStore = getCurrentStore(storesList, currentStoreId);
       if (!currentStore?.name) return [];
 
       const listToDisplay = [] as ItemWithStoreSpecificValues[];
@@ -980,7 +1004,7 @@ export const storeSpecificListSelector = (listname: ListName) =>
           const { itemKey, storeSpecificValues } = input;
           const isInCartForCurrentStore =
             storeSpecificValues?.[StoreSpecificValueKey.IsInCart]?.[
-              currentStore.name
+              currentStoreId
             ];
 
           if (
@@ -991,7 +1015,7 @@ export const storeSpecificListSelector = (listname: ListName) =>
 
           const currentQuantityForItemAndStoreCombination =
             storeSpecificValues?.[StoreSpecificValueKey.Quantity]?.[
-              currentStore.name
+              currentStoreId
             ];
 
           if (
@@ -1019,7 +1043,7 @@ export const storeSpecificListSelector = (listname: ListName) =>
           listname === ListName.ShoppingList
             ? shoppingList.sortOrderValue.sortBy
             : inCartList.sortOrderValue.sortBy,
-          currentStoreName,
+          currentStoreId,
           listname === ListName.ShoppingList
             ? shoppingList.sortOrderValue.sortOrder
             : inCartList.sortOrderValue.sortOrder,
@@ -1035,16 +1059,6 @@ export const shoppingListSelector = (state: RootState) =>
 export const storesListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.StoresList];
 
-export const storesListItemSelector = (key: Key | string) =>
-  createSelector(
-    [(state: RootState) => state[listsSlice.name].storesList.data],
-    (storesList) => {
-      return storesList?.find(
-        (store) => store.name === getKeyToUse(key),
-      ) as Store;
-    },
-  );
-
 export const storeSpecificValuesMapSelector = (state: RootState) =>
   state[listsSlice.name].storeSpecificValuesMap;
 
@@ -1055,11 +1069,11 @@ export const storeSpecificValuesSelector = (
   createSelector(
     [
       (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
-      (state: RootState) => state[listsSlice.name].currentStoreName,
+      (state: RootState) => state[listsSlice.name].currentStoreId,
     ],
-    (storeSpecificValuesMap, currentStoreName) => {
+    (storeSpecificValuesMap, currentStoreId) => {
       return storeSpecificValuesMap?.[getKeyToUse(key)]?.[fieldName]?.[
-        currentStoreName
+        currentStoreId
       ];
     },
   );
@@ -1071,7 +1085,8 @@ export const {
   addStoresListItem,
   clearShopping,
   completePurchase,
-  migrateItems,
+  handleLoadAllResponse,
+  handleSaveAllResponse,
   moveAllToInCart,
   moveItemToShoppingList,
   moveSelectedToCart,
@@ -1079,9 +1094,10 @@ export const {
   moveSelectedToShopping,
   removeItemsListItems,
   removeShoppingListItems,
-  removeStoresListItem,
+  removeStoresListItems,
   resetCurrentLocation,
-  resetCurrentStoreName,
+  resetCurrentLocationState,
+  resetCurrentStoreId,
   resetItemsList,
   resetLastPurchasedMap,
   resetListSlice,
@@ -1090,7 +1106,8 @@ export const {
   resetSelectedItemsInShopping,
   resetStoresList,
   setCurrentLocation,
-  setCurrentStoreName,
+  setCurrentLocationState,
+  setCurrentStoreId,
   setFilters,
   setItemsList,
   setLastPurchasedMap,
@@ -1124,10 +1141,9 @@ type OnKeyChangeInput = {
 type UpdateListWithItemInput<T> = {
   state: ListsState;
   listName: ListName;
-  newItem: T;
-  originalKey: Key;
+  item: T;
   onKeyChange?: (input: OnKeyChangeInput) => void;
-};
+} & Partial<OriginalKeyProp>;
 
 function moveItems(
   state: ListsState,
@@ -1135,7 +1151,7 @@ function moveItems(
   isInCart = true,
   shouldAddQuantity = false,
 ) {
-  const { currentStoreName, storeSpecificValuesMap } = state;
+  const { currentStoreId, storeSpecificValuesMap } = state;
 
   for (const key of keys) {
     if (shouldAddQuantity) {
@@ -1146,17 +1162,17 @@ function moveItems(
           {};
       }
       (storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.Quantity] = {
-        [currentStoreName]: 1,
+        [currentStoreId]: 1,
       };
     }
     if (
       storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Quantity]?.[
-        currentStoreName
+        currentStoreId
       ]
     ) {
       (storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.IsInCart] = {
         ...(storeSpecificValuesMap[key] as any)[StoreSpecificValueKey.IsInCart],
-        [currentStoreName]: isInCart,
+        [currentStoreId]: isInCart,
       };
     }
   }
@@ -1170,26 +1186,31 @@ function moveItems(
  * Overriding item with new item
  **/
 function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
-  const { listName, newItem, originalKey, state, onKeyChange } = props;
-  const newKeyToUse = getKeyToUse(newItem);
+  const { listName, item, state, originalKey, onKeyChange } = props;
+  const itemKeyToUse = getKeyToUse(item);
   const originalKeyToUse = getKeyToUse(originalKey || EMPTY_STRING);
-  const originalItemIndex = state[listName].data.findIndex(
-    (item: Key) => getKeyToUse(item) === originalKeyToUse,
-  );
-  const newItemIndex = state[listName].data.findIndex((item: Key) => {
-    const keyLocal = getKeyToUse(item);
-    return keyLocal === newKeyToUse;
-  });
+  const newKeyToUse = getKeyToUse(item);
 
-  if (!newKeyToUse) {
+  if (!itemKeyToUse) {
     alert(
-      `Unable to add an item with key of '${newKeyToUse}' to the '${listName}'.`,
+      `Unable to add an item with key of '${itemKeyToUse}' to the '${listName}'.`,
     );
     return;
   }
 
+  const itemIndex = state[listName].data.findIndex((item: Key) => {
+    const keyLocal = getKeyToUse(item);
+    return keyLocal === itemKeyToUse;
+  });
+
+  if (itemIndex > -1) {
+    state[listName].data[itemIndex] = item as any;
+  } else {
+    state[listName].data.push(item as any);
+  }
+
   if (originalKeyToUse && newKeyToUse !== originalKeyToUse) {
-    const canDoSimpleUpdate = newItemIndex === -1;
+    const canDoSimpleUpdate = itemIndex === -1;
     onKeyChange &&
       onKeyChange({
         type: canDoSimpleUpdate
@@ -1198,35 +1219,6 @@ function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
         newKey: newKeyToUse,
         oldKey: originalKeyToUse,
       });
-  }
-
-  if (originalItemIndex >= 0) {
-    if (originalKeyToUse === newKeyToUse) {
-      console.log('updating existing item');
-      state[listName].data[originalItemIndex] = newItem as any;
-    } else {
-      console.log(
-        'overriding existing item with existing item or updating item with new key',
-      );
-      let indexOffset = 0;
-      if (newItemIndex >= 0) {
-        state[listName].data.splice(newItemIndex, 1);
-        if (newItemIndex < originalItemIndex) {
-          indexOffset++;
-        }
-      }
-      state[listName].data[
-        originalItemIndex > 0
-          ? originalItemIndex - indexOffset
-          : originalItemIndex
-      ] = newItem as any;
-    }
-  } else if (originalItemIndex === -1 && newItemIndex >= 0) {
-    console.log('overring existing item with new item');
-    state[listName].data[newItemIndex] = newItem as any;
-  } else {
-    console.log('adding item');
-    state[listName].data.push(newItem as any);
   }
 }
 
@@ -1237,14 +1229,14 @@ function updateSelectedItems(
   >,
   listName: ListName.ShoppingList | ListName.InCartList | 'previouslyPurchased',
 ) {
-  const { operation: opearation, item } = action.payload;
-  if (!item || !opearation) return;
+  const { operation, item } = action.payload;
+  if (!item || !operation) return;
   const keyToUse = getKeyToUse(item);
   if (!keyToUse) {
     displayAlert({ error: 'No key found', item, keyToUse });
   }
 
-  switch (opearation) {
+  switch (operation) {
     case 'add':
       switch (listName) {
         case ListName.InCartList:
@@ -1309,13 +1301,16 @@ function updateSelectedItems(
 
 function removeItems<T extends Key>(
   state: ListsState,
-  itemsToRemove: Item[],
+  itemsToRemove: T[],
   listName: ListName,
   onRemoveItem?: (keyBeingRemoved: T) => void,
 ) {
+  if (!itemsToRemove || itemsToRemove.length === 0) return;
   const keysToUse = itemsToRemove.map((item) => getKeyToUse(item));
   state[listName].data = state[listName].data.filter((item: Key) => {
-    if (item?.upc && item.name) {
+    if (item?._id) {
+      return !keysToUse.includes(item._id);
+    } else if (item?.upc && item.name) {
       const isMatch = !keysToUse.includes(item.upc);
       if (!isMatch) {
         onRemoveItem && onRemoveItem(item as T);
@@ -1333,5 +1328,77 @@ function removeItems<T extends Key>(
     state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
   }
 }
+
+function getCurrentStore(
+  storesList: StoreList['data'],
+  currentStoreId: ListsState['currentStoreId'],
+) {
+  const foundStore = (storesList.find((store) => {
+    return getKeyToUse(store) === currentStoreId;
+  }) || {
+    _id: EMPTY_STRING,
+    name: EMPTY_STRING,
+    gpsCoordinates: null,
+  }) as Store;
+  return foundStore;
+}
+
+//todo?
+// function mergeStore() {
+// const { newKey, oldKey } = input;
+
+// //handle storeSpecificValuesMap merging
+// iterateStoreSpecificValuesMap({
+//   storeSpecificValuesMap: state.storeSpecificValuesMap,
+//   onNewStoreSpecificValue(input) {
+//     const {
+//       itemKey,
+//       storeSpecificValueKeyValue,
+//       storeSpecificValueKey,
+//     } = input;
+//     const oldKeyValue = storeSpecificValueKeyValue?.[oldKey];
+//     const newKeyValue = storeSpecificValueKeyValue?.[newKey];
+//     if (storeSpecificValueKeyValue && oldKeyValue !== undefined) {
+//       if (storeSpecificValueKey === 'quantity') {
+//         console.log({
+//           case: '1',
+//           storeSpecificValueKeyValue,
+//           oldKeyValue,
+//           newKeyValue,
+//           currentStore: state.currentStoreId,
+//           storeSpecificValueKey,
+//           itemKey,
+//         });
+//       }
+//       if (typeof oldKeyValue === 'object') {
+//         storeSpecificValueKeyValue[newKey] = {
+//           ...(newKeyValue as unknown as object),
+//           ...(oldKeyValue as unknown as object),
+//         } as any;
+//       } else {
+//         storeSpecificValueKeyValue[newKey] =
+//           newKeyValue || oldKeyValue;
+//       }
+//     }
+//     delete storeSpecificValueKeyValue?.[oldKey];
+//   },
+// });
+
+// //handle lastPurchasedMap merging (uses the most recent value between the two stores)
+// for (const [, storeSpecificValue] of Object.entries(
+//   state.lastPurchasedMap || {},
+// )) {
+//   const oldKeyValue = storeSpecificValue?.[oldKey];
+//   const newKeyValue = storeSpecificValue?.[newKey];
+//   if (storeSpecificValue && oldKeyValue !== undefined) {
+//     storeSpecificValue[newKey] = Math.max(
+//       newKeyValue || EMPTY_NUMBER,
+//       oldKeyValue || EMPTY_NUMBER,
+//     );
+//   }
+//   delete storeSpecificValue?.[oldKey];
+// }
+// state.currentStoreId = newKey;
+// }
 
 //#endregion

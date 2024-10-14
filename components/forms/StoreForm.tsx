@@ -2,96 +2,93 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import _ from 'lodash';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { AddressForm } from './AddressForm';
 import { InputText } from './InputText';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { BottomSheetModalWithFixedHeader } from '../BottomSheetModalWithFixedHeader';
-import { InputValidationMessage } from '../InputValidationMessage';
 import { ForwardGeoCodingModal } from '../modals/ForwardGeoCodingModal';
 
 import {
-  DoForwardGeocodingResponse,
   ForwardGeocodingPlace,
-  doForwardGeocoding,
-} from '@/api/geofencing';
+  GEO_CODING_SERVICE,
+} from '@/components/services/GeoCodingService';
 import {
   AUTO_SAVE_DEBOUNCE_THRESHOLD,
+  EMPTY_NUMBER,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
   GPS_COORDINATES_DEFAULT,
+  US_COUNTRY_CODE,
 } from '@/constants/general';
+import { setError } from '@/state/slices/generalSlice';
 import {
   AddStoresListItemPayload,
+  currentLocationStateSelector,
   storesListSelector,
 } from '@/state/slices/listsSlice';
-import {
-  autoSaveStoresSelector,
-  canOverrideStoreSelector,
-} from '@/state/slices/optionsSlice';
+import { autoSaveStoresSelector } from '@/state/slices/optionsSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
 import { Store } from '@/types/Store';
-import { Address, StoreProp } from '@/types/general';
+import { Address, State, StoreProp } from '@/types/general';
 import {
   displayAlert,
   getAreStoresEqual,
   getGpsCoordinate,
-  getItemFromList,
+  getId,
   getKeyToUse,
+  getStateFromString,
 } from '@/utils/helpers';
+import { parseAddress } from '@/utils/parseAddress';
 
 type StoreFormValdation = {
   isValid: boolean;
   message: string;
 };
 
-type StoreFormProps = {
+export type StoreFormProps = {
   onClose: () => void;
   onSave: (addStoresListItemPayload: AddStoresListItemPayload) => void;
-} & StoreProp &
-  Pick<AddStoresListItemPayload, 'originalKey'>;
+} & StoreProp;
 
-type StoreFormData = Omit<Store, 'calculatedDistance'>;
+type StoreFormData = Omit<Required<Store>, 'calculatedDistance'>;
 /**
  *Handles store inputs
  **/
 export function StoreForm(props: StoreFormProps) {
-  const { originalKey, onClose, onSave, store } = props;
+  const { onClose, onSave, store } = props;
   const theme = useTheme();
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useAppDispatch();
+  const storesList = useAppSelector(storesListSelector);
+  const autoSaveStores = useAppSelector(autoSaveStoresSelector);
+  const currentLocationState = useAppSelector(currentLocationStateSelector);
   const [formData, setFormData] = useState<StoreFormData>({
+    hasBeenSaved: store?.hasBeenSaved != null ? store.hasBeenSaved : false,
+    needsSaving: store?.needsSaving != null ? store.needsSaving : true,
+    _id: store?._id || getId(),
+    addedDate: store?.addedDate || EMPTY_NUMBER,
+    addressLineOne: store?.addressLineOne || EMPTY_STRING,
+    addressLineTwo: store?.addressLineTwo || EMPTY_STRING,
+    city: store?.city || EMPTY_STRING,
+    state: store?.state || currentLocationState || State.None,
+    zipCode: store?.zipCode || EMPTY_STRING,
+    country: store?.country || US_COUNTRY_CODE,
     name: store?.name || EMPTY_STRING,
     gpsCoordinates: store?.gpsCoordinates || {
       ...GPS_COORDINATES_DEFAULT,
     },
   });
+  const addressRef = useRef<Address>({
+    ...formData,
+  });
+
   const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
   const [placeToUse, setPlaceToUse] = useState<ForwardGeocodingPlace>(null);
-  const [positionsToShowInModal, setPlacesToShowInModal] =
-    useState<DoForwardGeocodingResponse>([]);
+  const [positionsToShowInModal, setPlacesToShowInModal] = useState<
+    ForwardGeocodingPlace[]
+  >([]);
   const [isAddressValid, setIsAddressValid] = useState(false);
   const addressSheetRef = useRef<BottomSheetModalMethods>(null);
-  const canOverrideStore = useSelector(canOverrideStoreSelector);
-  const storesList = useSelector(storesListSelector);
-  const autoSaveStores = useSelector(autoSaveStoresSelector);
-  const originalKeyToUse = useMemo(
-    () => getKeyToUse(originalKey),
-    [originalKey],
-  );
-  const isProposedStorePresent = useMemo(
-    () =>
-      !!getItemFromList(storesList.data, {
-        name: formData.name || EMPTY_STRING,
-        upc: EMPTY_STRING,
-      }),
-    [formData.name, storesList],
-  );
-  const isUpdatingStore = useMemo(
-    () => originalKeyToUse && formData.name.trim() === originalKeyToUse,
-    [formData.name, originalKeyToUse],
-  );
-  const addressRef = useRef<Address | null>(null);
-
   const formValidation: StoreFormValdation = useMemo(() => {
     const isValid = formData.name.length > 0;
     return {
@@ -99,12 +96,15 @@ export function StoreForm(props: StoreFormProps) {
       message: isValid ? EMPTY_STRING : 'A store name must be given',
     };
   }, [formData.name]);
+
   const isSavingDisabled = useMemo(
-    () =>
-      (!formValidation.isValid ||
-        (!canOverrideStore && isProposedStorePresent)) &&
-      !isUpdatingStore,
-    [formValidation, canOverrideStore, isProposedStorePresent, isUpdatingStore],
+    () => !formValidation.isValid,
+    [formValidation],
+  );
+
+  const nameToUse = useMemo(
+    () => formData.addressLineOne || formData.name,
+    [formData],
   );
   const autoSaveTimeoutRef = useRef<any>();
 
@@ -114,15 +114,33 @@ export function StoreForm(props: StoreFormProps) {
 
   const onSavePress = useCallback(
     (shouldClose = true) => {
-      onSave &&
-        onSave({
-          newStore: formData,
-          originalKey,
-        });
+      const toSave = {
+        newStore: {
+          ...formData,
+          addedDate: Date.now(),
+        },
+      };
+
+      toSave.newStore.needsSaving = true;
+      if (store) {
+        const areEqual = _.isEqual(
+          {
+            ...toSave.newStore,
+            ...getStandardizedValuesForComparison(),
+          } as Store,
+          {
+            ...store,
+            ...getStandardizedValuesForComparison(),
+          } as Store,
+        );
+        toSave.newStore.needsSaving = store.needsSaving || !areEqual;
+      }
+
+      onSave && onSave(toSave);
       if (!shouldClose) return;
       onClose && onClose();
     },
-    [onClose, onSave, formData, originalKey],
+    [onClose, onSave, formData],
   );
 
   const onGetCurrentCoordinatesPress = useCallback(async () => {
@@ -144,30 +162,49 @@ export function StoreForm(props: StoreFormProps) {
     (address: Address, isValid: boolean) => {
       addressRef.current = address;
       setIsAddressValid(isValid);
+      setFormData((current) => ({
+        ...current,
+        ...address,
+        name: address.addressLineOne || EMPTY_STRING,
+      }));
     },
     [addressRef.current],
   );
 
   const onAddressFormSubmitPress = useCallback(async () => {
-    const places = await doForwardGeocoding(addressRef.current);
+    const places = await GEO_CODING_SERVICE.doForwardGeocoding({
+      address: addressRef.current,
+      dispatch,
+    });
 
     if (!places || places.length === 0) {
-      alert('No places found');
+      dispatch(
+        setError({
+          message: 'No places found',
+          error: {
+            message: `Value for key is '${process.env.EXPO_PUBLIC_GEOCODING_API_KEY?.substring(0, 3)}...${process.env.EXPO_PUBLIC_GEOCODING_API_KEY?.substring(process.env.EXPO_PUBLIC_GEOCODING_API_KEY.length - 3)}'`,
+          },
+        }),
+      );
     } else if (places.length === 1) {
       setPlaceToUse(places[0]);
+      addressSheetRef.current?.dismiss();
     } else {
-      setPlacesToShowInModal(places);
+      setPlacesToShowInModal(places || []);
     }
-  }, [addressRef.current]);
+  }, [addressRef.current, addressSheetRef.current]);
 
-  const onUseAddressPress = useCallback(() => {
+  const onSearchPress = useCallback(() => {
     addressSheetRef.current?.present();
   }, [addressSheetRef.current]);
 
   useEffect(() => {
-    if (placeToUse?.lat && placeToUse.lon) {
+    if (placeToUse?.lat && placeToUse?.lon) {
+      const address = parseAddress(placeToUse.display_name);
       setFormData((current) => ({
         ...current,
+        ...address,
+        name: address.addressLineOne || EMPTY_STRING,
         gpsCoordinates: {
           lat: placeToUse?.lat,
           lon: placeToUse?.lon,
@@ -175,12 +212,6 @@ export function StoreForm(props: StoreFormProps) {
       }));
     }
   }, [placeToUse]);
-
-  useEffect(() => {
-    if (!originalKey) {
-      nameInputRef.current?.focus();
-    }
-  }, [originalKey]);
 
   //handling autoSave
   useEffect(() => {
@@ -229,34 +260,9 @@ export function StoreForm(props: StoreFormProps) {
               Close
             </Button>
           </Row>
-          <InputValidationMessage
-            isValid={
-              (!!originalKeyToUse && originalKeyToUse === formData.name) ||
-              !isProposedStorePresent
-            }
-            message={
-              canOverrideStore
-                ? `An store with the name of '${formData.name}' is already in the list and will be overriden.`
-                : `Please enable overriding stores or remove the store with name of '${formData.name}'`
-            }
-          />
         </>
       }
     >
-      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <InputText>Name</InputText>
-        <Input
-          ref={nameInputRef}
-          variant="outline"
-          p={theme.space[1]}
-          placeholder="Store Name"
-          value={formData.name}
-          onChangeText={(newText) =>
-            setFormData((current) => ({ ...current, name: newText }))
-          }
-          isInvalid={formData.name.length <= 0}
-        />
-      </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Row alignItems="center">
           <InputText
@@ -272,17 +278,17 @@ export function StoreForm(props: StoreFormProps) {
             placeholder="latitude"
             value={formData.gpsCoordinates?.lat.toString()}
             onChangeText={(newLat) =>
-              setFormData((current) => ({
-                ...current,
-                gpsCoordinates: {
-                  ...current.gpsCoordinates,
-                  lat: newLat,
-                },
-              }))
+              setFormData(
+                (current) =>
+                  ({
+                    ...current,
+                    gpsCoordinates: {
+                      ...current.gpsCoordinates,
+                      lat: newLat,
+                    },
+                  }) as any,
+              )
             }
-            isInvalid={isNaN(
-              parseFloat(formData?.gpsCoordinates?.lat || EMPTY_STRING),
-            )}
           />
           <InputText
             style={{ marginHorizontal: theme.space[FORM_INTER_ITEM_SPACING] }}
@@ -297,17 +303,17 @@ export function StoreForm(props: StoreFormProps) {
             placeholder="longitude"
             value={formData.gpsCoordinates?.lon.toString()}
             onChangeText={(newLon) =>
-              setFormData((current) => ({
-                ...current,
-                gpsCoordinates: {
-                  ...current.gpsCoordinates,
-                  lon: newLon,
-                },
-              }))
+              setFormData(
+                (current) =>
+                  ({
+                    ...current,
+                    gpsCoordinates: {
+                      ...current.gpsCoordinates,
+                      lon: newLon,
+                    },
+                  }) as any,
+              )
             }
-            isInvalid={isNaN(
-              parseFloat(formData?.gpsCoordinates?.lon || EMPTY_STRING),
-            )}
           />
         </Row>
         <Row
@@ -321,14 +327,33 @@ export function StoreForm(props: StoreFormProps) {
           >
             Use Current
           </Button>
-          <Button isDisabled={isLoadingGpscoords} onPress={onUseAddressPress}>
-            Use Address
+          <Button isDisabled={isLoadingGpscoords} onPress={onSearchPress}>
+            Search
           </Button>
         </Row>
       </Stack>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <AddressForm
+          onValueChange={onAddressChange}
+          onValueChangeTimeout={0}
+          options={{
+            addressLineOne: {
+              name: 'Name',
+              value: nameToUse,
+            },
+            addressLineTwo: {
+              value: formData.addressLineTwo,
+            },
+            city: { value: formData.city },
+            state: { value: getStateFromString(formData.state) },
+            zipCode: { value: formData.zipCode },
+            country: { value: formData.country },
+          }}
+        />
+      </Stack>
       <BottomSheetModalWithFixedHeader
         ref={addressSheetRef}
-        title="Geofencing"
+        title="Search Stores"
         onSubmit={onAddressFormSubmitPress}
         submitButton={{
           validation: {
@@ -339,7 +364,30 @@ export function StoreForm(props: StoreFormProps) {
           text: 'Search',
         }}
       >
-        <AddressForm onValueChange={onAddressChange} />
+        <AddressForm
+          onValueChange={onAddressChange}
+          options={{
+            addressLineOne: {
+              name: 'Store Name',
+              value: nameToUse,
+              suffix: { text: '*' },
+            },
+            addressLineTwo: { isVisible: false },
+            city: {
+              suffix: { text: '**' },
+            },
+            country: {
+              suffix: { text: '*' },
+            },
+            state: {
+              suffix: { text: '**' },
+              value: currentLocationState,
+            },
+            zipCode: {
+              suffix: { text: '**' },
+            },
+          }}
+        />
       </BottomSheetModalWithFixedHeader>
       <ForwardGeoCodingModal
         onConfirm={(place) => {
@@ -356,4 +404,15 @@ export function StoreForm(props: StoreFormProps) {
       />
     </AbsolutePositionedScreen>
   );
+}
+
+/**
+ *This returns a store with values that don't need to be compared
+ **/
+function getStandardizedValuesForComparison() {
+  return {
+    needsSaving: false,
+    calculatedDistance: 0,
+    addedDate: 0,
+  } as Partial<Store>;
 }

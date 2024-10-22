@@ -27,7 +27,7 @@ import {
   FILE_NAMES,
   FREQUENCY_INITIAL,
   HOUR_IN_MS,
-  IMAGE_PICKER_QUALITY_INITIAL,
+  IMAGE_QUALITY,
   SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT,
   SORT_ORDER_VALUE_BY_NAME_DEFAULT,
   WEEK_IN_MS,
@@ -343,7 +343,7 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   };
 }
 
-export function getImagePickerOptions(quality = IMAGE_PICKER_QUALITY_INITIAL) {
+export function getImagePickerOptions(quality = IMAGE_QUALITY) {
   return {
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
     allowsEditing: true,
@@ -501,7 +501,7 @@ export async function captureImage() {
     const result = await ImagePicker.launchCameraAsync(getImagePickerOptions());
 
     if (!result.canceled) {
-      return result.assets[0].uri;
+      return result.assets[0];
     }
   } catch (error) {
     console.log({ error });
@@ -551,7 +551,7 @@ export async function pickImage() {
     );
 
     if (!result.canceled) {
-      return result.assets[0].uri;
+      return result.assets[0];
     }
   } catch (error) {
     console.log({ error });
@@ -733,4 +733,10 @@ export function sanitizeKey<T extends Key>(key: T) {
 export function sanitize(str?: string) {
   if (!str) return '';
   return str?.replace(/\./g, '');
+}
+
+export async function uriToBlob(uri: string) {
+  const response = await fetch(uri);
+  const blob = await response.blob();
+  return blob;
 }

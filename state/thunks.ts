@@ -31,6 +31,7 @@ import {
   SaveItemResponse,
   SavePurchaseResponse,
   SaveStoreResponse,
+  SignedUrlResponse,
   UserAccountInput,
 } from '@/components/services/BffService';
 import {
@@ -38,10 +39,17 @@ import {
   ReverseGeocodingResponse,
 } from '@/components/services/GeoCodingService';
 import { EMPTY_STRING } from '@/constants/general';
+import { LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { Item, LastPurchasedMap } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
 import { Error, SetAppDataInput, State } from '@/types/general';
-import { getKeyToUse, handleError, getUserCredentials } from '@/utils/helpers';
+import {
+  getKeyToUse,
+  handleError,
+  getUserCredentials,
+  uriToBlob,
+  deleteFile,
+} from '@/utils/helpers';
 
 export type DeleteItemsThunkInput = {
   items: Item[];
@@ -53,6 +61,9 @@ export type SaveAllThunkInput = Omit<
   SetAppDataInput,
   'dispatch' | 'upcProducts'
 >;
+export type SaveImageThunkInput = {
+  item: Item;
+};
 export type SavePurchaseThunkInput = void;
 
 export const createUser = createAsyncThunk(
@@ -181,6 +192,11 @@ export const deleteItems = createAsyncThunk(
         }
         throw new Error('No user info found.');
       }
+      if (!items || items.length === 0) {
+        shouldDisplayError = false;
+        throw new Error('No items given.');
+      }
+
       dispatch(setLoading(`Deleting items...`));
       response = await BFF_SERVICE.deleteItems({
         items: itemsInDb,
@@ -188,19 +204,10 @@ export const deleteItems = createAsyncThunk(
         ...getUserCredentials(account),
       });
 
-      if (response) {
-        if (
-          response.deletedCount > 0 &&
-          response.deletedCount !== itemsInDb.length
-        ) {
-          throw new Error(
-            'The number of items deleted does not match the number given.',
-          );
-        }
-        dispatch(removeItemsListItems(items));
-      } else {
+      if (!response?.acknowledged) {
         throw new Error('Unable to delete items.');
       }
+      dispatch(removeItemsListItems(items));
     } catch (error) {
       dispatch(removeItemsListItems(itemsNotInDb));
       return handleErrorsWithRejection({
@@ -406,6 +413,84 @@ export const saveAll = createAsyncThunk(
   },
 );
 
+export const saveCustomImage = createAsyncThunk(
+  'saveCustomImage',
+  async (
+    input: SaveImageThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const state = getState() as RootState;
+    const account = state.general.account;
+    let shouldDisplayError = true;
+    let signedUrlResponse: SignedUrlResponse;
+
+    try {
+      const { item } = input;
+      const customImageUrlIndex = item.images.findIndex((image) =>
+        image.match(LOCAL_FILE_REGEX),
+      );
+      const customImageUrl = item.images[customImageUrlIndex];
+
+      if (!customImageUrl || !customImageUrl.match(LOCAL_FILE_REGEX)) {
+        shouldDisplayError = false;
+        throw new Error('No need to save image in saveImage.');
+      }
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No credentials found');
+      }
+
+      dispatch(setLoading(`Saving image to cloud...`));
+      const split = customImageUrl.split('/');
+      const filename = split[split.length - 1];
+
+      signedUrlResponse = await BFF_SERVICE.getSignedUrlForUpload({
+        dispatch,
+        ...getUserCredentials(account),
+        filename,
+      });
+
+      if (!signedUrlResponse?.uploadUrl || !signedUrlResponse.downloadUrl) {
+        throw new Error('Unable to get signed url.');
+      }
+
+      const blob = await uriToBlob(customImageUrl);
+      const savedResponse = await fetch(signedUrlResponse.uploadUrl, {
+        body: blob,
+        method: 'PUT',
+      });
+
+      if (!savedResponse.ok) {
+        throw new Error('Unable to save image.');
+      }
+
+      const newImages = [...item.images];
+      newImages[customImageUrlIndex] = signedUrlResponse.downloadUrl;
+      console.log({ item, newImages, customImageUrlIndex });
+      dispatch(
+        addItemsListItem({
+          item: {
+            ...item,
+            images: newImages,
+          },
+        }),
+      );
+      deleteFile(customImageUrl);
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response: signedUrlResponse,
+        baseMsg: `Error saving image.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(setLoading(EMPTY_STRING));
+    }
+  },
+);
+
 export const saveItem = createAsyncThunk(
   'saveItem',
   async (input: ItemFormOnSave, { getState, dispatch, rejectWithValue }) => {
@@ -433,6 +518,11 @@ export const saveItem = createAsyncThunk(
       }
       if (!input.item.needsSaving) {
         shouldDisplayError = false;
+        dispatch(
+          saveCustomImage({
+            item: itemToDispatch.item,
+          }),
+        );
         throw new Error('No need to save item.');
       }
       dispatch(setLoading(`Saving '${getKeyToUse(input.item)}' in Database`));
@@ -446,6 +536,11 @@ export const saveItem = createAsyncThunk(
       }
       itemToDispatch.item.needsSaving = false;
       itemToDispatch.item.hasBeenSaved = true;
+      dispatch(
+        saveCustomImage({
+          item: itemToDispatch.item,
+        }),
+      );
     } catch (error) {
       return handleErrorsWithRejection({
         dispatch,

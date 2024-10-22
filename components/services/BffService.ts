@@ -1,4 +1,5 @@
 import { Dispatch, UnknownAction } from '@reduxjs/toolkit';
+import { ImagePickerAsset } from 'expo-image-picker';
 
 import { AbstractService, GenericResponse } from './AbstractService';
 import { ItemFormOnSave } from '../forms/ItemForm';
@@ -33,6 +34,7 @@ export const BACKEND_URL = `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:${proce
 export const ITEM_PATH = '/item';
 export const LAST_PURCHASED_PATH = '/lastPurchasedMap';
 export const STORE_PATH = '/store';
+export const S3_PATH = '/s3';
 export const USER_PATH = '/user';
 
 export const DELETE_ITEMS_RESPONSE_DEFAULT: DeletionResponse = Object.freeze({
@@ -54,6 +56,7 @@ export type EmailNeeded = { email: string };
  **/
 export type IdNeeded = { _id: string };
 export type IdsNeeded = { ids: string[] };
+export type ImageNeeded = { image: ImagePickerAsset };
 export type ItemNeeded = { item: Item };
 export type ItemsNeeded = { items: Item[] };
 export type LastPurchasedMapNeeded = {
@@ -81,6 +84,9 @@ export type UserAccount = {
 export type DeleteItemsInput = ItemsNeeded & DispatchNeeded & CredentialsNeeded;
 export type DeleteStoresInput = IdsNeeded & DispatchNeeded & CredentialsNeeded;
 export type DeleteUserInput = DispatchNeeded & CredentialsNeeded;
+export type GetSignedUrlInput = { filename: string } & UserIdNeeded &
+  PasswordNeeded &
+  DispatchNeeded;
 export type GetUserItemsInput = DispatchNeeded & UserIdNeeded;
 export type GetUserStoresInput = GetUserItemsInput;
 export type LoadAllFromDbInput = DispatchNeeded & UserIdNeeded & PasswordNeeded;
@@ -170,6 +176,9 @@ export type SaveAllResponse =
 export type SaveItemResponse = Item | GenericResponse;
 export type SavePurchaseResponse = IdNeeded | GenericResponse;
 export type SaveStoreResponse = Store | GenericResponse;
+export type SignedUrlResponse =
+  | { downloadUrl: string; uploadUrl: string }
+  | GenericResponse;
 //#endregion
 
 class BffService extends AbstractService {
@@ -241,7 +250,13 @@ class BffService extends AbstractService {
     const keys = items.map((item) => getKeyToUse(item));
     const response = await this.makeCall<DeletionResponse>({
       path: `${ITEM_PATH}`,
-      body: JSON.stringify({ userId, password, ids, keys }),
+      body: JSON.stringify({
+        userId,
+        password,
+        ids,
+        keys,
+        imagePaths: this.getImagePathsToDelete(items),
+      }),
       options: {
         method: 'DELETE',
       },
@@ -285,6 +300,27 @@ class BffService extends AbstractService {
       dispatch,
       errorMsg: `Unable to delete user with id of '${userId}'`,
       loadingMsg: `Deleting user with id of '${userId}'...`,
+    });
+    return response;
+  }
+
+  async getSignedUrlForUpload(input: GetSignedUrlInput) {
+    const { dispatch, userId, password, filename } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+    const body = JSON.stringify({
+      userId,
+      password,
+      filename,
+    });
+    const response = await this.makeCall<SignedUrlResponse>({
+      path: `${S3_PATH}/signedUrl`,
+      options: {
+        method: 'POST',
+      },
+      body,
+      dispatch,
+      errorMsg: `Unable to get signed url for uploading`,
+      loadingMsg: `Getting signed url for uploading...`,
     });
     return response;
   }
@@ -616,6 +652,24 @@ class BffService extends AbstractService {
   }
 
   //#region Private Methods
+  private getImagePathsToDelete(items: Item[]): string[] {
+    const toReturn = [] as string[];
+    if (!items || items.length === 0) return toReturn;
+    for (const item of items) {
+      for (const imageUrl of item.images) {
+        if (!imageUrl) continue;
+        const match = imageUrl
+          ?.trim()
+          ?.match(/https:\/\/.*\.s3\..*\.amazonaws\.com\/(.*)/);
+        console.log({ match });
+        if (match) {
+          toReturn.push(match[1]);
+        }
+      }
+    }
+    return toReturn;
+  }
+
   private getStandardizedItem(item: Item) {
     const toReturn = {
       ...item,

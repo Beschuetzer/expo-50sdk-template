@@ -6,7 +6,7 @@ import { StyleSheet } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 
 import { ItemTileProps } from './ItemTile';
-import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
+import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
@@ -100,7 +100,11 @@ export function ItemTileForPreviouslyPurchased(
             useMarginRight
           />
         </Column>
-        <ItemTileNameAndUpcColumn item={item} color={dynamicTextColor} />
+        <ItemTileNameAndUpcColumn
+          item={item}
+          color={dynamicTextColor}
+          orientation="vertical"
+        />
         <Row alignItems="center" flex={0} justifyContent="flex-end">
           {isInShopping ? (
             <FontAwesome
@@ -129,7 +133,7 @@ export function ItemTileForPreviouslyPurchased(
             </TouchableOpacity>
           ) : null}
         </Row>
-        <ItemTileIsSelectedColumn
+        <TileIsSelectedBackground
           isMultiSelectMode={isMultiSelectMode}
           isSelected={isSelected}
         />

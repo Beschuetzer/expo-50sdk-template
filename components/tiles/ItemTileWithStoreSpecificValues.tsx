@@ -1,3 +1,4 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme, theme } from 'native-base';
 import { useCallback, useMemo } from 'react';
@@ -7,12 +8,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { ItemTileProps, ItemTileViewingMode } from './ItemTile';
 import { ItemTileBasicContent } from './ItemTileBasicContent';
-import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
+import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
 import {
   FORM_INTER_ITEM_SPACING,
+  IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
+  IMAGE_RENDERER_WIDTH_DEFAULT,
   ITEM_UNIT_INITIAL,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
@@ -58,6 +61,11 @@ export function ItemTileWithStoreSpecificValues(
   const noteAtStore = useSelector(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.Note),
   );
+  const imageHeightInFullMode = useMemo(() => {
+    const defaultHeight =
+      IMAGE_RENDERER_WIDTH_DEFAULT * IMAGE_RENDERER_ASPECT_RATIO_DEFAULT;
+    return defaultHeight * 1.25;
+  }, [item.upc, noteAtStore]);
 
   const decrementQuantity = useCallback(() => {
     dispatch(
@@ -81,31 +89,45 @@ export function ItemTileWithStoreSpecificValues(
     );
   }, [item]);
 
-  const isBasicViewingMode = useMemo(
-    () => viewingMode === ItemTileViewingMode.Basic,
-    [viewingMode],
-  );
   const basicContentJsx = useMemo(() => {
-    const TagToUse = isBasicViewingMode ? Row : Column;
     return (
-      <TagToUse>
-        <TouchableOpacity
-          hitSlop={getButtonHitSlop()}
-          onPress={incrementQuantity}
-          onLongPress={decrementQuantity}
-        >
-          <Text style={{ color: theme.colors.info[900] }}>
+      <Row justifyContent="space-between" alignItems="center" flex={1}>
+        <Row>
+          <Text>
             {quantityAtStore} {item.unit || ITEM_UNIT_INITIAL}
             {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
               ? 's'
               : ''}
           </Text>
-        </TouchableOpacity>
-        {priceAtStore ? <Text> at ${priceAtStore}</Text> : null}
-        {isBasicViewingMode && aisleNumberAtStore ? (
-          <Text> (aisle {aisleNumberAtStore})</Text>
-        ) : null}
-      </TagToUse>
+          {priceAtStore ? <Text> at ${priceAtStore}</Text> : null}
+          {aisleNumberAtStore ? (
+            <Text> (aisle {aisleNumberAtStore})</Text>
+          ) : null}
+        </Row>
+
+        <Row space={theme.space[FORM_INTER_ITEM_SPACING] * 3}>
+          <TouchableOpacity
+            hitSlop={getButtonHitSlop(2)}
+            onPress={decrementQuantity}
+          >
+            <FontAwesome
+              color={theme.colors.primary[900]}
+              size={theme.sizes[3]}
+              name="minus"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            hitSlop={getButtonHitSlop(2)}
+            onPress={incrementQuantity}
+          >
+            <FontAwesome
+              color={theme.colors.primary[900]}
+              size={theme.sizes[3]}
+              name="plus"
+            />
+          </TouchableOpacity>
+        </Row>
+      </Row>
     );
   }, [
     decrementQuantity,
@@ -118,7 +140,6 @@ export function ItemTileWithStoreSpecificValues(
   const mainContentJsx = useMemo(() => {
     return (
       <>
-        {aisleNumberAtStore ? <Text>Aisle #: {aisleNumberAtStore}</Text> : null}
         {noteAtStore ? (
           <Text fontStyle="italic" fontSize={theme.fontSizes.xs}>
             {noteAtStore}
@@ -126,7 +147,7 @@ export function ItemTileWithStoreSpecificValues(
         ) : null}
       </>
     );
-  }, [noteAtStore, priceAtStore, aisleNumberAtStore]);
+  }, [noteAtStore, priceAtStore]);
 
   function renderContent() {
     switch (viewingMode) {
@@ -136,7 +157,6 @@ export function ItemTileWithStoreSpecificValues(
             item={item}
             isMultiSelectMode={isMultiSelectMode}
             isSelected={isSelected}
-            showUpc={false}
           >
             <Row>{basicContentJsx}</Row>
           </ItemTileBasicContent>
@@ -148,14 +168,16 @@ export function ItemTileWithStoreSpecificValues(
               <ImageRenderer
                 item={item}
                 source={item.images[item.imageToUseIndex]}
+                height={imageHeightInFullMode}
+                width={(imageHeightInFullMode * 2) / 3}
                 useMarginRight
               />
-              {basicContentJsx}
             </Column>
             <ItemTileNameAndUpcColumn item={item}>
               {mainContentJsx}
+              {basicContentJsx}
             </ItemTileNameAndUpcColumn>
-            <ItemTileIsSelectedColumn
+            <TileIsSelectedBackground
               isMultiSelectMode={isMultiSelectMode}
               isSelected={isSelected}
             />

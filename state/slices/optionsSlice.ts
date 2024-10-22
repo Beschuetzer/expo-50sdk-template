@@ -9,7 +9,6 @@ import {
   AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   AUTO_SET_STORE_WHEN_CLOSE_ENOUGH_INITIAL,
   CAN_OVERRIDE_DEFAULT,
-  IMAGE_PICKER_QUALITY_INITIAL,
   NAME_ORDER_TEMPLATE_INITIAL,
   SAVE_IMAGES_TO_GALLERY_INITIAL,
   SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
@@ -26,7 +25,6 @@ export type OptionsState = {
   autoSaveStores: boolean;
   autoSetStore: AutoSetStore;
   canOverrideItem: boolean;
-  customImageQuality: number;
   saveImagesToGallery: boolean;
   nameOrderTemplate: string;
   scanningMode: ScanningMode;
@@ -41,7 +39,6 @@ const initialState: OptionsState = {
     maxDistanceInMiles: AUTO_SET_STORE_DISTANCE_THRESHOLD_INITIAL,
   },
   canOverrideItem: CAN_OVERRIDE_DEFAULT,
-  customImageQuality: IMAGE_PICKER_QUALITY_INITIAL,
   nameOrderTemplate: NAME_ORDER_TEMPLATE_INITIAL,
   saveImagesToGallery: SAVE_IMAGES_TO_GALLERY_INITIAL,
   scanningMode: ScanningMode.AddToCart,
@@ -75,13 +72,6 @@ export const optionsSlice = createSlice({
       action: PayloadAction<OptionsState['canOverrideItem']>,
     ) => {
       state.canOverrideItem = action.payload;
-    },
-    setCustomImageQuality: (
-      state: OptionsState,
-      action: PayloadAction<OptionsState['customImageQuality']>,
-    ) => {
-      if (!action.payload) return;
-      state.customImageQuality = action.payload;
     },
     setSaveImagesToGallery: (
       state: OptionsState,
@@ -126,7 +116,6 @@ export const {
   setNameOrderTemplate,
   setScanningMode,
   setSwipeableRowOpenThreshold,
-  setCustomImageQuality,
 } = optionsSlice.actions;
 
 export const autoSaveItemsSelector = (state: RootState) =>
@@ -140,9 +129,6 @@ export const autoSetStoreSelector = (state: RootState) =>
 
 export const canOverrideItemSelector = (state: RootState) =>
   state[optionsSlice.name].canOverrideItem;
-
-export const customImageQualitySelector = (state: RootState) =>
-  state[optionsSlice.name].customImageQuality;
 
 export const nameOrderTemplateSelector = (state: RootState) =>
   state[optionsSlice.name].nameOrderTemplate;

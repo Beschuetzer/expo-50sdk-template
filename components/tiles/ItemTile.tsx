@@ -5,8 +5,9 @@ import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
+import { DeveloperInfo } from './DeveloperInfo';
 import { ItemTileBasicContent } from './ItemTileBasicContent';
-import { ItemTileIsSelectedColumn } from './ItemTileIsSelectedColumn';
+import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
@@ -81,15 +82,9 @@ export function ItemTile(props: ItemTileProps<Item>) {
                   ? new Date(lastPurchased).toLocaleString()
                   : 'N/A'}
               </Text>
-              <Text>Db Id: {item._id}</Text>
-              <Text>
-                Needs Saving: {item.needsSaving === false ? 'false' : 'true'}
-              </Text>
-              <Text>
-                Has been Saved: {item.hasBeenSaved === true ? 'true' : 'false'}
-              </Text>
+              <DeveloperInfo />
             </ItemTileNameAndUpcColumn>
-            <ItemTileIsSelectedColumn
+            <TileIsSelectedBackground
               isMultiSelectMode={isMultiSelectMode}
               isSelected={isSelected}
             />

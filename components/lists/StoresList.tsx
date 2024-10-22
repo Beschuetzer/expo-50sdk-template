@@ -11,6 +11,7 @@ import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
+import { AlphabeticalScroll } from '../AlphabeticalScroll';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
@@ -228,6 +229,15 @@ export function StoresList(props: StoresListProps) {
         isVisible={isFilterModalOpen}
         setIsVisible={setIsFilterModalOpen}
         onValueChange={onFilterValueChange}
+      />
+      <AlphabeticalScroll
+        items={storesList.data}
+        onCharPress={(index) => {
+          if (listRef?.current) {
+            listRef.current.scrollToIndex({ animated: false, index });
+          }
+        }}
+        sortOrderValue={storesList.sortOrderValue}
       />
       <ConfirmModal {...confirmModalProps} />
     </>

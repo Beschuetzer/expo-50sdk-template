@@ -1,12 +1,16 @@
 ## MVP
+
+-add toggle for isDeveloperMode
+
+- add options
+    --(maybe?): add an option which removes all the store data in storeSpecificValues when deleting a store via DELETE /store
+
 -add button for each store with an address call "Navigate" which opens the direction in the map app for the device 
     --https://stackoverflow.com/questions/43214062/open-maps-google-maps-in-react-native
 -fix issue where selecting an image causes it to still be saved in the grocify folder even if the source image is from there
 -instead of current/set current label for store, use background color like in ItemTile
 
-- ideas for options to add
-    --add an option which removes all the store data in storeSpecificValues when deleting a store via DELETE /store
-    --add an option to show developer info like _id and needsSaving fields in the tiles
+
 
 -now that each item has it's own _id, add an option to merge different items (in the case where a user mistakenly adds the same upc or name to an item)?
 

@@ -1,15 +1,13 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { ImagePickerAsset } from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { Center, Row, useTheme } from 'native-base';
 import { ColorType } from 'native-base/lib/typescript/components/types';
 import React, { useCallback } from 'react';
 import { TouchableOpacity, ViewStyle } from 'react-native';
 
-import {
-  APP_NAME,
-  EMPTY_STRING,
-  FORM_INTER_ITEM_SPACING,
-} from '@/constants/general';
+import { APP_NAME, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { setError } from '@/state/slices/generalSlice';
 import { saveImagesToGallerySelector } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { pickImage, captureImage, handleError } from '@/utils/helpers';
@@ -40,12 +38,20 @@ export function ImageCapturer(props: ImageCapturerProps) {
 
   const getCustomImage = useCallback(
     async (
-      resultFetcher: () => Promise<string | undefined>,
+      resultFetcher: () => Promise<ImagePickerAsset | undefined>,
       onResultFound: (result: string) => void,
     ) => {
       try {
-        const result = (await resultFetcher()) || EMPTY_STRING;
-        onResultFound && onResultFound(result);
+        const result = (await resultFetcher()) || null;
+        if (!result) {
+          dispatch(
+            setError({
+              message: 'Unable to get an image from the resultFetcher',
+            }),
+          );
+          return;
+        }
+        onResultFound && onResultFound(result.uri);
       } catch (error) {
         console.error('Error obtaining a custom image: ' + error);
       }

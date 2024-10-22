@@ -5,7 +5,7 @@ type ItemTileIsSelectedColumnProps = {
   isSelected: boolean;
 };
 
-export function ItemTileIsSelectedColumn(props: ItemTileIsSelectedColumnProps) {
+export function TileIsSelectedBackground(props: ItemTileIsSelectedColumnProps) {
   const { isSelected, isMultiSelectMode } = props;
   const colorToUse = theme.colors.green[900];
   const opacity = !isMultiSelectMode || !isSelected ? 0 : 0.25;

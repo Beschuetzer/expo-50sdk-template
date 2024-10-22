@@ -80,7 +80,8 @@ export type ItemBase = {
 /**
  *This represents something that can be added to any store
  **/
-export type Item = Key & ItemBase & NeedsSaving & AddedDate & HasBeenSaved;
+export type Item = Key & ItemBase & AddedDate & DatabaseItem;
+export type DatabaseItem = NeedsSaving & HasBeenSaved & Partial<Id>;
 export type ItemWithStoreSpecificValues = Item & StoreSpecificValues;
 export type PrevioulsyPurchasedItem = ItemWithStoreSpecificValues & {
   isRecommended: boolean;

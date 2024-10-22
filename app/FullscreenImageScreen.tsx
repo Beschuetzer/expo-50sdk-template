@@ -33,7 +33,10 @@ export default function FullscreenImageScreen() {
   });
   const imageToUse = useMemo(
     () =>
-      customImageUri || upcProduct?.image_url || upcProduct?.image_front_url,
+      customImageUri ||
+      upcProduct?.image_url ||
+      upcProduct?.image_front_url ||
+      item.images[item.imageToUseIndex],
     [upcProduct, customImageUri],
   );
 

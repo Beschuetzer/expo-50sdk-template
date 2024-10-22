@@ -10,7 +10,6 @@ import { AutoSaveItemsToggle } from '@/components/options/AutoSaveItemsToggle';
 import { AutoSaveStoresToggle } from '@/components/options/AutoSaveStoresToggle';
 import { AutoSetStoreToggle } from '@/components/options/AutoSetStoreToggle';
 import { CanCreateMultipleItemsWithSameUpcToggle } from '@/components/options/CanCreateMultipleItemsWithSameUpcToggle';
-import { CustomImageQualitySlider } from '@/components/options/CustomImageQualitySlider';
 import { NameOrderSpecifier } from '@/components/options/NameOrderSpecifier';
 import { SaveImagesToGallerySlider } from '@/components/options/SaveImagesToGallerySlider';
 import { SaveLoadState } from '@/components/options/SaveLoadState';
@@ -127,7 +126,6 @@ export default function OptionsScreen() {
           isValid={Math.round(openThreshhold) < maxAllowableSwipeThreshold}
           message={`The current value will be set to ${maxAllowableSwipeThreshold}, since that is the max allowed for this device.`}
         />
-        <CustomImageQualitySlider />
       </Stack>
       <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
         <Button

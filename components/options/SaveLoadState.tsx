@@ -20,7 +20,6 @@ import {
   getKeyToUse,
   importAppData,
   makeNewDirectory,
-  prepareItemsListForSaving,
   saveAppStateToFile,
   setAppData,
 } from '@/utils/helpers';
@@ -57,11 +56,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       const newFolderName = new Date().toISOString();
       const madeDirectory = await makeNewDirectory(dir, newFolderName);
 
-      await saveAppStateToFile(
-        FILE_NAMES.items,
-        madeDirectory,
-        prepareItemsListForSaving(itemsList),
-      );
+      await saveAppStateToFile(FILE_NAMES.items, madeDirectory, itemsList);
       await saveAppStateToFile(
         FILE_NAMES.storeSpecificValues,
         madeDirectory,

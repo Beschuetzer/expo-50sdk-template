@@ -1,4 +1,4 @@
-import { Column, Row, Text, useTheme } from 'native-base';
+import { Column, ITextProps, Row, Text, useTheme } from 'native-base';
 import { useMemo } from 'react';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -7,8 +7,10 @@ import { ChildrenProp, ItemProp } from '@/types/general';
 
 export type ItemTileNameAndUpcColumnProps = {
   color?: string;
+  nameProps?: ITextProps;
   orientation?: 'vertical' | 'horizontal';
   showUpc?: boolean;
+  upcProps?: ITextProps;
 } & Partial<ItemProp<Item>> &
   ChildrenProp;
 export function ItemTileNameAndUpcColumn(props: ItemTileNameAndUpcColumnProps) {
@@ -17,8 +19,10 @@ export function ItemTileNameAndUpcColumn(props: ItemTileNameAndUpcColumnProps) {
     children,
     color = theme.colors.black,
     item,
+    nameProps,
     showUpc = true,
     orientation = 'horizontal',
+    upcProps,
   } = props;
   const isHorizontal = orientation === 'horizontal';
   const TagToUse = useMemo(() => (isHorizontal ? Row : Column), [isHorizontal]);
@@ -32,13 +36,13 @@ export function ItemTileNameAndUpcColumn(props: ItemTileNameAndUpcColumnProps) {
     <Column flex={1}>
       <TagToUse space={spacingToUse}>
         <Column flex={1}>
-          <Text noOfLines={1} color={color}>
+          <Text noOfLines={1} color={color} {...nameProps}>
             {item?.name}
           </Text>
         </Column>
         <Column flex={0}>
           {showUpc && item.upc ? (
-            <Text color={color} fontWeight={900}>
+            <Text color={color} fontWeight={900} {...upcProps}>
               #{item?.upc}
             </Text>
           ) : null}

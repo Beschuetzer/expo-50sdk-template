@@ -53,7 +53,7 @@ export function StoreTile(props: StoreTileProps) {
             store?.calculatedDistance >= 0 ? (
               <Text>Estimated Distance: {store.calculatedDistance}mi.</Text>
             ) : null}
-            <DeveloperInfo />
+            <DeveloperInfo {...store} />
           </Stack>
           <TileIsSelectedBackground
             isMultiSelectMode

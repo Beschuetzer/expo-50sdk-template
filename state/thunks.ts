@@ -1,5 +1,8 @@
 import { AsyncThunk, createAsyncThunk, Dispatch } from '@reduxjs/toolkit';
-import { AsyncThunkConfig } from '@reduxjs/toolkit/dist/createAsyncThunk';
+import {
+  AsyncThunkAction,
+  AsyncThunkConfig,
+} from '@reduxjs/toolkit/dist/createAsyncThunk';
 
 import { ACCOUNT_INITIAL, setAccount, setLoading } from './slices/generalSlice';
 import { getLastPurchasedFromStoreSpecificValues } from './slices/helpers/getLastPurchasedMapFromStoreSpecificValues';
@@ -374,6 +377,7 @@ export const saveAll = createAsyncThunk(
       const storesNeedingSaving = stores.data.filter(
         (store) => store.needsSaving,
       );
+
       response = await BFF_SERVICE.saveAllToDb({
         ...input,
         items: {
@@ -397,6 +401,27 @@ export const saveAll = createAsyncThunk(
           storesSaved: storesNeedingSaving,
         }),
       );
+
+      //Save all custom images
+      const actions = [] as AsyncThunkAction<
+        void,
+        SaveImageThunkInput,
+        AsyncThunkConfig
+      >[];
+      items.data.forEach((item) => {
+        for (const image of item?.images || []) {
+          if (image.match(LOCAL_FILE_REGEX)) {
+            actions.push(
+              saveCustomImage({
+                item,
+              }),
+            );
+            continue;
+          }
+        }
+      });
+      await Promise.all(actions.map((promise) => dispatch(promise)));
+
       return response;
     } catch (error) {
       return handleErrorsWithRejection({
@@ -440,7 +465,7 @@ export const saveCustomImage = createAsyncThunk(
         throw new Error('No credentials found');
       }
 
-      dispatch(setLoading(`Saving image to cloud...`));
+      dispatch(setLoading(`Saving '${customImageUrl}' to cloud...`));
       const split = customImageUrl.split('/');
       const filename = split[split.length - 1];
 

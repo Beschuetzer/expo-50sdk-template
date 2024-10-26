@@ -1,5 +1,6 @@
 ## MVP
-
+-open-based based bulk add feature:
+    
 -add toggle for isDeveloperMode
 
 - add options

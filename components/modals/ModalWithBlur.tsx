@@ -1,5 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { View, useTheme, Button, Row, Heading } from 'native-base';
+import { IViewProps } from 'native-base/lib/typescript/components/basic/View/types';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { Modal, ViewStyle } from 'react-native';
 
@@ -11,6 +12,7 @@ import { ButtonOptions, ChildrenProp } from '@/types/general';
 export type ModalWithBlurProps = {
   cancelButton?: ButtonOptions;
   confirmButton?: ButtonOptions;
+  containerStyles?: IViewProps;
   isVisible?: boolean;
   title: string | ReactNode | ReactNode[];
   onConfirm?: () => void;
@@ -21,6 +23,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
   const {
     cancelButton,
     confirmButton,
+    containerStyles,
     isVisible = false,
     title,
     children,
@@ -78,6 +81,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
               padding: 20,
               backgroundColor: 'white',
               borderRadius: 10,
+              ...containerStyles,
               ...maxWidth,
             } as ViewStyle
           }

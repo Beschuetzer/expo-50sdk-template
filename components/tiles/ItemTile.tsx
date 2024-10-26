@@ -82,7 +82,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
                   ? new Date(lastPurchased).toLocaleString()
                   : 'N/A'}
               </Text>
-              <DeveloperInfo />
+              <DeveloperInfo {...item} />
             </ItemTileNameAndUpcColumn>
             <TileIsSelectedBackground
               isMultiSelectMode={isMultiSelectMode}

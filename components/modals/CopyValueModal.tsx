@@ -87,8 +87,14 @@ export default function CopyValueModal(props: CopyValueModalProps) {
       return;
     }
 
+    const isNumbersOnly = filterValue.match(/^\s*\d+\s*$/);
+
     const filteredValues = valuesList.filter(([key, value, item]) => {
-      if (key?.match(filterValue) || item?.name?.match(filterValue)) {
+      const valueToMatch = isNumbersOnly
+        ? item?.upc || EMPTY_STRING
+        : item?.name || EMPTY_STRING;
+
+      if (valueToMatch?.match(filterValue)) {
         return [key, value];
       }
     });
@@ -99,6 +105,9 @@ export default function CopyValueModal(props: CopyValueModalProps) {
   return (
     <ModalWithBlur
       {...props}
+      containerStyles={{
+        borderRadius: 0,
+      }}
       isVisible={valuesList.length > 0}
       confirmButton={{
         isEnabled: !!currentlySelectedKey,
@@ -133,6 +142,7 @@ export default function CopyValueModal(props: CopyValueModalProps) {
       ) : (
         <View width={windowDimensions.width} flex={1}>
           <FlashList
+            contentContainerStyle={{ paddingRight: theme.space[10] }}
             renderItem={(item) => {
               const { item: itemToRender } = item;
               const [key, value] = itemToRender;
@@ -141,6 +151,7 @@ export default function CopyValueModal(props: CopyValueModalProps) {
                   key={key}
                   variant="outline"
                   isDisabled={currentlySelectedKey === key}
+                  paddingRight={theme.space[FORM_INTER_ITEM_SPACING] * 2}
                   onPress={() => setCurrentlySelectedKey(key)}
                   justifyContent="space-between"
                 >

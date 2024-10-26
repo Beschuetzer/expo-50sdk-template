@@ -17,7 +17,7 @@ export function ItemTileCopyModal(props: ItemTileCopyModalProps) {
   const item = useSelector(itemsListItemSelector(itemKey)) || undefined;
 
   return (
-    <Row>
+    <Row width="100%">
       <Column flex={0}>
         <ImageRenderer
           item={item}
@@ -25,8 +25,12 @@ export function ItemTileCopyModal(props: ItemTileCopyModalProps) {
           useMarginRight
         />
       </Column>
-      <Column>
-        <ItemTileNameAndUpcColumn item={item} />
+      <Column maxWidth="85%">
+        <ItemTileNameAndUpcColumn
+          item={item}
+          orientation="vertical"
+          nameProps={{ numberOfLines: 2 }}
+        />
         <Text>Value to use: {value}</Text>
       </Column>
     </Row>

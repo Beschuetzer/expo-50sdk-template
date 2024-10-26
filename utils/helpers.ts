@@ -558,29 +558,6 @@ export async function pickImage() {
   }
 }
 
-/**
- *Currently this just removes images that are locally cached from the saved data
- **/
-export function prepareItemsListForSaving(itemsList: ItemsList) {
-  const newData = [] as Item[];
-  for (const item of itemsList.data) {
-    const shouldResetIndex =
-      !!item?.images?.[item.imageToUseIndex]?.match(LOCAL_FILE_REGEX) || false;
-    const filteredImages = item.images.filter(
-      (image) => !image.match(LOCAL_FILE_REGEX),
-    );
-    newData.push({
-      ...item,
-      images: filteredImages,
-      imageToUseIndex: shouldResetIndex ? 0 : item.imageToUseIndex,
-    });
-  }
-  return {
-    ...itemsList,
-    data: newData,
-  };
-}
-
 export function resetConfirmModalProps(
   setConfirmModalProps: (
     value: React.SetStateAction<ConfirmModalProps>,

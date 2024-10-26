@@ -157,6 +157,7 @@ export default function AccountScreen() {
           <Row>
             <Input
               flex={1}
+              type="password"
               variant="outline"
               p={theme.space[1]}
               placeholder="SuperSecretPassword!@#4"

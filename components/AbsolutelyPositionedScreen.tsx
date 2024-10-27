@@ -5,7 +5,7 @@ import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { absolutePositioning } from '@/constants/styles';
 
 type AbsolutePositionedScreenProps = {
-  absolutelyPositionedJsx: ReactNode | ReactNode[];
+  absolutelyPositionedJsx?: ReactNode | ReactNode[];
   children: ReactNode | ReactNode[];
   useFlatList?: boolean;
 };

@@ -25,6 +25,7 @@ import { ItemFormOnSave } from '@/components/forms/ItemForm';
 import { GenericResponse } from '@/components/services/AbstractService';
 import {
   BFF_SERVICE,
+  ChangePasswordResponse,
   CreateUserResponse,
   DeleteUserResponse,
   DeletionResponse,
@@ -68,6 +69,39 @@ export type SaveImageThunkInput = {
   item: Item;
 };
 export type SavePurchaseThunkInput = void;
+
+export const changePassword = createAsyncThunk(
+  'changePassword',
+  async (newPassword: string, { getState, dispatch, rejectWithValue }) => {
+    const state = getState() as RootState;
+      const account = state.general?.account;
+    let response: ChangePasswordResponse;
+    try {
+      response = await BFF_SERVICE.changePassword({
+        ...getUserCredentials(account),
+        newPassword,
+        dispatch,
+      });
+      if (!response?.success) {
+        throw new Error('Error creating user account');
+      }
+      dispatch(
+        setAccount({
+          ...account,
+          password: newPassword,
+        }),
+      );
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to change the user password for user account '${account._id}'.`,
+      });
+    }
+  },
+);
 
 export const createUser = createAsyncThunk(
   'createUser',

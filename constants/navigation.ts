@@ -6,6 +6,7 @@ export enum Routes {
   ItemModal = 'itemModal',
   ItemsScreen = 'ItemsScreen',
   OptionsScreen = 'OptionsScreen',
+  PasswordResetScreen = 'PasswordResetScreen',
   ScannerScreen = 'ScannerScreen',
   ShoppingList = 'ShoppingList',
   ShoppingListScreen = 'index',

@@ -1,3 +1,4 @@
+import { useNavigation } from 'expo-router';
 import { Button, Input, Row, Stack, useTheme } from 'native-base';
 import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -14,6 +15,7 @@ import {
 } from '@/components/modals/ConfirmModal';
 import { BFF_SERVICE, UserAccount } from '@/components/services/BffService';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import { EMAIL_SCHEMA, PASSWORD_SCHEMA } from '@/constants/schema';
 import {
   ACCOUNT_INITIAL,
@@ -34,6 +36,7 @@ const USERNAME_AVAILABILITY_INITIAL = Object.freeze({
 });
 
 export default function AccountScreen() {
+  const navigation = useNavigation();
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const userAccount = useSelector(accountSelector);
@@ -126,6 +129,10 @@ export default function AccountScreen() {
     dispatch(setAccount(ACCOUNT_INITIAL));
   }, []);
 
+  const onChangePassword = useCallback(() => {
+    navigation.navigate(Routes.PasswordResetScreen);
+  }, [navigation]);
+
   const onRegisterPress = useCallback(async () => {
     dispatch(createUser({ email, password }));
   }, [email, password]);
@@ -135,17 +142,23 @@ export default function AccountScreen() {
       headerRight: () => (
         <ListHeaderRight
           ref={menuRef}
-          options={[
+          options={
             userAccount._id
-              ? {
-                  text: 'Delete',
-                  onPress: onDeletePress,
-                }
-              : undefined,
-          ]}
+              ? [
+                  {
+                    text: 'Delete',
+                    onPress: onDeletePress,
+                  },
+                  {
+                    text: 'Reset Password',
+                    onPress: onChangePassword,
+                  },
+                ]
+              : []
+          }
         />
       ),
-      headerTitle: `Test`,
+      headerTitle: userAccount._id ? 'Account Page' : `Create an Account`,
     }),
   });
 
@@ -194,9 +207,19 @@ export default function AccountScreen() {
             />
           </Row>
           {userAccount._id ? (
-            <Button isDisabled={!userAccount._id} onPress={onLogoutPress}>
-              Logout
-            </Button>
+            <Row
+              space={theme.space[FORM_INTER_ITEM_SPACING]}
+              justifyContent="space-between"
+              mt={theme.space[FORM_INTER_ITEM_SPACING]}
+            >
+              <Button
+                flex={1}
+                isDisabled={!userAccount._id}
+                onPress={onLogoutPress}
+              >
+                Logout
+              </Button>
+            </Row>
           ) : (
             <>
               <Row
@@ -205,6 +228,7 @@ export default function AccountScreen() {
                 mt={theme.space[FORM_INTER_ITEM_SPACING]}
               >
                 <Button
+                  flex={1}
                   isDisabled={
                     !!userAccount._id || !isEmailValid || !isPasswordValid
                   }
@@ -214,13 +238,14 @@ export default function AccountScreen() {
                 </Button>
                 {usernameAvailability.isAvailable ? (
                   <Button
+                    flex={1}
                     isDisabled={!isEmailValid || !isPasswordValid}
                     onPress={onRegisterPress}
                   >
                     Register
                   </Button>
                 ) : (
-                  <Button onPress={onCheckUsernameAvailability}>
+                  <Button flex={1} onPress={onCheckUsernameAvailability}>
                     Check Availability
                   </Button>
                 )}

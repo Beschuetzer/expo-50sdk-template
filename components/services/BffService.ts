@@ -62,6 +62,7 @@ export type ItemsNeeded = { items: Item[] };
 export type LastPurchasedMapNeeded = {
   lastPurchasedMap: LastPurchasedMap;
 };
+export type NewPasswordNeeded = { newPassword: string };
 export type StoreNeeded = { store: Store };
 export type StoresNeeded = { stores: Store[] };
 export type StoreSpecificValuesNeeded = {
@@ -81,6 +82,9 @@ export type UserAccount = {
 //#endregion
 
 //#region Input Types
+export type ChangePasswordInput = CredentialsNeeded &
+  DispatchNeeded &
+  NewPasswordNeeded;
 export type DeleteItemsInput = ItemsNeeded & DispatchNeeded & CredentialsNeeded;
 export type DeleteStoresInput = IdsNeeded & DispatchNeeded & CredentialsNeeded;
 export type DeleteUserInput = DispatchNeeded & CredentialsNeeded;
@@ -134,6 +138,7 @@ export type UserAccountInput = Omit<UserAccount, '_id'>;
 //#endregion
 
 //#region Response Types
+export type ChangePasswordResponse = { success: boolean } | GenericResponse;
 export type CreateUserResponse = UserAccount | GenericResponse;
 export type DeletionResponse =
   | {
@@ -192,6 +197,30 @@ class BffService extends AbstractService {
       bffServiceBaseUrl: this._baseUrl,
       EXPO_PUBLIC_ENV: process.env.EXPO_PUBLIC_ENV,
     });
+  }
+
+  async changePassword(input: ChangePasswordInput) {
+    const { userId, password, dispatch, newPassword } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) {
+      return;
+    }
+
+    const body = JSON.stringify({
+      _id: userId,
+      password,
+      newPassword,
+    });
+    const response = await this.makeCall<ChangePasswordResponse>({
+      dispatch,
+      body,
+      options: {
+        method: 'POST',
+      },
+      path: `${USER_PATH}/changePassword`,
+      errorMsg: `Unable to change password for user with id of '${userId}'`,
+      loadingMsg: `Changing password for user with id of '${userId}'...`,
+    });
+    return response;
   }
 
   async createUser(input: UserNeeded<UserAccountInput> & DispatchNeeded) {

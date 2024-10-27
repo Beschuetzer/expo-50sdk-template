@@ -111,6 +111,14 @@ function RootLayoutNav() {
                         headerLeft: () => <CloseButton />,
                       }}
                     />
+                    <Stack.Screen
+                      name={Routes.PasswordResetScreen}
+                      options={{
+                        title: 'Password Reset',
+                        headerTitleAlign: 'center',
+                        headerLeft: () => <CloseButton />,
+                      }}
+                    />
                   </Stack>
                 </BottomSheetModalProvider>
               </MenuProvider>

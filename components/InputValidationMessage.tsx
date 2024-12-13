@@ -4,13 +4,14 @@ import { Row, Text, useTheme } from 'native-base';
 import { StyleProp } from '@/types/general';
 
 export type InputValidationMessageProps = {
-  isValid: boolean;
-  message: string;
+  isValid?: boolean;
+  message?: string;
 } & StyleProp;
 export function InputValidationMessage(props: InputValidationMessageProps) {
   const { isValid, message, style } = props;
   const theme = useTheme();
 
+  if (isValid == null) return null;
   return (
     <Row
       display={!isValid ? 'block' : 'none'}

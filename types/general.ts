@@ -13,12 +13,9 @@ import {
 } from './Item';
 import { GpsCoordinate, Store } from './Store';
 import { UpcProduct } from './UpcResponse';
+import { CurrentStoreNeeded, DispatchNeeded } from './bffService';
+import { ListName } from './listSlice';
 
-import {
-  CurrentStoreNeeded,
-  DispatchNeeded,
-} from '@/components/services/BffService';
-import { ListName } from '@/state/slices/listsSlice';
 import { UpcProducts } from '@/state/slices/scannerSlice';
 
 export enum ScanningMode {

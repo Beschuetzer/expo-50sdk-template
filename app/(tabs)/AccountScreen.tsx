@@ -13,7 +13,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from '@/components/modals/ConfirmModal';
-import { BFF_SERVICE, UserAccount } from '@/components/services/BffService';
+import { BFF_SERVICE } from '@/components/services/BffService';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { EMAIL_SCHEMA, PASSWORD_SCHEMA } from '@/constants/schema';
@@ -24,6 +24,7 @@ import {
 } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
 import { createUser, deleteUser, login } from '@/state/thunks';
+import { UserAccount } from '@/types/bffService';
 import { resetConfirmModalProps } from '@/utils/helpers';
 
 type UsernameAvailability = {
@@ -130,6 +131,7 @@ export default function AccountScreen() {
   }, []);
 
   const onChangePassword = useCallback(() => {
+    // @ts-ignore
     navigation.navigate(Routes.PasswordResetScreen);
   }, [navigation]);
 

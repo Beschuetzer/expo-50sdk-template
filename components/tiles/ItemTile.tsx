@@ -27,6 +27,7 @@ export type ItemTileProps<T> = {
   buttonProps?: RectButtonProps;
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
+  onPress?: (item: T) => void;
   onSelect?: (item: T) => void;
   viewingMode?: ItemTileViewingMode;
 } & ItemProp<T> &
@@ -40,6 +41,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
     buttonProps,
     listName,
     item,
+    onPress,
     onSelect,
     viewingMode = ItemTileViewingMode.Basic,
   } = props;
@@ -98,9 +100,11 @@ export function ItemTile(props: ItemTileProps<Item>) {
       {...buttonProps}
       style={styles.rectButton}
       onPress={() => {
+        onPress && onPress(item);
         if (isMultiSelectMode) {
           onSelect && onSelect(item);
         } else {
+          // @ts-ignore
           navigation.navigate(Routes.ItemModal, {
             key: item,
             showOverrideMsg: false,

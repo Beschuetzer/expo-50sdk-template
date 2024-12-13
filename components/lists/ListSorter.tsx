@@ -7,12 +7,9 @@ import { useDispatch } from 'react-redux';
 import { SORT_TYPE_DESCRIPTIONS, SortOrder, SortType } from './sorters';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import {
-  SetSortOrderPayload,
-  SortOrderValue,
-  setSortOrder,
-} from '@/state/slices/listsSlice';
+import { setSortOrder } from '@/state/slices/listsSlice';
 import { HeadingTagProp } from '@/types/general';
+import { SortOrderValue, SetSortOrderPayload } from '@/types/listSlice';
 import { camelCaseToSpacedCapitalized } from '@/utils/helpers';
 
 export type ListSortViewSize = 'large' | 'small';

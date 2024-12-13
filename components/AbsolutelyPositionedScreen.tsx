@@ -1,4 +1,5 @@
 import { Column, FlatList, ScrollView, View, useTheme } from 'native-base';
+import { IFlatListProps } from 'native-base/lib/typescript/components/basic/FlatList';
 import { ReactNode, useState } from 'react';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -7,12 +8,14 @@ import { absolutePositioning } from '@/constants/styles';
 type AbsolutePositionedScreenProps = {
   absolutelyPositionedJsx?: ReactNode | ReactNode[];
   children: ReactNode | ReactNode[];
+  flatListProps?: Partial<IFlatListProps<any>>;
   useFlatList?: boolean;
 };
 
 const CONTAINER_HEIGHT_DEFAULT = 0;
 export function AbsolutePositionedScreen(props: AbsolutePositionedScreenProps) {
-  const { absolutelyPositionedJsx, children, useFlatList } = props;
+  const { absolutelyPositionedJsx, children, flatListProps, useFlatList } =
+    props;
   const [containerHeight, setContainerHeight] = useState(
     CONTAINER_HEIGHT_DEFAULT,
   );
@@ -30,6 +33,7 @@ export function AbsolutePositionedScreen(props: AbsolutePositionedScreenProps) {
       return (
         <FlatList
           {...commonStyles}
+          {...flatListProps}
           data={[{ jsx: contentJSX, index: 1 }]}
           keyExtractor={(item) => item.index.toString()}
           renderItem={(item) => item.item.jsx}

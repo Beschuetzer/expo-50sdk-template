@@ -82,6 +82,73 @@ describe('updateStoreSpecificValueMap', () => {
       ]?.[MOCK_CURRENT_STORE],
     ).toStrictEqual(MOCK_CURRENT_STORE_QUANTITY + 1);
   });
+
+  it('can handle undefined store key', async () => {
+    const state = {
+      ...MOCK_STATE,
+      storeSpecificValuesMap: {
+        upc2: currentItems.one,
+      } as StoreSpecificValuesMap,
+    };
+    logState(state);
+
+    updateStoreSpecificValueMap(
+      state,
+      {
+        name: KEY_TO_USE,
+        upc: '',
+      } as Item,
+      {
+        quantity: (current) => {
+          console.log({ current });
+          return current + 1;
+        },
+      } as StoreSpecificValueUpdater,
+      MOCK_CURRENT_STORE,
+    );
+
+    logState(state);
+
+    expect(
+      state.storeSpecificValuesMap?.[KEY_TO_USE]?.[
+        StoreSpecificValueKey.Quantity
+      ]?.[MOCK_CURRENT_STORE],
+    ).toStrictEqual(1);
+  });
+
+  it('can handle undefined value key', async () => {
+    const state = {
+      ...MOCK_STATE,
+      storeSpecificValuesMap: {
+        [KEY_TO_USE]: {},
+        upc2: currentItems.one,
+      } as StoreSpecificValuesMap,
+    };
+    logState(state);
+
+    updateStoreSpecificValueMap(
+      state,
+      {
+        name: KEY_TO_USE,
+        upc: '',
+      } as Item,
+      {
+        quantity: (current) => {
+          console.log({ current });
+          return current + 1;
+        },
+      } as StoreSpecificValueUpdater,
+      MOCK_CURRENT_STORE,
+    );
+
+    logState(state);
+
+    expect(
+      state.storeSpecificValuesMap?.[KEY_TO_USE]?.[
+        StoreSpecificValueKey.Quantity
+      ]?.[MOCK_CURRENT_STORE],
+    ).toStrictEqual(1);
+  });
 });
 
 function logState(state: ListsState) {

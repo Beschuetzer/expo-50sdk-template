@@ -21,7 +21,6 @@ export const ErrorModal = (props: ErrorModalProps) => {
   const errors = useAppSelector(errorSelector);
   const dispatch = useAppDispatch();
 
-  console.log({ errors });
   // displayAlert({
   //   message: errors.message,
   //   statusCode: errors.statusCode || ERROR_MODAL_STATUS_CODE_DEFAULT,
@@ -46,10 +45,11 @@ export const ErrorModal = (props: ErrorModalProps) => {
       confirmButton={{ text: 'Ok' }}
       cancelButton={{ isVisible: false }}
       title="Errors Encountered (Press to View)"
-      isVisible={errors.length > 0}
+      isVisible={errors.some((error) => Boolean(error.message))}
     >
       <Stack>
         {errors.map((error, index) => {
+          if (!error.message) return null;
           return (
             <Row key={index} justifyContent="space-between" alignItems="center">
               <Button variant="link" onPress={() => onButtonPress(error)}>

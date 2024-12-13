@@ -14,6 +14,7 @@ export const ServiceTesterButton = (props: BffServiceTesterProps) => {
   const navigation = useNavigation();
 
   const onBffServicePress = useCallback(() => {
+    // @ts-ignore
     navigation.navigate(route);
   }, [navigation]);
 

@@ -10,8 +10,8 @@ import {
   saveStore,
 } from '../thunks';
 
-import { UserAccount } from '@/components/services/BffService';
 import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
+import { UserAccount } from '@/types/bffService';
 import { Error } from '@/types/general';
 import { ArrayElement } from '@/types/helpers';
 
@@ -24,7 +24,7 @@ export const ACCOUNT_INITIAL = Object.freeze({
 export const ERRORS_INITIAL = (() => [] as Error[])();
 export const IS_UP_TO_DATE_INITIAL = false;
 export const SHOULD_MOCK_SCANNED_RESPONSES_INITIAL = false;
-export const SHOULD_SAVE_ON_LOGIN_INITIAL = true;
+export const SHOULD_SAVE_ON_LOGIN_INITIAL = false;
 //#endregion
 
 export type GeneralState = {
@@ -63,6 +63,9 @@ export const generalSlice = createSlice({
   name: 'general',
   initialState,
   reducers: {
+    resetErrors: (state: GeneralState) => {
+      state.errors = ERRORS_INITIAL;
+    },
     setAccount: (
       state: GeneralState,
       action: PayloadAction<GeneralState['account']>,
@@ -129,6 +132,9 @@ export const generalSlice = createSlice({
       state.isUpToDate = true;
       state.lastSyncTime = Date.now();
     });
+    builder.addCase(saveAll.rejected, (state, action) => {
+      state.isUpToDate = false;
+    });
     builder.addCase(saveItem.rejected, (state, action) => {
       state.isUpToDate = false;
     });
@@ -143,6 +149,7 @@ export const generalSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
+  resetErrors,
   setAccount,
   setIsUpToDate,
   setError,

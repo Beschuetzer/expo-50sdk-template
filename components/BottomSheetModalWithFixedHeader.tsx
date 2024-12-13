@@ -24,20 +24,26 @@ import {
 } from './InputValidationMessage';
 import { useKeyboard } from './hooks/useKeyboard';
 
-import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import {
+  EMPTY_NUMBER,
+  EMPTY_STRING,
+  FORM_INTER_ITEM_SPACING,
+} from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
 import { ButtonOptions, ChildrenProp } from '@/types/general';
 
 type SubmitButtonProps = {
-  validation: InputValidationMessageProps;
+  validation?: InputValidationMessageProps;
 } & ButtonOptions;
 
 type BottomSheetModalWithFixedHeaderProps = {
+  closeButton?: ButtonOptions;
+  hideButtons?: boolean;
   onClose?: () => void;
   onSubmit?: () => void;
   submitButton?: SubmitButtonProps;
-  closeButton?: ButtonOptions;
   title: string;
+  useFullscreen?: boolean;
 } & ChildrenProp &
   Omit<BottomSheetModalProps, 'children' | 'snapPoints' | 'index'>;
 
@@ -46,12 +52,14 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
   BottomSheetModalWithFixedHeaderProps
 >((props, ref) => {
   const {
-    onSubmit,
-    onClose: onCancel,
-    submitButton,
-    closeButton,
-    title,
     children,
+    closeButton,
+    hideButtons = false,
+    onClose: onCancel,
+    onSubmit,
+    submitButton,
+    title,
+    useFullscreen = false,
     ...rest
   } = props;
   const theme = useTheme();
@@ -63,19 +71,15 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
   const [buttonsHeight, setButtonsHeight] = useState(0);
   const [headingHeight, setHeadingHeight] = useState(0);
   const windowDimensions = useMemo(() => Dimensions.get('window'), []);
-  const showButtonsRow = useMemo(
-    () => onSubmit || onCancel,
-    [onCancel, onSubmit],
-  );
 
   const submitButtonToUse = useMemo(() => {
     return {
       validation: {
         isValid:
-          submitButton?.validation.isValid != null
+          submitButton?.validation?.isValid != null
             ? submitButton.validation.isValid
             : true,
-        message: submitButton?.validation.message || EMPTY_STRING,
+        message: submitButton?.validation?.message || EMPTY_STRING,
       },
       colorScheme: submitButton?.colorScheme || 'success',
       isEnabled:
@@ -94,13 +98,16 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
 
   const snapPoints = useMemo(
     () => [
-      contentHeight && headingHeight
-        ? isKeyboardVisible
-          ? '100%'
-          : `${Math.ceil(((contentHeight + headingHeight + buttonsHeight + 23) / windowDimensions.height) * 100)}%`
-        : '1%',
+      useFullscreen
+        ? '100%'
+        : contentHeight && headingHeight
+          ? isKeyboardVisible
+            ? '100%'
+            : `${Math.ceil(((contentHeight + headingHeight + buttonsHeight + 23) / windowDimensions.height) * 100)}%`
+          : '1%',
     ],
     [
+      useFullscreen,
       isKeyboardVisible,
       buttonsHeight,
       contentHeight,
@@ -120,7 +127,7 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
 
   const onButtonsLayout = useCallback((event: LayoutChangeEvent) => {
     const height = event?.nativeEvent?.layout?.height;
-    setButtonsHeight(height);
+    setButtonsHeight(hideButtons ? EMPTY_NUMBER : height);
   }, []);
 
   const onContentLayout = useCallback((event: LayoutChangeEvent) => {
@@ -151,7 +158,6 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
       <BottomSheetScrollView>
         <Stack
           px={theme.space[FORM_INTER_ITEM_SPACING] * 2}
-          pb={!showButtonsRow ? theme.space[FORM_INTER_ITEM_SPACING] * 2 : 0}
           space={theme.space[FORM_INTER_ITEM_SPACING]}
           onLayout={onContentLayout}
         >
@@ -164,7 +170,7 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
         onLayout={onButtonsLayout}
       >
         <InputValidationMessage {...submitButtonToUse.validation} />
-        {showButtonsRow ? (
+        {!hideButtons ? (
           <Row
             space={theme.space[FORM_INTER_ITEM_SPACING]}
             justifyContent="space-between"

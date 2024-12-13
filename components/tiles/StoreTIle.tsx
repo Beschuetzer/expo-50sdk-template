@@ -31,6 +31,7 @@ export function StoreTile(props: StoreTileProps) {
     <RectButton
       style={styles.rectButton}
       onPress={() => {
+        // @ts-ignore
         navigation.navigate(Routes.StoreModal, {
           store,
         });

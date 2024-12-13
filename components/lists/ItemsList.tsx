@@ -1,16 +1,9 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { useFocusEffect, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
 import { Text, useTheme, Stack } from 'native-base';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
-import { Menu } from 'react-native-popup-menu';
 
 import { ListFilter, ListFilterFilters } from './ListFilter';
 import { ListItemSeparator } from './ListItemSeparator';
@@ -20,6 +13,7 @@ import { SortType } from './sorters';
 import { AlphabeticalScroll } from '../AlphabeticalScroll';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
+import { useMenu } from '../hooks/useMenu';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
 import { ItemTile, ItemTileViewingMode } from '../tiles/ItemTile';
@@ -31,7 +25,6 @@ import {
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
-  ListName,
   addAllToShoppingCart,
   currentStoreSelector,
   itemsListSelector,
@@ -46,6 +39,7 @@ import { useAppDispatch, useAppSelector } from '@/state/store';
 import { deleteItems } from '@/state/thunks';
 import { Item, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import {
   getKeyToUse,
   getNewViewingMode,
@@ -84,19 +78,47 @@ export function ItemsList(props: ItemsListProps) {
   );
   const [viewingMode, setViewingMode] = useState(ItemTileViewingMode.Full);
   const lastSortTypeRef = useRef(itemsListSortTypes[0]);
-  const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: itemsList, title: 'Items List' });
 
   const iconSize = useMemo(() => {
     return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
   }, [viewingMode]);
 
-  const closeMenu = useCallback(() => {
-    menuRef.current?.close();
-  }, [menuRef]);
+  const [, closeMenu] = useMenu({
+    navigationOptionsGetter: (menuRef) => ({
+      headerRight: () => (
+        <ListHeaderRight
+          ref={menuRef}
+          onSortPress={onSortPress}
+          onFilterPress={onFilterPress}
+          onResetPress={onResetPress}
+          options={[
+            selectedItems.length > 0
+              ? {
+                  text: 'Add Selected to Shopping List',
+                  onPress: onAddAllToShoppingPress,
+                }
+              : undefined,
+            selectedItems.length > 0
+              ? {
+                  text: 'Delete Selected',
+                  onPress: onDeleteSelectedPress,
+                }
+              : undefined,
+            {
+              text: 'Toggle Mode',
+              onPress: onToggleViewingModePress,
+            },
+          ]}
+        />
+      ),
+      headerLeft: () => <AddButton onPress={onAddItemPress} />,
+    }),
+  });
 
   function onAddItemPress() {
     closeMenu();
+    // @ts-ignore
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
       key: { upc: EMPTY_STRING, name: EMPTY_STRING },
@@ -212,42 +234,6 @@ export function ItemsList(props: ItemsListProps) {
     },
     [listRef, closeMenu],
   );
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <ListHeaderRight
-          ref={menuRef}
-          onSortPress={onSortPress}
-          onFilterPress={onFilterPress}
-          onResetPress={onResetPress}
-          options={[
-            selectedItems.length > 0
-              ? {
-                  text: 'Add Selected to Shopping List',
-                  onPress: onAddAllToShoppingPress,
-                }
-              : undefined,
-            selectedItems.length > 0
-              ? {
-                  text: 'Delete Selected',
-                  onPress: onDeleteSelectedPress,
-                }
-              : undefined,
-            {
-              text: 'Toggle Mode',
-              onPress: onToggleViewingModePress,
-            },
-          ]}
-        />
-      ),
-      headerLeft: () => <AddButton onPress={onAddItemPress} />,
-    });
-  }, [navigation, isMultiSelectMode, selectedItems]);
-
-  useFocusEffect(() => {
-    closeMenu();
-  });
 
   function renderItem({ item, index }: ListRow<Item>) {
     return (

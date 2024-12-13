@@ -5,18 +5,17 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { InCartPrice } from './InCartPrice';
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
 import { shoppingListSortTypes } from './ShoppingLIst';
 import { SwipeableRow } from './SwipeableRow';
+import { TotalListPrice } from './TotalListPrice';
 import { SortType } from './sorters';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
 import { ESTIMATED_SIZE_FOR_SHOPPING_LISTS } from '@/constants/general';
 import {
-  ListName,
   isMultiSelectModeForInCartSelector,
   moveItemToShoppingList,
   selectedItemsFromInCartSelector,
@@ -28,6 +27,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import { getKeyToUse } from '@/utils/helpers';
 
 type InCartListProps = Pick<
@@ -72,6 +72,7 @@ export function InCartList(props: InCartListProps) {
   );
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
+    if (index === 0) return <TotalListPrice listname={ListName.InCartList} />;
     return (
       <SwipeableRow
         leftSwipe={{
@@ -89,52 +90,48 @@ export function InCartList(props: InCartListProps) {
           onPress: onSwipeLeft.bind(null, item),
         }}
       >
-        {index === 0 ? (
-          <InCartPrice />
-        ) : (
-          <ItemTileWithStoreSpecificValues
-            isMultiSelectMode={isMultiSelectMode}
-            listName={listName}
-            item={item}
-            viewingMode={viewingMode}
-            buttonProps={{
-              onLongPress: () => {
-                dispatch(
-                  updateSelectedItemsFromInCart({
-                    operation: 'set',
-                    item: isMultiSelectMode ? undefined : item,
-                  }),
-                );
-                dispatch(setIsMultiSelectModeForInCartCart(!isMultiSelectMode));
-              },
-            }}
-            onSelect={(item) => {
-              const isSelected = !!selectedItems.find(
-                (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+        <ItemTileWithStoreSpecificValues
+          isMultiSelectMode={isMultiSelectMode}
+          listName={listName}
+          item={item}
+          viewingMode={viewingMode}
+          buttonProps={{
+            onLongPress: () => {
+              dispatch(
+                updateSelectedItemsFromInCart({
+                  operation: 'set',
+                  item: isMultiSelectMode ? undefined : item,
+                }),
               );
-              if (isSelected) {
-                dispatch(
-                  updateSelectedItemsFromInCart({
-                    operation: 'remove',
-                    item,
-                  }),
-                );
-              } else {
-                dispatch(
-                  updateSelectedItemsFromInCart({
-                    operation: 'add',
-                    item,
-                  }),
-                );
-              }
-            }}
-            isSelected={
-              !!selectedItems.find(
-                (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
-              )
+              dispatch(setIsMultiSelectModeForInCartCart(!isMultiSelectMode));
+            },
+          }}
+          onSelect={(item) => {
+            const isSelected = !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            );
+            if (isSelected) {
+              dispatch(
+                updateSelectedItemsFromInCart({
+                  operation: 'remove',
+                  item,
+                }),
+              );
+            } else {
+              dispatch(
+                updateSelectedItemsFromInCart({
+                  operation: 'add',
+                  item,
+                }),
+              );
             }
-          />
-        )}
+          }}
+          isSelected={
+            !!selectedItems.find(
+              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+            )
+          }
+        />
       </SwipeableRow>
     );
   }

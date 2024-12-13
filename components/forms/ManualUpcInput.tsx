@@ -7,9 +7,10 @@ import { InputValidationMessage } from '../InputValidationMessage';
 import { MOCK_UPCS } from '../mocks/constants';
 
 import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
-import { listToDisplaySelector, ListName } from '@/state/slices/listsSlice';
+import { listToDisplaySelector } from '@/state/slices/listsSlice';
 import { scanningModeSelector } from '@/state/slices/optionsSlice';
 import { Item } from '@/types/Item';
+import { ListName } from '@/types/listSlice';
 import { getIsValidUpcValue, getItemFromList } from '@/utils/helpers';
 
 type ManualUpcInputProps = {

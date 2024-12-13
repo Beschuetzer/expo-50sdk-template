@@ -11,7 +11,6 @@ import {
   updateSelectedItemsFromPreviouslyPurchased,
   setIsMultiSelectModeForPreviouslyPurchased,
   selectedItemsFromPreviouslyPurchasedSelector,
-  ListName,
   isMultiSelectModeForPreviouslyPurchasedSelector,
   storeSpecificListSelector,
 } from '@/state/slices/listsSlice';
@@ -21,6 +20,7 @@ import {
   PrevioulsyPurchasedItem,
 } from '@/types/Item';
 import { ListRow } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import { getKeyToUse } from '@/utils/helpers';
 
 type PreviouslyPurchasedListProps = object;

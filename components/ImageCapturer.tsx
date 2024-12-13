@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { ImagePickerAsset } from 'expo-image-picker';
+import { ImagePickerAsset, ImagePickerOptions } from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { Center, Row, useTheme } from 'native-base';
 import { ColorType } from 'native-base/lib/typescript/components/types';
@@ -15,7 +15,8 @@ import { pickImage, captureImage, handleError } from '@/utils/helpers';
 type ImageCapturerProps = {
   borderColor?: ColorType;
   height?: number;
-  onImageChange: (image: string) => void;
+  imageOptions?: ImagePickerOptions;
+  onImageChange: (image: ImagePickerAsset) => void;
   showTakeImage?: boolean;
   showSelectImage?: boolean;
   style?: ViewStyle;
@@ -27,6 +28,7 @@ export function ImageCapturer(props: ImageCapturerProps) {
     borderColor,
     height = 50,
     width = 75,
+    imageOptions,
     onImageChange,
     showSelectImage = true,
     showTakeImage = true,
@@ -39,7 +41,7 @@ export function ImageCapturer(props: ImageCapturerProps) {
   const getCustomImage = useCallback(
     async (
       resultFetcher: () => Promise<ImagePickerAsset | undefined>,
-      onResultFound: (result: string) => void,
+      onResultFound: (result: ImagePickerAsset) => void,
     ) => {
       try {
         const result = (await resultFetcher()) || null;
@@ -51,7 +53,7 @@ export function ImageCapturer(props: ImageCapturerProps) {
           );
           return;
         }
-        onResultFound && onResultFound(result.uri);
+        onResultFound && onResultFound(result);
       } catch (error) {
         console.error('Error obtaining a custom image: ' + error);
       }
@@ -60,10 +62,10 @@ export function ImageCapturer(props: ImageCapturerProps) {
   );
 
   const onImageChangeLocal = useCallback(
-    async (result: string) => {
+    async (result: ImagePickerAsset) => {
       try {
         if (shouldSaveImagesToGallery) {
-          const asset = await MediaLibrary.createAssetAsync(result);
+          const asset = await MediaLibrary.createAssetAsync(result.uri);
           await MediaLibrary.createAlbumAsync(APP_NAME, asset, false);
         }
       } catch (error) {
@@ -76,13 +78,13 @@ export function ImageCapturer(props: ImageCapturerProps) {
   );
 
   const onImageTakenPress = useCallback(() => {
-    getCustomImage(captureImage, (result) => {
+    getCustomImage(captureImage.bind(null, imageOptions), (result) => {
       onImageChangeLocal(result);
     });
   }, [onImageChange]);
 
   const onImageSelectedPress = useCallback(() => {
-    getCustomImage(pickImage, (result) => {
+    getCustomImage(pickImage.bind(null, imageOptions), (result) => {
       onImageChangeLocal(result);
     });
   }, [onImageChange]);

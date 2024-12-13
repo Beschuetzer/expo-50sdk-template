@@ -1,21 +1,51 @@
-import { Dispatch, UnknownAction } from '@reduxjs/toolkit';
-import { ImagePickerAsset } from 'expo-image-picker';
-
-import { AbstractService, GenericResponse } from './AbstractService';
-import { ItemFormOnSave } from '../forms/ItemForm';
+import { AbstractService } from './AbstractService';
 
 import { EMPTY_STRING, ITEM_UNIT_INITIAL } from '@/constants/general';
 import { setError } from '@/state/slices/generalSlice';
-import { SortOrderValue } from '@/state/slices/listsSlice';
+import { AppDispatch } from '@/state/store';
 import { SaveAllThunkInput } from '@/state/thunks';
-import {
-  Item,
-  LastPurchasedMap,
-  StoreSpecificValues,
-  StoreSpecificValuesMap,
-} from '@/types/Item';
+import { Item } from '@/types/Item';
 import { Store } from '@/types/Store';
-import { BulkWriteResult, DocumentResult } from '@/types/mongoose';
+import {
+  DeletionResponse,
+  ChangePasswordInput,
+  ChangePasswordResponse,
+  UserNeeded,
+  UserAccountInput,
+  DispatchNeeded,
+  CreateUserResponse,
+  EmailNeeded,
+  DeleteItemsInput,
+  DeleteStoresInput,
+  DeleteUserInput,
+  DeleteUserResponse,
+  GetSignedUrlInput,
+  SignedUrlResponse,
+  IdNeeded,
+  GetUserItemsInput,
+  GetUserStoresInput,
+  LoginResponse,
+  LoadAllFromDbInput,
+  LoadAllResponse,
+  ProcessGroceryListInput,
+  ProcessGroceryListResponse,
+  SaveAllToDbInput,
+  SaveAllResponse,
+  SaveItemInput,
+  SaveItemRequest,
+  SaveItemResponse,
+  SaveItemsInput,
+  SaveItemsRequest,
+  SavePurchaseInput,
+  SavePurchaseRequest,
+  SavePurchaseResponse,
+  SaveStoreInput,
+  SaveStoreRequest,
+  SaveStoreResponse,
+  UpdateUserInput,
+  PingResponse,
+  DeleteS3ObjectsInput,
+} from '@/types/bffService';
 import {
   getIsDevelopmentMode,
   getKeyToUse,
@@ -33,6 +63,7 @@ function displayAlert(object: object | null) {
 export const BACKEND_URL = `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:${process.env.EXPO_PUBLIC_PORT_NUMBER}`;
 export const ITEM_PATH = '/item';
 export const LAST_PURCHASED_PATH = '/lastPurchasedMap';
+export const OPEN_AI_PATH = '/openAi';
 export const STORE_PATH = '/store';
 export const S3_PATH = '/s3';
 export const USER_PATH = '/user';
@@ -41,150 +72,6 @@ export const DELETE_ITEMS_RESPONSE_DEFAULT: DeletionResponse = Object.freeze({
   acknowledged: false,
   deletedCount: 0,
 });
-
-//#region General Types
-export type AccountInfoNeeded = Omit<UserAccount, 'email'>;
-export type CredentialsNeeded = UserIdNeeded & PasswordNeeded;
-export type CurrentStoreNeeded = { currentStoreId: string };
-export type DispatchNeeded = {
-  dispatch: Dispatch<UnknownAction>;
-};
-
-export type EmailNeeded = { email: string };
-/**
- *The mongodb _id for a user/item/store/etc
- **/
-export type IdNeeded = { _id: string };
-export type IdsNeeded = { ids: string[] };
-export type ImageNeeded = { image: ImagePickerAsset };
-export type ItemNeeded = { item: Item };
-export type ItemsNeeded = { items: Item[] };
-export type LastPurchasedMapNeeded = {
-  lastPurchasedMap: LastPurchasedMap;
-};
-export type NewPasswordNeeded = { newPassword: string };
-export type StoreNeeded = { store: Store };
-export type StoresNeeded = { stores: Store[] };
-export type StoreSpecificValuesNeeded = {
-  storeSpecificValues?: StoreSpecificValues;
-};
-export type StoreSpecificValuesMapNeeded = {
-  storeSpecificValuesMap?: StoreSpecificValuesMap;
-};
-export type PasswordNeeded = { password: string };
-export type UserNeeded<T> = { user: T };
-export type UserIdNeeded = { userId: string };
-export type UserAccount = {
-  _id: string;
-  email: string;
-  password: string;
-};
-//#endregion
-
-//#region Input Types
-export type ChangePasswordInput = CredentialsNeeded &
-  DispatchNeeded &
-  NewPasswordNeeded;
-export type DeleteItemsInput = ItemsNeeded & DispatchNeeded & CredentialsNeeded;
-export type DeleteStoresInput = IdsNeeded & DispatchNeeded & CredentialsNeeded;
-export type DeleteUserInput = DispatchNeeded & CredentialsNeeded;
-export type GetSignedUrlInput = { filename: string } & UserIdNeeded &
-  PasswordNeeded &
-  DispatchNeeded;
-export type GetUserItemsInput = DispatchNeeded & UserIdNeeded;
-export type GetUserStoresInput = GetUserItemsInput;
-export type LoadAllFromDbInput = DispatchNeeded & UserIdNeeded & PasswordNeeded;
-export type MakeCallInput = {
-  body?: string;
-  errorMsg: string;
-  loadingMsg: string;
-  options?: RequestInit;
-  path: string;
-  /**
-   *If `true`, {@link MakeCallInput.errMsg errorMsg} will always be used.
-   **/
-  useErrorMessage?: boolean;
-} & DispatchNeeded;
-export type SaveAllToDbInput = SaveAllThunkInput & DispatchNeeded & UserAccount;
-export type SaveItemInput = DispatchNeeded & UserAccount & ItemFormOnSave;
-export type SaveItemRequest = Omit<
-  SaveItemInput,
-  'dispatch' | 'storeSpecificValues'
-> &
-  StoreSpecificValuesMapNeeded &
-  UserIdNeeded &
-  PasswordNeeded;
-export type SaveItemsInput = ItemsNeeded &
-  StoreSpecificValuesMapNeeded &
-  DispatchNeeded &
-  Omit<UserAccount, 'email'>;
-export type SaveItemsRequest = Omit<SaveItemsInput, 'dispatch'> &
-  StoreSpecificValuesMapNeeded &
-  UserIdNeeded &
-  PasswordNeeded;
-export type SaveStoreInput = StoreNeeded & DispatchNeeded & CredentialsNeeded;
-export type SavePurchaseInput = LastPurchasedMapNeeded &
-  DispatchNeeded &
-  CredentialsNeeded;
-export type SavePurchaseRequest = Omit<SavePurchaseInput, 'dispatch'> &
-  UserIdNeeded &
-  PasswordNeeded;
-export type SaveStoreRequest = Omit<SaveStoreInput, 'dispatch'> &
-  UserIdNeeded &
-  PasswordNeeded;
-export type UpdateStoreInput = SaveStoreInput;
-export type UpdateUserInput = DispatchNeeded & CredentialsNeeded;
-export type UserAccountInput = Omit<UserAccount, '_id'>;
-//#endregion
-
-//#region Response Types
-export type ChangePasswordResponse = { success: boolean } | GenericResponse;
-export type CreateUserResponse = UserAccount | GenericResponse;
-export type DeletionResponse =
-  | {
-      acknowledged: boolean;
-      deletedCount: number;
-    }
-  | GenericResponse;
-export type DeleteUserResponse =
-  | {
-      deletedUser: UserAccount;
-      deletedItems: DeletionResponse;
-      deletedLastPurchasedMap: DeletionResponse;
-      deletedStores: DeletionResponse;
-      deletedStoreSpecificItems: DeletionResponse;
-    }
-  | GenericResponse;
-export type LoadAllResponse =
-  | {
-      items: Item[];
-      stores: Store[];
-      storeSpecificValues: StoreSpecificValuesMap;
-      lastPurchasedMap: LastPurchasedMap;
-      settings: CurrentStoreNeeded & {
-        sortOrderValues: {
-          items: SortOrderValue;
-          stores: SortOrderValue;
-        };
-      };
-    }
-  | GenericResponse;
-export type LoginResponse = UserAccount | GenericResponse;
-export type SaveAllResponse =
-  | {
-      itemsResult: BulkWriteResult;
-      lastPurchasedMapResult: DocumentResult<LastPurchasedMap>;
-      storesResult: BulkWriteResult;
-      storeSpecificValuesResult: DocumentResult<StoreSpecificValuesMap>;
-    }
-  | GenericResponse;
-export type SaveItemResponse = Item | GenericResponse;
-export type SavePurchaseResponse = IdNeeded | GenericResponse;
-export type SaveStoreResponse = Store | GenericResponse;
-export type SignedUrlResponse =
-  | { downloadUrl: string; uploadUrl: string }
-  | GenericResponse;
-//#endregion
 
 class BffService extends AbstractService {
   constructor() {
@@ -266,6 +153,29 @@ class BffService extends AbstractService {
       loadingMsg: `Checking if '${email}' is available...`,
     });
     return isEmailAvailable;
+  }
+
+  async deleteS3Objects(input: DeleteS3ObjectsInput) {
+    const { dispatch, userId, password, objKeys } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+    if (!objKeys || objKeys.length === 0) return;
+    const body = JSON.stringify({
+      userId,
+      password,
+      objKeys,
+    });
+    const keysAsString = objKeys.join(', ');
+    const response = await this.makeCall<SignedUrlResponse>({
+      path: `${S3_PATH}`,
+      options: {
+        method: 'DELETE',
+      },
+      body,
+      dispatch,
+      errorMsg: `Unable to delete objects: '${keysAsString}'.`,
+      loadingMsg: `Delete '${keysAsString}'...`,
+    });
+    return response;
   }
 
   async deleteItems(input: DeleteItemsInput) {
@@ -464,6 +374,49 @@ class BffService extends AbstractService {
     return response;
   }
 
+  async ping(dispatch: AppDispatch) {
+    const response = await this.makeCall<PingResponse>({
+      dispatch,
+      path: `/ping`,
+      errorMsg: `The server is not running yet.`,
+      loadingMsg: `Waking the server...`,
+    });
+    return response;
+  }
+
+  /**
+   *Uses AI to process image into a list
+   **/
+  async processGroceryList(
+    input: ProcessGroceryListInput,
+  ): Promise<ProcessGroceryListResponse> {
+    const { image, dispatch, userId, password } = input || {};
+
+    if (!this.validateCredentials(userId, password, dispatch)) {
+      return {
+        store: EMPTY_STRING,
+        items: [],
+      };
+    }
+
+    const imageConcatanation = `${image.substring(0, 5)}...${image.substring(image.length - 5)}`;
+    const response = await this.makeCall<ProcessGroceryListResponse>({
+      path: `${OPEN_AI_PATH}/processGroceryList`,
+      body: JSON.stringify({
+        userId,
+        password,
+        image,
+      }),
+      options: {
+        method: 'POST',
+      },
+      dispatch,
+      errorMsg: `Unable to process the image ${imageConcatanation}`,
+      loadingMsg: `Converting image to grocery list...`,
+    });
+    return response;
+  }
+
   async saveAllToDb(input: SaveAllToDbInput) {
     const { dispatch, _id: userId, password, email, ...rest } = input;
     if (!this.validateCredentials(userId, password, dispatch)) return;
@@ -532,7 +485,6 @@ class BffService extends AbstractService {
       );
       return null;
     }
-    console.log({ originalKey });
 
     const body = JSON.stringify({
       item: this.getStandardizedItem(item),

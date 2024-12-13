@@ -1,7 +1,7 @@
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { useNavigation } from 'expo-router';
 import { Button, Row, FormControl, Input, useTheme, Stack } from 'native-base';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Dimensions } from 'react-native';
 
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
@@ -15,12 +15,13 @@ import { SaveImagesToGallerySlider } from '@/components/options/SaveImagesToGall
 import { SaveLoadState } from '@/components/options/SaveLoadState';
 import { SaveLoadStateViaDb } from '@/components/options/SaveLoadStateFromDb';
 import { ShouldSaveOnLoginToggle } from '@/components/options/ShouldSaveOnLoginToggle';
+import { BFF_SERVICE } from '@/components/services/BffService';
 import {
   FORM_INTER_ITEM_SPACING,
   SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
-import { setLoading } from '@/state/slices/generalSlice';
+import { setError, setLoading } from '@/state/slices/generalSlice';
 import { setCurrentLocation } from '@/state/slices/listsSlice';
 import {
   setSwipeableRowOpenThreshold,
@@ -28,7 +29,7 @@ import {
 } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState } from '@/state/thunks';
-import { getGpsCoordinate } from '@/utils/helpers';
+import { displayAlert, getGpsCoordinate } from '@/utils/helpers';
 
 const DEBOUNCE_TIMEOUT = 500;
 
@@ -44,9 +45,26 @@ export default function OptionsScreen() {
     (windowDimensions.width * 47.5) / 100,
   );
 
+  const [isPinging, setIsPinging] = useState(false);
   //any new state should be updated in useEffect below when it changes, due to how values are being updated in redux
   const [swipeableRowOpenThresholdValue, setSwipeableRowOpenThresholdValue] =
     useState(openThreshhold.toString());
+
+  const onPingBffPress = useCallback(async () => {
+    try {
+      setIsPinging(true);
+      const response = await BFF_SERVICE.ping(dispatch);
+      if (response?.isAwake) {
+        displayAlert({ message: 'Bff service is running.' });
+      } else {
+        dispatch(setError({ message: 'Bff server is not running.' }));
+      }
+    } catch (error) {
+      dispatch(setError({ message: 'Bff server is not running.' }));
+    } finally {
+      setIsPinging(false);
+    }
+  }, [BFF_SERVICE]);
 
   function onDonePress() {
     navigation.goBack();
@@ -138,8 +156,16 @@ export default function OptionsScreen() {
         >
           Update Current Location
         </Button>
-        <Button onPress={() => navigation.navigate(Routes.DevOptionsScreen)}>
+        <Button
+          onPress={() => {
+            // @ts-ignore
+            navigation.navigate(Routes.DevOptionsScreen);
+          }}
+        >
           Developer Options
+        </Button>
+        <Button isDisabled={isPinging} onPress={onPingBffPress}>
+          Ping Bff
         </Button>
       </Stack>
     </AbsolutePositionedScreen>

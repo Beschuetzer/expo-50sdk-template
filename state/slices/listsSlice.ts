@@ -5,12 +5,7 @@ import _ from 'lodash';
 import { updateStoreSpecificValueMap } from './helpers/updateStoreSpecificValueMap';
 import { RootState } from '../store';
 
-import { ListFilterFilters } from '@/components/lists/ListFilter';
-import { SortOrder, SortType, getSorter } from '@/components/lists/sorters';
-import {
-  LoadAllResponse,
-  SaveAllResponse,
-} from '@/components/services/BffService';
+import { getSorter, SortOrder } from '@/components/lists/sorters';
 import { EMPTY_STRING } from '@/constants/general';
 import {
   Item,
@@ -29,12 +24,23 @@ import {
   StoreSpecificValuesMap,
 } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
+import { LoadAllResponse } from '@/types/bffService';
+import { CurrentLocation, OriginalKeyProp, State } from '@/types/general';
 import {
-  CurrentLocation,
-  ListNameProp,
-  OriginalKeyProp,
-  State,
-} from '@/types/general';
+  ListName,
+  AddAllToShoppingCartPayload,
+  AddItemsListItemPayload,
+  AddStoresListItemPayload,
+  CompletePurchasePayload,
+  HandleSaveAllResponsePayload,
+  ResetListToDisplayPayload,
+  ResetListToDisplayFiltersPayload,
+  SetFiltersPayload,
+  SetSortOrderPayload,
+  ToggleSortOrderPayload,
+  UpdateSelectedItemsPayload,
+  UpdateStoreSpecificValuesPayload,
+} from '@/types/listSlice';
 import { getItemWithStoreSpecificValues } from '@/utils/getItemWithStoreSpecificValues';
 import {
   calculateDistance,
@@ -50,74 +56,6 @@ import {
   getStoreWithDistance,
 } from '@/utils/helpers';
 import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
-
-export enum ListName {
-  InCartList = 'inCartList',
-  ItemsList = 'itemsList',
-  PreviouslyPurchased = 'previouslyPurchased',
-  ShoppingList = 'shoppingList',
-  StoresList = 'storesList',
-}
-
-export type SortOrders = {
-  [key in ListName]: SortOrderValue;
-};
-export type SortOrderValue = { sortBy: SortType; sortOrder: SortOrder };
-
-//#region Payloads
-export type AddAllToShoppingCartPayload = Item[];
-
-export type AddItemsListItemPayload = {
-  item: Item;
-  storeSpecificValues?: StoreSpecificValues;
-};
-
-export type AddStoresListItemPayload = {
-  newStore: Store;
-};
-
-export type CompletePurchasePayload = LastPurchasedMap | undefined;
-
-export type HandleSaveAllResponsePayload = SaveAllResponse & {
-  /**
-   *The items that should have been saved
-   **/
-  itemsSaved: Item[];
-  /**
-   *The stores that should have been saved
-   **/
-  storesSaved: Store[];
-};
-
-export type ResetListToDisplayFiltersPayload = ListNameProp;
-
-export type ResetListToDisplayPayload = ListNameProp;
-
-export type SetFiltersPayload = {
-  filters: ListFilterFilters<any>;
-} & ListNameProp;
-
-export type SetSortOrderPayload = object &
-  ListNameProp &
-  Partial<Pick<SortOrderValue, 'sortOrder' | 'sortBy'>>;
-
-export type ToggleSortOrderPayload = Pick<SetSortOrderPayload, 'listName'>;
-export type UpdateSelectedItemsPayload<T> = {
-  operation: 'add' | 'remove' | 'set';
-  item: T | undefined;
-};
-export type UpdateStoreSpecificValuesPayload = {
-  /**
-   *The key to get the item from {@link ItemsList itemsList}
-   **/
-  key: Key;
-  /**
-   *The new value for each store specific value
-   **/
-  storeSpecificValuesToUpdate: StoreSpecificValueUpdater;
-  storeId?: string;
-};
-//#endregion
 
 //#region State
 const CURRENT_LOCATION_INITIAL = null;
@@ -948,7 +886,13 @@ export const priceOfItemsSelector = (listname: ListName) =>
     (list, storeSpecificValuesMap, currentStoreId) => {
       let totalPrice = 0;
       for (const value of Object.values(storeSpecificValuesMap)) {
-        if (value?.[StoreSpecificValueKey.IsInCart]?.[currentStoreId]) {
+        const isInCart =
+          value?.[StoreSpecificValueKey.IsInCart]?.[currentStoreId];
+        const shouldAddToTotal =
+          (isInCart && listname === ListName.InCartList) ||
+          (!isInCart && listname === ListName.ShoppingList);
+
+        if (shouldAddToTotal) {
           const quantity =
             value?.[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 0;
           const price =

@@ -49,9 +49,6 @@ export function handleStoreSpecificValuesImport(
         }
       }
     },
-    onNewItemEnd: ({ itemKey }) => {
-      delete copy[itemKey];
-    },
   });
   return copy;
 }

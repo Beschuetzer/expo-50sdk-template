@@ -1,10 +1,9 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { useFocusEffect, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
 import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
-import { Menu } from 'react-native-popup-menu';
 
 import { ListFilter, ListFilterFilters } from './ListFilter';
 import { ListItemSeparator } from './ListItemSeparator';
@@ -14,6 +13,7 @@ import { SortType } from './sorters';
 import { AlphabeticalScroll } from '../AlphabeticalScroll';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
+import { useMenu } from '../hooks/useMenu';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
 import { StoreTile } from '../tiles/StoreTIle';
@@ -24,7 +24,6 @@ import {
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
-  ListName,
   currentStoreSelector,
   listToDisplaySelector,
   setFilters,
@@ -39,6 +38,7 @@ import { deleteStores } from '@/state/thunks';
 import { Key } from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ListRow } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import { getKeyToUse, resetConfirmModalProps } from '@/utils/helpers';
 
 type StoresListProps = object;
@@ -65,15 +65,25 @@ export function StoresList(props: StoresListProps) {
     {} as ConfirmModalProps,
   );
   const lastSortTypeRef = useRef(storesListSortTypes[0]);
-  const menuRef = useRef<Menu>(null);
   useUpdatedListTitle({ list: storesList, title: 'Stores List' });
 
-  const closeMenu = useCallback(() => {
-    menuRef.current?.close();
-  }, [menuRef]);
+  const [, closeMenu] = useMenu({
+    navigationOptionsGetter: (menuRef) => ({
+      headerRight: () => (
+        <ListHeaderRight
+          ref={menuRef}
+          onSortPress={onSortPress}
+          onFilterPress={onFilterPress}
+          onResetPress={onResetPress}
+        />
+      ),
+      headerLeft: () => <AddButton onPress={onAddStorePress} />,
+    }),
+  });
 
   function onAddStorePress() {
     closeMenu();
+    // @ts-ignore
     navigation.navigate(Routes.StoreModal);
   }
 
@@ -135,24 +145,6 @@ export function StoresList(props: StoresListProps) {
   useEffect(() => {
     setListKey((current) => current + 1);
   }, [currentStoreId]);
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <ListHeaderRight
-          ref={menuRef}
-          onSortPress={onSortPress}
-          onFilterPress={onFilterPress}
-          onResetPress={onResetPress}
-        />
-      ),
-      headerLeft: () => <AddButton onPress={onAddStorePress} />,
-    });
-  }, [navigation]);
-
-  useFocusEffect(() => {
-    closeMenu();
-  });
 
   function renderItem({ item, index }: ListRow<Store>) {
     return (

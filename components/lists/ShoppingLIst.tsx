@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
+import { TotalListPrice } from './TotalListPrice';
 import { SortType } from './sorters';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
@@ -16,7 +17,6 @@ import {
   FORM_INTER_ITEM_SPACING,
 } from '@/constants/general';
 import {
-  ListName,
   addItemToCart,
   currentStoreSelector,
   isMultiSelectModeForShoppingCartSelector,
@@ -28,6 +28,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import { getKeyToUse } from '@/utils/helpers';
 
 type ShoppingListProps = Pick<
@@ -94,6 +95,7 @@ export function ShoppingList(props: ShoppingListProps) {
   );
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
+    if (index === 0) return <TotalListPrice listname={ListName.ShoppingList} />;
     return (
       <SwipeableRow
         leftSwipe={{
@@ -194,13 +196,14 @@ export function ShoppingList(props: ShoppingListProps) {
             setRefreshing(false);
           }, 2000);
         }}
-        data={shoppingListToDisplay}
+        data={[{ name: 'in-cart price' } as any, ...shoppingListToDisplay]}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
         }
         estimatedItemSize={ESTIMATED_SIZE_FOR_SHOPPING_LISTS}
         ItemSeparatorComponent={() => <ListItemSeparator />}
+        stickyHeaderIndices={[0]}
       />
     </>
   );

@@ -6,10 +6,10 @@ import { BFF_SERVICE } from './BffService';
 import { ItemTile } from '../tiles/ItemTile';
 
 import { accountSelector, loadingSelector } from '@/state/slices/generalSlice';
-import { ListName } from '@/state/slices/listsSlice';
 import { useAppSelector } from '@/state/store';
 import { Item } from '@/types/Item';
 import { ListRow } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import { getUserCredentials, handleError } from '@/utils/helpers';
 
 type UserItemProps = object;
@@ -28,7 +28,6 @@ export const UserItems = (props: UserItemProps) => {
           dispatch,
           ...getUserCredentials(account),
         });
-        console.log({ items });
         if (!items) return;
         setItems(items);
       } catch (error) {

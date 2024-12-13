@@ -29,7 +29,6 @@ export const UserStores = (props: UserStoreProps) => {
           dispatch,
           ...getUserCredentials(account),
         });
-        console.log({ items: stores });
         if (!stores) return;
         setStores(stores);
       } catch (error) {
@@ -41,7 +40,11 @@ export const UserStores = (props: UserStoreProps) => {
   function renderItems(toRender: ListRow<Store>) {
     const { item: store } = toRender;
     return (
-      <StoreTile store={store} currentStore={currentStore} keyToUse={store} />
+      <StoreTile
+        store={store}
+        currentStore={currentStore}
+        currentStoreId={currentStore._id}
+      />
     );
   }
   return (

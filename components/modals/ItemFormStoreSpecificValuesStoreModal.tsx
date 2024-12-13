@@ -6,7 +6,6 @@ import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   listToDisplaySelector,
-  ListName,
   currentStoreSelector,
 } from '@/state/slices/listsSlice';
 import { useAppSelector } from '@/state/store';
@@ -15,6 +14,7 @@ import {
   StoreSpecificValueKey,
 } from '@/types/Item';
 import { Store } from '@/types/Store';
+import { ListName } from '@/types/listSlice';
 
 export type ItemFormStoreSpecificValuesStoreModalOnConfirmValues = {
   [StoreSpecificValueKey.AisleNumber]: string;

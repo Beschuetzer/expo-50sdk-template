@@ -1,6 +1,15 @@
 ## MVP
--open-based based bulk add feature:
-    
+-add option to add another line in QuickAdd feature
+-When scanning an item and adding to list, copy over the store specific values if only ever purchased at one store.  If multiple locations, add a prompt to select the store?
+-Change how CopyValueModal works in ItemFormStoreSpecificValues (a message should be displayed when the list of items is empty)
+
+-move all types to their own file to try and fix the warning about cyclical imports
+-troubleshoot startup performance issue where ImageRenderer appears to be loading every item on load (change to lazy loading for items tab and any others it makes sense for?)
+-use native-base components for:
+    --modals (use Modal)
+    --pickers (use Select)
+    --can ActionSheet be leveraged anywhere? (https://docs.nativebase.io/action-sheet)
+
 -add toggle for isDeveloperMode
 
 - add options
@@ -8,15 +17,8 @@
 
 -add button for each store with an address call "Navigate" which opens the direction in the map app for the device 
     --https://stackoverflow.com/questions/43214062/open-maps-google-maps-in-react-native
--fix issue where selecting an image causes it to still be saved in the grocify folder even if the source image is from there
 -instead of current/set current label for store, use background color like in ItemTile
-
-
-
 -now that each item has it's own _id, add an option to merge different items (in the case where a user mistakenly adds the same upc or name to an item)?
-
--add a feature to take a pic of an image and populate the currently selected store's list with the results
-
 -move the store specific values to be higher up in the form?
 -Move the store selection stuff to a menu option in the ItemModal?
 
@@ -62,7 +64,8 @@ the ability to create a store layout and have a map/route be generated based on 
 -AlphabeticalScroll:
     --add ability to scroll along the container and then navigate to section on release?
     --add tracking of current scroll amount (pass in the value from the list if desired)
-
+-work on dark/light mode stuff?
+-Make the ImageCapturer a sticky item in the QuickAddModal (harder than it appears)
 
 ## Testing
 -add a button to populate stores which creates 200 stores (x number of them being within .1 miles from current location);  then measure how long it takes to find the closest store in AutoSetStoreModal's useEffect

@@ -1,19 +1,27 @@
 import { View, useTheme } from 'native-base';
+import { useMemo } from 'react';
 import { TouchableOpacity } from 'react-native';
 
 import { ImageRenderer } from '../ImageRenderer';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { EMPTY_NUMBER, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 
 type ThumbnailPickerImageProps = {
-  borderColor: string;
+  borderColor?: string;
   imageUrl: string;
-  index: number;
-  onPress: (imageUrl: string) => void;
+  index?: number;
+  onLongPress?: (imageUrl: string) => void;
+  onPress?: (imageUrl: string) => void;
 };
 
 export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
-  const { imageUrl, index, borderColor, onPress } = props;
+  const {
+    imageUrl,
+    index = EMPTY_NUMBER,
+    borderColor = 'transparent',
+    onLongPress,
+    onPress,
+  } = props;
   const theme = useTheme();
 
   return (
@@ -23,7 +31,10 @@ export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
       borderWidth={2}
       borderColor={borderColor}
     >
-      <TouchableOpacity onPress={() => onPress && onPress(imageUrl)}>
+      <TouchableOpacity
+        onPress={() => onPress && onPress(imageUrl)}
+        onLongPress={() => onLongPress && onLongPress(imageUrl)}
+      >
         <ImageRenderer
           showFullscreenOnPress={false}
           source={imageUrl}

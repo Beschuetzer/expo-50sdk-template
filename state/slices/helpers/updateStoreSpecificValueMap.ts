@@ -1,7 +1,9 @@
 import { ListsState } from '../listsSlice';
 
+import { STORE_SPECIFIC_VALUE_KEY_DEFAULTS } from '@/constants/general';
 import {
   Key,
+  StoreSpecificValueKey,
   StoreSpecificValueUpdater,
   StoreSpecificValues,
 } from '@/types/Item';
@@ -20,21 +22,26 @@ export function updateStoreSpecificValueMap(
     const storeIdToUse = storeId || state.currentStoreId;
     const currentItem = state.storeSpecificValuesMap?.[keyToUse] as any;
     const currentValues = currentItem?.[valueName];
-    const currentValueAtCurrentStore = currentValues?.[storeIdToUse];
+    const currentValueAtCurrentStore =
+      currentValues?.[storeIdToUse] ||
+      STORE_SPECIFIC_VALUE_KEY_DEFAULTS[valueName as StoreSpecificValueKey];
     const newValueAtCurrentStore = (value as any)?.(currentValueAtCurrentStore);
 
-    console.log({
-      valueName,
-      value,
-      keyToUse,
-      storeIdToUse,
-      currentItem,
-      currentValues,
-      currentValueAtCurrentStore,
-      newValueAtCurrentStore,
-    });
+    // console.log({
+    //   valueName,
+    //   value,
+    //   keyToUse,
+    //   storeIdToUse,
+    //   currentItem,
+    //   currentValues,
+    //   currentValueAtCurrentStore,
+    //   newValueAtCurrentStore,
+    // });
 
-    if (!currentItem || currentValues === undefined) {
+    if (
+      !currentItem?.[valueName]?.[storeIdToUse] ||
+      currentValues === undefined
+    ) {
       state.storeSpecificValuesMap[keyToUse] = {
         ...state.storeSpecificValuesMap[keyToUse],
         [valueName]: {

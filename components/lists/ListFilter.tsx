@@ -5,8 +5,9 @@ import Dialog from 'react-native-dialog';
 import { useDispatch } from 'react-redux';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { ListName, resetListToDisplayFilters } from '@/state/slices/listsSlice';
+import { resetListToDisplayFilters } from '@/state/slices/listsSlice';
 import { List } from '@/types/Item';
+import { ListName } from '@/types/listSlice';
 
 export type ListFilterFilters<T> = Partial<Record<keyof T, string>>;
 

@@ -5,7 +5,6 @@ import { ToggleWithText } from './ToggleWithText';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
-  accountSelector,
   setShouldSaveOnLogin,
   shouldSaveOnLoginSelector,
 } from '@/state/slices/generalSlice';
@@ -13,7 +12,6 @@ import { useAppDispatch, useAppSelector } from '@/state/store';
 
 export function ShouldSaveOnLoginToggle() {
   const theme = useTheme();
-  const account = useAppSelector(accountSelector);
   const shouldSaveOnLogin = useAppSelector(shouldSaveOnLoginSelector);
   const dispatch = useAppDispatch();
 
@@ -21,7 +19,6 @@ export function ShouldSaveOnLoginToggle() {
     dispatch(setShouldSaveOnLogin(!shouldSaveOnLogin));
   }, [shouldSaveOnLogin]);
 
-  if (!account?._id) return null;
   return (
     <ToggleWithText
       switchProps={{

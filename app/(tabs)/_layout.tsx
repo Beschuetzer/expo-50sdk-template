@@ -43,6 +43,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="barcode" color={color} />
           ),
+          lazy: true,
         }}
       />
       <Tabs.Screen
@@ -53,6 +54,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="building" color={color} />
           ),
+          lazy: true,
         }}
       />
       <Tabs.Screen
@@ -63,6 +65,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="list-alt" color={color} />
           ),
+          lazy: true,
         }}
       />
       <Tabs.Screen

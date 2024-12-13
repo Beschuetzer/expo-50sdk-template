@@ -1,9 +1,9 @@
 import { XOR } from 'ts-xor';
 
 import { Store } from './Store';
+import { SortOrderValue, ListName } from './listSlice';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
-import { ListName, SortOrderValue } from '@/state/slices/listsSlice';
 
 export type AddedDate = {
   addedDate: number;
@@ -95,6 +95,23 @@ export enum StoreSpecificValueKey {
   Price = 'price',
   Quantity = 'quantity',
 }
+
+// StoreSpecificValueKeyTypes will now enforce that every enum key is defined
+export type StoreSpecificValueKeyTypes = {
+  [key in StoreSpecificValueKey]: key extends StoreSpecificValueKey.AisleNumber
+    ? number
+    : key extends StoreSpecificValueKey.IsInCart
+      ? boolean
+      : key extends StoreSpecificValueKey.ItemId
+        ? string
+        : key extends StoreSpecificValueKey.Note
+          ? string
+          : key extends StoreSpecificValueKey.Price
+            ? number
+            : key extends StoreSpecificValueKey.Quantity
+              ? number
+              : never;
+};
 
 /**
  *Maps the item key to the store specific values

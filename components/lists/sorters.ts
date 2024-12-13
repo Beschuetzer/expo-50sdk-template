@@ -46,8 +46,8 @@ export function getSorter(
     let nextItem = next[key];
     if (
       currentStoreId &&
-      current?.[key][currentStoreId] !== undefined &&
-      next[key]?.[currentStoreId] !== undefined
+      current?.[key]?.[currentStoreId] !== undefined &&
+      next?.[key]?.[currentStoreId] !== undefined
     ) {
       currentItem = currentItem[currentStoreId];
       nextItem = nextItem[currentStoreId];

@@ -5,14 +5,14 @@ import { TextProps } from 'react-native';
 import { useSelector } from 'react-redux';
 
 import { InputText } from './InputText';
-import { ItemFormProps } from './ItemForm';
-import { CopyValue } from '../CopyValue';
+import { FontAwesomeButton } from '../FontAwesomeButton';
 import { StoreManager } from '../StoreManager';
-import CopyValueModal, { CopyModalValues } from '../modals/CopyValueModal';
 import {
   ItemFormStoreSpecificValuesStoreModal,
   ItemFormStoreSpecificValuesStoreModalOnConfirmValues,
 } from '../modals/ItemFormStoreSpecificValuesStoreModal';
+import { ItemSearchModal } from '../modals/ItemSearchModal';
+import { ItemTileCopyModal } from '../tiles/ItemTileCopyModal';
 
 import {
   EMPTY_NUMBER,
@@ -26,18 +26,30 @@ import {
   storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
 import {
+  Item,
   ItemWithStoreSpecificValues,
   StoreSpecificValueKey,
   StoreSpecificValues,
 } from '@/types/Item';
 import { ItemProp } from '@/types/general';
-import { getKeyToUse } from '@/utils/helpers';
+import { ItemFormProps } from '@/types/itemForm';
+import {
+  camelCaseToSpacedCapitalized,
+  getItemFromList,
+  getKeyToUse,
+} from '@/utils/helpers';
 import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
 
+type ItemSearchModalValueType = string;
+type ItemSearchModalValues = { [key: string]: ItemSearchModalValueType };
+type ItemSearchModalValue = [string, ItemSearchModalValueType, Item | null];
 type ItemFormStoreSpecificProps<T> = {
   onValueChange: (storeSpecificValues: StoreSpecificValues) => void;
 } & Partial<ItemProp<T>> &
-  Pick<ItemFormProps, 'shouldAddQuantity'>;
+  Pick<
+    ItemFormProps,
+    'initialQuantity' | 'hideStoreManagerRow' | 'storeManagerProps'
+  >;
 
 /**
  *Whenever a new field for {@link StoreSpecificValueKey} is added,
@@ -46,7 +58,13 @@ type ItemFormStoreSpecificProps<T> = {
 export function ItemFormStoreSpecific(
   props: ItemFormStoreSpecificProps<ItemWithStoreSpecificValues>,
 ) {
-  const { item, onValueChange, shouldAddQuantity } = props;
+  const {
+    hideStoreManagerRow,
+    item,
+    onValueChange,
+    initialQuantity,
+    storeManagerProps,
+  } = props;
   const theme = useTheme();
   const currentStore = useSelector(currentStoreSelector);
   const currentStoreId = useSelector(currentStoreIdSelector);
@@ -93,7 +111,8 @@ export function ItemFormStoreSpecific(
     useState(false);
   const lastSavedValueRef = useRef({} as StoreSpecificValues);
 
-  const [copyModalValues, setCopyModalValues] = useState<CopyModalValues>({});
+  const [itemSearchModalValues, setItemSearchModalValues] =
+    useState<ItemSearchModalValues>({});
   const [copyModalKey, setcopyModalKey] = useState<string>(EMPTY_STRING);
   const inputTextTextProps = useMemo(
     () =>
@@ -105,7 +124,7 @@ export function ItemFormStoreSpecific(
 
   const findItemsWithStoreSpecificValueKey = useCallback(
     (storeSpecificValueKeyInput: StoreSpecificValueKey) => {
-      const valuesToShow: CopyModalValues = {};
+      const valuesToShow: ItemSearchModalValues = {};
       iterateStoreSpecificValuesMap({
         storeSpecificValuesMap,
         onNewStoreSpecificValueStart: (input) => {
@@ -156,32 +175,38 @@ export function ItemFormStoreSpecific(
       lastSavedValueRef.current?.[StoreSpecificValueKey.AisleNumber]?.[
         currentStoreId
       ] ||
+      item?.[StoreSpecificValueKey.AisleNumber]?.[currentStoreId] ||
       itemInList?.[StoreSpecificValueKey.AisleNumber]?.[currentStoreId] ||
       EMPTY_NUMBER;
     const itemIdToShow =
       lastSavedValueRef.current?.[StoreSpecificValueKey.ItemId]?.[
         currentStoreId
       ] ||
+      item?.[StoreSpecificValueKey.ItemId]?.[currentStoreId] ||
       itemInList?.[StoreSpecificValueKey.ItemId]?.[currentStoreId] ||
       EMPTY_STRING;
     const noteToShow =
       lastSavedValueRef.current?.[StoreSpecificValueKey.Note]?.[
         currentStoreId
       ] ||
+      item?.[StoreSpecificValueKey.Note]?.[currentStoreId] ||
       itemInList?.[StoreSpecificValueKey.Note]?.[currentStoreId] ||
       EMPTY_STRING;
     const priceToShow =
       lastSavedValueRef.current?.[StoreSpecificValueKey.Price]?.[
         currentStoreId
       ]?.toString() ||
+      item?.[StoreSpecificValueKey.Price]?.[currentStoreId].toString() ||
       itemInList?.[StoreSpecificValueKey.Price]?.[currentStoreId]?.toString() ||
       EMPTY_STRING;
     const quantityToShow =
       lastSavedValueRef.current?.[StoreSpecificValueKey.Quantity]?.[
         currentStoreId
       ] ||
+      item?.[StoreSpecificValueKey.Quantity]?.[currentStoreId] ||
       itemInList?.[StoreSpecificValueKey.Quantity]?.[currentStoreId] ||
-      (shouldAddQuantity ? 1 : EMPTY_NUMBER);
+      initialQuantity ||
+      EMPTY_NUMBER;
 
     setAisleNumber(aisleNumberToShow);
     setItemId(itemIdToShow);
@@ -193,28 +218,31 @@ export function ItemFormStoreSpecific(
 
   useEffect(() => {
     const currentValues = getCurrentValues();
+    if (_.isEqual(currentValues, lastSavedValueRef.current)) return;
     const valueToSave = _.merge(lastSavedValueRef.current, currentValues);
     lastSavedValueRef.current = valueToSave;
-    console.log({ valueToSave });
     onValueChange && onValueChange(valueToSave);
   }, [getCurrentValues, onValueChange]);
 
   if (!currentStoreId) return null;
   return (
     <Stack>
-      <Row alignItems="flex-end">
-        <Row flex={1} mr={theme.space[FORM_INTER_ITEM_SPACING]}>
-          <StoreManager showStoreList />
+      {hideStoreManagerRow ? null : (
+        <Row alignItems="flex-end">
+          <Row flex={1} mr={theme.space[FORM_INTER_ITEM_SPACING]}>
+            <StoreManager showStoreList {...storeManagerProps} />
+          </Row>
+          {keyToUse ? (
+            <FontAwesomeButton
+              name="copy"
+              style={{ paddingBottom: theme.space[4] }}
+              onPress={() => {
+                setShouldDisplayStoreToUseModal(true);
+              }}
+            />
+          ) : null}
         </Row>
-        {keyToUse ? (
-          <CopyValue
-            style={{ paddingBottom: theme.space[4] }}
-            onPress={() => {
-              setShouldDisplayStoreToUseModal(true);
-            }}
-          />
-        ) : null}
-      </Row>
+      )}
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText textProps={inputTextTextProps}>
           Price at '{currentStore.name}'
@@ -227,14 +255,14 @@ export function ItemFormStoreSpecific(
           value={(price || EMPTY_STRING).toString()}
           onChangeText={(newValue) => setPrice(newValue)}
           InputRightElement={
-            <CopyValue
+            <FontAwesomeButton
+              name="copy"
               style={{ paddingRight: theme.space[FORM_INTER_ITEM_SPACING] * 4 }}
-              size={theme.sizes[4]}
               onPress={() => {
                 const values = findItemsWithStoreSpecificValueKey(
                   StoreSpecificValueKey.Price,
                 );
-                setCopyModalValues(values);
+                setItemSearchModalValues(values);
                 setcopyModalKey(StoreSpecificValueKey.Price);
               }}
             />
@@ -265,14 +293,14 @@ export function ItemFormStoreSpecific(
           value={itemId}
           onChangeText={(newValue) => setItemId(newValue)}
           InputRightElement={
-            <CopyValue
+            <FontAwesomeButton
+              name="copy"
               style={{ paddingRight: theme.space[FORM_INTER_ITEM_SPACING] * 4 }}
-              size={theme.sizes[4]}
               onPress={() => {
                 const values = findItemsWithStoreSpecificValueKey(
                   StoreSpecificValueKey.ItemId,
                 );
-                setCopyModalValues(values);
+                setItemSearchModalValues(values);
                 setcopyModalKey(StoreSpecificValueKey.ItemId);
               }}
             />
@@ -293,14 +321,14 @@ export function ItemFormStoreSpecific(
             setAisleNumber(parseFloat(newValue) || EMPTY_NUMBER)
           }
           InputRightElement={
-            <CopyValue
+            <FontAwesomeButton
+              name="copy"
               style={{ paddingRight: theme.space[FORM_INTER_ITEM_SPACING] * 4 }}
-              size={theme.sizes[4]}
               onPress={() => {
                 const values = findItemsWithStoreSpecificValueKey(
                   StoreSpecificValueKey.AisleNumber,
                 );
-                setCopyModalValues(values);
+                setItemSearchModalValues(values);
                 setcopyModalKey(StoreSpecificValueKey.AisleNumber);
               }}
             />
@@ -319,19 +347,62 @@ export function ItemFormStoreSpecific(
           autoCompleteType={false}
         />
       </Stack>
-      <CopyValueModal
-        fieldName={copyModalKey}
-        values={copyModalValues}
-        onCancel={() => setCopyModalValues({})}
-        onConfirm={(selectedValue: any) => {
-          setCopyModalValues({});
+      <ItemSearchModal<ItemSearchModalValue>
+        title={`Item ${camelCaseToSpacedCapitalized(copyModalKey)}s`}
+        isVisible={Object.keys(itemSearchModalValues || {}).length > 0}
+        onCancel={() => setItemSearchModalValues({})}
+        onConfirm={(selectedValue) => {
+          const valueToUse = selectedValue?.[1];
+          setItemSearchModalValues({});
           if (copyModalKey === StoreSpecificValueKey.AisleNumber) {
-            setAisleNumber(selectedValue);
+            setAisleNumber(parseInt(valueToUse || EMPTY_STRING, 10));
           } else if (copyModalKey === StoreSpecificValueKey.ItemId) {
-            setItemId(selectedValue);
+            setItemId(valueToUse || EMPTY_STRING);
           } else if (copyModalKey === StoreSpecificValueKey.Price) {
-            setPrice(selectedValue);
+            setPrice(valueToUse || EMPTY_STRING);
           }
+        }}
+        onGetFilteredValues={(items, filterValue) => {
+          const isNumbersOnly = filterValue.match(/^\s*\d+\s*$/);
+          const filteredValues = items.filter(([key, value, item]) => {
+            const valueToMatch = isNumbersOnly
+              ? item?.upc || EMPTY_STRING
+              : item?.name || EMPTY_STRING;
+
+            if (valueToMatch?.match(filterValue)) {
+              return [key, value];
+            }
+          });
+          return filteredValues;
+        }}
+        onGetValuesList={(items) => {
+          const entries: ItemSearchModalValue[] = [];
+          let i = 0;
+          for (const [key, value] of Object.entries(
+            itemSearchModalValues || {},
+          )) {
+            const item = getItemFromList(items, key);
+            entries[i] = [key, value, item];
+            i++;
+          }
+
+          //sort entries by name if available otherwise by store specific value
+          entries.sort((a, b) => {
+            let valueA = a[1];
+            let valueB = b[1];
+            if (a[2]?.name && b[2]?.name) {
+              valueA = a[2]?.name;
+              valueB = b[2]?.name;
+            }
+            if (valueA === valueB) return 0;
+            return valueA > valueB ? 1 : -1;
+          });
+          return entries;
+        }}
+        onRenderChildren={(item) => {
+          const { item: itemToRender } = item;
+          const [key, value] = itemToRender;
+          return <ItemTileCopyModal itemKey={key} value={String(value)} />;
         }}
       />
       <ItemFormStoreSpecificValuesStoreModal

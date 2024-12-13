@@ -1,4 +1,5 @@
 import { useRoute } from '@react-navigation/native';
+import { ImagePickerAsset } from 'expo-image-picker';
 import { useNavigation } from 'expo-router';
 import { Center, Row, Text, useTheme } from 'native-base';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -13,6 +14,7 @@ import { useAppDispatch } from '@/state/store';
 import { saveItem } from '@/state/thunks';
 import { Item } from '@/types/Item';
 
+const MAX_TITLE_LENGTH = 24;
 export default function FullscreenImageScreen() {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
@@ -40,6 +42,14 @@ export default function FullscreenImageScreen() {
     [upcProduct, customImageUri],
   );
 
+  const getHeaderTitle = useCallback(() => {
+    const valueToUse = item.name || item._id || item.upc || 'No Item Info';
+    if (valueToUse.length > MAX_TITLE_LENGTH) {
+      return `${valueToUse.substring(0, MAX_TITLE_LENGTH)}...`;
+    }
+    return valueToUse;
+  }, [item]);
+
   const onCustomImageCallback = useCallback(
     (result: string) => {
       setCustomImageUri(result);
@@ -61,8 +71,8 @@ export default function FullscreenImageScreen() {
   );
 
   const onImageChange = useCallback(
-    (result: string) => {
-      onCustomImageCallback(result);
+    (result: ImagePickerAsset) => {
+      onCustomImageCallback(result.uri);
     },
     [onCustomImageCallback],
   );
@@ -70,9 +80,9 @@ export default function FullscreenImageScreen() {
   useEffect(() => {
     if (!item?.name) return;
     navigation.setOptions({
-      headerTitle: item?.name,
+      headerTitle: getHeaderTitle(),
     });
-  }, []);
+  }, [getHeaderTitle]);
 
   if (isLoading) {
     return <FullscreenSpinner />;

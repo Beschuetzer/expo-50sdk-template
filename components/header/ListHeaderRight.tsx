@@ -12,7 +12,7 @@ import {
 
 import { EllipsisButton } from './EllipsisButton';
 
-const { NotAnimatedContextMenu } = renderers;
+const { SlideInMenu } = renderers;
 
 export type ListHeaderRightOptions =
   | {
@@ -34,7 +34,7 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
       props;
 
     return (
-      <Menu renderer={NotAnimatedContextMenu} ref={ref}>
+      <Menu renderer={SlideInMenu} ref={ref}>
         <MenuTrigger children={<EllipsisButton />} />
         <MenuOptions customStyles={customMenuOptionsStyle}>
           {onSortPress ? (

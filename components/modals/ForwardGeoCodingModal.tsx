@@ -29,6 +29,7 @@ export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
   const currentLocation = useSelector(currentLocationSelector);
   const theme = useTheme();
   const sortedPlaces = useMemo(() => {
+    if (!places) return [];
     return places
       .map((place) => ({
         ...place,

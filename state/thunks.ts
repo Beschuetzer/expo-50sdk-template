@@ -10,49 +10,52 @@ import {
   listsSlice,
   addItemsListItem,
   addStoresListItem,
-  AddStoresListItemPayload,
   completePurchase,
   handleSaveAllResponse,
   removeItemsListItems,
   removeStoresListItems,
   handleLoadAllResponse,
-  ListName,
   setCurrentLocationState,
 } from './slices/listsSlice';
 import { RootState } from './store';
 
-import { ItemFormOnSave } from '@/components/forms/ItemForm';
 import { GenericResponse } from '@/components/services/AbstractService';
-import {
-  BFF_SERVICE,
-  ChangePasswordResponse,
-  CreateUserResponse,
-  DeleteUserResponse,
-  DeletionResponse,
-  LoadAllResponse,
-  LoginResponse,
-  SaveAllResponse,
-  SaveItemResponse,
-  SavePurchaseResponse,
-  SaveStoreResponse,
-  SignedUrlResponse,
-  UserAccountInput,
-} from '@/components/services/BffService';
+import { BFF_SERVICE } from '@/components/services/BffService';
 import {
   GEO_CODING_SERVICE,
   ReverseGeocodingResponse,
 } from '@/components/services/GeoCodingService';
-import { EMPTY_STRING } from '@/constants/general';
+import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
 import { LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { Item, LastPurchasedMap } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
+import {
+  ChangePasswordResponse,
+  ProcessGroceryListResponse,
+  UserAccountInput,
+  CreateUserResponse,
+  DeleteUserResponse,
+  LoginResponse,
+  DeletionResponse,
+  LoadAllResponse,
+  SaveAllResponse,
+  SaveItemResponse,
+  SavePurchaseResponse,
+  SaveStoreResponse,
+  MakeCallInput,
+  UserAccount,
+} from '@/types/bffService';
 import { Error, SetAppDataInput, State } from '@/types/general';
+import { ItemFormOnSave } from '@/types/itemForm';
+import { AddStoresListItemPayload, ListName } from '@/types/listSlice';
 import {
   getKeyToUse,
   handleError,
   getUserCredentials,
-  uriToBlob,
   deleteFile,
+  getCustomImageInfo,
+  getS3ObjectKey,
+  uriToBlob,
 } from '@/utils/helpers';
 
 export type DeleteItemsThunkInput = {
@@ -61,20 +64,20 @@ export type DeleteItemsThunkInput = {
 export type DeleteStoresThunkInput = {
   stores: Store[];
 };
+export type GetCurrentStoreInput = {
+  gpsCoordinate: GpsCoordinate;
+} & Pick<MakeCallInput, 'showLoadingMsg'>;
 export type SaveAllThunkInput = Omit<
   SetAppDataInput,
   'dispatch' | 'upcProducts'
 >;
-export type SaveImageThunkInput = {
-  item: Item;
-};
 export type SavePurchaseThunkInput = void;
 
 export const changePassword = createAsyncThunk(
   'changePassword',
   async (newPassword: string, { getState, dispatch, rejectWithValue }) => {
     const state = getState() as RootState;
-      const account = state.general?.account;
+    const account = state.general?.account;
     let response: ChangePasswordResponse;
     try {
       response = await BFF_SERVICE.changePassword({
@@ -98,6 +101,47 @@ export const changePassword = createAsyncThunk(
         error: error as Error,
         response,
         baseMsg: `Unable to change the user password for user account '${account._id}'.`,
+      });
+    }
+  },
+);
+
+export const convertImageToList = createAsyncThunk(
+  'convertImageToList',
+  async (image: string, { getState, dispatch, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const account = state.general?.account;
+    const { _id: userId, password } = account;
+    let response: ProcessGroceryListResponse;
+    let shouldDisplayError = true;
+    try {
+      if (!image) {
+        throw new Error('No image provided in convertImageToList');
+      }
+
+      if (!userId || !password) {
+        shouldDisplayError = false;
+        throw new Error('No user credentials given');
+      }
+
+      response = await BFF_SERVICE.processGroceryList({
+        userId,
+        password,
+        image,
+        dispatch,
+      });
+      if (!response?.items || response.items.length === 0) {
+        throw new Error('Error proccessing the image.');
+      }
+      return response;
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to process the image.`,
+        shouldDisplayError,
       });
     }
   },
@@ -324,7 +368,8 @@ export const deleteStores = createAsyncThunk(
 
 export const getCurrentState = createAsyncThunk(
   'getCurrentState',
-  async (gpsCoordinate: GpsCoordinate, { dispatch, rejectWithValue }) => {
+  async (input: GetCurrentStoreInput, { dispatch, rejectWithValue }) => {
+    const { gpsCoordinate, showLoadingMsg = true } = input;
     const { lat, lon } = gpsCoordinate;
     let response: ReverseGeocodingResponse | GenericResponse;
     try {
@@ -332,6 +377,7 @@ export const getCurrentState = createAsyncThunk(
         gpsCoordinate,
         dispatch,
         loadingMsg: `Finding the current state for lat: ${lat}, lon: ${lon}`,
+        showLoadingMsg,
       });
       if (!response?.address.state) {
         throw new Error('Error getting state');
@@ -354,7 +400,7 @@ export const getCurrentState = createAsyncThunk(
 );
 
 export const loadAll = createAsyncThunk(
-  'saveAll',
+  'loadAll',
   async (_, { getState, dispatch, rejectWithValue }) => {
     const state = getState() as RootState;
     const { account } = state.general || {};
@@ -407,7 +453,14 @@ export const saveAll = createAsyncThunk(
       }
       const { items, stores } = input;
       dispatch(setLoading(`Saving data to database`));
-      const itemsNeedingSaving = items.data.filter((item) => item.needsSaving);
+
+      const itemsNeedingSaving = items.data.filter(
+        (item) => item.needsSaving && !getCustomImageInfo(item)?.[0],
+      );
+      const itemsWithCustomImage = items.data.filter(
+        (item) => !!getCustomImageInfo(item)?.[0],
+      );
+
       const storesNeedingSaving = stores.data.filter(
         (store) => store.needsSaving,
       );
@@ -436,23 +489,25 @@ export const saveAll = createAsyncThunk(
         }),
       );
 
-      //Save all custom images
+      // Save all custom images
       const actions = [] as AsyncThunkAction<
         void,
-        SaveImageThunkInput,
+        ItemFormOnSave,
         AsyncThunkConfig
       >[];
-      items.data.forEach((item) => {
-        for (const image of item?.images || []) {
-          if (image.match(LOCAL_FILE_REGEX)) {
-            actions.push(
-              saveCustomImage({
-                item,
-              }),
-            );
-            continue;
-          }
-        }
+      itemsWithCustomImage.forEach((item) => {
+        actions.push(
+          saveItem({
+            hasKeyChanged: false,
+            originalKey: item,
+            item: {
+              ...item,
+              needsSaving: false,
+              hasBeenSaved: true,
+            },
+            storeSpecificValues: input.storeSpecificValues[getKeyToUse(item)],
+          }),
+        );
       });
       await Promise.all(actions.map((promise) => dispatch(promise)));
 
@@ -472,84 +527,6 @@ export const saveAll = createAsyncThunk(
   },
 );
 
-export const saveCustomImage = createAsyncThunk(
-  'saveCustomImage',
-  async (
-    input: SaveImageThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let shouldDisplayError = true;
-    let signedUrlResponse: SignedUrlResponse;
-
-    try {
-      const { item } = input;
-      const customImageUrlIndex = item.images.findIndex((image) =>
-        image.match(LOCAL_FILE_REGEX),
-      );
-      const customImageUrl = item.images[customImageUrlIndex];
-
-      if (!customImageUrl || !customImageUrl.match(LOCAL_FILE_REGEX)) {
-        shouldDisplayError = false;
-        throw new Error('No need to save image in saveImage.');
-      }
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No credentials found');
-      }
-
-      dispatch(setLoading(`Saving '${customImageUrl}' to cloud...`));
-      const split = customImageUrl.split('/');
-      const filename = split[split.length - 1];
-
-      signedUrlResponse = await BFF_SERVICE.getSignedUrlForUpload({
-        dispatch,
-        ...getUserCredentials(account),
-        filename,
-      });
-
-      if (!signedUrlResponse?.uploadUrl || !signedUrlResponse.downloadUrl) {
-        throw new Error('Unable to get signed url.');
-      }
-
-      const blob = await uriToBlob(customImageUrl);
-      const savedResponse = await fetch(signedUrlResponse.uploadUrl, {
-        body: blob,
-        method: 'PUT',
-      });
-
-      if (!savedResponse.ok) {
-        throw new Error('Unable to save image.');
-      }
-
-      const newImages = [...item.images];
-      newImages[customImageUrlIndex] = signedUrlResponse.downloadUrl;
-      console.log({ item, newImages, customImageUrlIndex });
-      dispatch(
-        addItemsListItem({
-          item: {
-            ...item,
-            images: newImages,
-          },
-        }),
-      );
-      deleteFile(customImageUrl);
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response: signedUrlResponse,
-        baseMsg: `Error saving image.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-    }
-  },
-);
-
 export const saveItem = createAsyncThunk(
   'saveItem',
   async (input: ItemFormOnSave, { getState, dispatch, rejectWithValue }) => {
@@ -558,6 +535,7 @@ export const saveItem = createAsyncThunk(
     const account = state.general.account;
     let response: SaveItemResponse;
     let shouldDisplayError = true;
+    const newImages = [...input.item.images];
 
     const itemToDispatch = {
       ...input,
@@ -575,31 +553,42 @@ export const saveItem = createAsyncThunk(
         shouldDisplayError = false;
         throw new Error('No account found.');
       }
-      if (!input.item.needsSaving) {
+
+      const [savedImageUrl, savedImageIndex, customImageUrl] =
+        await saveCustomImageToS3(itemToDispatch.item, account, dispatch);
+
+      if (!input.item.needsSaving && !savedImageUrl) {
         shouldDisplayError = false;
-        dispatch(
-          saveCustomImage({
-            item: itemToDispatch.item,
-          }),
-        );
         throw new Error('No need to save item.');
+      } else if (savedImageUrl) {
+        newImages[savedImageIndex] = savedImageUrl;
+        itemToDispatch.item.images = newImages;
       }
+
       dispatch(setLoading(`Saving '${getKeyToUse(input.item)}' in Database`));
       response = await BFF_SERVICE.saveItem({
         ...input,
         dispatch,
         ...account,
+        item: itemToDispatch.item,
       });
       if (!response?._id) {
+        if (!input.item.hasBeenSaved) {
+          newImages[savedImageIndex] = customImageUrl;
+          itemToDispatch.item.images = newImages;
+          const objectKey = getS3ObjectKey(savedImageUrl);
+          await BFF_SERVICE.deleteS3Objects({
+            dispatch,
+            objKeys: objectKey ? [objectKey] : [],
+            ...getUserCredentials(account),
+          });
+        }
+
         throw new Error(`Unable to save ${getKeyToUse(itemToDispatch.item)}`);
       }
+      deleteFile(customImageUrl);
       itemToDispatch.item.needsSaving = false;
       itemToDispatch.item.hasBeenSaved = true;
-      dispatch(
-        saveCustomImage({
-          item: itemToDispatch.item,
-        }),
-      );
     } catch (error) {
       return handleErrorsWithRejection({
         dispatch,
@@ -758,7 +747,6 @@ function handleErrorsWithRejection<T>(
     genericMsg = 'Please try again.',
     shouldDisplayError = true,
   } = input;
-  console.log({ error });
   const detailsMsg =
     response === undefined ? 'The server cannot be reached.' : genericMsg;
   const messageToUse = `${baseMsg}  ${detailsMsg}`;
@@ -766,4 +754,60 @@ function handleErrorsWithRejection<T>(
     handleError(dispatch, error as Error, messageToUse);
   }
   return rejectWithValue(messageToUse);
+}
+
+async function saveCustomImageToS3(
+  item: Item,
+  account: UserAccount,
+  dispatch: Dispatch,
+): Promise<[string, number, string]> {
+  const defaultReturn = [EMPTY_STRING, EMPTY_NUMBER, EMPTY_STRING] as [
+    string,
+    number,
+    string,
+  ];
+  try {
+    const customImageUrlIndex = item.images.findIndex((image) =>
+      image.match(LOCAL_FILE_REGEX),
+    );
+    const customImageUrl = item.images[customImageUrlIndex];
+
+    if (!customImageUrl || !customImageUrl.match(LOCAL_FILE_REGEX)) {
+      throw new Error('No need to save image in saveImage.');
+    }
+    if (!account._id || !account.password) {
+      throw new Error('No credentials found');
+    }
+
+    const split = customImageUrl.split('/');
+    const filename = split[split.length - 1];
+
+    const signedUrlResponse = await BFF_SERVICE.getSignedUrlForUpload({
+      dispatch,
+      ...getUserCredentials(account),
+      filename,
+    });
+
+    if (!signedUrlResponse?.uploadUrl || !signedUrlResponse.downloadUrl) {
+      throw new Error('Unable to get signed url.');
+    }
+
+    const blob = await uriToBlob(customImageUrl);
+    if (!blob) {
+      return defaultReturn;
+    }
+
+    const savedResponse = await fetch(signedUrlResponse.uploadUrl, {
+      body: blob,
+      method: 'PUT',
+    });
+
+    if (!savedResponse.ok) {
+      throw new Error('Unable to save image.');
+    }
+
+    return [signedUrlResponse.downloadUrl, customImageUrlIndex, customImageUrl];
+  } catch (error) {
+    return defaultReturn;
+  }
 }

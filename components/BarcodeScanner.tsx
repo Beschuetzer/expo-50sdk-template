@@ -6,10 +6,11 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 
 import { EMPTY_STRING } from '@/constants/general';
-import { ListName, listToDisplaySelector } from '@/state/slices/listsSlice';
+import { listToDisplaySelector } from '@/state/slices/listsSlice';
 import { scanningModeSelector } from '@/state/slices/optionsSlice';
 import { Item } from '@/types/Item';
 import { ScanningMode } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import { getItemFromList } from '@/utils/helpers';
 
 type ScannedObj = { data: string };

@@ -11,7 +11,6 @@ import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { maxWidth } from '@/constants/styles';
 import {
-  ListName,
   currentStoreIdSelector,
   currentStoreSelector,
   listToDisplaySelector,
@@ -19,9 +18,11 @@ import {
 } from '@/state/slices/listsSlice';
 import { Store } from '@/types/Store';
 import { HeadingTagProp } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 import { getKeyToUse } from '@/utils/helpers';
 
-type StorageManagerProps = {
+export type StorageManagerProps = {
+  isVisible?: boolean;
   showAddStore?: boolean;
   showStoreList?: boolean;
   showTag?: boolean;
@@ -30,6 +31,7 @@ type StorageManagerProps = {
 } & HeadingTagProp;
 export function StoreManager(props: StorageManagerProps) {
   const {
+    isVisible = true,
     headingTag: Tag = FormControl.Label,
     showAddStore = false,
     showStoreList = false,
@@ -47,6 +49,7 @@ export function StoreManager(props: StorageManagerProps) {
   const dispatch = useDispatch();
 
   const onAddPress = useCallback(() => {
+    // @ts-ignore
     navigation.navigate(Routes.StoreModal);
   }, []);
 
@@ -54,6 +57,7 @@ export function StoreManager(props: StorageManagerProps) {
     dispatch(setCurrentStoreId(storeName));
   }, []);
 
+  if (!isVisible) return null;
   return (
     <Stack style={style}>
       <Row {...maxWidth} justifyContent="space-between" alignItems="center">

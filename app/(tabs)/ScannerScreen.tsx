@@ -162,6 +162,7 @@ export default function ScannerScreen() {
             return;
           }
         }
+        // @ts-ignore
         navigation.navigate(Routes.ItemModal, {
           key: { upc, name: EMPTY_STRING },
           showOverrideMsg: false,

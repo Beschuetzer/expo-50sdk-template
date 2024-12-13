@@ -1,9 +1,7 @@
-import { Dispatch } from '@reduxjs/toolkit';
-
-import { MakeCallInput } from './BffService';
-
 import { BFF_SERVICE_ABORT_TIMEOUT, EMPTY_STRING } from '@/constants/general';
 import { setLoading } from '@/state/slices/generalSlice';
+import { AppDispatch } from '@/state/store';
+import { MakeCallInput } from '@/types/bffService';
 import { ErrorMessage } from '@/types/general';
 import { handleError } from '@/utils/helpers';
 
@@ -19,7 +17,7 @@ export class AbstractService {
   protected validateCredentials(
     userId: string,
     password: string,
-    dispatch: Dispatch<any>,
+    dispatch: AppDispatch,
   ) {
     try {
       if (!userId || !password) {
@@ -43,6 +41,8 @@ export class AbstractService {
       loadingMsg,
       options,
       path,
+      showErrorMsg = true,
+      showLoadingMsg,
       useErrorMessage = false,
     } = makeCallInput;
 
@@ -66,9 +66,8 @@ export class AbstractService {
         body,
         signal,
       };
-      console.log({ url, combinedOptions, path, trimmedPath });
 
-      dispatch(setLoading(loadingMsg));
+      showLoadingMsg && dispatch(setLoading(loadingMsg));
       const timeoutId = setTimeout(
         () => controller.abort(),
         BFF_SERVICE_ABORT_TIMEOUT,
@@ -76,16 +75,14 @@ export class AbstractService {
       const response = await fetch(url, combinedOptions);
       clearTimeout(timeoutId);
 
-      console.log({ response });
       const result = (await response.json()) as T;
-      console.log({ result });
       if (response.ok) {
         return result;
       } else {
         const errorMessage = useErrorMessage
           ? errorMsg
           : (result as ErrorMessage)?.errorResponse?.message;
-        if (errorMessage) {
+        if (showErrorMsg && errorMessage) {
           handleError(
             dispatch,
             { message: errorMessage },
@@ -95,7 +92,7 @@ export class AbstractService {
       }
     } catch (error) {
       if ((error as Error)?.message !== 'Aborted') {
-        handleError(dispatch, error as Error);
+        showErrorMsg && handleError(dispatch, error as Error);
       } else {
         return undefined;
       }

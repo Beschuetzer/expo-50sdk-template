@@ -24,6 +24,11 @@ export function handleLastPurchasedMapImport(
         (copy as any)[itemFound._id] = {
           [storeFound?._id]: lastPurchasedTime,
         };
+      } else {
+        console.warn(
+          `handleLastPurchasedMapImport: deleting ${itemKey} from copy.`,
+        );
+        delete copy[itemKey];
       }
 
       if (!storeFound?._id) {
@@ -37,7 +42,6 @@ export function handleLastPurchasedMapImport(
         );
       }
     }
-    delete copy[itemKey];
   }
   return copy;
 }

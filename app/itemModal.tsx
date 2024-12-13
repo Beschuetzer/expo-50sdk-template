@@ -3,13 +3,14 @@ import { useNavigation } from 'expo-router';
 import { Center, theme, Heading, Text } from 'native-base';
 import { useCallback, useMemo, useRef } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { useSelector } from 'react-redux';
 
-import { ItemForm, ItemFormOnSave } from '@/components/forms/ItemForm';
+import { ItemForm } from '@/components/forms/ItemForm';
 import { useUpcProduct } from '@/components/hooks/useUpcProduct';
-import { EMPTY_STRING } from '@/constants/general';
+import { BFF_SERVICE } from '@/components/services/BffService';
+import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
+import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
+import { accountSelector } from '@/state/slices/generalSlice';
 import {
-  ListName,
   currentStoreSelector,
   itemsListItemSelector,
   itemsListSelector,
@@ -20,11 +21,19 @@ import {
   canOverrideItemSelector,
   nameOrderTemplateSelector,
 } from '@/state/slices/optionsSlice';
-import { useAppDispatch } from '@/state/store';
+import { useAppDispatch, useAppSelector } from '@/state/store';
 import { saveItem } from '@/state/thunks';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
-import { getKeyToUse } from '@/utils/helpers';
+import { ItemFormOnSave } from '@/types/itemForm';
+import { ListName } from '@/types/listSlice';
+import {
+  deleteFile,
+  getKeyToUse,
+  getS3Images,
+  getS3ObjectKey,
+  getUserCredentials,
+} from '@/utils/helpers';
 import { getItem } from '@/utils/model-mappings';
 
 export default function ItemModal() {
@@ -38,16 +47,18 @@ export default function ItemModal() {
     callerList,
   } = (route.params || {}) as any;
   const keyToUse = getKeyToUse(key);
-  const itemInList = useSelector(
+  const itemInList = useAppSelector(
     itemsListItemSelector(keyToUse || EMPTY_STRING),
   );
-  const canOverrideItem = useSelector(canOverrideItemSelector);
-  const currentStore = useSelector(currentStoreSelector);
-  const autoSaveItems = useSelector(autoSaveItemsSelector);
-  const nameOrderTemplate = useSelector(nameOrderTemplateSelector);
-  const itemsList = useSelector(itemsListSelector);
-  const storeSpecificValuesMap = useSelector(storeSpecificValuesMapSelector);
+  const canOverrideItem = useAppSelector(canOverrideItemSelector);
+  const account = useAppSelector(accountSelector);
+  const currentStore = useAppSelector(currentStoreSelector);
+  const autoSaveItems = useAppSelector(autoSaveItemsSelector);
+  const nameOrderTemplate = useAppSelector(nameOrderTemplateSelector);
+  const itemsList = useAppSelector(itemsListSelector);
+  const storeSpecificValuesMap = useAppSelector(storeSpecificValuesMapSelector);
 
+  const s3ImagesToDeleteOnSaveRef = useRef<string[]>([]);
   const originalKeyRef = useRef<Key>(key);
   const canSkipUseUpcProductRef = useRef(false);
 
@@ -67,6 +78,19 @@ export default function ItemModal() {
     navigation.canGoBack() && navigation.goBack();
   }, [navigation]);
 
+  const handleImageDeletion = useCallback(
+    async (url: string) => {
+      const isLocalImage = url?.match(LOCAL_FILE_REGEX);
+      const isS3Image = url?.match(AMAZON_S3_REGEX);
+      if (isLocalImage) {
+        deleteFile(url);
+      } else if (isS3Image) {
+        s3ImagesToDeleteOnSaveRef.current.push(url);
+      }
+    },
+    [s3ImagesToDeleteOnSaveRef],
+  );
+
   const handleSave = useCallback(
     (onSavePayload: ItemFormOnSave) => {
       const { hasKeyChanged, item } = onSavePayload;
@@ -74,6 +98,17 @@ export default function ItemModal() {
         originalKeyRef.current = item;
       }
       canSkipUseUpcProductRef.current = onSavePayload.hasKeyChanged;
+      if (s3ImagesToDeleteOnSaveRef?.current?.length > 0) {
+        const objKeys = s3ImagesToDeleteOnSaveRef.current.map((s3Img) =>
+          getS3ObjectKey(s3Img),
+        );
+        BFF_SERVICE.deleteS3Objects({
+          dispatch,
+          objKeys,
+          ...getUserCredentials(account),
+        });
+      }
+
       dispatch(saveItem(onSavePayload));
     },
     [canSkipUseUpcProductRef, originalKeyRef],
@@ -116,12 +151,15 @@ export default function ItemModal() {
         item={fallbackItem as ItemWithStoreSpecificValues}
         itemInList={itemInList}
         onClose={handleClose}
+        onDeleteImage={handleImageDeletion}
         onSave={handleSave}
         showOverrideMsgInitial={showOverrideMsg}
         shouldFocusFirstField={!itemInList}
-        shouldAddQuantity={
+        initialQuantity={
           callerList === ListName.ShoppingList ||
           callerList === ListName.PreviouslyPurchased
+            ? 1
+            : EMPTY_NUMBER
         }
         shouldAddToCart={callerList === ListName.InCartList}
         autoSave={isAutoSaveEnabled}

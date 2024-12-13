@@ -19,6 +19,7 @@ import {
   currentLocationStateSelector,
   resetCurrentLocationState,
 } from '@/state/slices/listsSlice';
+import { resetQuickAddListSlice } from '@/state/slices/quickAddSlice';
 import {
   resetUpcProducts,
   upcProductsSelector,
@@ -90,6 +91,13 @@ export function ReduxViewer() {
                 }}
               >
                 Lists
+              </Button>
+              <Button
+                onPress={() => {
+                  dispatch(resetQuickAddListSlice());
+                }}
+              >
+                Quick Add List
               </Button>
               <Button
                 onPress={() => {

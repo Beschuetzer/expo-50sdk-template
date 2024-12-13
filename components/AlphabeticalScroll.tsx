@@ -12,8 +12,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SortType } from './lists/sorters';
 
 import { EMPTY_NUMBER } from '@/constants/general';
-import { SortOrderValue } from '@/state/slices/listsSlice';
 import { Key } from '@/types/Item';
+import { SortOrderValue } from '@/types/listSlice';
 import { getAlphabeticalCharToIndexMapping } from '@/utils/getAlphabeticalCharToIndexMapping';
 
 type AlphabeticalScrollProps<T> = {
@@ -25,7 +25,7 @@ type AlphabeticalScrollProps<T> = {
 export function AlphabeticalScroll<T extends Key>(
   props: AlphabeticalScrollProps<T>,
 ) {
-  const { items, onCharPress, sortOrderValue } = props;  
+  const { items, onCharPress, sortOrderValue } = props;
   const alphabeticalCharToIndexMapping = useMemo(
     () =>
       getAlphabeticalCharToIndexMapping(items, sortOrderValue.sortOrder as any),

@@ -11,7 +11,5 @@ export async function handleMockResponse(upc: string) {
       status_verbose: 'product not found',
     },
   };
-  console.log({ toReturn, upc });
-
   return new Response(JSON.stringify(toReturn));
 }

@@ -6,7 +6,9 @@ type UseMenuInput = {
   navigationOptionsGetter: (menuRef: RefObject<Menu>) => any;
 };
 
-export const useMenu = (input: UseMenuInput) => {
+type UseMenuResponse = [RefObject<Menu>, () => void];
+
+export const useMenu = (input: UseMenuInput): UseMenuResponse => {
   const { navigationOptionsGetter } = input;
   const navigation = useNavigation();
   const menuRef = useRef<Menu>(null);
@@ -19,4 +21,11 @@ export const useMenu = (input: UseMenuInput) => {
     closeMenu();
     navigation.setOptions(navigationOptionsGetter(menuRef));
   }, [navigation, navigationOptionsGetter, menuRef]);
+
+  return [
+    menuRef,
+    function () {
+      menuRef.current?.close();
+    },
+  ];
 };

@@ -1,4 +1,4 @@
-import { IdNeeded, UserIdNeeded } from '@/components/services/BffService';
+import { UserIdNeeded, IdNeeded } from './bffService';
 
 /**
  *The key is the index and the value is the _id

@@ -15,13 +15,10 @@ import { handleStoreSpecificValuesImport } from './handleStoreSpecificValuesImpo
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
-import {
-  UserAccount,
-  CredentialsNeeded,
-} from '@/components/services/BffService';
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import {
   DAY_IN_MS,
+  EMPTY_NUMBER,
   EMPTY_STRING,
   ERROR_MODAL_STATUS_CODE_DEFAULT,
   FILE_NAMES,
@@ -33,6 +30,7 @@ import {
   WEEK_IN_MS,
 } from '@/constants/general';
 import {
+  AMAZON_S3_REGEX,
   LOCAL_FILE_REGEX,
   POSTAL_CODE_REGEX,
   UPC_REGEX,
@@ -40,15 +38,15 @@ import {
 } from '@/constants/regexs';
 import { setError } from '@/state/slices/generalSlice';
 import {
-  ListName,
   setItemsList,
   setLastPurchasedMap,
   setStoresList,
   setStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import { setUpcProducts } from '@/state/slices/scannerSlice';
-import { Item, ItemsList, Key, List } from '@/types/Item';
+import { Item, ItemUnit, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
+import { UserAccount, CredentialsNeeded } from '@/types/bffService';
 import {
   Address,
   CurrentLocation,
@@ -59,6 +57,7 @@ import {
   State,
   TimeSpan,
 } from '@/types/general';
+import { ListName } from '@/types/listSlice';
 
 export async function wait(ms: number) {
   if (ms <= 0) return;
@@ -209,13 +208,30 @@ export function getEmptyList<T>(listName?: ListName) {
   } as List<T>;
 }
 
+export function getEmptyItem(): Item {
+  return {
+    _id: EMPTY_STRING,
+    addedDate: Date.now(),
+    frequency: EMPTY_NUMBER,
+    fullscreenImage: EMPTY_STRING,
+    hasBeenSaved: false,
+    images: [],
+    imageToUseIndex: 0,
+    lastUpdatedDate: Date.now(),
+    name: EMPTY_STRING,
+    needsSaving: true,
+    unit: ItemUnit.Package,
+    upc: EMPTY_STRING,
+  };
+}
+
 export function getEmptyObject<T>() {
   return {} as T;
 }
 
 export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {
-  return list.filter((item) => {
-    for (const [key, regex] of Object.entries(filters)) {
+  return (list || []).filter((item) => {
+    for (const [key, regex] of Object.entries(filters || {})) {
       const fieldValue = item?.[key as keyof T] as string;
       const isMatch = fieldValue.match(new RegExp(regex as string, 'i'));
       if (!isMatch) return false;
@@ -246,6 +262,14 @@ export function getIsPreviouslyPurchasedItemRecommended(
 
 export function getIsValidUpcValue(value: string) {
   return !!UPC_REGEX.test(value);
+}
+
+export function getItemValidation(item?: Key) {
+  const isValid = !!item?.name;
+  return {
+    isValid,
+    message: isValid ? EMPTY_STRING : 'Please enter a name',
+  };
 }
 
 export function getKeyToUse(key: string | Key, displayAlert = false) {
@@ -343,19 +367,36 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   };
 }
 
-export function getImagePickerOptions(quality = IMAGE_QUALITY) {
+export function getCustomImageInfo(item: Item): [string, number] {
+  const defaultReturn = [EMPTY_STRING, -1] as [string, number];
+  if (!item || !item.images || item.images.length === 0) return defaultReturn;
+  const customImageUrlIndex = item.images.findIndex((image) =>
+    image.match(LOCAL_FILE_REGEX),
+  );
+  const customImageUrl = item.images?.[customImageUrlIndex];
+  if (!customImageUrl) return defaultReturn;
+  return [customImageUrl, customImageUrlIndex];
+}
+
+export function getImagePickerOptions(
+  options?: ImagePicker.ImagePickerOptions,
+) {
   return {
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
     allowsEditing: true,
     aspect: [3, 4],
-    quality,
+    quality: IMAGE_QUALITY,
     selectionLimit: 1,
+    ...options,
   } as ImagePicker.ImagePickerOptions;
 }
 
 export function getItemForImport<T extends Key>(itemKey: string, items: T[]) {
   if (!itemKey || !items || items.length === 0) return null;
   return items.find((item) => {
+    if (item._id && itemKey === item._id) {
+      return true;
+    }
     if (item.upc) {
       return (item.upc || item.name) === itemKey;
     }
@@ -400,6 +441,25 @@ export function getNewViewingMode(viewingMode: ItemTileViewingMode) {
   return viewingMode === ItemTileViewingMode.Basic
     ? ItemTileViewingMode.Full
     : ItemTileViewingMode.Basic;
+}
+
+export function getS3ObjectKey(url: string) {
+  try {
+    if (!url) return EMPTY_STRING;
+    let urlToUse = url;
+    if (!url.match(/http/)) {
+      urlToUse = `https://${url}`;
+    }
+    const objKey = new URL(urlToUse)?.pathname?.substring(1);
+    return objKey || EMPTY_STRING;
+  } catch (error) {
+    return EMPTY_STRING;
+  }
+}
+
+export function getS3Images(images: string[]) {
+  if (!images || images.length === 0) return [];
+  return images.filter((image) => image.match(AMAZON_S3_REGEX));
 }
 
 export function getSortOrderValues(listName: ListName) {
@@ -496,9 +556,11 @@ export async function getDirectory() {
   return permissions.directoryUri;
 }
 
-export async function captureImage() {
+export async function captureImage(options?: ImagePicker.ImagePickerOptions) {
   try {
-    const result = await ImagePicker.launchCameraAsync(getImagePickerOptions());
+    const result = await ImagePicker.launchCameraAsync(
+      getImagePickerOptions(options),
+    );
 
     if (!result.canceled) {
       return result.assets[0];
@@ -543,11 +605,11 @@ export async function importAppData(directory: string) {
   return toReturn;
 }
 
-export async function pickImage() {
+export async function pickImage(options?: ImagePicker.ImagePickerOptions) {
   try {
     // No permissions request is necessary for launching the image library
     const result = await ImagePicker.launchImageLibraryAsync(
-      getImagePickerOptions(),
+      getImagePickerOptions(options),
     );
 
     if (!result.canceled) {
@@ -713,7 +775,11 @@ export function sanitize(str?: string) {
 }
 
 export async function uriToBlob(uri: string) {
-  const response = await fetch(uri);
-  const blob = await response.blob();
-  return blob;
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return blob;
+  } catch {
+    return null;
+  }
 }

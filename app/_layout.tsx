@@ -85,24 +85,6 @@ function RootLayoutNav() {
                       }}
                     />
                     <Stack.Screen
-                      name={Routes.ItemModal}
-                      options={{
-                        presentation: 'modal',
-                        title: 'Item Details',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.StoreModal}
-                      options={{
-                        presentation: 'modal',
-                        title: 'Store Details',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
                       name={Routes.FullscreenImageScreen}
                       options={{
                         presentation: 'modal',
@@ -112,9 +94,36 @@ function RootLayoutNav() {
                       }}
                     />
                     <Stack.Screen
+                      name={Routes.ItemModal}
+                      options={{
+                        presentation: 'modal',
+                        title: 'Item Details',
+                        headerTitleAlign: 'center',
+                        headerLeft: () => <CloseButton />,
+                      }}
+                    />
+                    <Stack.Screen
+                      name={Routes.QuickAddModal}
+                      options={{
+                        presentation: 'modal',
+                        title: 'Quick Add',
+                        headerTitleAlign: 'center',
+                        headerLeft: () => <CloseButton />,
+                      }}
+                    />
+                    <Stack.Screen
                       name={Routes.PasswordResetScreen}
                       options={{
                         title: 'Password Reset',
+                        headerTitleAlign: 'center',
+                        headerLeft: () => <CloseButton />,
+                      }}
+                    />
+                    <Stack.Screen
+                      name={Routes.StoreModal}
+                      options={{
+                        presentation: 'modal',
+                        title: 'Store Details',
                         headerTitleAlign: 'center',
                         headerLeft: () => <CloseButton />,
                       }}

@@ -194,6 +194,7 @@ export function ItemTileWithStoreSpecificValues(
         if (isMultiSelectMode) {
           onSelect && onSelect(item);
         } else {
+          // @ts-ignore
           navigation.navigate(Routes.ItemModal, {
             key: item,
             showOverrideMsg: false,

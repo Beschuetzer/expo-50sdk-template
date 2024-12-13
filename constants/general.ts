@@ -1,9 +1,13 @@
 import { SortOrder, SortType } from '@/components/lists/sorters';
-import { SortOrderValue } from '@/state/slices/listsSlice';
-import { ItemUnit } from '@/types/Item';
+import {
+  ItemUnit,
+  StoreSpecificValueKey,
+  StoreSpecificValueKeyTypes,
+} from '@/types/Item';
 import { GpsCoordinate } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
 import { Frequency, TimeSpan } from '@/types/general';
+import { SortOrderValue } from '@/types/listSlice';
 
 export const EMPTY_NUMBER = 0;
 export const EMPTY_STRING = '';
@@ -27,6 +31,7 @@ export const CAN_OVERRIDE_DEFAULT = false;
 export const DEFAULT_IMAGE_INDEX = 0;
 export const ERROR_MODAL_STATUS_CODE_DEFAULT = 500;
 export const ESTIMATED_SIZE_FOR_ITEMS_LIST = 108;
+export const ESTIMATED_SIZE_FOR_QUICK_ADD_MODAL_SEARCH_LIST = 117;
 export const ESTIMATED_SIZE_FOR_SHOPPING_LISTS = 133;
 export const ESTIMATED_SIZE_FOR_STORES_LIST = 61;
 export const FILE_NAMES = {
@@ -45,6 +50,7 @@ export const GPS_COORDINATES_DEFAULT = Object.freeze({
   lat: EMPTY_STRING,
   lon: EMPTY_STRING,
 } as GpsCoordinate);
+export const HEADER_BUTTON_SIZE_DEFAULT = 8;
 export const HOUR_IN_MS = 1000 * 60 * 60;
 export const DAY_IN_MS = HOUR_IN_MS * 24;
 export const WEEK_IN_MS = DAY_IN_MS * 7;
@@ -68,6 +74,7 @@ export const ITEM_UNIT_INITIAL = ItemUnit.Package;
 export const NAME_ORDER_BRANDS_STRING = 'brands';
 export const NAME_ORDER_PRODUCT_NAME_STRING = 'product_name';
 export const NAME_ORDER_TEMPLATE_INITIAL = `${NAME_ORDER_PRODUCT_NAME_STRING} (${NAME_ORDER_BRANDS_STRING})`;
+export const QUANTITY_ROW_DEFAULT = 1;
 export const SAVE_IMAGES_TO_GALLERY_INITIAL = false;
 export const SORT_ORDER_VALUE_BY_NAME_DEFAULT: SortOrderValue = Object.freeze({
   sortOrder: SortOrder.Ascending,
@@ -339,3 +346,12 @@ export const VALID_COUNTRY_CODES = [
   'ZM',
   'ZW',
 ];
+
+export const STORE_SPECIFIC_VALUE_KEY_DEFAULTS: StoreSpecificValueKeyTypes = {
+  [StoreSpecificValueKey.AisleNumber]: EMPTY_NUMBER,
+  [StoreSpecificValueKey.IsInCart]: false,
+  [StoreSpecificValueKey.ItemId]: EMPTY_STRING,
+  [StoreSpecificValueKey.Note]: EMPTY_STRING,
+  [StoreSpecificValueKey.Price]: EMPTY_NUMBER,
+  [StoreSpecificValueKey.Quantity]: EMPTY_NUMBER,
+};

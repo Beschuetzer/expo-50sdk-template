@@ -2,11 +2,8 @@ import {
   AbstractService,
   GenericResponse,
 } from '@/components/services/AbstractService';
-import {
-  DispatchNeeded,
-  MakeCallInput,
-} from '@/components/services/BffService';
 import { GpsCoordinate } from '@/types/Store';
+import { DispatchNeeded, MakeCallInput } from '@/types/bffService';
 import { Address } from '@/types/general';
 
 const GEO_CODING_SERVICE_BASE_URL = 'https://geocode.maps.co';
@@ -20,6 +17,7 @@ export type ForwardGeocodingInput = {
 export type ReverseGeocodingInput = {
   gpsCoordinate: GpsCoordinate;
 } & Messages &
+  Pick<MakeCallInput, 'showLoadingMsg'> &
   DispatchNeeded;
 
 export type ForwardGeocodingPlace = {
@@ -78,7 +76,6 @@ class GeoCodingService extends AbstractService {
   async doForwardGeocoding(input: ForwardGeocodingInput) {
     const { address, dispatch, loadingMsg, errorMsg } = input;
     const urlParams = new URLSearchParams();
-    console.log({ address });
 
     !!address?.addressLineOne &&
       urlParams.append('street', `${address.addressLineOne}`);
@@ -103,7 +100,7 @@ class GeoCodingService extends AbstractService {
   async doReverseGeoCoding(
     input: ReverseGeocodingInput,
   ): Promise<ReverseGeocodingResponse> {
-    const { gpsCoordinate, dispatch, errorMsg, loadingMsg } = input;
+    const { gpsCoordinate, dispatch, errorMsg, loadingMsg, showLoadingMsg } = input;
     const { lat, lon } = gpsCoordinate;
     if (!lat || !lon) {
       throw new Error('Please provide a valid latitude and longitude');
@@ -118,6 +115,7 @@ class GeoCodingService extends AbstractService {
       loadingMsg:
         loadingMsg || `Finding address for  lat: ${lat}, lon: ${lon}.`,
       dispatch,
+      showLoadingMsg,
     });
   }
 }

@@ -1,8 +1,9 @@
 import { Picker } from '@react-native-picker/picker';
 import { Row, Input, theme, View, Stack, Heading, Text } from 'native-base';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
+  EMPTY_NUMBER,
   FREQUENCY_INITIAL,
   TIME_SPAN_TO_MILLISECONDS_MAPPING,
 } from '@/constants/general';
@@ -26,6 +27,7 @@ export function FrequencyInput(props: FrequencyInputProps) {
     spacing,
     initialFrequency,
   } = props;
+  const previousFrequencyValueRef = useRef(EMPTY_NUMBER);
   const [frequency, setFrequency] = useState<Frequency>(
     initialFrequency || {
       ...FREQUENCY_INITIAL,
@@ -53,8 +55,10 @@ export function FrequencyInput(props: FrequencyInputProps) {
   );
 
   useEffect(() => {
+    if (frequencyInMs === previousFrequencyValueRef.current) return;
     onValueChange && onValueChange(frequencyInMs);
-  }, [onValueChange, frequency]);
+    previousFrequencyValueRef.current = frequencyInMs;
+  }, [onValueChange, frequencyInMs]);
 
   return (
     <Stack my={spacing}>

@@ -17,6 +17,7 @@ export type ModalWithBlurProps = {
   title: string | ReactNode | ReactNode[];
   onConfirm?: () => void;
   onCancel?: () => void;
+  onBlurPress?: () => void;
 } & ChildrenProp;
 
 export function ModalWithBlur(props: ModalWithBlurProps) {
@@ -29,6 +30,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
     children,
     onCancel,
     onConfirm,
+    onBlurPress,
   } = props;
   const theme = useTheme();
 
@@ -74,6 +76,9 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
           alignItems: 'center',
           backgroundColor: MODAL_BLUR_VIEW_COLOR,
         }}
+        onTouchEnd={() => {
+          onBlurPress && onBlurPress();
+        }}
       >
         <View
           style={
@@ -85,6 +90,9 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
               ...maxWidth,
             } as ViewStyle
           }
+          onTouchEnd={(e) => {
+            e.stopPropagation();
+          }}
         >
           {typeof title === 'string' ? (
             <Heading

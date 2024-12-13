@@ -5,11 +5,9 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { Menu } from 'react-native-popup-menu';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 
 import { AddButton } from '@/components/header/AddButton';
@@ -17,8 +15,10 @@ import {
   ListHeaderRight,
   ListHeaderRightOptions,
 } from '@/components/header/ListHeaderRight';
+import { useAwakenBff } from '@/components/hooks/useAwakenBff';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { useInitializer } from '@/components/hooks/useInitializer';
+import { useMenu } from '@/components/hooks/useMenu';
 import { InCartList } from '@/components/lists/InCartList';
 import { ListSorter } from '@/components/lists/ListSorter';
 import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
@@ -34,8 +34,8 @@ import {
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
+import { accountSelector } from '@/state/slices/generalSlice';
 import {
-  ListName,
   currentStoreSelector,
   inCartListSelector,
   moveAllToInCart,
@@ -61,7 +61,8 @@ import {
   itemsPurchasedAtStoreSelector,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
-import { savePurchase } from '@/state/thunks';
+import { getCurrentState, savePurchase } from '@/state/thunks';
+import { ListName } from '@/types/listSlice';
 import { getNewViewingMode, resetConfirmModalProps } from '@/utils/helpers';
 
 export default function TabOneScreen() {
@@ -70,12 +71,15 @@ export default function TabOneScreen() {
   useGpsCoordinate({
     onSuccess: (gpsCoordinate) => {
       dispatch(setCurrentLocation(gpsCoordinate));
+      dispatch(getCurrentState({ gpsCoordinate, showLoadingMsg: false }));
     },
   });
+  useAwakenBff();
   useInitializer();
   const layout = useWindowDimensions();
   const shoppingList = useAppSelector(shoppingListSelector);
   const inCartList = useAppSelector(inCartListSelector);
+  const account = useAppSelector(accountSelector);
   const itemsPurchasedAtStore = useAppSelector(itemsPurchasedAtStoreSelector);
   const previouslyPurchasedList = useAppSelector(
     previouslyPurchasedListSelector,
@@ -101,8 +105,22 @@ export default function TabOneScreen() {
   );
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const [index, setIndex] = useState(0);
-  const menuRef = useRef<Menu>(null);
   const navigation = useNavigation();
+
+  const [, closeMenu] = useMenu({
+    navigationOptionsGetter: (menuRef) => ({
+      headerRight: () => (
+        <ListHeaderRight
+          ref={menuRef}
+          onSortPress={onSortPress}
+          onResetPress={onResetPress}
+          options={getMenuOptions()}
+        />
+      ),
+      headerLeft: () => <AddButton onPress={onAddItemPress} />,
+      headerTitle: `Shopping (${currentStore.name})`,
+    }),
+  });
 
   const renderScene = useMemo(
     () =>
@@ -174,10 +192,6 @@ export default function TabOneScreen() {
     setViewingMode((current) => getNewViewingMode(current));
   }, []);
 
-  const closeMenu = useCallback(() => {
-    menuRef.current?.close();
-  }, [menuRef]);
-
   const getMenuOptions = useCallback(() => {
     const options: ListHeaderRightOptions[] = [
       {
@@ -196,6 +210,14 @@ export default function TabOneScreen() {
           text: 'Remove Selected',
         });
       }
+
+      if (account._id && account.password) {
+        options.push({
+          onPress: onQuickAddPress,
+          text: 'Quick Add',
+        });
+      }
+
       options.push(
         ...[
           {
@@ -238,10 +260,12 @@ export default function TabOneScreen() {
     selectedInCartItems,
     selectedShoppingCartItems,
     selectedPreviouslyPurchasedItems,
+    account,
   ]);
 
   const onAddItemPress = useCallback(() => {
     closeMenu();
+    // @ts-ignore
     navigation.navigate(Routes.ItemModal, {
       showBlank: true,
       callerList: listName,
@@ -288,6 +312,11 @@ export default function TabOneScreen() {
     dispatch(moveAllToInCart());
   }, []);
 
+  const onQuickAddPress = useCallback(() => {
+    // @ts-ignore
+    navigation.navigate(Routes.QuickAddModal);
+  }, []);
+
   const onRemoveSelectedPress = useCallback(() => {
     dispatch(removeShoppingListItems(selectedShoppingCartItems));
   }, [selectedShoppingCartItems]);
@@ -322,29 +351,6 @@ export default function TabOneScreen() {
     dispatch(setIsMultiSelectModeForPreviouslyPurchased(false));
     dispatch(resetSelectedItemsInShopping());
   }, [index]);
-
-  useEffect(() => {
-    closeMenu();
-    navigation.setOptions({
-      headerRight: () => (
-        <ListHeaderRight
-          ref={menuRef}
-          onSortPress={onSortPress}
-          onResetPress={onResetPress}
-          options={getMenuOptions()}
-        />
-      ),
-      headerLeft: () => <AddButton onPress={onAddItemPress} />,
-      headerTitle: `Shopping (${currentStore.name})`,
-    });
-  }, [
-    index,
-    selectedShoppingCartItems.length,
-    selectedInCartItems.length,
-    currentStore.name,
-    listName,
-    getMenuOptions,
-  ]);
 
   function renderTabBar(props: any) {
     return (

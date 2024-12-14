@@ -39,6 +39,7 @@ import {
   getId,
   getKeyToUse,
   getStateFromString,
+  trimObjectValues,
 } from '@/utils/helpers';
 import { openMap } from '@/utils/openMap';
 import { parseAddress } from '@/utils/parseAddress';
@@ -118,11 +119,10 @@ export function StoreForm(props: StoreFormProps) {
     (shouldClose = true) => {
       const toSave = {
         newStore: {
-          ...formData,
+          ...trimObjectValues(formData),
           addedDate: Date.now(),
         },
       };
-
       toSave.newStore.needsSaving = true;
       if (store) {
         const areEqual = _.isEqual(
@@ -131,7 +131,7 @@ export function StoreForm(props: StoreFormProps) {
             ...getStandardizedValuesForComparison(),
           } as Store,
           {
-            ...store,
+            ...trimObjectValues(store),
             ...getStandardizedValuesForComparison(),
           } as Store,
         );
@@ -322,7 +322,14 @@ export function StoreForm(props: StoreFormProps) {
           {!formData.gpsCoordinates.lat ||
           !formData.gpsCoordinates.lon ||
           !formData.name ? null : (
-            <FontAwesomeButton size={theme.sizes[8]} style={{paddingHorizontal: theme.space[FORM_INTER_ITEM_SPACING] * 2}} name="map-marker" onPress={onMapPress} />
+            <FontAwesomeButton
+              size={theme.sizes[8]}
+              style={{
+                paddingHorizontal: theme.space[FORM_INTER_ITEM_SPACING] * 2,
+              }}
+              name="map-marker"
+              onPress={onMapPress}
+            />
           )}
         </Row>
         <Row

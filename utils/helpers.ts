@@ -774,6 +774,15 @@ export function sanitize(str?: string) {
   return str?.replace(/\./g, '');
 }
 
+export function trimObjectValues<T>(obj: T ) {
+  for (const key in obj) {
+    if (typeof obj[key] === 'string') {
+      (obj as any)[key] = obj[key].trim();
+    }
+  }
+  return obj as T;
+}
+
 export async function uriToBlob(uri: string) {
   try {
     const response = await fetch(uri);

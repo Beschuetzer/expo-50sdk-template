@@ -45,7 +45,7 @@ type AddressFormProps = {
 function getAddressFromOptions(options: AddressFormProps['options']) {
   return {
     addressLineOne:
-      options?.addressLineOne?.value?.split(',')[0].trim() || EMPTY_STRING,
+      options?.addressLineOne?.value?.split(',')[0] || EMPTY_STRING,
     addressLineTwo: options?.addressLineTwo?.value || EMPTY_STRING,
     city: options?.city?.value || EMPTY_STRING,
     country: options?.country?.value || US_COUNTRY_CODE,

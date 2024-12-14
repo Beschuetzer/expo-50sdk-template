@@ -1,16 +1,18 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { useNavigation } from 'expo-router';
-import { Button, Center, FlatList, Row, Stack, theme } from 'native-base';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Button, FlatList, Row, Stack, theme } from 'native-base';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
+import { FontAwesomeButton } from '@/components/FontAwesomeButton';
 import { ImageCapturer } from '@/components/ImageCapturer';
 import { QuickAddRow } from '@/components/QuickAddRow';
 import { ListHeaderRight } from '@/components/header/ListHeaderRight';
 import { useMenu } from '@/components/hooks/useMenu';
 import { ListItemSeparator } from '@/components/lists/ListItemSeparator';
 import { SwipeableRow } from '@/components/lists/SwipeableRow';
+import { QuickAddRowModal } from '@/components/modals/QuickAddRowModal';
 import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
@@ -23,8 +25,10 @@ import {
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import {
+  addToQuickAddList,
   clearQuickAddList,
   deleteQuickAddListItem,
+  QUICK_ADD_UNIT_INITIAL,
   quickAddListWithGuessesSelector,
   quickAddModeSelector,
   toggleQuickAddMode,
@@ -32,7 +36,10 @@ import {
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { convertImageToList, saveItem } from '@/state/thunks';
 import { StoreSpecificValueKey } from '@/types/Item';
-import { ProcessedGroceryList } from '@/types/bffService';
+import {
+  ProcessedGroceryList,
+  ProcessedGroceryListItem,
+} from '@/types/bffService';
 import { ArrayElement } from '@/types/helpers';
 import {
   ProcessedGroceryListWithGuesses,
@@ -79,6 +86,7 @@ export default function QuickAddModal() {
   const selectedItemIdsAndQuantitiesRef = useRef<SelectedItemIdsAndQuantities>(
     {},
   );
+  const [isAddNewRowModalVisible, setIsAddNewRowModalVisible] = useState(false);
 
   const [, closeMenu] = useMenu({
     navigationOptionsGetter: (menuRef) => ({
@@ -193,7 +201,11 @@ export default function QuickAddModal() {
       }
     >
       <Stack py={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <Center justifyContent="center">
+        <Row
+          px={theme.space[FORM_INTER_ITEM_SPACING] * 2}
+          justifyContent="space-between"
+          alignItems="center"
+        >
           <ImageCapturer
             imageOptions={{
               quality: IMAGE_QUALITY_TO_USE,
@@ -202,14 +214,20 @@ export default function QuickAddModal() {
             }}
             onImageChange={onImageChange}
           />
-        </Center>
+          <FontAwesomeButton
+            name="plus"
+            onPress={() => setIsAddNewRowModalVisible(true)}
+          />
+        </Row>
         <FlatList
           data={quickAddListWithGuesses.items}
           ItemSeparatorComponent={() => <ListItemSeparator />}
+          keyExtractor={(item) => item?.[0] || EMPTY_STRING}
           renderItem={(itemLocal) => {
             const { index, item } = itemLocal;
             return (
               <SwipeableRow
+                key={index}
                 swipeableProps={{
                   onBegan: closeMenu,
                 }}
@@ -297,6 +315,24 @@ export default function QuickAddModal() {
                   }}
                 />
               </SwipeableRow>
+            );
+          }}
+        />
+        <QuickAddRowModal
+          title="Add New Row"
+          isVisible={isAddNewRowModalVisible}
+          onCancel={() => setIsAddNewRowModalVisible(false)}
+          onConfirm={(name: string, quantity: number) => {
+            setIsAddNewRowModalVisible(false);
+            const itemToUse = [
+              name,
+              quantity,
+              QUICK_ADD_UNIT_INITIAL,
+            ] as ProcessedGroceryListItem;
+            dispatch(
+              addToQuickAddList({
+                items: [itemToUse],
+              }),
             );
           }}
         />

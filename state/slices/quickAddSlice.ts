@@ -20,8 +20,8 @@ export const QUICK_ADD_ITEMS_INITIAL = Object.freeze({
   store: EMPTY_STRING,
   items: [],
 });
-
 export const QUICK_ADD_MODE_INITIAL: QuickAddMode = 'replace';
+export const QUICK_ADD_UNIT_INITIAL = 'unit';
 //#endregion
 
 const initialState: QuickAddState = Object.freeze({
@@ -33,6 +33,14 @@ export const quickAddSlice = createSlice({
   name: 'quickAdd',
   initialState,
   reducers: {
+    addToQuickAddList: (
+      state: QuickAddState,
+      action: PayloadAction<Pick<QuickAddState['quickAddList'], 'items'>>,
+    ) => {
+      const { items } = action.payload;
+      if (!items || items.length === 0) return;
+      state.quickAddList.items.unshift(...items);
+    },
     clearQuickAddList: (state: QuickAddState) => {
       state.quickAddList = QUICK_ADD_ITEMS_INITIAL;
     },
@@ -81,6 +89,7 @@ export const quickAddSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
+  addToQuickAddList,
   clearQuickAddList,
   deleteQuickAddListItem,
   resetQuickAddListSlice,

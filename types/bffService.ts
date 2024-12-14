@@ -37,8 +37,9 @@ export type LastPurchasedMapNeeded = {
 export type NewPasswordNeeded = { newPassword: string };
 export type ProcessedGroceryList = {
   store: string;
-  items: [string, number, string][];
+  items: ProcessedGroceryListItem[];
 };
+export type ProcessedGroceryListItem = [string, number, string];
 export type StoreNeeded = { store: Store };
 export type StoresNeeded = { stores: Store[] };
 export type StoreSpecificValuesNeeded = {

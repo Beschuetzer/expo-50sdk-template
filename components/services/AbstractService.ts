@@ -42,7 +42,7 @@ export class AbstractService {
       options,
       path,
       showErrorMsg = true,
-      showLoadingMsg,
+      showLoadingMsg = true,
       useErrorMessage = false,
     } = makeCallInput;
 

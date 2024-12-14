@@ -44,6 +44,7 @@ import {
   SaveStoreResponse,
   MakeCallInput,
   UserAccount,
+  ProcessedGroceryListItem,
 } from '@/types/bffService';
 import { Error, SetAppDataInput, State } from '@/types/general';
 import { ItemFormOnSave } from '@/types/itemForm';
@@ -760,7 +761,7 @@ async function saveCustomImageToS3(
   item: Item,
   account: UserAccount,
   dispatch: Dispatch,
-): Promise<[string, number, string]> {
+): Promise<ProcessedGroceryListItem> {
   const defaultReturn = [EMPTY_STRING, EMPTY_NUMBER, EMPTY_STRING] as [
     string,
     number,

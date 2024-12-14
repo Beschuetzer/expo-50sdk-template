@@ -100,7 +100,8 @@ class GeoCodingService extends AbstractService {
   async doReverseGeoCoding(
     input: ReverseGeocodingInput,
   ): Promise<ReverseGeocodingResponse> {
-    const { gpsCoordinate, dispatch, errorMsg, loadingMsg, showLoadingMsg } = input;
+    const { gpsCoordinate, dispatch, errorMsg, loadingMsg, showLoadingMsg } =
+      input;
     const { lat, lon } = gpsCoordinate;
     if (!lat || !lon) {
       throw new Error('Please provide a valid latitude and longitude');

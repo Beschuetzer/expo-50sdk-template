@@ -113,7 +113,7 @@ export const quickAddListWithGuessesSelector = createSelector(
     (state: RootState) => state[listsSlice.name].currentStoreId,
   ],
   (quickAddList, itemsList, storesList, currentStoreId) => {
-    const currentStoreName = getItemFromList(storesList, currentStoreId);
+    // const currentStoreName = getItemFromList(storesList, currentStoreId);
     if (!quickAddList.items || quickAddList.items.length === 0) {
       return {
         ...QUICK_ADD_ITEMS_INITIAL,

@@ -1,9 +1,12 @@
+import { FontAwesome6 } from '@expo/vector-icons';
 import { Camera, CameraType } from 'expo-camera';
 import { useFocusEffect } from 'expo-router';
-import { Text } from 'native-base';
+import { Center, Text } from 'native-base';
 import React, { ReactNode, useCallback, useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { useSelector } from 'react-redux';
+
+import { useKeyboard } from './hooks/useKeyboard';
 
 import { EMPTY_STRING } from '@/constants/general';
 import { listToDisplaySelector } from '@/state/slices/listsSlice';
@@ -17,7 +20,7 @@ type ScannedObj = { data: string };
 export type BarcodeScannerProps = {
   cameraType?: CameraType;
   isEnabled?: boolean;
-  onResetPress?: () => void;
+  onButtonPress?: () => void;
   onScanned?: (
     upc: string,
     scanningMode: ScanningMode,
@@ -27,6 +30,7 @@ export type BarcodeScannerProps = {
 };
 
 export function BarcodeScanner(props: BarcodeScannerProps) {
+  const isKeyboardVisible = useKeyboard();
   const itemsList = useSelector(
     listToDisplaySelector(ListName.ItemsList),
   ) as Item[];
@@ -34,7 +38,7 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
   const {
     isEnabled = true,
     cameraType = CameraType.back,
-    onResetPress,
+    onButtonPress,
     onScanned,
     scanButton,
   } = props;
@@ -58,14 +62,23 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
     }, []),
   );
 
-  function renderScanButton() {
-    if (isEnabled) return null;
+  function renderButton() {
+    const visibleStyle = {
+      display: isKeyboardVisible ? 'none' : 'flex',
+    } as ViewStyle;
+    const stylesToUse = [styles.scanAgainButton, visibleStyle];
+    if (isEnabled)
+      return (
+        <TouchableOpacity style={stylesToUse} onPress={onButtonPress}>
+          <Text style={styles.scanAgainText}>Hide</Text>
+        </TouchableOpacity>
+      );
     if (scanButton)
       return React.cloneElement(scanButton as React.ReactElement, {
-        onPress: onResetPress,
+        onPress: onButtonPress,
       });
     return (
-      <TouchableOpacity style={[styles.scanAgainButton]} onPress={onResetPress}>
+      <TouchableOpacity style={stylesToUse} onPress={onButtonPress}>
         <Text style={styles.scanAgainText}>Tap to Scan</Text>
       </TouchableOpacity>
     );
@@ -78,7 +91,12 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
         type={cameraType}
         onBarCodeScanned={handleBarCodeScanned}
       />
-      {renderScanButton()}
+      {isEnabled ? (
+        <Center position="absolute" top={0} bottom={0} left={0} right={0}>
+          <FontAwesome6 name="expand" size={300} color="white" />
+        </Center>
+      ) : null}
+      {renderButton()}
     </>
   ) : null;
 }

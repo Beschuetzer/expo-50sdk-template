@@ -1,5 +1,5 @@
 import { Button, Input, View, Text, useTheme, Row } from 'native-base';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { BarcodeScannerProps } from '../BarcodeScanner';
@@ -11,7 +11,11 @@ import { listToDisplaySelector } from '@/state/slices/listsSlice';
 import { scanningModeSelector } from '@/state/slices/optionsSlice';
 import { Item } from '@/types/Item';
 import { ListName } from '@/types/listSlice';
-import { getIsValidUpcValue, getItemFromList } from '@/utils/helpers';
+import {
+  getIsDevelopmentMode,
+  getIsValidUpcValue,
+  getItemFromList,
+} from '@/utils/helpers';
 
 type ManualUpcInputProps = {
   isVisible?: boolean;
@@ -33,6 +37,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
   const [isValid, setIsValid] = useState(IS_VALID_INITIAL);
   const [value, setValue] = useState<string>(VALUE_INITIAL);
   const theme = useTheme();
+  const isDevelopmentBuild = useMemo(() => getIsDevelopmentMode(), []);
 
   const handleSetIsValid = useCallback((value: string) => {
     clearTimeout(timeoutRef.current);
@@ -40,6 +45,11 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
       setIsValid(getIsValidUpcValue(value));
     }, DEBOUNCE_TIMEOUT);
   }, []);
+
+  const onSearchPress = useCallback(() => {
+    onPress &&
+      onPress(value, scanningMode, !!getItemFromList(itemsList, value));
+  }, [onPress, value, scanningMode, itemsList]);
 
   const onValueChange = useCallback(
     (text: string) => {
@@ -73,6 +83,7 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         onChangeText={onValueChange}
         value={value}
         focusOutlineColor={isValid ? 'primary.100' : 'red.200'}
+        onSubmitEditing={onSearchPress}
       />
       <InputValidationMessage
         style={{
@@ -82,23 +93,22 @@ export function ManualUpcInput(props: ManualUpcInputProps) {
         isValid={isValid}
         message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} numbers (currently ${value.length} chars)`}
       />
-      <Row space={1}>
-        {MOCK_UPCS.map((mock, index) => {
-          return (
-            <Button key={index} flex={1} onPress={() => onValueChange(mock)}>
-              Mock {mock}
-            </Button>
-          );
-        })}
-      </Row>
+      {isDevelopmentBuild ? (
+        <Row space={1}>
+          {MOCK_UPCS.map((mock, index) => {
+            return (
+              <Button key={index} flex={1} onPress={() => onValueChange(mock)}>
+                Mock {mock}
+              </Button>
+            );
+          })}
+        </Row>
+      ) : null}
       <Button
         isDisabled={!isValid || value.length === 0}
         backgroundColor="secondary.900"
         borderRadius={0}
-        onPress={() => {
-          onPress &&
-            onPress(value, scanningMode, !!getItemFromList(itemsList, value));
-        }}
+        onPress={onSearchPress}
       >
         Search
       </Button>

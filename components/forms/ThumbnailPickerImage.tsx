@@ -1,5 +1,4 @@
 import { View, useTheme } from 'native-base';
-import { useMemo } from 'react';
 import { TouchableOpacity } from 'react-native';
 
 import { ImageRenderer } from '../ImageRenderer';

@@ -1,6 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
+import { useIsFocused } from '@react-navigation/native';
 import { CameraType } from 'expo-camera';
-import { useNavigation } from 'expo-router';
+import { useFocusEffect, useNavigation } from 'expo-router';
 import { Button, View, Row, Text, Heading, useTheme } from 'native-base';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet } from 'react-native';
@@ -66,6 +67,7 @@ export default function ScannerScreen() {
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {},
   );
+  const isFocused = useIsFocused();
   const storeNameToAddToListRef = useRef<string>(currentStore.name);
 
   const handleAddToList = useCallback(
@@ -203,6 +205,7 @@ export default function ScannerScreen() {
   }, []);
 
   const onManuallyEnter = useCallback(() => {
+    setIsScannerEnabled(false);
     setIsManuallyEntering((current) => !current);
   }, []);
 
@@ -213,6 +216,12 @@ export default function ScannerScreen() {
   useEffect(() => {
     storeNameToAddToListRef.current = currentStore.name;
   }, [currentStore.name]);
+
+  useFocusEffect(() => {
+    if (!isFocused) {
+      setIsScannerEnabled(false);
+    }
+  });
 
   if (hasPermission === null) {
     return <FullscreenSpinner />;
@@ -262,7 +271,10 @@ export default function ScannerScreen() {
         cameraType={type}
         onScanned={onBarcodeScanned}
         isEnabled={isScannerEnabled}
-        onResetPress={() => setIsScannerEnabled(true)}
+        onButtonPress={() => {
+          setIsScannerEnabled((current) => !current);
+          setIsManuallyEntering(false);
+        }}
       />
       <Snackbar
         style={{ backgroundColor: theme.colors.white }}

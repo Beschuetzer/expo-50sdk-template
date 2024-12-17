@@ -62,8 +62,6 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     [onSelectImage, images],
   );
 
-  console.log({ imageSet: images });
-
   const onImageReturned = useCallback(
     (result: ImagePickerAsset) => {
       const urlToUse = result.uri;
@@ -79,7 +77,6 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         });
         return isLocalFile || isS3File;
       });
-      console.log({ hasCustomImageAlready });
 
       if (hasCustomImageAlready) {
         console.log('has a local file already');
@@ -112,7 +109,6 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
 
   useEffect(() => {
     const imageSetArray = Array.from(images);
-    console.log({ imageSetArray });
     onChange && onChange(Array.from(new Set(imageSetArray)));
   }, [images]);
 

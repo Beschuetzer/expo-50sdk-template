@@ -30,7 +30,6 @@ import { ListName } from '@/types/listSlice';
 import {
   deleteFile,
   getKeyToUse,
-  getS3Images,
   getS3ObjectKey,
   getUserCredentials,
 } from '@/utils/helpers';

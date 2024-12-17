@@ -2,6 +2,8 @@
 // import { Store } from '@/types/Store';
 // import { handleStoreSpecificValuesImport } from './handleStoreSpecificValuesImport';
 
+test('empty test file', () => {});
+
 // describe('handleStoreSpecificValuesImport', () => {
 //     it('it works', async () => {
 //       const modified = handleStoreSpecificValuesImport(

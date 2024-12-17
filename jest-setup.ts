@@ -1,6 +1,4 @@
 // myComponent.test.js
-import { ListName } from './state/slices/listsSlice';
-
 global.alert = jest.fn();
 
 jest.mock('@react-native-async-storage/async-storage', () =>

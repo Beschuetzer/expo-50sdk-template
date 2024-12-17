@@ -20,11 +20,7 @@ import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
 } from '@/constants/general';
-import {
-  LOCAL_FILE_REGEX,
-  UPC_REGEX,
-  UPC_REQUIRED_CHAR_LENGTH,
-} from '@/constants/regexs';
+import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import {
   Item,
   ItemWithStoreSpecificValues,

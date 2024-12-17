@@ -1,5 +1,5 @@
 ## MVP
--add option to add another line in QuickAdd feature
+-add option to load data from db on app start (call it auto-sync on load).
 -When scanning an item and adding to list, copy over the store specific values if only ever purchased at one store.  If multiple locations, add a prompt to select the store?
 -Change how CopyValueModal works in ItemFormStoreSpecificValues (a message should be displayed when the list of items is empty)
 

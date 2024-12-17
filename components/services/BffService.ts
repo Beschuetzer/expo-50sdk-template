@@ -75,15 +75,18 @@ export const DELETE_ITEMS_RESPONSE_DEFAULT: DeletionResponse = Object.freeze({
 
 class BffService extends AbstractService {
   constructor() {
+    const isDevelopmentMode = getIsDevelopmentMode();
     super(
-      getIsDevelopmentMode()
+      isDevelopmentMode
         ? BACKEND_URL
         : 'https://grocify-bff-ac27c2662495.herokuapp.com',
     );
-    displayAlert({
-      bffServiceBaseUrl: this._baseUrl,
-      EXPO_PUBLIC_ENV: process.env.EXPO_PUBLIC_ENV,
-    });
+    if (isDevelopmentMode) {
+      displayAlert({
+        bffServiceBaseUrl: this._baseUrl,
+        EXPO_PUBLIC_ENV: process.env.EXPO_PUBLIC_ENV,
+      });
+    }
   }
 
   async changePassword(input: ChangePasswordInput) {

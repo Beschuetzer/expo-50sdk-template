@@ -151,7 +151,7 @@ export default function OptionsScreen() {
             dispatch(setLoading('Obtaining current gps coordinate...'));
             const currentGpsCoordinate = await getGpsCoordinate();
             dispatch(setCurrentLocation(currentGpsCoordinate));
-            dispatch(getCurrentState(currentGpsCoordinate));
+            dispatch(getCurrentState({ gpsCoordinate: currentGpsCoordinate }));
           }}
         >
           Update Current Location

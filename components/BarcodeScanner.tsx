@@ -1,7 +1,7 @@
 import { Camera, CameraType } from 'expo-camera';
 import { useFocusEffect } from 'expo-router';
 import { Text } from 'native-base';
-import { useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 
@@ -23,6 +23,7 @@ export type BarcodeScannerProps = {
     scanningMode: ScanningMode,
     isItemInList: boolean,
   ) => void;
+  scanButton?: ReactNode | ReactNode[];
 };
 
 export function BarcodeScanner(props: BarcodeScannerProps) {
@@ -35,6 +36,7 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
     cameraType = CameraType.back,
     onResetPress,
     onScanned,
+    scanButton,
   } = props;
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
 
@@ -56,6 +58,19 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
     }, []),
   );
 
+  function renderScanButton() {
+    if (isEnabled) return null;
+    if (scanButton)
+      return React.cloneElement(scanButton as React.ReactElement, {
+        onPress: onResetPress,
+      });
+    return (
+      <TouchableOpacity style={[styles.scanAgainButton]} onPress={onResetPress}>
+        <Text style={styles.scanAgainText}>Tap to Scan</Text>
+      </TouchableOpacity>
+    );
+  }
+
   return shouldRenderCamera ? (
     <>
       <Camera
@@ -63,11 +78,7 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
         type={cameraType}
         onBarCodeScanned={handleBarCodeScanned}
       />
-      {!isEnabled ? (
-        <TouchableOpacity style={styles.scanAgainButton} onPress={onResetPress}>
-          <Text style={styles.scanAgainText}>Tap to Scan Again</Text>
-        </TouchableOpacity>
-      ) : null}
+      {renderScanButton()}
     </>
   ) : null;
 }
@@ -78,14 +89,16 @@ const styles = StyleSheet.create({
   },
   scanAgainButton: {
     position: 'absolute',
-    top: '50%',
-    left: '25%',
+    bottom: '0%',
+    left: '0%',
     padding: 15,
+    width: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 10,
   },
   scanAgainText: {
     color: 'white',
     fontSize: 18,
+    textAlign: 'center',
   },
 });

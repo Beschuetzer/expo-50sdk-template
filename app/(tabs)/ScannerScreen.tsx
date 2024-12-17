@@ -5,7 +5,7 @@ import { Button, View, Row, Text, Heading, useTheme } from 'native-base';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { Snackbar } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { FullscreenSpinner } from '@/components/FullscreenSpinner';
@@ -35,6 +35,7 @@ import {
   scanningModeSelector,
   setScanningMode,
 } from '@/state/slices/optionsSlice';
+import { useAppSelector } from '@/state/store';
 import { Item } from '@/types/Item';
 import { ScanningMode } from '@/types/general';
 import {
@@ -46,12 +47,13 @@ import {
 
 const SNACKBAR_VISIBILITY_DURATION = 2500;
 export default function ScannerScreen() {
-  const currentStore = useSelector(currentStoreSelector);
-  const currentStoreId = useSelector(currentStoreIdSelector);
-  const scanningMode = useSelector(scanningModeSelector);
-  const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
-  const itemsList = useSelector(itemsListSelector);
-  const storesList = useSelector(storesListSelector);
+  const currentStore = useAppSelector(currentStoreSelector);
+  const currentStoreId = useAppSelector(currentStoreIdSelector);
+  const scanningMode = useAppSelector(scanningModeSelector);
+  const lastPurchasedMap = useAppSelector(lastPurchasedMapSelector);
+  const itemsList = useAppSelector(itemsListSelector);
+  const storesList = useAppSelector(storesListSelector);
+  const [isScannerEnabled, setIsScannerEnabled] = useState(false);
   const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
@@ -186,11 +188,12 @@ export default function ScannerScreen() {
     (upc: string, scanningMode: ScanningMode, isItemInList: boolean) => {
       const now = Date.now();
       const diff = now - lastScanTimeRef.current;
-      if (diff <= SNACKBAR_VISIBILITY_DURATION) return;
+      if (!isScannerEnabled || diff <= SNACKBAR_VISIBILITY_DURATION) return;
+      setIsScannerEnabled(false);
       handleUpcNavigation(upc, scanningMode, isItemInList);
       lastScanTimeRef.current = now;
     },
-    [lastScanTimeRef.current, handleUpcNavigation],
+    [lastScanTimeRef.current, handleUpcNavigation, isScannerEnabled],
   );
 
   const onSwitchCameraPress = useCallback(() => {
@@ -255,7 +258,12 @@ export default function ScannerScreen() {
         isVisible={isManuallyEntering}
         onPress={handleUpcNavigation}
       />
-      <BarcodeScanner cameraType={type} onScanned={onBarcodeScanned} />
+      <BarcodeScanner
+        cameraType={type}
+        onScanned={onBarcodeScanned}
+        isEnabled={isScannerEnabled}
+        onResetPress={() => setIsScannerEnabled(true)}
+      />
       <Snackbar
         style={{ backgroundColor: theme.colors.white }}
         visible={isSnackbarVisible}

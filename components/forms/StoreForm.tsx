@@ -16,11 +16,8 @@ import {
 } from '@/components/services/GeoCodingService';
 import {
   AUTO_SAVE_DEBOUNCE_THRESHOLD,
-  EMPTY_NUMBER,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
-  GPS_COORDINATES_DEFAULT,
-  US_COUNTRY_CODE,
 } from '@/constants/general';
 import { setError, setLoading } from '@/state/slices/generalSlice';
 import {
@@ -30,13 +27,13 @@ import {
 import { autoSaveStoresSelector } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { Store } from '@/types/Store';
-import { Address, State, StoreProp } from '@/types/general';
+import { Address, StoreProp } from '@/types/general';
 import { AddStoresListItemPayload } from '@/types/listSlice';
 import {
   displayAlert,
   getAreStoresEqual,
+  getEmptyStore,
   getGpsCoordinate,
-  getId,
   getKeyToUse,
   getStateFromString,
   trimObjectValues,
@@ -54,7 +51,6 @@ export type StoreFormProps = {
   onSave: (addStoresListItemPayload: AddStoresListItemPayload) => void;
 } & StoreProp;
 
-type StoreFormData = Omit<Required<Store>, 'calculatedDistance'>;
 /**
  *Handles store inputs
  **/
@@ -65,26 +61,10 @@ export function StoreForm(props: StoreFormProps) {
   const storesList = useAppSelector(storesListSelector);
   const autoSaveStores = useAppSelector(autoSaveStoresSelector);
   const currentLocationState = useAppSelector(currentLocationStateSelector);
-  const [formData, setFormData] = useState<StoreFormData>({
-    hasBeenSaved: store?.hasBeenSaved != null ? store.hasBeenSaved : false,
-    needsSaving: store?.needsSaving != null ? store.needsSaving : true,
-    _id: store?._id || getId(),
-    addedDate: store?.addedDate || EMPTY_NUMBER,
-    addressLineOne: store?.addressLineOne || EMPTY_STRING,
-    addressLineTwo: store?.addressLineTwo || EMPTY_STRING,
-    city: store?.city || EMPTY_STRING,
-    state: store?.state || currentLocationState || State.None,
-    zipCode: store?.zipCode || EMPTY_STRING,
-    country: store?.country || US_COUNTRY_CODE,
-    name: store?.name || EMPTY_STRING,
-    gpsCoordinates: store?.gpsCoordinates || {
-      ...GPS_COORDINATES_DEFAULT,
-    },
-  });
-  const addressRef = useRef<Address>({
-    ...formData,
-  });
-
+  const [formData, setFormData] = useState(
+    getEmptyStore(store, currentLocationState),
+  );
+  const [searchAddress, setSearchAddress] = useState(getEmptyStore());
   const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
   const [placeToUse, setPlaceToUse] = useState<ForwardGeocodingPlace>(null);
   const [positionsToShowInModal, setPlacesToShowInModal] = useState<
@@ -108,6 +88,10 @@ export function StoreForm(props: StoreFormProps) {
   const nameToUse = useMemo(
     () => formData.addressLineOne || formData.name,
     [formData],
+  );
+  const searchNameToUse = useMemo(
+    () => searchAddress.name || searchAddress.addressLineOne,
+    [searchAddress],
   );
   const autoSaveTimeoutRef = useRef<any>();
 
@@ -162,22 +146,18 @@ export function StoreForm(props: StoreFormProps) {
     }
   }, []);
 
-  const onAddressChange = useCallback(
-    (address: Address, isValid: boolean) => {
-      addressRef.current = address;
-      setIsAddressValid(isValid);
-      setFormData((current) => ({
-        ...current,
-        ...address,
-        name: address.addressLineOne || EMPTY_STRING,
-      }));
-    },
-    [addressRef.current],
-  );
+  const onAddressChange = useCallback((address: Address, isValid: boolean) => {
+    setIsAddressValid(isValid);
+    setFormData((current) => ({
+      ...current,
+      ...address,
+      name: address.addressLineOne || EMPTY_STRING,
+    }));
+  }, []);
 
   const onAddressFormSubmitPress = useCallback(async () => {
     const places = await GEO_CODING_SERVICE.doForwardGeocoding({
-      address: addressRef.current,
+      address: searchAddress,
       dispatch,
     });
 
@@ -196,11 +176,18 @@ export function StoreForm(props: StoreFormProps) {
     } else {
       setPlacesToShowInModal(places || []);
     }
-  }, [addressRef.current, addressSheetRef.current]);
+  }, [searchAddress, addressSheetRef.current]);
 
   const onSearchPress = useCallback(() => {
+    setSearchAddress(
+      getEmptyStore({
+        name: formData.name,
+        addressLineOne: nameToUse,
+        state: formData.state || currentLocationState,
+      } as Store),
+    );
     addressSheetRef.current?.present();
-  }, [addressSheetRef.current]);
+  }, [addressSheetRef.current, formData, nameToUse, currentLocationState]);
 
   const onMapPress = useCallback(() => {
     openMap({
@@ -209,6 +196,17 @@ export function StoreForm(props: StoreFormProps) {
       label: formData.name,
     });
   }, [formData]);
+
+  const onSearchAddressChange = useCallback(
+    (address: Address, isValid: boolean) => {
+      setSearchAddress((current) => ({
+        ...current,
+        ...address,
+        name: address.addressLineOne || EMPTY_STRING,
+      }));
+    },
+    [],
+  );
 
   useEffect(() => {
     if (placeToUse?.lat && placeToUse?.lon) {
@@ -285,7 +283,7 @@ export function StoreForm(props: StoreFormProps) {
             flex={1}
             placeholder="latitude"
             value={formData.gpsCoordinates?.lat.toString()}
-            onChangeText={(newLat) =>
+            onChangeText={(newLat) => {
               setFormData(
                 (current) =>
                   ({
@@ -295,8 +293,8 @@ export function StoreForm(props: StoreFormProps) {
                       lat: newLat,
                     },
                   }) as any,
-              )
-            }
+              );
+            }}
           />
           <InputText>Long:&nbsp;</InputText>
           <Input
@@ -306,7 +304,7 @@ export function StoreForm(props: StoreFormProps) {
             flex={1}
             placeholder="longitude"
             value={formData.gpsCoordinates?.lon.toString()}
-            onChangeText={(newLon) =>
+            onChangeText={(newLon) => {
               setFormData(
                 (current) =>
                   ({
@@ -316,8 +314,8 @@ export function StoreForm(props: StoreFormProps) {
                       lon: newLon,
                     },
                   }) as any,
-              )
-            }
+              );
+            }}
           />
           {!formData.gpsCoordinates.lat ||
           !formData.gpsCoordinates.lon ||
@@ -358,9 +356,7 @@ export function StoreForm(props: StoreFormProps) {
               name: 'Name',
               value: nameToUse,
             },
-            addressLineTwo: {
-              value: formData.addressLineTwo,
-            },
+            addressLineTwo: { value: formData.addressLineTwo },
             city: { value: formData.city },
             state: { value: getStateFromString(formData.state) },
             zipCode: { value: formData.zipCode },
@@ -382,11 +378,11 @@ export function StoreForm(props: StoreFormProps) {
         }}
       >
         <AddressForm
-          onValueChange={onAddressChange}
+          onValueChange={onSearchAddressChange}
           options={{
             addressLineOne: {
               name: 'Store Name',
-              value: nameToUse,
+              value: searchNameToUse,
               suffix: { text: '*' },
             },
             addressLineTwo: { isVisible: false },

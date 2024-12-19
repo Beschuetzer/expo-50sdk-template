@@ -23,10 +23,12 @@ import {
   ERROR_MODAL_STATUS_CODE_DEFAULT,
   FILE_NAMES,
   FREQUENCY_INITIAL,
+  GPS_COORDINATES_DEFAULT,
   HOUR_IN_MS,
   IMAGE_QUALITY,
   SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT,
   SORT_ORDER_VALUE_BY_NAME_DEFAULT,
+  US_COUNTRY_CODE,
   WEEK_IN_MS,
 } from '@/constants/general';
 import {
@@ -227,6 +229,28 @@ export function getEmptyItem(): Item {
 
 export function getEmptyObject<T>() {
   return {} as T;
+}
+
+export function getEmptyStore(
+  store?: Store | null,
+  currentLocationState?: string,
+): Omit<Required<Store>, 'calculatedDistance'> {
+  return {
+    hasBeenSaved: store?.hasBeenSaved != null ? store.hasBeenSaved : false,
+    needsSaving: store?.needsSaving != null ? store.needsSaving : true,
+    _id: store?._id || getId(),
+    addedDate: store?.addedDate || EMPTY_NUMBER,
+    addressLineOne: store?.addressLineOne || EMPTY_STRING,
+    addressLineTwo: store?.addressLineTwo || EMPTY_STRING,
+    city: store?.city || EMPTY_STRING,
+    state: store?.state || currentLocationState || State.None,
+    zipCode: store?.zipCode || EMPTY_STRING,
+    country: store?.country || US_COUNTRY_CODE,
+    name: store?.name || EMPTY_STRING,
+    gpsCoordinates: store?.gpsCoordinates || {
+      ...GPS_COORDINATES_DEFAULT,
+    },
+  };
 }
 
 export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {

@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorValue, Dimensions } from 'react-native';
 
 import { InputText } from './InputText';
+import FocusInput from '../FocusInput';
 
 import {
   EMPTY_STRING,
@@ -57,10 +58,7 @@ function getAddressFromOptions(options: AddressFormProps['options']) {
 export function AddressForm(props: AddressFormProps) {
   const { options, onValueChange, onValueChangeTimeout } = props;
   const theme = useTheme();
-
   const debounceRef = useRef<any>();
-  const isFirstRenderRef = useRef(true);
-  const addressLineOneRef = useRef<HTMLInputElement>();
   const [address, setAddress] = useState<Address>(
     getAddressFromOptions(options),
   );
@@ -110,14 +108,6 @@ export function AddressForm(props: AddressFormProps) {
   }, [address]);
 
   useEffect(() => {
-    if (!isFirstRenderRef.current) return;
-    isFirstRenderRef.current = false;
-    if (address.addressLineOne.length === 0) {
-      addressLineOneRef.current?.focus();
-    }
-  }, [addressLineOneRef, isFirstRenderRef, address.addressLineOne]);
-
-  useEffect(() => {
     setAddress(getAddressFromOptions(options));
   }, [
     options?.addressLineOne?.value,
@@ -149,8 +139,7 @@ export function AddressForm(props: AddressFormProps) {
           >
             {fieldOneName}
           </InputText>
-          <Input
-            ref={addressLineOneRef}
+          <FocusInput
             variant="outline"
             p={theme.space[1]}
             flex={1}

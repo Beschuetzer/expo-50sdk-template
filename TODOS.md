@@ -1,4 +1,14 @@
 ## MVP
+-Make aisle number field accept letters
+-Add "move list to..." option on shopping tab when items are in the shopping list:
+    --modify the StoreManager to be a pure component and have the dispatch action called in the callback
+-Add "move list from..." option on shopping tab
+    --modify the StoreManager to be a pure component and have the dispatch action called in the callback
+-Add a flow where you can add a store from the ItemForm (via a bottomsheet modal using the store forn?)
+    --modify the StoreManager to have the option to select new store which opens the bottom sheet modal
+-Investigate how to have ok google open the app and do something like "add item to list"
+
+
 -add option to load data from db on app start (call it auto-sync on load).
 -When scanning an item and adding to list, copy over the store specific values if only ever purchased at one store.  If multiple locations, add a prompt to select the store?
 -Change how CopyValueModal works in ItemFormStoreSpecificValues (a message should be displayed when the list of items is empty)

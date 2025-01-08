@@ -46,6 +46,7 @@ export function QuickAddRow(props: QuickAddRowProps) {
     itemsList,
     guesses,
     index,
+    newItemInitial,
     previouslySelectedIndex,
     storeSpecificValuesMap,
     onAddNewItem,
@@ -79,7 +80,7 @@ export function QuickAddRow(props: QuickAddRowProps) {
   );
   const [newItemPayload, setNewItemPayload] = useState<
     ItemFormOnSave | undefined
-  >(undefined);
+  >(newItemInitial || undefined);
   const newItemValidation = useMemo(
     () => getItemValidation(newItemPayload?.item),
     [newItemPayload?.item],

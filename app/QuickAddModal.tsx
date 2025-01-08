@@ -111,10 +111,11 @@ export default function QuickAddModal() {
 
   const onDeleteItem = useCallback(
     (index: number, item: ArrayElement<ProcessedGroceryList['items']>) => {
-      delete selectedItemIdsAndQuantitiesRef.current[item[0]];
+      delete newItemsRef?.current[item?.[0]];
+      delete selectedItemIdsAndQuantitiesRef?.current[item?.[0]];
       dispatch(deleteQuickAddListItem(index));
     },
-    [selectedItemIdsAndQuantitiesRef],
+    [selectedItemIdsAndQuantitiesRef.current, newItemsRef.current],
   );
 
   const onImageChange = useCallback(async (image: ImagePickerAsset) => {
@@ -252,14 +253,14 @@ export default function QuickAddModal() {
                   index={index}
                   itemsList={itemsList}
                   storeSpecificValuesMap={storeSpecificValuesMap}
+                  newItemInitial={newItemsRef?.current[item[0]]}
                   previouslySelectedIndex={
                     selectedIndexesRef.current?.[item?.[0]]
                   }
                   guesses={quickAddListWithGuesses.guesses?.[item[0]]}
                   onAddNewItem={(parsedName, newItemPayload) => {
-                    if (!parsedName) return;
+                    if (!parsedName || !newItemPayload) return;
                     newItemsRef.current[parsedName] = newItemPayload;
-                    if (!newItemPayload) return;
                     delete selectedItemIdsAndQuantitiesRef.current[parsedName];
                   }}
                   onQuantityChange={(parsedName, quantity) => {

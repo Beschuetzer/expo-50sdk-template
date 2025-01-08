@@ -20,6 +20,7 @@ export type QuickAddRowProps = {
   itemsList: ItemsList;
   storeSpecificValuesMap: StoreSpecificValuesMap;
   index: number;
+  newItemInitial?: ItemFormOnSave;
   previouslySelectedIndex?: number;
   onAddNewItem?: (parsedName: string, newItemPayload?: ItemFormOnSave) => void;
   onQuantityChange: (parsedName: string, quantity: number) => void;

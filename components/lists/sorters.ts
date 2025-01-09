@@ -52,13 +52,16 @@ export function getSorter(
       currentItem = currentItem[currentStoreId];
       nextItem = nextItem[currentStoreId];
       if (
-        key === SortType.AisleNumber ||
         key === SortType.ItemId ||
         key === SortType.Price ||
         key === SortType.Quantity
       ) {
         currentItem = parseFloat(currentItem);
         nextItem = parseFloat(nextItem);
+      } else if (key === SortType.AisleNumber) {
+        //todo: need to use the custom sorter for the store
+        // currentItem = currentItem?.replace(/[a-zA-Z]/g, EMPTY_STRING);
+        // nextItem = nextItem?.replace(/[a-zA-Z]/g, EMPTY_STRING);
       }
     }
 

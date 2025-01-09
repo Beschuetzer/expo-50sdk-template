@@ -1,7 +1,13 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import _ from 'lodash';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { FrequencyInput } from './FrequencyInput';
 import { InputText } from './InputText';

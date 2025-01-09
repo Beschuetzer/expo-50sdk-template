@@ -86,7 +86,7 @@ export function ItemFormStoreSpecific(
   const [aisleNumber, setAisleNumber] = useState(
     storeSpecificValuesMap?.[currentStoreId]?.[
       StoreSpecificValueKey.AisleNumber
-    ] || EMPTY_NUMBER,
+    ] || EMPTY_STRING,
   );
   const [itemId, setItemId] = useState(
     storeSpecificValuesMap?.[currentStoreId]?.[
@@ -177,7 +177,7 @@ export function ItemFormStoreSpecific(
       ] ||
       item?.[StoreSpecificValueKey.AisleNumber]?.[currentStoreId] ||
       itemInList?.[StoreSpecificValueKey.AisleNumber]?.[currentStoreId] ||
-      EMPTY_NUMBER;
+      EMPTY_STRING;
     const itemIdToShow =
       lastSavedValueRef.current?.[StoreSpecificValueKey.ItemId]?.[
         currentStoreId
@@ -312,13 +312,12 @@ export function ItemFormStoreSpecific(
           Aisle # at '{currentStore.name}'
         </InputText>
         <Input
-          keyboardType="numeric"
           variant="outline"
           p={theme.space[1]}
           placeholder="Aisle #"
           value={(aisleNumber || EMPTY_STRING).toString()}
           onChangeText={(newValue) =>
-            setAisleNumber(parseFloat(newValue) || EMPTY_NUMBER)
+            setAisleNumber(newValue)
           }
           InputRightElement={
             <FontAwesomeButton
@@ -355,7 +354,7 @@ export function ItemFormStoreSpecific(
           const valueToUse = selectedValue?.[1];
           setItemSearchModalValues({});
           if (copyModalKey === StoreSpecificValueKey.AisleNumber) {
-            setAisleNumber(parseInt(valueToUse || EMPTY_STRING, 10));
+            setAisleNumber(valueToUse || EMPTY_STRING);
           } else if (copyModalKey === StoreSpecificValueKey.ItemId) {
             setItemId(valueToUse || EMPTY_STRING);
           } else if (copyModalKey === StoreSpecificValueKey.Price) {
@@ -417,7 +416,7 @@ export function ItemFormStoreSpecific(
           setShouldDisplayStoreToUseModal(false);
 
           if (aisleNumber) {
-            setAisleNumber(parseFloat(aisleNumber) || EMPTY_NUMBER);
+            setAisleNumber(aisleNumber || EMPTY_STRING);
           }
           if (itemId) {
             setItemId(itemId);

@@ -1,5 +1,7 @@
 ## MVP
 
+-fix issue using quick add then exiting the app doesn't save added items.  Moving one to in cart first does though
+
 -Make aisle number field accept letters (check the sorting)
     --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
     --figure out why items with no aisle are not being sorted at the front or the end but in the middle somewhere

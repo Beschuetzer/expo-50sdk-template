@@ -1,5 +1,6 @@
 ## MVP
 
+-Selecting closest store on load not working
 -Add a search bar in the previously purchased tab
 -fix issue using quick add then exiting the app doesn't save added items.  Moving one to in cart first does though
 

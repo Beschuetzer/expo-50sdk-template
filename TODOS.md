@@ -1,6 +1,7 @@
 ## MVP
-
--Selecting closest store on load not working
+-Add menu in store details with a selection to copy store values from another store (add tests for this too)
+-Move all of the menu items in the Items tab to a search bar and icons
+-Selecting closest store on load not working?
 -Add a search bar in the previously purchased tab
 -fix issue using quick add then exiting the app doesn't save added items.  Moving one to in cart first does though
 

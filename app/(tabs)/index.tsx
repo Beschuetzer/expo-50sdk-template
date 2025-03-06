@@ -70,6 +70,7 @@ export default function TabOneScreen() {
   const dispatch = useAppDispatch();
   useGpsCoordinate({
     onSuccess: (gpsCoordinate) => {
+      console.log({ gpsCoordinate });
       dispatch(setCurrentLocation(gpsCoordinate));
       dispatch(getCurrentState({ gpsCoordinate, showLoadingMsg: false }));
     },

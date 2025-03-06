@@ -38,22 +38,16 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
   }, []);
 
   useEffect(() => {
-    console.log({ currentLocation, storesList });
-    
     const storesMeetingCriteria: Store[] = [];
     for (const store of storesList.data) {
       const storeIsCloseEnough =
         store.calculatedDistance != null &&
         store.calculatedDistance <= autoSetStore.maxDistanceInMiles;
-        console.log({ storeIsCloseEnough });
-        
       if (storeIsCloseEnough) {
         storesMeetingCriteria.push(store);
       }
     }
 
-    console.log({ storesMeetingCriteria });
-    
     if (storesMeetingCriteria.length > 0) {
       const assumedStore =
         storesMeetingCriteria[
@@ -66,15 +60,13 @@ export const AutoSetStoreModal = (props: AutoSetStoreModalProps) => {
         currentStore.name.trim().toLowerCase() ===
         assumedStore?.name.trim().toLowerCase();
 
-        console.log({ assumedStore, isCurrentStoreAssumedStore });
-        
       if (!isCurrentStoreAssumedStore && autoSetStore.enabled) {
         onConfirmPress(assumedStore);
       } else if (!isCurrentStoreAssumedStore) {
         setStoreToAskAbout(assumedStore);
       }
     }
-  }, [currentLocation, storesList]);
+  }, [currentLocation, storesList.data]);
 
   return (
     <ModalWithBlur

@@ -3,9 +3,9 @@ import { useNavigation } from 'expo-router';
 import { useCallback } from 'react';
 
 import { StoreForm } from '@/components/forms/StoreForm';
-import { AddStoresListItemPayload } from '@/state/slices/listsSlice';
 import { useAppDispatch } from '@/state/store';
 import { saveStore } from '@/state/thunks';
+import { AddStoresListItemPayload } from '@/types/listSlice';
 
 export default function StoreModal() {
   const navigation = useNavigation();

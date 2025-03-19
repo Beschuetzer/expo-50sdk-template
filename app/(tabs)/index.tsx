@@ -25,7 +25,7 @@ import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedL
 import {
   ShoppingList,
   shoppingListSortTypes,
-} from '@/components/lists/ShoppingLIst';
+} from '@/components/lists/ShoppingList';
 import { SortType } from '@/components/lists/sorters';
 import {
   ConfirmModal,

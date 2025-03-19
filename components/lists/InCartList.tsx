@@ -7,13 +7,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { ListItemSeparator } from './ListItemSeparator';
 import { ListSorter } from './ListSorter';
-import { shoppingListSortTypes } from './ShoppingLIst';
 import { SwipeableRow } from './SwipeableRow';
 import { TotalListPrice } from './TotalListPrice';
 import { SortType } from './sorters';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
+import { shoppingListSortTypes } from '@/components/lists/ShoppingList';
 import { ESTIMATED_SIZE_FOR_SHOPPING_LISTS } from '@/constants/general';
 import {
   isMultiSelectModeForInCartSelector,

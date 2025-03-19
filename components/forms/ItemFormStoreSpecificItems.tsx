@@ -35,9 +35,9 @@ import { ItemProp } from '@/types/general';
 import { ItemFormProps } from '@/types/itemForm';
 import {
   camelCaseToSpacedCapitalized,
-  ensureMaxLength,
   getItemFromList,
   getKeyToUse,
+  getStoreDescriptor,
 } from '@/utils/helpers';
 import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
 
@@ -79,13 +79,7 @@ export function ItemFormStoreSpecific(
     [item],
   );
   const storeNameWithLocation = useMemo(
-    () =>
-      currentStore.city || currentStore.zipCode
-        ? ensureMaxLength(
-            `${currentStore.name} (${currentStore.city || currentStore.zipCode || ''})`,
-            40,
-          )
-        : `${currentStore.name}`,
+    () => getStoreDescriptor(currentStore),
     [currentStore],
   );
   const itemInList = useSelector(

@@ -531,6 +531,15 @@ export function getStoreWithDistance(
   };
 }
 
+export function getStoreDescriptor(store: Store, maxLength = 40) {
+  return store.city || store.zipCode
+    ? ensureMaxLength(
+        `${store.name} (${store.city || store.zipCode || ''})`,
+        maxLength,
+      )
+    : `${store.name}`;
+}
+
 export function getUserCredentials(
   userAccount: UserAccount,
 ): CredentialsNeeded {

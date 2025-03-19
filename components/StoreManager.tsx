@@ -19,7 +19,7 @@ import {
 import { Store } from '@/types/Store';
 import { HeadingTagProp } from '@/types/general';
 import { ListName } from '@/types/listSlice';
-import { getKeyToUse } from '@/utils/helpers';
+import { getKeyToUse, getStoreDescriptor } from '@/utils/helpers';
 
 export type StorageManagerProps = {
   isVisible?: boolean;
@@ -66,11 +66,7 @@ export function StoreManager(props: StorageManagerProps) {
             <Tag>
               Current {useAbbreviatedVerbiage ? EMPTY_STRING : 'Store'}:&nbsp;
             </Tag>
-            <Tag>
-              {currentStore?.addressLineOne ||
-                currentStore?.name ||
-                'No store selected'}
-            </Tag>
+            <Tag>{getStoreDescriptor(currentStore) || 'No store selected'}</Tag>
           </Text>
         ) : null}
         {showAddStore ? (
@@ -84,7 +80,7 @@ export function StoreManager(props: StorageManagerProps) {
           {storesList.map((store) => (
             <Picker.Item
               key={getKeyToUse(store)}
-              label={store?.name}
+              label={getStoreDescriptor(store)}
               value={getKeyToUse(store)}
             />
           ))}

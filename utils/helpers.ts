@@ -147,6 +147,12 @@ export function displayAlert(object: object | null) {
   alert(object ? JSON.stringify(object, null, 2) : object);
 }
 
+export function ensureMaxLength(str: string, maxLength: number) {
+  if (!str) return EMPTY_STRING;
+  if (str.length <= maxLength) return str;
+  return str.slice(0, maxLength - 3) + '...';
+}
+
 export function getAddressString(
   address: Address | null,
   includePreposition = false,

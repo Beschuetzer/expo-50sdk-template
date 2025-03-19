@@ -35,6 +35,7 @@ import { ItemProp } from '@/types/general';
 import { ItemFormProps } from '@/types/itemForm';
 import {
   camelCaseToSpacedCapitalized,
+  ensureMaxLength,
   getItemFromList,
   getKeyToUse,
 } from '@/utils/helpers';
@@ -76,6 +77,16 @@ export function ItemFormStoreSpecific(
         upc: item?.upc || EMPTY_STRING,
       }),
     [item],
+  );
+  const storeNameWithLocation = useMemo(
+    () =>
+      currentStore.city || currentStore.zipCode
+        ? ensureMaxLength(
+            `${currentStore.name} (${currentStore.city || currentStore.zipCode || ''})`,
+            40,
+          )
+        : `${currentStore.name}`,
+    [currentStore],
   );
   const itemInList = useSelector(
     itemsListWithStoreSpecificValuesSelector(keyToUse),
@@ -245,7 +256,7 @@ export function ItemFormStoreSpecific(
       )}
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText textProps={inputTextTextProps}>
-          Price at '{currentStore.name}'
+          Price at '{storeNameWithLocation}'
         </InputText>
         <Input
           variant="outline"
@@ -271,7 +282,7 @@ export function ItemFormStoreSpecific(
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText textProps={inputTextTextProps}>
-          Quantity needed at '{currentStore.name}'
+          Quantity needed at '{storeNameWithLocation}'
         </InputText>
         <Input
           variant="outline"
@@ -284,7 +295,7 @@ export function ItemFormStoreSpecific(
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText textProps={inputTextTextProps}>
-          Item id at '{currentStore.name}'
+          Item id at '{storeNameWithLocation}'
         </InputText>
         <Input
           variant="outline"
@@ -309,16 +320,14 @@ export function ItemFormStoreSpecific(
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText textProps={inputTextTextProps}>
-          Aisle # at '{currentStore.name}'
+          Aisle # at '{storeNameWithLocation}'
         </InputText>
         <Input
           variant="outline"
           p={theme.space[1]}
           placeholder="Aisle #"
           value={(aisleNumber || EMPTY_STRING).toString()}
-          onChangeText={(newValue) =>
-            setAisleNumber(newValue)
-          }
+          onChangeText={(newValue) => setAisleNumber(newValue)}
           InputRightElement={
             <FontAwesomeButton
               name="copy"
@@ -336,7 +345,7 @@ export function ItemFormStoreSpecific(
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText textProps={inputTextTextProps}>
-          Note for '{currentStore.name}'
+          Note for '{storeNameWithLocation}'
         </InputText>
         <TextArea
           p={theme.space[1]}

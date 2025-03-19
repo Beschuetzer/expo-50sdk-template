@@ -1,4 +1,5 @@
 ## MVP
+-Differentiate between stores in store specific values (add zip code or city)
 -Add option to move an item from one shopping cart to another store's shopping cart (add a button on each item in the shopping cart next to the - and + buttons and an option in the menu which can handle multiple)
 -Add menu in store details with a selection to copy store values from another store (add tests for this too)
 -Move all of the menu items in the Items tab to a search bar and icons

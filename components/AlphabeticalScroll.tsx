@@ -86,7 +86,6 @@ export function AlphabeticalScroll<T extends Key>(
       //   onTouchEnd={(event) => {
       //     const { nativeEvent } = event;
       //     const { pageY } = nativeEvent;
-      //     console.log(`final pageY: ${pageY}`);
       //     setCurrentScrollHeight(EMPTY_NUMBER);
       //   }}
       position="absolute"

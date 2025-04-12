@@ -29,6 +29,7 @@ import {
   EMPTY_STRING,
   ESTIMATED_SIZE_FOR_QUICK_ADD_MODAL_SEARCH_LIST as ESTIMATED_SIZE_FOR_MODAL_SEARCH_LIST,
   FORM_INTER_ITEM_SPACING,
+  LIST_HAPTICS,
 } from '@/constants/general';
 import { itemsListSelector } from '@/state/slices/listsSlice';
 import { useAppSelector } from '@/state/store';
@@ -151,6 +152,7 @@ export function ItemSearchModal<T>(props: ItemSearchModalProps<T>) {
       ) : (
         <View width={windowDimensions.width} flex={1}>
           <FlashList
+            keyboardShouldPersistTaps="always"
             extraData={selectedItem}
             ref={flashListRef}
             contentContainerStyle={{ paddingRight: theme.space[10] }}
@@ -164,6 +166,7 @@ export function ItemSearchModal<T>(props: ItemSearchModalProps<T>) {
                   paddingRight={theme.space[FORM_INTER_ITEM_SPACING] * 2}
                   onPress={() => {
                     setSelectedItem(itemToRender);
+                    LIST_HAPTICS.handleSelection();
                   }}
                   justifyContent="space-between"
                 >

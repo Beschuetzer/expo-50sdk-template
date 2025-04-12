@@ -50,7 +50,11 @@ export const UserStores = (props: UserStoreProps) => {
   return (
     <Stack>
       <Heading size="md">Stores:</Heading>
-      <FlatList data={stores} renderItem={renderItems} />
+      <FlatList
+        keyboardShouldPersistTaps="always"
+        data={stores}
+        renderItem={renderItems}
+      />
     </Stack>
   );
 };

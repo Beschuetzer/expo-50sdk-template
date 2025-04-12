@@ -9,12 +9,17 @@ import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 import { TotalListPrice } from './TotalListPrice';
 import { SortType } from './sorters';
+import FilterListInput from '../FilterListInput';
+import { StoreSelectionModal } from '../modals/StoreSelectionModal';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
 import {
+  EMPTY_STRING,
   ESTIMATED_SIZE_FOR_SHOPPING_LISTS,
   FORM_INTER_ITEM_SPACING,
+  LIST_HAPTICS,
+  SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT,
 } from '@/constants/general';
 import {
   addItemToCart,
@@ -25,11 +30,12 @@ import {
   setIsMultiSelectModeForShoppingCart,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
+  moveItemToAnotherCart,
 } from '@/state/slices/listsSlice';
-import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
+import { Item, ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListRow } from '@/types/general';
 import { ListName } from '@/types/listSlice';
-import { getKeyToUse } from '@/utils/helpers';
+import { ensureMaxLength, getKeyToUse } from '@/utils/helpers';
 
 type ShoppingListProps = Pick<
   ItemTileProps<ItemWithStoreSpecificValues>,
@@ -56,9 +62,7 @@ const listName: ListName = ListName.ShoppingList;
  **/
 export function ShoppingList(props: ShoppingListProps) {
   const { viewingMode } = props;
-  const shoppingListToDisplay = useSelector(
-    storeSpecificListSelector(listName),
-  );
+  const shoppingList = useSelector(storeSpecificListSelector(listName));
   const currentStore = useSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -68,18 +72,23 @@ export function ShoppingList(props: ShoppingListProps) {
   const isMultiSelectMode = useSelector(
     isMultiSelectModeForShoppingCartSelector,
   );
+  const [itemToTransfer, setItemToTransfer] = useState<Item | null>(null);
+  const [shoppingListToDisplay, setShoppingListToDisplay] =
+    useState(shoppingList);
 
   const iconSize = useMemo(() => {
     return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
   }, [viewingMode]);
 
   const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
+    LIST_HAPTICS.handleSwipeItem()();
     setRefreshing(false);
     dispatch(addItemToCart(item));
   }, []);
 
   const onSwipeLeft = useCallback(
     (key: Key) => {
+      LIST_HAPTICS.handleSwipeItem(true)();
       dispatch(
         updateStoreSpecificValues({
           key,
@@ -96,8 +105,10 @@ export function ShoppingList(props: ShoppingListProps) {
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
     if (index === 0) return <TotalListPrice listname={ListName.ShoppingList} />;
+
     return (
       <SwipeableRow
+        key={getKeyToUse(item)}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -144,6 +155,9 @@ export function ShoppingList(props: ShoppingListProps) {
           listName={listName}
           item={item}
           viewingMode={viewingMode}
+          onTransferPress={() => {
+            setItemToTransfer(item);
+          }}
           buttonProps={{
             onLongPress: () => {
               dispatch(
@@ -153,6 +167,7 @@ export function ShoppingList(props: ShoppingListProps) {
                 }),
               );
               dispatch(setIsMultiSelectModeForShoppingCart(!isMultiSelectMode));
+              LIST_HAPTICS.handleMultipleItemSelect(isMultiSelectMode)();
             },
           }}
           onSelect={(item) => {
@@ -174,6 +189,7 @@ export function ShoppingList(props: ShoppingListProps) {
                 }),
               );
             }
+            LIST_HAPTICS.handleIsSelected(isSelected)();
           }}
           isSelected={
             !!selectedItems.find(
@@ -187,8 +203,20 @@ export function ShoppingList(props: ShoppingListProps) {
 
   return (
     <>
+      <FilterListInput
+        list={shoppingList}
+        onFilterChange={(filteredValues) => {
+          setShoppingListToDisplay(filteredValues);
+        }}
+        sortTypes={Object.values(SortType).filter(
+          (sortType) =>
+            sortType !== SortType.None && sortType !== SortType.Distance,
+        )}
+        startingSortOrderValue={SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT}
+      />
       <FlashList
         ref={listRef}
+        keyboardShouldPersistTaps="always"
         refreshing={refreshing}
         onRefresh={() => {
           setRefreshing(true);
@@ -204,6 +232,22 @@ export function ShoppingList(props: ShoppingListProps) {
         estimatedItemSize={ESTIMATED_SIZE_FOR_SHOPPING_LISTS}
         ItemSeparatorComponent={() => <ListItemSeparator />}
         stickyHeaderIndices={[0]}
+      />
+      <StoreSelectionModal
+        title={`Move '${ensureMaxLength(itemToTransfer?.name || EMPTY_STRING, 20)}' to:`}
+        isVisible={!!itemToTransfer}
+        onCancel={() => setItemToTransfer(null)}
+        onConfirm={(selectedStore) => {
+          setItemToTransfer(null);
+          if (selectedStore && itemToTransfer) {
+            dispatch(
+              moveItemToAnotherCart({
+                item: itemToTransfer,
+                store: selectedStore,
+              }),
+            );
+          }
+        }}
       />
     </>
   );

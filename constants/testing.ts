@@ -1,3 +1,19 @@
+import { UPC_REQUIRED_CHAR_LENGTH } from './regexs';
+
+import { SortOrder, SortType } from '@/components/lists/sorters';
+import {
+  getRandomItem,
+  getRandomStoreSpecificValues,
+} from '@/components/mocks/helpers';
+import {
+  StoreSpecificValuesMap,
+  StoreSpecificValueKey,
+  List,
+  Item,
+} from '@/types/Item';
+import { Store } from '@/types/Store';
+import { getEmptyList } from '@/utils/helpers';
+
 export const MOCK_STORE_SPECIFIC_VALUES = {
   '804305050414': {
     aisleNumber: { Costco: 34, 'Costco (Eden Prairie)': 34 },
@@ -2577,3 +2593,70 @@ export const MOCK_STORES_LIST = {
   sortOrderValue: { sortBy: 'name', sortOrder: 'Ascending' },
   currentStoreName: 'Costco (Eden Prairie)',
 };
+
+export function getMockStoresList(numStores: number = 10): List<Store> {
+  const stores = [];
+  for (let i = 0; i < numStores; i++) {
+    stores.push({
+      _id: `store-${i}`,
+      name: `store-${i}`,
+      // generate dummy coordinates: increasing latitude and decreasing longitude
+      gpsCoordinates: {
+        lat: (45 + i * 0.01).toString(),
+        lon: (-93 - i * 0.01).toString(),
+      },
+      // assign a random calculated distance for testing purposes
+      calculatedDistance: Number((Math.random() * 100).toFixed(2)),
+      addedDate: Date.now(),
+    });
+  }
+  return {
+    data: stores,
+    filters: {},
+    sortOrderValue: { sortBy: SortType.Name, sortOrder: SortOrder.Ascending },
+  };
+}
+
+export function getMockItemsListWithStoreSpecificValues(
+  count: number,
+  startUpc: number,
+) {
+  const itemsList = getEmptyList<Item>();
+  const storeSpecificValuesMap: StoreSpecificValuesMap = {};
+
+  for (let index = 0; index < count; index++) {
+    const upcToUse =
+      startUpc + index.toString().padStart(UPC_REQUIRED_CHAR_LENGTH, '0');
+    itemsList.data.push(getRandomItem(upcToUse));
+    storeSpecificValuesMap[upcToUse] = getRandomStoreSpecificValues();
+  }
+  return {
+    itemsList,
+    storeSpecificValuesMap,
+  };
+}
+
+export function getMockStoreSpecificValuesMap(
+  numItems: number,
+  numStores: number,
+): StoreSpecificValuesMap {
+  const storeSpecificValuesMap: StoreSpecificValuesMap = {};
+
+  // Create a map with numItems items and each key holding numStores stores per value.
+  for (let i = 0; i < numItems; i++) {
+    const itemKey = `item-${i}`;
+    storeSpecificValuesMap[itemKey] = {};
+
+    for (const element of Object.values(StoreSpecificValueKey)) {
+      const storeSpecificValueKey = element as StoreSpecificValueKey;
+      storeSpecificValuesMap[itemKey][storeSpecificValueKey] = {};
+
+      for (let j = 0; j < numStores; j++) {
+        const storeKey = `store-${j}`;
+        storeSpecificValuesMap[itemKey][storeSpecificValueKey][storeKey] =
+          i * j;
+      }
+    }
+  }
+  return storeSpecificValuesMap;
+}

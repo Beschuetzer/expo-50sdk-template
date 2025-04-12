@@ -3,7 +3,7 @@ import { RefObject, useCallback, useEffect, useRef } from 'react';
 import { Menu } from 'react-native-popup-menu';
 
 type UseMenuInput = {
-  navigationOptionsGetter: (menuRef: RefObject<Menu>) => any;
+  navigationOptionsGetter?: (menuRef: RefObject<Menu>) => any;
 };
 
 type UseMenuResponse = [RefObject<Menu>, () => void];
@@ -19,6 +19,7 @@ export const useMenu = (input: UseMenuInput): UseMenuResponse => {
 
   useEffect(() => {
     closeMenu();
+    if (!navigationOptionsGetter) return;
     navigation.setOptions(navigationOptionsGetter(menuRef));
   }, [navigation, navigationOptionsGetter, menuRef]);
 

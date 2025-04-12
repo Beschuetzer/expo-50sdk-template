@@ -5,14 +5,12 @@ import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 
-import { ListFilter, ListFilterFilters } from './ListFilter';
 import { ListItemSeparator } from './ListItemSeparator';
-import { ListSorter } from './ListSorter';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
 import { AlphabeticalScroll } from '../AlphabeticalScroll';
+import FilterListInput from '../FilterListInput';
 import { AddButton } from '../header/AddButton';
-import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useMenu } from '../hooks/useMenu';
 import { useUpdatedListTitle } from '../hooks/useUpdateListTitle';
 import { ConfirmModal, ConfirmModalProps } from '../modals/ConfirmModal';
@@ -21,16 +19,14 @@ import { StoreTile } from '../tiles/StoreTIle';
 import {
   ESTIMATED_SIZE_FOR_STORES_LIST,
   FORM_INTER_ITEM_SPACING,
+  LIST_HAPTICS,
+  SORT_ORDER_VALUE_BY_NAME_DEFAULT,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
   currentStoreSelector,
-  listToDisplaySelector,
-  setFilters,
-  setSortOrder,
   setCurrentStoreId,
   storesListSelector,
-  resetListToDisplay,
   currentStoreIdSelector,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
@@ -38,20 +34,13 @@ import { deleteStores } from '@/state/thunks';
 import { Key } from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ListRow } from '@/types/general';
-import { ListName } from '@/types/listSlice';
 import { getKeyToUse, resetConfirmModalProps } from '@/utils/helpers';
 
 type StoresListProps = object;
 
-const storesListSortTypes = [SortType.Name, SortType.Distance] as SortType[];
-
-const listName: ListName = ListName.StoresList;
 export function StoresList(props: StoresListProps) {
   const navigation = useNavigation();
   const storesList = useAppSelector(storesListSelector);
-  const storesListToDisplay = useAppSelector(
-    listToDisplaySelector(listName),
-  ) as Store[];
   const currentStore = useAppSelector(currentStoreSelector);
   const currentStoreId = useAppSelector(currentStoreIdSelector);
   const theme = useTheme();
@@ -59,69 +48,34 @@ export function StoresList(props: StoresListProps) {
   const listRef = useRef<FlashList<Store> | null>(null);
   const [listKey, setListKey] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [sortOrderValue, setSortOrderValue] = useState(
+    SORT_ORDER_VALUE_BY_NAME_DEFAULT,
+  );
+  const [storesToDisplay, setStoresToDisplay] = useState(storesList.data);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {} as ConfirmModalProps,
   );
-  const lastSortTypeRef = useRef(storesListSortTypes[0]);
   useUpdatedListTitle({ list: storesList, title: 'Stores List' });
 
   const [, closeMenu] = useMenu({
     navigationOptionsGetter: (menuRef) => ({
-      headerRight: () => (
-        <ListHeaderRight
-          ref={menuRef}
-          onSortPress={onSortPress}
-          onFilterPress={onFilterPress}
-          onResetPress={onResetPress}
-        />
-      ),
       headerLeft: () => <AddButton onPress={onAddStorePress} />,
     }),
   });
 
   function onAddStorePress() {
     closeMenu();
-    // @ts-ignore
+    //@ts-ignore
     navigation.navigate(Routes.StoreModal);
   }
 
-  const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true);
+  const onSwipeRight = useCallback((key: Key) => {
+    LIST_HAPTICS.handleSwipeItem()();
+    dispatch(setCurrentStoreId(getKeyToUse(key)));
   }, []);
-
-  const onFilterPress = useCallback(() => {
-    setIsFilterModalOpen(true);
-  }, []);
-
-  const onResetPress = useCallback(() => {
-    dispatch(resetListToDisplay({ listName }));
-  }, []);
-
-  const onSortTypeChange = useCallback((sortType: SortType) => {
-    lastSortTypeRef.current = sortType;
-    dispatch(setSortOrder({ listName, sortBy: sortType }));
-  }, []);
-
-  const onFilterValueChange = useCallback(
-    (filters: ListFilterFilters<Store>) => {
-      dispatch(setFilters({ listName, filters }));
-    },
-    [listName],
-  );
-
-  const onSwipeRight = useCallback(
-    (key: Key) => {
-      closeMenu();
-      dispatch(setCurrentStoreId(getKeyToUse(key)));
-    },
-    [closeMenu],
-  );
 
   const onSwipeLeft = useCallback(
     (store: Store) => {
-      closeMenu();
       setConfirmModalProps({
         isVisible: true,
         title: 'Deleting Store',
@@ -129,6 +83,7 @@ export function StoresList(props: StoresListProps) {
         note: 'This will remove all store-specific data related to this store.',
         onCancel: () => resetConfirmModalProps(setConfirmModalProps),
         onConfirm: () => {
+          LIST_HAPTICS.handleSwipeItem(true)();
           dispatch(
             deleteStores({
               stores: [store],
@@ -139,7 +94,7 @@ export function StoresList(props: StoresListProps) {
         },
       });
     },
-    [listRef, closeMenu],
+    [listRef],
   );
 
   useEffect(() => {
@@ -149,9 +104,6 @@ export function StoresList(props: StoresListProps) {
   function renderItem({ item, index }: ListRow<Store>) {
     return (
       <SwipeableRow
-        swipeableProps={{
-          onBegan: closeMenu,
-        }}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -188,49 +140,46 @@ export function StoresList(props: StoresListProps) {
   }
   return (
     <>
+      <FilterListInput
+        list={storesList.data}
+        onFilterChange={(filteredValues, _, sortOrderValue) => {
+          setStoresToDisplay(filteredValues);
+          setSortOrderValue(sortOrderValue);
+        }}
+        sortTypes={Object.values(SortType).filter(
+          (sortType) =>
+            sortType === SortType.Name || sortType === SortType.Distance,
+        )}
+        swapElementOrder
+      />
       <FlashList
         ref={listRef}
         key={listKey}
+        keyboardShouldPersistTaps="always"
         refreshing={refreshing}
-        onTouchStart={closeMenu}
         onRefresh={() => {
           setRefreshing(true);
           setTimeout(() => {
             setRefreshing(false);
           }, 2000);
         }}
-        data={storesListToDisplay}
+        data={storesToDisplay}
         renderItem={renderItem}
         keyExtractor={(item: Store, index: number) => getKeyToUse(item)}
         estimatedItemSize={ESTIMATED_SIZE_FOR_STORES_LIST}
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />
-      <ListSorter
-        sortOrderValue={storesList.sortOrderValue}
-        listName={listName}
-        isVisible={isSortModalOpen}
-        setIsVisible={setIsSortModalOpen}
-        onValueChange={onSortTypeChange}
-        sortTypes={storesListSortTypes}
-        viewSize="small"
-      />
-      <ListFilter
-        list={storesList}
-        listName={listName}
-        filterNames={['name']}
-        isVisible={isFilterModalOpen}
-        setIsVisible={setIsFilterModalOpen}
-        onValueChange={onFilterValueChange}
-      />
-      <AlphabeticalScroll
-        items={storesList.data}
-        onCharPress={(index) => {
-          if (listRef?.current) {
-            listRef.current.scrollToIndex({ animated: false, index });
-          }
-        }}
-        sortOrderValue={storesList.sortOrderValue}
-      />
+      {sortOrderValue.sortBy === SortType.Name ? (
+        <AlphabeticalScroll
+          items={storesToDisplay}
+          onCharPress={(index) => {
+            if (listRef?.current) {
+              listRef.current.scrollToIndex({ animated: false, index });
+            }
+          }}
+          sortOrderValue={sortOrderValue}
+        />
+      ) : null}
       <ConfirmModal {...confirmModalProps} />
     </>
   );

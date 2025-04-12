@@ -60,7 +60,7 @@ export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
       onCancel={onCancelPress}
       onConfirm={onConfirmPress}
     >
-      <ScrollView keyboardShouldPersistTaps="handled">
+      <ScrollView keyboardShouldPersistTaps="always">
         {Array.from(sortedPlaces).map((place) => {
           return (
             <Button

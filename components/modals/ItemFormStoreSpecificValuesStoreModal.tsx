@@ -134,7 +134,7 @@ export function ItemFormStoreSpecificValuesStoreModal(
         onConfirm && onConfirm(toReturn);
       }}
     >
-      <ScrollView keyboardShouldPersistTaps="handled">
+      <ScrollView keyboardShouldPersistTaps="always">
         {Object.entries(storeIdToNameMap).map(([storeId, storeName]) => {
           return (
             <Button

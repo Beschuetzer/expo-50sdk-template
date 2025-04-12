@@ -41,7 +41,7 @@ export function AbsolutePositionedScreen(props: AbsolutePositionedScreenProps) {
       );
     }
     return (
-      <ScrollView keyboardShouldPersistTaps="handled" {...commonStyles}>
+      <ScrollView keyboardShouldPersistTaps="always" {...commonStyles}>
         {contentJSX}
       </ScrollView>
     );

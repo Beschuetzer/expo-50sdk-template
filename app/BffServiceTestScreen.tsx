@@ -57,7 +57,6 @@ export default function BffServiceTestScreen() {
     // };
     // const id = getItemId(data.item, TEST_EMAIL);
     // const saveItemResult = await BFF_SERVICE.saveItem(data);
-    // console.log({ id, saveItemResult });
     // const saveAllResult = await BFF_SERVICE.saveAllToDb({
     //   dispatch,
     //   items: {
@@ -80,7 +79,6 @@ export default function BffServiceTestScreen() {
     //   },
     //   storeSpecificValues: {},
     // });
-    // console.log({ id, saveAllResult });
   }, [currentStore, storesList]);
 
   return (

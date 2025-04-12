@@ -7,6 +7,7 @@ import { FontAwesomeButton } from '../FontAwesomeButton';
 import { InputText } from '../forms/InputText';
 
 import { EMPTY_STRING, QUANTITY_ROW_DEFAULT } from '@/constants/general';
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 type QuickAddRowModalProps = Omit<ModalWithBlurProps, 'onConfirm'> & {
   onConfirm: (name: string, quantity: number) => void;
@@ -51,7 +52,7 @@ export function QuickAddRowModal(props: QuickAddRowModalProps) {
                   setQuantity((current) => {
                     const parsedInt = parseInt(current, 10);
                     const newQuantity = parsedInt + 1;
-                    console.log({ newQuantity });
+                    logWhenDevelopmentMode({ newQuantity });
 
                     return newQuantity.toString();
                   })

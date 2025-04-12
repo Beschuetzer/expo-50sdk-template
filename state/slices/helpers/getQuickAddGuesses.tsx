@@ -14,7 +14,6 @@ export function getQuickAddGuesses(
   const guesses = {} as QuickAddGuesses;
 
   for (const itemsListItem of items) {
-    // console.log({ itemName: itemsListItem.name });
     const itemsListItemName = itemsListItem.name;
 
     if (!itemsListItemName) continue;

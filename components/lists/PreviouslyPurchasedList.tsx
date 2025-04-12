@@ -1,8 +1,12 @@
+import { FlashList } from '@shopify/flash-list';
+import { Column } from 'native-base';
 import React, { useCallback, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ListItemSeparator } from './ListItemSeparator';
+import { SortType } from './sorters';
+import FilterListInput from '../FilterListInput';
 import { ItemTileForPreviouslyPurchased } from '../tiles/ItemTileForPreviouslyPurchasedItems';
 
 import {
@@ -33,6 +37,7 @@ const listName: ListName = ListName.PreviouslyPurchased;
 export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
   const itemsPurchasedAtStore = useSelector(itemsPurchasedAtStoreSelector);
   const dispatch = useDispatch();
+  const [filteredItems, setFilteredItems] = useState(itemsPurchasedAtStore);
   const [refreshing, setRefreshing] = useState(false);
   const selectedItems = useSelector(
     selectedItemsFromPreviouslyPurchasedSelector,
@@ -71,6 +76,7 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
 
     return (
       <ItemTileForPreviouslyPurchased
+        key={getKeyToUse(item)}
         isInCart={!!itemInCart}
         isInShopping={!!itemInShopping}
         isRecommended={!!item.isRecommended}
@@ -123,14 +129,28 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
   }
 
   return (
-    <FlatList
-      refreshing={refreshing}
-      data={itemsPurchasedAtStore}
-      renderItem={renderItem}
-      keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
-        getKeyToUse(item)
-      }
-      ItemSeparatorComponent={() => <ListItemSeparator />}
-    />
+    <>
+      <FilterListInput
+        list={itemsPurchasedAtStore}
+        onFilterChange={(filteredValues) => {
+          setFilteredItems(filteredValues);
+        }}
+        sortTypes={Object.values(SortType).filter(
+          (item) => item === SortType.Name || item === SortType.Upc,
+        )}
+      />
+      <FlashList
+        keyboardShouldPersistTaps="always"
+        refreshing={refreshing}
+        data={filteredItems}
+        estimatedItemSize={62}
+        renderItem={renderItem}
+        extraData={{ itemsInCart, itemsInShopping }}
+        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
+          getKeyToUse(item)
+        }
+        ItemSeparatorComponent={() => <ListItemSeparator />}
+      />
+    </>
   );
 }

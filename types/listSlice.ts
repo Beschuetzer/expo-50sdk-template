@@ -37,6 +37,24 @@ export type AddStoresListItemPayload = {
   newStore: Store;
 };
 
+export type CopyStoreSpecificValuesPayload = {
+  /**
+   *The destination store to copy the values to
+   **/
+  destination: Key;
+
+  /**
+   *The source store to copy the values from
+   **/
+  source: Key;
+
+  /**
+   *The item to copy the values for
+   * If this is given, only the store specific values for these items will be copied
+   **/
+  items?: [Item];
+};
+
 export type CompletePurchasePayload = LastPurchasedMap | undefined;
 
 export type HandleSaveAllResponsePayload = SaveAllResponse & {
@@ -48,6 +66,11 @@ export type HandleSaveAllResponsePayload = SaveAllResponse & {
    *The stores that should have been saved
    **/
   storesSaved: Store[];
+};
+
+export type MoveItemToAnotherCartPayload = {
+  store: Store;
+  item: Item;
 };
 
 export type ResetListToDisplayFiltersPayload = ListNameProp;

@@ -6,21 +6,22 @@ import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ListItemSeparator } from './ListItemSeparator';
-import { ListSorter } from './ListSorter';
 import { SwipeableRow } from './SwipeableRow';
 import { TotalListPrice } from './TotalListPrice';
 import { SortType } from './sorters';
+import FilterListInput from '../FilterListInput';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 
-import { shoppingListSortTypes } from '@/components/lists/ShoppingList';
-import { ESTIMATED_SIZE_FOR_SHOPPING_LISTS } from '@/constants/general';
+import {
+  ESTIMATED_SIZE_FOR_SHOPPING_LISTS,
+  LIST_HAPTICS,
+  SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT,
+} from '@/constants/general';
 import {
   isMultiSelectModeForInCartSelector,
   moveItemToShoppingList,
   selectedItemsFromInCartSelector,
-  setSortOrder,
-  shoppingListSelector,
   storeSpecificListSelector,
   setIsMultiSelectModeForInCartCart,
   updateSelectedItemsFromInCart,
@@ -43,28 +44,22 @@ const listName: ListName = ListName.InCartList;
  **/
 export function InCartList(props: InCartListProps) {
   const { viewingMode } = props;
-  const shoppingList = useSelector(shoppingListSelector);
   const inCartList = useSelector(storeSpecificListSelector(listName));
   const theme = useTheme();
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
   const selectedItems = useSelector(selectedItemsFromInCartSelector);
   const isMultiSelectMode = useSelector(isMultiSelectModeForInCartSelector);
+  const [inCartListToDisplay, setInCartListToDisplay] = useState(inCartList);
 
   const iconSize = useMemo(() => {
     return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
   }, [viewingMode]);
 
-  const onSortTypeChange = useCallback((sortType: SortType) => {
-    dispatch(
-      setSortOrder({ listName: ListName.ShoppingList, sortBy: sortType }),
-    );
-  }, []);
-
   const onSwipeLeft = useCallback(
     (key: Key) => {
+      LIST_HAPTICS.handleSwipeItem(true)();
       dispatch(moveItemToShoppingList(key));
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     },
@@ -75,6 +70,7 @@ export function InCartList(props: InCartListProps) {
     if (index === 0) return <TotalListPrice listname={ListName.InCartList} />;
     return (
       <SwipeableRow
+        key={getKeyToUse(item)}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -104,6 +100,7 @@ export function InCartList(props: InCartListProps) {
                 }),
               );
               dispatch(setIsMultiSelectModeForInCartCart(!isMultiSelectMode));
+              LIST_HAPTICS.handleMultipleItemSelect(isMultiSelectMode)();
             },
           }}
           onSelect={(item) => {
@@ -125,6 +122,7 @@ export function InCartList(props: InCartListProps) {
                 }),
               );
             }
+            LIST_HAPTICS.handleIsSelected(isSelected)();
           }}
           isSelected={
             !!selectedItems.find(
@@ -138,7 +136,19 @@ export function InCartList(props: InCartListProps) {
 
   return (
     <>
+      <FilterListInput
+        list={inCartList}
+        onFilterChange={(filteredValues) => {
+          setInCartListToDisplay(filteredValues);
+        }}
+        sortTypes={Object.values(SortType).filter(
+          (sortType) =>
+            sortType !== SortType.None && sortType !== SortType.Distance,
+        )}
+        startingSortOrderValue={SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT}
+      />
       <FlashList
+        keyboardShouldPersistTaps="always"
         ref={listRef}
         refreshing={refreshing}
         onRefresh={() => {
@@ -147,7 +157,7 @@ export function InCartList(props: InCartListProps) {
             setRefreshing(false);
           }, 2000);
         }}
-        data={[{ name: 'in-cart price' } as any, ...inCartList]}
+        data={[{ name: 'in-cart price' } as any, ...inCartListToDisplay]}
         renderItem={renderItem}
         keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
           getKeyToUse(item)
@@ -155,15 +165,6 @@ export function InCartList(props: InCartListProps) {
         estimatedItemSize={ESTIMATED_SIZE_FOR_SHOPPING_LISTS}
         ItemSeparatorComponent={() => <ListItemSeparator />}
         stickyHeaderIndices={[0]}
-      />
-      <ListSorter
-        sortOrderValue={shoppingList.sortOrderValue}
-        listName={ListName.ShoppingList}
-        isVisible={isSortModalOpen}
-        setIsVisible={setIsSortModalOpen}
-        onValueChange={onSortTypeChange}
-        sortTypes={shoppingListSortTypes}
-        viewSize="small"
       />
     </>
   );

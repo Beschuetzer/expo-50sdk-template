@@ -32,10 +32,7 @@ export class ErrorBoundary extends React.Component<
   render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <ScrollView
-          style={styles.container}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView style={styles.container} keyboardShouldPersistTaps="always">
           <Text style={[styles.alignCenter, styles.largeHeading]}>
             Error Encountered
           </Text>

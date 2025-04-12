@@ -47,6 +47,7 @@ import {
   SelectedItemIdsAndQuantities,
 } from '@/types/quickAdd';
 import { getKeyToUse } from '@/utils/helpers';
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 const IMAGE_QUALITY_TO_USE = 1;
 
@@ -132,7 +133,7 @@ export default function QuickAddModal() {
       if (entries.length === 0 && newItemPayloads.length === 0) return;
       for (const [parsedName, { quantity, id }] of entries) {
         if (!id) continue;
-        console.log(`updating quantity for ${parsedName} to ${quantity}`);
+        logWhenDevelopmentMode(`updating quantity for ${parsedName} to ${quantity}`);
         dispatch(
           updateStoreSpecificValues({
             key: { _id: id, name: EMPTY_STRING },
@@ -144,11 +145,11 @@ export default function QuickAddModal() {
       }
 
       if (newItemPayloads.length > 0) {
-        console.log('processing newItems');
+        logWhenDevelopmentMode('processing newItems');
         const actions = [];
         for (const [parsedName, payload] of newItemPayloads) {
           if (!payload) continue;
-          console.log(
+          logWhenDevelopmentMode(
             `adding new item for ${parsedName} as '${payload.item.name}' with quantity: ${payload.storeSpecificValues?.[StoreSpecificValueKey.Quantity]?.[currentStore._id]}`,
           );
           actions.push(saveItem(payload));
@@ -156,13 +157,12 @@ export default function QuickAddModal() {
         const start = performance.now();
         await Promise.all(actions.map((action) => dispatch(action)));
         const end = performance.now();
-        console.log(`Time to complete: ${end - start}`);
+        logWhenDevelopmentMode(`Time to complete: ${end - start}`);
       }
 
       navigation.canGoBack() && navigation.goBack();
-      onClearPress();
     } catch (error) {
-      console.log({ errorHere: error });
+      logWhenDevelopmentMode({ errorHere: error });
     }
   }, [newItemsRef, selectedItemIdsAndQuantitiesRef, navigation]);
 
@@ -175,6 +175,10 @@ export default function QuickAddModal() {
       quickAddListWithGuesses,
     );
   }, [quickAddListWithGuesses]);
+
+  useEffect(() => {
+    dispatch(clearQuickAddList());
+  }, []);
 
   return (
     <AbsolutePositionedScreen
@@ -222,13 +226,14 @@ export default function QuickAddModal() {
         </Row>
         <FlatList
           data={quickAddListWithGuesses.items}
+          keyboardShouldPersistTaps="always"
           ItemSeparatorComponent={() => <ListItemSeparator />}
           keyExtractor={(item) => item?.[0] || EMPTY_STRING}
           renderItem={(itemLocal) => {
             const { index, item } = itemLocal;
             return (
               <SwipeableRow
-                key={index}
+                key={`${item[0]}-${index}`}
                 swipeableProps={{
                   onBegan: closeMenu,
                 }}

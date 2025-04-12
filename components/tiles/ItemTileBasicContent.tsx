@@ -1,6 +1,7 @@
 import { Column } from 'native-base';
 import React from 'react';
 
+import { DeveloperInfo } from './DeveloperInfo';
 import { ItemTileProps } from './ItemTile';
 import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import {
@@ -39,6 +40,7 @@ export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
       </Column>
       <ItemTileNameAndUpcColumn item={item} showUpc={showUpc}>
         {children}
+        <DeveloperInfo {...item} />
       </ItemTileNameAndUpcColumn>
       <TileIsSelectedBackground
         isMultiSelectMode={isMultiSelectMode}

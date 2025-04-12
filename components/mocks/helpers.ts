@@ -70,7 +70,7 @@ export function getRandomStoreSpecificValues(): StoreSpecificValues {
         `${getRandomInt(0, 1000000).toString().padStart(10, '0')}`,
     },
     [StoreSpecificValueKey.AisleNumber]: {
-      [MOCK_STORES[1].name]: getRandomInt(0, 2000),
+      [MOCK_STORES[1].name]: getRandomInt(0, 2000).toString(),
     },
     [StoreSpecificValueKey.Price]: {
       [MOCK_STORES[1].name]: getRandomInt(1, 1000),
@@ -82,7 +82,7 @@ export function getRandomStoreSpecificValues(): StoreSpecificValues {
   };
 }
 
-export function getRandomItem(lastUpcNumber: number): Item {
+export function getRandomItem(lastUpcNumber: number | string): Item {
   const upcToUse = lastUpcNumber
     .toString()
     .padStart(UPC_REQUIRED_CHAR_LENGTH, '0');

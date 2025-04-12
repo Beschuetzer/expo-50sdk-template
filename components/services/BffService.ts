@@ -51,6 +51,7 @@ import {
   getKeyToUse,
   handleError,
 } from '@/utils/helpers';
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 function displayAlert(object: object | null) {
   alert(object ? JSON.stringify(object, null, 2) : object);
@@ -67,6 +68,7 @@ export const OPEN_AI_PATH = '/openAi';
 export const STORE_PATH = '/store';
 export const S3_PATH = '/s3';
 export const USER_PATH = '/user';
+logWhenDevelopmentMode({ BACKEND_URL });
 
 export const DELETE_ITEMS_RESPONSE_DEFAULT: DeletionResponse = Object.freeze({
   acknowledged: false,

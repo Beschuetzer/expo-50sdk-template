@@ -1,20 +1,16 @@
 ## MVP
--Add option to move an item from one shopping cart to another store's shopping cart (add a button on each item in the shopping cart next to the - and + buttons and an option in the menu which can handle multiple)
--Add menu in store details with a selection to copy store values from another store (add tests for this too)
+-Add a share button in order to share a shopping list (pressing it would open up a bottom tab with other app to use to share (e.g. email/whatsapp))
+-add a scroll bar like Music player app
 -Move all of the menu items in the Items tab to a search bar and icons
 -Selecting closest store on load not working?
--Add a search bar in the previously purchased tab
--fix issue using quick add then exiting the app doesn't save added items.  Moving one to in cart first does though
+-add indication the multi select mode is enabled for a list
+-add ability to share items (add a list of permissions (e.g. read and write) which the server checks for doing anything; POST endpoints need write permission and GET needs either)
 
 -Make aisle number field accept letters (check the sorting)
     --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
     --figure out why items with no aisle are not being sorted at the front or the end but in the middle somewhere
 
 
--Add "move list to..." option on shopping tab when items are in the shopping list:
-    --modify the StoreManager to be a pure component and have the dispatch action called in the callback
--Add "move list from..." option on shopping tab
-    --modify the StoreManager to be a pure component and have the dispatch action called in the callback
 -Add a flow where you can add a store from the ItemForm (via a bottomsheet modal using the store forn?)
     --modify the StoreManager to have the option to select new store which opens the bottom sheet modal
 -Investigate how to have ok google open the app and do something like "add item to list"

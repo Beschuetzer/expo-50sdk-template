@@ -58,6 +58,7 @@ import {
   getS3ObjectKey,
   uriToBlob,
 } from '@/utils/helpers';
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 export type DeleteItemsThunkInput = {
   items: Item[];
@@ -762,6 +763,7 @@ async function saveCustomImageToS3(
   account: UserAccount,
   dispatch: Dispatch,
 ): Promise<ProcessedGroceryListItem> {
+  logWhenDevelopmentMode({ item, account });
   const defaultReturn = [EMPTY_STRING, EMPTY_NUMBER, EMPTY_STRING] as [
     string,
     number,
@@ -783,11 +785,14 @@ async function saveCustomImageToS3(
     const split = customImageUrl.split('/');
     const filename = split[split.length - 1];
 
+    logWhenDevelopmentMode({ filename, customImageUrl });
     const signedUrlResponse = await BFF_SERVICE.getSignedUrlForUpload({
       dispatch,
       ...getUserCredentials(account),
       filename,
     });
+
+    logWhenDevelopmentMode({ signedUrlResponse });
 
     if (!signedUrlResponse?.uploadUrl || !signedUrlResponse.downloadUrl) {
       throw new Error('Unable to get signed url.');
@@ -803,12 +808,15 @@ async function saveCustomImageToS3(
       method: 'PUT',
     });
 
+    logWhenDevelopmentMode({ savedResponse });
+
     if (!savedResponse.ok) {
       throw new Error('Unable to save image.');
     }
 
     return [signedUrlResponse.downloadUrl, customImageUrlIndex, customImageUrl];
   } catch (error) {
+    logWhenDevelopmentMode({ source: 'saveCustomImageToS3', error });
     return defaultReturn;
   }
 }

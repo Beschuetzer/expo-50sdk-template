@@ -4,7 +4,10 @@ import React, { useRef } from 'react';
 import { getRandomItem, getRandomStoreSpecificValues } from './helpers';
 import { MOCK_STORES } from './mockStores';
 
-import { UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
+import {
+  getMockItemsListWithStoreSpecificValues,
+  getMockStoresList,
+} from '@/constants/testing';
 import {
   setItemsList,
   addStoresListItem,
@@ -18,6 +21,11 @@ import {
   addItemsListItem,
   currentLocationStateSelector,
   resetCurrentLocationState,
+  addStoreSpecificValues,
+  setStoresList,
+  addItemsToItemsList,
+  setCurrentStoreId,
+  setLastPurchasedMap,
 } from '@/state/slices/listsSlice';
 import { resetQuickAddListSlice } from '@/state/slices/quickAddSlice';
 import {
@@ -26,8 +34,8 @@ import {
 } from '@/state/slices/scannerSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { saveItem, saveStore } from '@/state/thunks';
-import { Item, StoreSpecificValuesMap } from '@/types/Item';
-import { calculateDistance, displayAlert, getEmptyList } from '@/utils/helpers';
+import { LastPurchasedMap, StoreSpecificValueKey } from '@/types/Item';
+import { calculateDistance, displayAlert, getKeyToUse } from '@/utils/helpers';
 
 const NUMBER_OF_ITEM_TO_MOCK_INITIAL = 1000;
 const NUMBER_OF_ITEMS_TO_SORT_INITIAL = 1000;
@@ -54,8 +62,220 @@ export function ReduxViewer() {
     );
   }
 
+  function onStoreItemsCountPress() {
+    dispatch(resetItemsList());
+    dispatch(resetStoresList());
+    dispatch(resetCurrentStoreId());
+    const mockStoresList = getMockStoresList(100);
+    for (let index = 0; index < 10; index++) {
+      const itemCount = 500;
+      const { itemsList, storeSpecificValuesMap } =
+        getMockItemsListWithStoreSpecificValues(
+          itemCount,
+          0 + index * itemCount,
+        );
+      dispatch(setStoresList(mockStoresList));
+      dispatch(addItemsToItemsList(itemsList));
+      dispatch(addStoreSpecificValues(storeSpecificValuesMap));
+      dispatch(
+        setCurrentStoreId(
+          mockStoresList.data[mockStoresList.data.length - 1]._id,
+        ),
+      );
+    }
+  }
+
+  function onCopyStoreSpecificValuesPress() {
+    dispatch(resetItemsList());
+    dispatch(resetStoresList());
+    dispatch(resetCurrentStoreId());
+    const mockStoresList = getMockStoresList(2);
+    const itemCount = 50;
+    const { itemsList, storeSpecificValuesMap } =
+      getMockItemsListWithStoreSpecificValues(itemCount, 0);
+
+    const seedData = {
+      [getKeyToUse(itemsList.data[0])]: {
+        [StoreSpecificValueKey.Price]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 2,
+        },
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 2,
+        },
+        [StoreSpecificValueKey.AisleNumber]: {
+          [mockStoresList.data[0]._id]: 'Aisle store-0',
+        },
+        [StoreSpecificValueKey.Note]: {
+          [mockStoresList.data[0]._id]: 'This is a note from store-0',
+        },
+      },
+      [getKeyToUse(itemsList.data[1])]: {
+        [StoreSpecificValueKey.Price]: {
+          [mockStoresList.data[0]._id]: 3.99,
+          [mockStoresList.data[1]._id]: 4.99,
+        },
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 2,
+          [mockStoresList.data[1]._id]: 2,
+        },
+        [StoreSpecificValueKey.AisleNumber]: {
+          [mockStoresList.data[1]._id]: 'Aisle store-1',
+        },
+        [StoreSpecificValueKey.ItemId]: {
+          [mockStoresList.data[1]._id]: 'ItemId for store-1',
+        },
+      },
+      [getKeyToUse(itemsList.data[2])]: {
+        [StoreSpecificValueKey.Price]: {
+          [mockStoresList.data[1]._id]: 1,
+        },
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+        [StoreSpecificValueKey.AisleNumber]: {
+          [mockStoresList.data[1]._id]: 'Aisle store-1',
+        },
+        [StoreSpecificValueKey.ItemId]: {
+          [mockStoresList.data[1]._id]: 'ItemId for store-1',
+        },
+      },
+      [getKeyToUse(itemsList.data[3])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+      [getKeyToUse(itemsList.data[4])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+      [getKeyToUse(itemsList.data[5])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+      [getKeyToUse(itemsList.data[6])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+      [getKeyToUse(itemsList.data[7])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+      [getKeyToUse(itemsList.data[8])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+      [getKeyToUse(itemsList.data[9])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+      [getKeyToUse(itemsList.data[10])]: {
+        [StoreSpecificValueKey.Quantity]: {
+          [mockStoresList.data[0]._id]: 1,
+          [mockStoresList.data[1]._id]: 1,
+        },
+      },
+    };
+
+    for (const key in seedData) {
+      storeSpecificValuesMap[key] = seedData[key];
+    }
+
+    const lastPurchasedMap: LastPurchasedMap = {
+      [getKeyToUse(itemsList.data[0])]: {
+        [mockStoresList.data[1]._id]: Date.now() - 1000,
+      },
+      [getKeyToUse(itemsList.data[1])]: {
+        [mockStoresList.data[1]._id]: Date.now() - 1000,
+      },
+      [getKeyToUse(itemsList.data[2])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[3])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[4])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[5])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[6])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[7])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[8])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[9])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[10])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[11])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[12])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[13])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[14])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[15])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      [getKeyToUse(itemsList.data[16])]: {
+        [mockStoresList.data[0]._id]: Date.now() - 60 * 1000 * 60 * 24 * 30,
+        [mockStoresList.data[1]._id]: Date.now(),
+      },
+      
+    };
+
+    dispatch(setLastPurchasedMap(lastPurchasedMap));
+    dispatch(setStoresList(mockStoresList));
+    dispatch(addItemsToItemsList(itemsList));
+    dispatch(addStoreSpecificValues(storeSpecificValuesMap));
+    dispatch(setCurrentStoreId(mockStoresList.data[0]._id));
+  }
+
   return (
     <FlatList
+      keyboardShouldPersistTaps="always"
       data={Object.values(upcProducts || {})}
       renderItem={(data) => {
         const { item, index } = data;
@@ -78,8 +298,8 @@ export function ReduxViewer() {
       }}
       ListHeaderComponent={
         <>
-          <Stack space={1}>
-            <Text>Resetting:</Text>
+          <Stack paddingY={2}>
+            <Heading>Resetting:</Heading>
             <Row space={1}>
               <Button onPress={() => dispatch(resetUpcProducts())}>
                 upcProducts
@@ -123,8 +343,8 @@ export function ReduxViewer() {
               </Button>
             </Row>
           </Stack>
-          <Stack space={1}>
-            <Text>Adding Mock:</Text>
+          <Stack paddingY={2}>
+            <Heading>Adding Mock:</Heading>
             <Row space={1}>
               <Button
                 onPress={() => {
@@ -200,26 +420,12 @@ export function ReduxViewer() {
             <Row space={1}>
               <Button
                 onPress={() => {
-                  const itemsList = getEmptyList<Item>();
-                  const storeSpecificValuesMap: StoreSpecificValuesMap = {};
-
-                  for (
-                    let index = 0;
-                    index < NUMBER_OF_ITEM_TO_MOCK_INITIAL;
-                    index++
-                  ) {
-                    const upcToUse = lastUpcNumberRef.current
-                      .toString()
-                      .padStart(UPC_REQUIRED_CHAR_LENGTH, '0');
-
-                    itemsList.data.push(
-                      getRandomItem(lastUpcNumberRef.current),
+                  const { itemsList, storeSpecificValuesMap } =
+                    getMockItemsListWithStoreSpecificValues(
+                      NUMBER_OF_ITEM_TO_MOCK_INITIAL,
+                      lastUpcIndexRef.current,
                     );
-                    storeSpecificValuesMap[upcToUse] =
-                      getRandomStoreSpecificValues();
-
-                    lastUpcNumberRef.current += 1;
-                  }
+                  lastUpcIndexRef.current += NUMBER_OF_ITEM_TO_MOCK_INITIAL;
                   dispatch(setItemsList(itemsList));
                   dispatch(setStoreSpecificValues(storeSpecificValuesMap));
                 }}
@@ -253,7 +459,13 @@ export function ReduxViewer() {
               Test Sort
             </Button>
           </Stack>
-
+          <Stack paddingY={2}>
+            <Heading>Setting up Specific Env:</Heading>
+            <Button onPress={onStoreItemsCountPress}>storeItemsCount</Button>
+            <Button onPress={onCopyStoreSpecificValuesPress}>
+              copyStoreSpecificValues
+            </Button>
+          </Stack>
           <Text>
             Current Location: (Lat: {currentLocation?.lat}, Lon:{' '}
             {currentLocation?.lon}, State: {currentLocationState})

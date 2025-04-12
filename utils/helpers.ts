@@ -12,6 +12,7 @@ import { v4 as uuidV4 } from 'uuid';
 
 import { handleLastPurchasedMapImport } from './handleLastPurchasedMapImport';
 import { handleStoreSpecificValuesImport } from './handleStoreSpecificValuesImport';
+import { logWhenDevelopmentMode } from './logging';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
@@ -126,7 +127,7 @@ export async function deleteImages(imageUrls: string[]) {
     if (!imageUrl.match(LOCAL_FILE_REGEX)) {
       continue;
     }
-    console.log('deleting ' + imageUrl);
+    logWhenDevelopmentMode('deleting ' + imageUrl);
     deleteFile(imageUrl);
   }
 }
@@ -134,11 +135,11 @@ export async function deleteImages(imageUrls: string[]) {
 export async function deleteFile(path: string) {
   if (!path) return;
   try {
-    console.log(`deleting '${path}'...`);
+    logWhenDevelopmentMode(`deleting '${path}'...`);
     await FileSystem.deleteAsync(path);
     return true;
   } catch (error) {
-    console.log(error);
+    logWhenDevelopmentMode(error);
     return false;
   }
 }
@@ -379,7 +380,7 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   try {
     await Location.enableNetworkProviderAsync();
   } catch (error) {
-    console.log('Continuing without high accuracy mode:' + error);
+    logWhenDevelopmentMode('Continuing without high accuracy mode:' + error);
   }
 
   const location = await Location.getCurrentPositionAsync({
@@ -605,7 +606,7 @@ export async function captureImage(options?: ImagePicker.ImagePickerOptions) {
       return result.assets[0];
     }
   } catch (error) {
-    console.log({ error });
+    logWhenDevelopmentMode({ error });
   }
 }
 
@@ -655,7 +656,7 @@ export async function pickImage(options?: ImagePicker.ImagePickerOptions) {
       return result.assets[0];
     }
   } catch (error) {
-    console.log({ error });
+    logWhenDevelopmentMode({ error });
   }
 }
 
@@ -672,7 +673,10 @@ export async function retrieveImagePathFromAsyncStorage(key: Key) {
     const keyToUse = getKeyToUse(key);
     return await AsyncStorage.getItem(keyToUse);
   } catch (error) {
-    console.log('Error retrieving image path in AsyncStorage', error);
+    logWhenDevelopmentMode(
+      'Error retrieving image path in AsyncStorage',
+      error,
+    );
     return null;
   }
 }
@@ -707,11 +711,11 @@ export async function saveImageLocally(key: Key, uri: string) {
       await saveImagePathToAsyncStorage(key, imagePath);
       return imagePath;
     } else {
-      console.log(`Unable to save image ${response?.uri}`);
+      logWhenDevelopmentMode(`Unable to save image ${response?.uri}`);
       return '';
     }
   } catch (error) {
-    console.log('Error saving image locally', error);
+    logWhenDevelopmentMode('Error saving image locally', error);
     return '';
   }
 }
@@ -721,7 +725,7 @@ export async function saveImagePathToAsyncStorage(key: Key, imagePath: string) {
     const keyToUse = getKeyToUse(key);
     await AsyncStorage.setItem(keyToUse, imagePath);
   } catch (error) {
-    console.log('Error storing image path in AsyncStorage', error);
+    logWhenDevelopmentMode('Error storing image path in AsyncStorage', error);
   }
 }
 
@@ -791,7 +795,8 @@ export async function measureExecutionTime(
   const start = performance.now();
   func && (await func());
   const end = performance.now();
-  if (shouldLog) console.log({ [`executionTimeOf${key}`]: end - start });
+  if (shouldLog)
+    logWhenDevelopmentMode({ [`executionTimeOf${key}`]: end - start });
 }
 
 export function sanitizeKey<T extends Key>(key: T) {
@@ -825,7 +830,9 @@ export function trimObjectValues<T>(obj: T) {
 export async function uriToBlob(uri: string) {
   try {
     const response = await fetch(uri);
+    logWhenDevelopmentMode({ response, uri });
     const blob = await response.blob();
+    logWhenDevelopmentMode({ blob });
     return blob;
   } catch {
     return null;

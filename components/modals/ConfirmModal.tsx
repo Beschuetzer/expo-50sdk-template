@@ -64,7 +64,7 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
         </Text>
       ) : null}
       {items.length > 1 ? (
-        <ScrollView keyboardShouldPersistTaps="handled">
+        <ScrollView keyboardShouldPersistTaps="always">
           {items.map((item, index) => {
             return (
               <Button

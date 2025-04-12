@@ -3,6 +3,7 @@ import { Stack, Row, theme, Text } from 'native-base';
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
 
 import { DeveloperInfo } from './DeveloperInfo';
 import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
@@ -10,7 +11,7 @@ import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
-import { ListsState } from '@/state/slices/listsSlice';
+import { ListsState, storeItemsCountSelector } from '@/state/slices/listsSlice';
 import { Address, StoreProp } from '@/types/general';
 import { getAddressString, getKeyToUse } from '@/utils/helpers';
 
@@ -26,6 +27,7 @@ export function StoreTile(props: StoreTileProps) {
     () => getKeyToUse(store || EMPTY_STRING),
     [store],
   );
+  const storeItemsCount = useSelector(storeItemsCountSelector(storeKeyToUse));
 
   return (
     <RectButton
@@ -45,7 +47,9 @@ export function StoreTile(props: StoreTileProps) {
           alignItems="center"
         >
           <Stack flex={1} justifyContent="center">
-            <Text fontSize={theme.fontSizes['lg']}>{store?.name}</Text>
+            <Text fontSize={theme.fontSizes['lg']}>
+              {store?.name} ({storeItemsCount})
+            </Text>
             {store?.addressLineTwo ? <Text>{store.addressLineTwo}</Text> : null}
             {store?.city || store?.state || store?.zipCode ? (
               <Text>{getAddressString(store as Address)}</Text>

@@ -11,6 +11,7 @@ import { ModalWithBlur } from '../modals/ModalWithBlur';
 import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
 import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { SpacingProp, StyleProp } from '@/types/general';
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 type ThumbnailPickerProps = {
   initialImages: string[];
@@ -68,7 +69,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
       const hasCustomImageAlready = images.some((image) => {
         const isLocalFile = !!image.match(LOCAL_FILE_REGEX);
         const isS3File = !!image.match(AMAZON_S3_REGEX);
-        console.log({
+        logWhenDevelopmentMode({
           AMAZON_S3_REGEX,
           LOCAL_FILE_REGEX,
           image,
@@ -79,7 +80,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
       });
 
       if (hasCustomImageAlready) {
-        console.log('has a local file already');
+        logWhenDevelopmentMode('has a local file already');
         setImages((current) => {
           const imagesWithoutCustomImages = [...current].filter((image) => {
             const isLocalImage = !!image.match(LOCAL_FILE_REGEX);
@@ -94,7 +95,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
           return imagesWithoutCustomImages;
         });
       } else {
-        console.log('does not have a local file already');
+        logWhenDevelopmentMode('does not have a local file already');
         setImages((current) => [...current, urlToUse]);
       }
       handleSelect(
@@ -116,6 +117,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     <Column mt={spacing}>
       <FlatList
         horizontal
+        keyboardShouldPersistTaps="always"
         data={Array.from(images)}
         renderItem={(itemLocal) => {
           const { index, item: imageUrl } = itemLocal;

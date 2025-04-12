@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { Stack, Input, useTheme, Row, TextArea } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TextProps } from 'react-native';
-import { useSelector } from 'react-redux';
 
 import { InputText } from './InputText';
 import { FontAwesomeButton } from '../FontAwesomeButton';
@@ -25,6 +24,7 @@ import {
   itemsListWithStoreSpecificValuesSelector,
   storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
+import { useAppSelector } from '@/state/store';
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -67,8 +67,8 @@ export function ItemFormStoreSpecific(
     storeManagerProps,
   } = props;
   const theme = useTheme();
-  const currentStore = useSelector(currentStoreSelector);
-  const currentStoreId = useSelector(currentStoreIdSelector);
+  const currentStore = useAppSelector(currentStoreSelector);
+  const currentStoreId = useAppSelector(currentStoreIdSelector);
   const keyToUse = useMemo(
     () =>
       getKeyToUse({
@@ -82,10 +82,10 @@ export function ItemFormStoreSpecific(
     () => getStoreDescriptor(currentStore),
     [currentStore],
   );
-  const itemInList = useSelector(
+  const itemInList = useAppSelector(
     itemsListWithStoreSpecificValuesSelector(keyToUse),
   );
-  const storeSpecificValuesMap = useSelector(storeSpecificValuesMapSelector);
+  const storeSpecificValuesMap = useAppSelector(storeSpecificValuesMapSelector);
 
   //See the two useEffects below when adding new fields (keys)
   const [aisleNumber, setAisleNumber] = useState(
@@ -174,6 +174,30 @@ export function ItemFormStoreSpecific(
     };
     return currentValues;
   }, [currentStoreId, aisleNumber, itemId, note, price, quantity]);
+
+  useEffect(() => {
+    const aisleNumberToShow = (storeSpecificValuesMap[keyToUse] as any)?.[
+      StoreSpecificValueKey.AisleNumber
+    ]?.[currentStoreId];
+    const itemIdToShow = (storeSpecificValuesMap[keyToUse] as any)?.[
+      StoreSpecificValueKey.ItemId
+    ]?.[currentStoreId];
+    const noteToShow = (storeSpecificValuesMap[keyToUse] as any)?.[
+      StoreSpecificValueKey.Note
+    ]?.[currentStoreId];
+    const priceToShow = (storeSpecificValuesMap[keyToUse] as any)?.[
+      StoreSpecificValueKey.Price
+    ]?.[currentStoreId]?.toString();
+    const quantityToShow = (storeSpecificValuesMap[keyToUse] as any)?.[
+      StoreSpecificValueKey.Quantity
+    ]?.[currentStoreId]?.toString();
+
+    setAisleNumber(aisleNumberToShow);
+    setItemId(itemIdToShow);
+    setNote(noteToShow);
+    setPrice(priceToShow);
+    setQuantity(quantityToShow);
+  }, [storeSpecificValuesMap[keyToUse]]);
 
   useEffect(() => {
     const aisleNumberToShow =

@@ -27,17 +27,6 @@ export function updateStoreSpecificValueMap(
       STORE_SPECIFIC_VALUE_KEY_DEFAULTS[valueName as StoreSpecificValueKey];
     const newValueAtCurrentStore = (value as any)?.(currentValueAtCurrentStore);
 
-    // console.log({
-    //   valueName,
-    //   value,
-    //   keyToUse,
-    //   storeIdToUse,
-    //   currentItem,
-    //   currentValues,
-    //   currentValueAtCurrentStore,
-    //   newValueAtCurrentStore,
-    // });
-
     if (
       !currentItem?.[valueName]?.[storeIdToUse] ||
       currentValues === undefined

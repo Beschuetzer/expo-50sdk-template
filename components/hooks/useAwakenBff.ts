@@ -11,6 +11,7 @@ const MAX_TRY_COUNT = 3;
  *A hook that calls a /ping route until the max number of tries is reached or the server responds
  **/
 export const useAwakenBff = () => {
+  const hasAwakenedRef = useRef(false);
   const tryCountCurrentRef = useRef(0);
   const dispatch = useAppDispatch();
 
@@ -28,8 +29,10 @@ export const useAwakenBff = () => {
 
   useEffect(() => {
     (async () => {
+      if (hasAwakenedRef.current) return;
       dispatch(resetErrors());
       checkStatus();
+      hasAwakenedRef.current = true;
     })();
   }, []);
 };

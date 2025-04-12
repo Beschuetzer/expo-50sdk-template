@@ -1,4 +1,5 @@
-import { useNavigation } from 'expo-router';
+import { useIsFocused } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from 'expo-router';
 import { useTheme } from 'native-base';
 import {
   useCallback,
@@ -15,29 +16,25 @@ import {
   ListHeaderRight,
   ListHeaderRightOptions,
 } from '@/components/header/ListHeaderRight';
+import { useAutoLogin } from '@/components/hooks/useAutoLogin';
 import { useAwakenBff } from '@/components/hooks/useAwakenBff';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { useInitializer } from '@/components/hooks/useInitializer';
 import { useMenu } from '@/components/hooks/useMenu';
 import { InCartList } from '@/components/lists/InCartList';
-import { ListSorter } from '@/components/lists/ListSorter';
 import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
-import {
-  ShoppingList,
-  shoppingListSortTypes,
-} from '@/components/lists/ShoppingList';
-import { SortType } from '@/components/lists/sorters';
+import { ShoppingList } from '@/components/lists/ShoppingList';
 import {
   ConfirmModal,
   ConfirmModalProps,
 } from '@/components/modals/ConfirmModal';
+import { StoreSelectionModal } from '@/components/modals/StoreSelectionModal';
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { accountSelector } from '@/state/slices/generalSlice';
 import {
   currentStoreSelector,
-  inCartListSelector,
   moveAllToInCart,
   moveSelectedToCart,
   moveSelectedToShopping,
@@ -45,8 +42,6 @@ import {
   selectedItemsFromInCartSelector,
   selectedItemsFromShoppingCartSelector,
   setCurrentLocation,
-  setSortOrder,
-  shoppingListSelector,
   storeSpecificListSelector,
   setIsMultiSelectModeForInCartCart,
   setIsMultiSelectModeForShoppingCart,
@@ -54,14 +49,17 @@ import {
   selectedItemsFromPreviouslyPurchasedSelector,
   moveSelectedPreviouslyPurchasedItemsToShopping,
   setIsMultiSelectModeForPreviouslyPurchased,
-  previouslyPurchasedListSelector,
   resetSelectedItemsInShopping,
   removeShoppingListItems,
   addAllToShoppingCart,
   itemsPurchasedAtStoreSelector,
+  moveItemToAnotherCart,
+  updateSelectedItemsFromShoppingCart,
+  updateSelectedItemsFromInCart,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState, savePurchase } from '@/state/thunks';
+import { Store } from '@/types/Store';
 import { ListName } from '@/types/listSlice';
 import { getNewViewingMode, resetConfirmModalProps } from '@/utils/helpers';
 
@@ -75,15 +73,11 @@ export default function TabOneScreen() {
     },
   });
   useAwakenBff();
+  useAutoLogin();
   useInitializer();
   const layout = useWindowDimensions();
-  const shoppingList = useAppSelector(shoppingListSelector);
-  const inCartList = useAppSelector(inCartListSelector);
   const account = useAppSelector(accountSelector);
   const itemsPurchasedAtStore = useAppSelector(itemsPurchasedAtStoreSelector);
-  const previouslyPurchasedList = useAppSelector(
-    previouslyPurchasedListSelector,
-  );
   const currentStore = useAppSelector(currentStoreSelector);
   const shoppingListItems = useAppSelector(
     storeSpecificListSelector(ListName.ShoppingList),
@@ -103,19 +97,16 @@ export default function TabOneScreen() {
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {},
   );
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+  const [isStoreSelectionModalVisible, setIsStoreSelectionModalVisible] =
+    useState(false);
   const [index, setIndex] = useState(0);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
 
   const [, closeMenu] = useMenu({
     navigationOptionsGetter: (menuRef) => ({
       headerRight: () => (
-        <ListHeaderRight
-          ref={menuRef}
-          onSortPress={onSortPress}
-          onResetPress={onResetPress}
-          options={getMenuOptions()}
-        />
+        <ListHeaderRight ref={menuRef} options={getMenuOptions()} />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
       headerTitle: `Shopping (${currentStore.name})`,
@@ -200,7 +191,21 @@ export default function TabOneScreen() {
       },
     ];
     if (index === 0) {
+      options.push({
+        text:
+          selectedShoppingCartItems.length === shoppingListItems.length
+            ? 'De-select All'
+            : 'Select All',
+        onPress:
+          selectedShoppingCartItems.length === shoppingListItems.length
+            ? onDeselectAllPress
+            : onSelectAllPress,
+      });
       if (selectedShoppingCartItems.length > 0) {
+        options.push({
+          onPress: onMoveSelectedToAnotherCartPress,
+          text: 'Move Selected to Another Cart',
+        });
         options.push({
           onPress: onMoveSelectedToCartPress,
           text: 'Move Selected to Cart',
@@ -231,6 +236,16 @@ export default function TabOneScreen() {
         ],
       );
     } else if (index === 1) {
+      options.push({
+        text:
+          selectedInCartItems.length === inCartListItems.length
+            ? 'De-select All'
+            : 'Select All',
+        onPress:
+          selectedInCartItems.length === inCartListItems.length
+            ? onDeselectAllPress
+            : onSelectAllPress,
+      });
       if (selectedInCartItems.length > 0) {
         options.push({
           onPress: onMoveSelectedToShoppingPress,
@@ -260,6 +275,8 @@ export default function TabOneScreen() {
     selectedInCartItems,
     selectedShoppingCartItems,
     selectedPreviouslyPurchasedItems,
+    shoppingListItems.length,
+    inCartListItems.length,
     account,
   ]);
 
@@ -276,6 +293,7 @@ export default function TabOneScreen() {
   const onClearAllPress = useCallback(() => {
     setConfirmModalProps({
       isVisible: true,
+      title: 'Clear Cart',
       message: 'Are you sure you want to clear the cart?',
       onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: () => {
@@ -295,6 +313,10 @@ export default function TabOneScreen() {
     );
     dispatch(addAllToShoppingCart(recommended));
   }, [itemsPurchasedAtStore]);
+
+  const onMoveSelectedToAnotherCartPress = useCallback(() => {
+    setIsStoreSelectionModalVisible(true);
+  }, []);
 
   const onMoveSelectedToCartPress = useCallback(() => {
     dispatch(moveSelectedToCart());
@@ -325,16 +347,51 @@ export default function TabOneScreen() {
     dispatch(resetListToDisplay({ listName }));
   }, [listName]);
 
-  const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true);
+  const onDeselectAllPress = useCallback(() => {
+    dispatch(resetSelectedItemsInShopping());
+    if (index === 0) {
+      dispatch(setIsMultiSelectModeForShoppingCart(false));
+    } else if (index === 1) {
+      dispatch(setIsMultiSelectModeForInCartCart(false));
+    }
+  }, [index]);
+
+  const onSelectAllPress = useCallback(() => {
+    if (index === 0) {
+      dispatch(setIsMultiSelectModeForShoppingCart(true));
+      for (const shoppingListItem of shoppingListItems) {
+        dispatch(
+          updateSelectedItemsFromShoppingCart({
+            operation: 'add',
+            item: shoppingListItem,
+          }),
+        );
+      }
+    }
+    if (index === 1) {
+      dispatch(setIsMultiSelectModeForInCartCart(true));
+      for (const inCartItem of inCartListItems) {
+        dispatch(
+          updateSelectedItemsFromInCart({
+            operation: 'add',
+            item: inCartItem,
+          }),
+        );
+      }
+    }
+  }, [index, inCartListItems, shoppingListItems]);
+
+  const resetSelected = useCallback(() => {
+    dispatch(setIsMultiSelectModeForInCartCart(false));
+    dispatch(setIsMultiSelectModeForShoppingCart(false));
+    dispatch(setIsMultiSelectModeForPreviouslyPurchased(false));
+    dispatch(resetSelectedItemsInShopping());
   }, []);
 
-  const onSortTypeChange = useCallback(
-    (sortType: SortType) => {
-      dispatch(setSortOrder({ listName, sortBy: sortType }));
-    },
-    [listName],
-  );
+  useFocusEffect(() => {
+    if (isFocused) return;
+    resetSelected();
+  });
 
   useLayoutEffect(() => {
     if (index === 2) return;
@@ -346,11 +403,8 @@ export default function TabOneScreen() {
   }, [inCartListItems.length, shoppingListItems.length, index]);
 
   useEffect(() => {
-    dispatch(setIsMultiSelectModeForInCartCart(false));
-    dispatch(setIsMultiSelectModeForShoppingCart(false));
-    dispatch(setIsMultiSelectModeForPreviouslyPurchased(false));
-    dispatch(resetSelectedItemsInShopping());
-  }, [index]);
+    resetSelected();
+  }, [index, resetSelected]);
 
   function renderTabBar(props: any) {
     return (
@@ -371,20 +425,23 @@ export default function TabOneScreen() {
         onIndexChange={setIndex}
         initialLayout={{ width: layout.width }}
       />
-      <ListSorter
-        sortOrderValue={
-          index === 0
-            ? shoppingList.sortOrderValue
-            : index === 1
-              ? inCartList.sortOrderValue
-              : previouslyPurchasedList.sortOrderValue
-        }
-        listName={listName}
-        isVisible={isSortModalOpen}
-        setIsVisible={setIsSortModalOpen}
-        onValueChange={onSortTypeChange}
-        sortTypes={shoppingListSortTypes}
-        viewSize="small"
+      <StoreSelectionModal
+        title="Move items to:"
+        onCancel={() => setIsStoreSelectionModalVisible(false)}
+        isVisible={isStoreSelectionModalVisible}
+        onConfirm={(selectedStore: Store | null) => {
+          setIsStoreSelectionModalVisible(false);
+          if (selectedStore && selectedShoppingCartItems.length > 0) {
+            for (const selectedItem of selectedShoppingCartItems) {
+              dispatch(
+                moveItemToAnotherCart({
+                  store: selectedStore,
+                  item: selectedItem,
+                }),
+              );
+            }
+          }
+        }}
       />
       <ConfirmModal {...confirmModalProps} />
     </>

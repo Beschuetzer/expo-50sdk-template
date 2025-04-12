@@ -36,6 +36,7 @@ import { Item, StoreSpecificValueKey } from '@/types/Item';
 import { ItemFormOnSave } from '@/types/itemForm';
 import { QuickAddRowProps } from '@/types/quickAdd';
 import { getItemValidation, getKeyToUse } from '@/utils/helpers';
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 const DEFAULT_QUANTITY = 1;
 export function QuickAddRow(props: QuickAddRowProps) {
@@ -127,7 +128,7 @@ export function QuickAddRow(props: QuickAddRowProps) {
     }
     //todo: remove this when done testing
     if (parsedName === 'Belinis') {
-      console.log({
+      logWhenDevelopmentMode({
         guesses,
         searchedItem,
         newItem,
@@ -452,7 +453,7 @@ export function QuickAddRow(props: QuickAddRowProps) {
         ref={itemFormSheetRef}
         title={`Add Item for '${parsedName}'`}
         onSubmit={() => {
-          console.log({
+          logWhenDevelopmentMode({
             newItem: newItemPayload?.item,
             images: newItemPayload?.item.images,
             price:

@@ -1,3 +1,5 @@
+import * as Haptics from 'expo-haptics';
+
 import { SortOrder, SortType } from '@/components/lists/sorters';
 import {
   ItemUnit,
@@ -71,6 +73,34 @@ export const IMAGE_PRIORITY_MAPPING: {
 export const ITEM_TILE_WIDTH = 30;
 export const ITEM_TILE_ICON_SIZE = 5;
 export const ITEM_UNIT_INITIAL = ItemUnit.Package;
+export const LIST_HAPTICS = {
+  handleIsSelected: (isSelected: boolean) => () => {
+    if (isSelected) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  },
+  handleMultipleItemSelect: (isMultiSelectEnabled: boolean) => () => {
+    if (isMultiSelectEnabled) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  },
+  handleSelection: () => {
+    Haptics.selectionAsync();
+  },
+  handleSwipeItem:
+    (isRemoving = false) =>
+    () => {
+      if (isRemoving) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    },
+};
 export const NAME_ORDER_BRANDS_STRING = 'brands';
 export const NAME_ORDER_PRODUCT_NAME_STRING = 'product_name';
 export const NAME_ORDER_TEMPLATE_INITIAL = `${NAME_ORDER_PRODUCT_NAME_STRING} (${NAME_ORDER_BRANDS_STRING})`;

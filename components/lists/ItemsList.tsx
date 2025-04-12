@@ -5,12 +5,11 @@ import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 
-import { ListFilter, ListFilterFilters } from './ListFilter';
 import { ListItemSeparator } from './ListItemSeparator';
-import { ListSorter } from './ListSorter';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
 import { AlphabeticalScroll } from '../AlphabeticalScroll';
+import FilterListInput from '../FilterListInput';
 import { AddButton } from '../header/AddButton';
 import { ListHeaderRight } from '../header/ListHeaderRight';
 import { useMenu } from '../hooks/useMenu';
@@ -22,17 +21,16 @@ import {
   EMPTY_STRING,
   ESTIMATED_SIZE_FOR_ITEMS_LIST,
   FORM_INTER_ITEM_SPACING,
+  LIST_HAPTICS,
+  SORT_ORDER_VALUE_BY_NAME_DEFAULT,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import {
   addAllToShoppingCart,
   currentStoreSelector,
   itemsListSelector,
-  listToDisplaySelector,
   removeItemsListItems,
   resetListToDisplay,
-  setFilters,
-  setSortOrder,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
@@ -49,35 +47,25 @@ import {
 
 type ItemsListProps = object;
 
-const itemsListSortTypes = [
-  SortType.Name,
-  SortType.Upc,
-  SortType.AddedDate,
-  SortType.LastUpdatedDate,
-  SortType.Frequency,
-] as SortType[];
-
 const listName: ListName = ListName.ItemsList;
 export function ItemsList(props: ItemsListProps) {
   const navigation = useNavigation();
   const itemsList = useAppSelector(itemsListSelector);
-  const itemsListToDisplay = useAppSelector(
-    listToDisplaySelector(listName),
-  ) as Item[];
   const currentStore = useAppSelector(currentStoreSelector);
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const listRef = useRef<FlashList<Item> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [itemsListToDisplay, setItemsListToDisplay] = useState(itemsList.data);
+  const [sortOrderValue, setSortOrderValue] = useState(
+    SORT_ORDER_VALUE_BY_NAME_DEFAULT,
+  );
   const [selectedItems, setSelectedItems] = useState<Item[]>([]);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     {} as ConfirmModalProps,
   );
   const [viewingMode, setViewingMode] = useState(ItemTileViewingMode.Full);
-  const lastSortTypeRef = useRef(itemsListSortTypes[0]);
   useUpdatedListTitle({ list: itemsList, title: 'Items List' });
 
   const iconSize = useMemo(() => {
@@ -89,8 +77,6 @@ export function ItemsList(props: ItemsListProps) {
       headerRight: () => (
         <ListHeaderRight
           ref={menuRef}
-          onSortPress={onSortPress}
-          onFilterPress={onFilterPress}
           onResetPress={onResetPress}
           options={[
             selectedItems.length > 0
@@ -116,7 +102,7 @@ export function ItemsList(props: ItemsListProps) {
     }),
   });
 
-  function onAddItemPress() {
+  const onAddItemPress = useCallback(() => {
     closeMenu();
     // @ts-ignore
     navigation.navigate(Routes.ItemModal, {
@@ -124,7 +110,13 @@ export function ItemsList(props: ItemsListProps) {
       key: { upc: EMPTY_STRING, name: EMPTY_STRING },
       callerList: listName,
     });
-  }
+  }, [closeMenu]);
+
+  const onResetPress = useCallback(() => {
+    dispatch(resetListToDisplay({ listName }));
+    setSelectedItems([]);
+    setIsMultiSelectMode(false);
+  }, []);
 
   const resetMultiSelectionMode = useCallback(() => {
     setIsMultiSelectMode(false);
@@ -135,14 +127,6 @@ export function ItemsList(props: ItemsListProps) {
     dispatch(addAllToShoppingCart(selectedItems));
     resetMultiSelectionMode();
   }, [selectedItems, resetMultiSelectionMode]);
-
-  const onSortPress = useCallback(() => {
-    setIsSortModalOpen(true);
-  }, []);
-
-  const onFilterPress = useCallback(() => {
-    setIsFilterModalOpen(true);
-  }, []);
 
   const onDeleteSelectedPress = useCallback(() => {
     setConfirmModalProps({
@@ -163,32 +147,15 @@ export function ItemsList(props: ItemsListProps) {
     });
   }, [selectedItems, resetMultiSelectionMode]);
 
-  const onResetPress = useCallback(() => {
-    dispatch(resetListToDisplay({ listName }));
-    setSelectedItems([]);
-    setIsMultiSelectMode(false);
-  }, []);
-
-  const onSortTypeChange = useCallback((sortType: SortType) => {
-    lastSortTypeRef.current = sortType;
-    dispatch(setSortOrder({ listName, sortBy: sortType }));
-  }, []);
-
   const onToggleViewingModePress = useCallback(() => {
     setViewingMode((current) => getNewViewingMode(current));
   }, []);
-
-  const onFilterValueChange = useCallback(
-    (filters: ListFilterFilters<Item>) => {
-      dispatch(setFilters({ listName, filters }));
-    },
-    [listName],
-  );
 
   const onSwipeRight = useCallback(
     (key: Key) => {
       closeMenu();
       setRefreshing(false);
+      LIST_HAPTICS.handleSwipeItem()();
       dispatch(
         updateStoreSpecificValues({
           key,
@@ -207,7 +174,6 @@ export function ItemsList(props: ItemsListProps) {
       const keyToDisplay = item?.name || item?.upc;
       const isUpc = !item.name;
       const isUpcMessagePart = isUpc ? `the item with the upc of ` : '';
-
       closeMenu();
       setConfirmModalProps({
         isVisible: true,
@@ -222,6 +188,7 @@ export function ItemsList(props: ItemsListProps) {
         },
         onCancel: () => resetConfirmModalProps(setConfirmModalProps),
         onConfirm: () => {
+          LIST_HAPTICS.handleSwipeItem(true)();
           dispatch(
             deleteItems({
               items: [item],
@@ -238,6 +205,7 @@ export function ItemsList(props: ItemsListProps) {
   function renderItem({ item, index }: ListRow<Item>) {
     return (
       <SwipeableRow
+        key={getKeyToUse(item)}
         swipeableProps={{
           onBegan: closeMenu,
         }}
@@ -290,6 +258,7 @@ export function ItemsList(props: ItemsListProps) {
             onLongPress: () => {
               setSelectedItems(isMultiSelectMode ? [] : [item]);
               setIsMultiSelectMode((current) => !current);
+              LIST_HAPTICS.handleMultipleItemSelect(isMultiSelectMode)();
             },
           }}
           onSelect={(item) => {
@@ -307,6 +276,7 @@ export function ItemsList(props: ItemsListProps) {
                 return [...current, item];
               });
             }
+            LIST_HAPTICS.handleIsSelected(isSelected)();
           }}
           isSelected={
             !!selectedItems.find(
@@ -320,9 +290,27 @@ export function ItemsList(props: ItemsListProps) {
 
   return (
     <>
+      <FilterListInput
+        list={itemsList.data}
+        onFilterChange={(filteredValues, _, sortOrderValue) => {
+          setItemsListToDisplay(filteredValues);
+          setSortOrderValue(sortOrderValue);
+        }}
+        sortTypes={Object.values(SortType).filter(
+          (sortType) =>
+            sortType === SortType.AddedDate ||
+            sortType === SortType.Frequency ||
+            sortType === SortType.LastUpdatedDate ||
+            sortType === SortType.Name ||
+            sortType === SortType.Upc,
+        )}
+        swapElementOrder
+      />
       <FlashList
         ref={listRef}
+        keyboardShouldPersistTaps="always"
         refreshing={refreshing}
+        extraData={{ viewingMode, isMultiSelectMode }}
         onTouchStart={closeMenu}
         onRefresh={() => {
           setRefreshing(true);
@@ -338,33 +326,18 @@ export function ItemsList(props: ItemsListProps) {
         estimatedItemSize={ESTIMATED_SIZE_FOR_ITEMS_LIST}
         ItemSeparatorComponent={() => <ListItemSeparator />}
       />
-      <ListSorter
-        sortOrderValue={itemsList.sortOrderValue}
-        listName={listName}
-        isVisible={isSortModalOpen}
-        setIsVisible={setIsSortModalOpen}
-        onValueChange={onSortTypeChange}
-        sortTypes={itemsListSortTypes}
-        viewSize="small"
-      />
-      <ListFilter
-        list={itemsList}
-        listName={listName}
-        filterNames={['name', 'upc']}
-        isVisible={isFilterModalOpen}
-        setIsVisible={setIsFilterModalOpen}
-        onValueChange={onFilterValueChange}
-      />
       <ConfirmModal {...confirmModalProps} />
-      <AlphabeticalScroll
-        items={itemsListToDisplay}
-        onCharPress={(index) => {
-          if (listRef?.current) {
-            listRef.current.scrollToIndex({ animated: false, index });
-          }
-        }}
-        sortOrderValue={itemsList.sortOrderValue}
-      />
+      {sortOrderValue.sortBy === SortType.Name ? (
+        <AlphabeticalScroll
+          items={itemsListToDisplay}
+          onCharPress={(index) => {
+            if (listRef?.current) {
+              listRef.current.scrollToIndex({ animated: false, index });
+            }
+          }}
+          sortOrderValue={sortOrderValue}
+        />
+      ) : null}
     </>
   );
 }

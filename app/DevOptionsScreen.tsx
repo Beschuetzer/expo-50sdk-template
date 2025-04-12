@@ -22,7 +22,7 @@ export default function DevOptionsScreen() {
 
   if (!getIsDevelopmentMode()) return null;
   return (
-    <ScrollView keyboardShouldPersistTaps="handled">
+    <ScrollView keyboardShouldPersistTaps="always">
       <ServiceTester />
       <Text>Using backend at: {BACKEND_URL}</Text>
       <MockResponseToggle />

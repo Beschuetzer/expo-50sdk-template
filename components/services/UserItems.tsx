@@ -43,7 +43,11 @@ export const UserItems = (props: UserItemProps) => {
   return (
     <Stack>
       <Heading size="md">Items:</Heading>
-      <FlatList data={items} renderItem={renderItems} />
+      <FlatList
+        keyboardShouldPersistTaps="always"
+        data={items}
+        renderItem={renderItems}
+      />
     </Stack>
   );
 };

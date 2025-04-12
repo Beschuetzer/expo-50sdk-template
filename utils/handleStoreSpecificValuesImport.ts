@@ -1,5 +1,6 @@
 import { getItemForImport } from './helpers';
 import { iterateStoreSpecificValuesMap } from './iterateStoreSpecificValuesMap';
+import { logWhenDevelopmentMode } from './logging';
 
 import { Item, StoreSpecificValuesMap } from '@/types/Item';
 import { Store } from '@/types/Store';
@@ -24,7 +25,9 @@ export function handleStoreSpecificValuesImport(
         );
       } else {
         if (itemFound._id) {
-          console.log(`Replacing '${itemKey}' with '${itemFound._id}'`);
+          logWhenDevelopmentMode(
+            `Replacing '${itemKey}' with '${itemFound._id}'`,
+          );
           copy[itemFound._id] = storeSpecificValues;
         }
       }
@@ -42,7 +45,9 @@ export function handleStoreSpecificValuesImport(
         );
       } else {
         if (storeFound._id) {
-          console.log(`Replacing '${storeKey}' with '${storeFound._id}'`);
+          logWhenDevelopmentMode(
+            `Replacing '${storeKey}' with '${storeFound._id}'`,
+          );
           delete (copy as any)[itemKey][storeSpecificValueKey][storeKey];
           (copy as any)[itemKey][storeSpecificValueKey][storeFound._id] =
             storeValue;

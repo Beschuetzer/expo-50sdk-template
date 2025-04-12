@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 
 import { useKeyboard } from './hooks/useKeyboard';
 
-import { EMPTY_STRING } from '@/constants/general';
+import { EMPTY_STRING, LIST_HAPTICS } from '@/constants/general';
 import { listToDisplaySelector } from '@/state/slices/listsSlice';
 import { scanningModeSelector } from '@/state/slices/optionsSlice';
 import { Item } from '@/types/Item';
@@ -49,6 +49,7 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
       const upc = scannedObj.data;
       const isItemInList = !!getItemFromList(itemsList, upc);
       onScanned && onScanned(upc || EMPTY_STRING, scanningMode, isItemInList);
+      LIST_HAPTICS.handleSelection();
     },
     [scanningMode, itemsList],
   );

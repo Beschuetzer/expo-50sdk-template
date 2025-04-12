@@ -6,7 +6,7 @@ import { updateStoreSpecificValueMap } from './helpers/updateStoreSpecificValueM
 import { RootState } from '../store';
 
 import { getSorter, SortOrder } from '@/components/lists/sorters';
-import { EMPTY_STRING } from '@/constants/general';
+import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
 import {
   Item,
   ItemWithStoreSpecificValues,
@@ -40,6 +40,8 @@ import {
   ToggleSortOrderPayload,
   UpdateSelectedItemsPayload,
   UpdateStoreSpecificValuesPayload,
+  MoveItemToAnotherCartPayload,
+  CopyStoreSpecificValuesPayload,
 } from '@/types/listSlice';
 import { getItemWithStoreSpecificValues } from '@/utils/getItemWithStoreSpecificValues';
 import {
@@ -55,7 +57,10 @@ import {
   getKeyToUse,
   getStoreWithDistance,
 } from '@/utils/helpers';
-import { iterateStoreSpecificValuesMap } from '@/utils/iterateStoreSpecificValuesMap';
+import {
+  ITERATE_STORE_SPECIFIC_VALUES_MAP_SKIP_VALUE,
+  iterateStoreSpecificValuesMap,
+} from '@/utils/iterateStoreSpecificValuesMap';
 
 //#region State
 const CURRENT_LOCATION_INITIAL = null;
@@ -136,15 +141,6 @@ export const listsSlice = createSlice({
       const itemToAdd = action.payload;
       const keyToUse = getKeyToUse(itemToAdd);
       if (!itemToAdd) return;
-      // console.log({
-      //   keyToUse,
-      //   item: state.storeSpecificValuesMap[keyToUse],
-      //   entry:
-      //     state.storeSpecificValuesMap[keyToUse]?.[
-      //       StoreSpecificValueKey.IsInCart
-      //     ],
-      // })
-
       if (!state.storeSpecificValuesMap?.[keyToUse]) {
         state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
       }
@@ -215,6 +211,16 @@ export const listsSlice = createSlice({
         }
       }
     },
+    addItemsToItemsList: (
+      state: ListsState,
+      action: PayloadAction<ItemsList>,
+    ) => {
+      const itemsList = action.payload;
+      state[ListName.ItemsList] = {
+        ...state[ListName.ItemsList],
+        ...itemsList,
+      };
+    },
     addStoresListItem: (
       state: ListsState,
       action: PayloadAction<AddStoresListItemPayload>,
@@ -230,6 +236,16 @@ export const listsSlice = createSlice({
       if (state.storesList.data.length === 1) {
         state.currentStoreId = getKeyToUse(newStore);
       }
+    },
+    addStoreSpecificValues: (
+      state: ListsState,
+      action: PayloadAction<ListsState['storeSpecificValuesMap']>,
+    ) => {
+      if (!action.payload) return;
+      state.storeSpecificValuesMap = {
+        ...state.storeSpecificValuesMap,
+        ...action.payload,
+      };
     },
     clearShopping: (state: ListsState) => {
       iterateStoreSpecificValuesMap({
@@ -294,6 +310,93 @@ export const listsSlice = createSlice({
             },
           };
         }
+      }
+    },
+    copyStoreSpecificValues: (
+      state: ListsState,
+      action: PayloadAction<CopyStoreSpecificValuesPayload>,
+    ) => {
+      const { source, destination, items } = action.payload;
+      const keysToIgnore = [
+        StoreSpecificValueKey.IsInCart.toString(),
+        StoreSpecificValueKey.Quantity.toString(),
+      ];
+      const storeSpecificValuesMapCopy = { ...state.storeSpecificValuesMap };
+      if (!source || !destination) return;
+      const itemIds = (items || [])?.map((item) => getKeyToUse(item));
+      iterateStoreSpecificValuesMap({
+        storeSpecificValuesMap: state.storeSpecificValuesMap,
+        onNewItemStart: ({ itemKey }) => {
+          if (items && !itemIds.includes(itemKey)) {
+            return ITERATE_STORE_SPECIFIC_VALUES_MAP_SKIP_VALUE;
+          }
+        },
+        onNewStoreSpecificValueStart: ({ storeSpecificValueKey }) => {
+          if (keysToIgnore.includes(storeSpecificValueKey)) {
+            return ITERATE_STORE_SPECIFIC_VALUES_MAP_SKIP_VALUE;
+          }
+        },
+        onNewStoreValue: ({
+          itemKey,
+          storeKey,
+          storeSpecificValueKey,
+          storeValue,
+        }) => {
+          if (storeValue && storeKey === source._id) {
+            const destinationKey = getKeyToUse(destination);
+            const currentValue = (
+              storeSpecificValuesMapCopy?.[itemKey] as any
+            )?.[storeSpecificValueKey][destinationKey];
+            if (currentValue) return;
+
+            if (!storeSpecificValuesMapCopy?.[itemKey]) {
+              storeSpecificValuesMapCopy[itemKey] = {} as StoreSpecificValues;
+            }
+            if (
+              !(storeSpecificValuesMapCopy?.[itemKey] as any)?.[
+                storeSpecificValueKey
+              ]
+            ) {
+              (storeSpecificValuesMapCopy[itemKey] as any)[
+                storeSpecificValueKey
+              ] = {
+                ...(storeSpecificValuesMapCopy[itemKey] as any)[
+                  storeSpecificValueKey
+                ],
+              } as StoreSpecificValue<any>;
+            }
+
+            (storeSpecificValuesMapCopy[itemKey] as any)[storeSpecificValueKey][
+              destinationKey
+            ] = storeValue;
+          }
+        },
+      });
+      state.storeSpecificValuesMap = storeSpecificValuesMapCopy;
+
+      //copying the last purchased map values if it's a full store copy
+      if (!items || items.length <= 0) {
+        const lastPurchasedMapCopy = { ...state.lastPurchasedMap };
+        for (const [itemKey, storeValues] of Object.entries(
+          state.lastPurchasedMap,
+        )) {
+          for (const [storeKey, value] of Object.entries(storeValues || {})) {
+            const destinationKey = getKeyToUse(destination);
+            const currentValue =
+              lastPurchasedMapCopy?.[itemKey]?.[destinationKey];
+            if (
+              value &&
+              storeKey === source._id &&
+              (!currentValue || value > currentValue)
+            ) {
+              lastPurchasedMapCopy[itemKey] = {
+                ...lastPurchasedMapCopy[itemKey],
+                [destinationKey]: value,
+              };
+            }
+          }
+        }
+        state.lastPurchasedMap = lastPurchasedMapCopy;
       }
     },
     handleLoadAllResponse: (
@@ -399,6 +502,43 @@ export const listsSlice = createSlice({
     moveAllToInCart: (state: ListsState) => {
       moveItems(state, Object.keys(state.storeSpecificValuesMap));
       state.selectedItemsFromShoppingCart = [];
+    },
+    moveItemToAnotherCart: (
+      state: ListsState,
+      action: PayloadAction<MoveItemToAnotherCartPayload>,
+    ) => {
+      const { item, store } = action.payload;
+      if (!item || !store) return;
+      const keyToUse = getKeyToUse(item);
+      if (!state.storeSpecificValuesMap?.[keyToUse]) {
+        state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
+      }
+
+      if (
+        state.storeSpecificValuesMap?.[keyToUse]?.[
+          StoreSpecificValueKey.Quantity
+        ]
+      ) {
+        const currentQuantity =
+          state.storeSpecificValuesMap[keyToUse][
+            StoreSpecificValueKey.Quantity
+          ][state.currentStoreId] || 1;
+        state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.Quantity][
+          getKeyToUse(store)
+        ] = currentQuantity;
+        state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.Quantity][
+          state.currentStoreId
+        ] = 0;
+      }
+      if (
+        state.storeSpecificValuesMap?.[keyToUse]?.[
+          StoreSpecificValueKey.IsInCart
+        ]
+      ) {
+        state.storeSpecificValuesMap[keyToUse][StoreSpecificValueKey.IsInCart][
+          state.currentStoreId
+        ] = false;
+      }
     },
     moveItemToShoppingList: (state: ListsState, action: PayloadAction<Key>) => {
       const keyToUse = getKeyToUse(action.payload);
@@ -919,7 +1059,10 @@ export const selectedItemsFromShoppingCartSelector = (state: RootState) =>
  *The way this is written, the shopping list will update when the storeList changes when really it should only change when the current store changes
  *This may not be an issue though
  **/
-export const storeSpecificListSelector = (listname: ListName) =>
+export const storeSpecificListSelector = (
+  listname: ListName,
+  shouldFilterAndSort = false,
+) =>
   createSelector(
     [
       (state: RootState) => state[listsSlice.name][ListName.ShoppingList],
@@ -976,6 +1119,8 @@ export const storeSpecificListSelector = (listname: ListName) =>
         },
       });
 
+      if (!shouldFilterAndSort) return listToDisplay;
+
       const filteredList = getFilteredList<ItemWithStoreSpecificValues>(
         listToDisplay,
         listname === ListName.ShoppingList
@@ -999,6 +1144,41 @@ export const storeSpecificListSelector = (listname: ListName) =>
 
 export const shoppingListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.ShoppingList];
+
+//Note: this is currently exponential time complexity
+export const storeItemsCountSelector = (storeId: string) =>
+  createSelector(
+    [(state: RootState) => state[listsSlice.name].storeSpecificValuesMap],
+    (storeSpecificValuesMap) => {
+      if (!storeId) return EMPTY_NUMBER;
+      const items = new Set<string>();
+      iterateStoreSpecificValuesMap({
+        storeSpecificValuesMap,
+        onNewStoreSpecificValueStart: (input) => {
+          const { storeSpecificValueKey } = input;
+          if (
+            storeSpecificValueKey !== StoreSpecificValueKey.IsInCart &&
+            storeSpecificValueKey !== StoreSpecificValueKey.Quantity
+          ) {
+            return ITERATE_STORE_SPECIFIC_VALUES_MAP_SKIP_VALUE;
+          }
+        },
+        onNewStoreValue: (input) => {
+          const { storeSpecificValues, itemKey, storeKey } = input;
+          if (storeKey !== storeId) return;
+          if (
+            storeSpecificValues?.[StoreSpecificValueKey.IsInCart]?.[storeId] ||
+            (storeSpecificValues?.[StoreSpecificValueKey.Quantity]?.[storeId] &&
+              storeSpecificValues?.[StoreSpecificValueKey.Quantity]?.[storeId] >
+                0)
+          ) {
+            items.add(itemKey);
+          }
+        },
+      });
+      return items.size;
+    },
+  );
 
 export const storesListSelector = (state: RootState) =>
   state[listsSlice.name][ListName.StoresList];
@@ -1025,14 +1205,18 @@ export const storeSpecificValuesSelector = (
 export const {
   addAllToShoppingCart,
   addItemsListItem,
+  addItemsToItemsList,
   addItemToCart,
   addStoresListItem,
+  addStoreSpecificValues,
   clearShopping,
   completePurchase,
+  copyStoreSpecificValues,
   handleLoadAllResponse,
   handleSaveAllResponse,
   moveAllToInCart,
   moveItemToShoppingList,
+  moveItemToAnotherCart,
   moveSelectedToCart,
   moveSelectedPreviouslyPurchasedItemsToShopping,
   moveSelectedToShopping,

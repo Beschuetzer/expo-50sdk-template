@@ -1,5 +1,5 @@
 import { useNavigation } from 'expo-router';
-import { Row, Column, Text } from 'native-base';
+import { Row, Column, Text, theme } from 'native-base';
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
@@ -11,7 +11,10 @@ import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
-import { ITEM_UNIT_INITIAL } from '@/constants/general';
+import {
+  FORM_INTER_ITEM_SPACING,
+  ITEM_UNIT_INITIAL,
+} from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import { lastPurchasedSelector } from '@/state/slices/listsSlice';
@@ -29,6 +32,7 @@ export type ItemTileProps<T> = {
   isSelected?: boolean;
   onPress?: (item: T) => void;
   onSelect?: (item: T) => void;
+  onTransferPress?: (item: T) => void;
   viewingMode?: ItemTileViewingMode;
 } & ItemProp<T> &
   ListNameProp;
@@ -113,11 +117,17 @@ export function ItemTile(props: ItemTileProps<Item>) {
         }
       }}
     >
-      <Row>{renderContent()}</Row>
+      <Row padding={theme.space[FORM_INTER_ITEM_SPACING]}>
+        {renderContent()}
+      </Row>
     </RectButton>
   );
 }
 
 const styles = StyleSheet.create({
-  rectButton: tileContainerStyles,
+  rectButton: {
+    ...tileContainerStyles,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+  },
 });

@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { Row, Column, Text, useTheme, theme } from 'native-base';
+import { Row, Column, Text, useTheme } from 'native-base';
 import { useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
@@ -43,6 +43,7 @@ export function ItemTileWithStoreSpecificValues(
     buttonProps,
     item,
     onSelect,
+    onTransferPress,
     viewingMode = ItemTileViewingMode.Full,
   } = props;
   const dispatch = useDispatch();
@@ -89,23 +90,39 @@ export function ItemTileWithStoreSpecificValues(
     );
   }, [item]);
 
+  const onTransferPressLocal = useCallback(() => {
+    onTransferPress && onTransferPress(item);
+  }, [onTransferPress, item]);
+
   const basicContentJsx = useMemo(() => {
     return (
       <Row justifyContent="space-between" alignItems="center" flex={1}>
-        <Row>
+        <Row flex={1}>
           <Text>
-            {quantityAtStore} {item.unit || ITEM_UNIT_INITIAL}
-            {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
-              ? 's'
-              : ''}
+            <Text>
+              {quantityAtStore} {item.unit || ITEM_UNIT_INITIAL}
+              {quantityAtStore && parseInt(quantityAtStore as any, 10) > 1
+                ? 's'
+                : ''}
+            </Text>
+            {priceAtStore ? <Text> at ${priceAtStore}</Text> : null}
+            {aisleNumberAtStore ? (
+              <Text> (aisle {aisleNumberAtStore})</Text>
+            ) : null}
           </Text>
-          {priceAtStore ? <Text> at ${priceAtStore}</Text> : null}
-          {aisleNumberAtStore ? (
-            <Text> (aisle {aisleNumberAtStore})</Text>
-          ) : null}
         </Row>
 
-        <Row space={theme.space[FORM_INTER_ITEM_SPACING] * 3}>
+        <Row space={theme.space[FORM_INTER_ITEM_SPACING] * 3} flex={0}>
+          <TouchableOpacity
+            hitSlop={getButtonHitSlop(2)}
+            onPress={onTransferPressLocal}
+          >
+            <FontAwesome
+              color={theme.colors.primary[900]}
+              size={theme.sizes[3]}
+              name="arrow-right"
+            />
+          </TouchableOpacity>
           <TouchableOpacity
             hitSlop={getButtonHitSlop(2)}
             onPress={decrementQuantity}
@@ -204,7 +221,9 @@ export function ItemTileWithStoreSpecificValues(
       }}
     >
       <Column>
-        <Row backgroundColor={theme.colors.white}>{renderContent()}</Row>
+        <Row padding={theme.space[FORM_INTER_ITEM_SPACING] * 1}>
+          {renderContent()}
+        </Row>
       </Column>
     </RectButton>
   );
@@ -213,7 +232,7 @@ export function ItemTileWithStoreSpecificValues(
 const styles = StyleSheet.create({
   rectButton: {
     ...tileContainerStyles,
-    paddingTop: theme.space[2],
-    paddingBottom: theme.space[FORM_INTER_ITEM_SPACING],
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
 });

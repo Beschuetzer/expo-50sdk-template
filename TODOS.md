@@ -1,5 +1,5 @@
 ## MVP
--Add a share button in order to share a shopping list (pressing it would open up a bottom tab with other app to use to share (e.g. email/whatsapp))
+
 -add a scroll bar like Music player app
 -Move all of the menu items in the Items tab to a search bar and icons
 -Selecting closest store on load not working?

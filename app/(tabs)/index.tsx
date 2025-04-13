@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { useWindowDimensions, Share } from 'react-native';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
 
 import { AddButton } from '@/components/header/AddButton';
@@ -32,7 +32,7 @@ import { StoreSelectionModal } from '@/components/modals/StoreSelectionModal';
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import { EMPTY_STRING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
-import { accountSelector } from '@/state/slices/generalSlice';
+import { accountSelector, setError } from '@/state/slices/generalSlice';
 import {
   currentStoreSelector,
   moveAllToInCart,
@@ -61,7 +61,14 @@ import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState, savePurchase } from '@/state/thunks';
 import { Store } from '@/types/Store';
 import { ListName } from '@/types/listSlice';
-import { getNewViewingMode, resetConfirmModalProps } from '@/utils/helpers';
+import {
+  getKeyToUse,
+  getNewViewingMode,
+  getStoreDescriptor,
+  resetConfirmModalProps,
+} from '@/utils/helpers';
+import { StoreSpecificValueKey } from '@/types/Item';
+import { getSorter, SortOrder, SortType } from '@/components/lists/sorters';
 
 export default function TabOneScreen() {
   const theme = useTheme();
@@ -112,6 +119,37 @@ export default function TabOneScreen() {
       headerTitle: `Shopping (${currentStore.name})`,
     }),
   });
+
+  // Prepare a function to share the list.
+  const onSharePress = useCallback(async () => {
+    const currentStoreId = getKeyToUse(currentStore);
+    const listContent = shoppingListItems
+      .filter((item) => !!item.name)
+      .sort(
+        getSorter(SortType.AisleNumber, currentStoreId, SortOrder.Ascending),
+      )
+      .map(
+        (item) =>
+          `- ${item.name} - ${item[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 1}`,
+      )
+      .join('\n');
+    const title = `Shopping List for '${getStoreDescriptor(currentStore)}'`;
+    const message = `${title}:\n\n${listContent}`;
+
+    try {
+      await Share.share(
+        {
+          title,
+          message,
+        },
+        {
+          dialogTitle: title,
+        },
+      );
+    } catch (error) {
+      dispatch(setError(error as Error));
+    }
+  }, [shoppingListItems, currentStore]);
 
   const renderScene = useMemo(
     () =>
@@ -232,6 +270,10 @@ export default function TabOneScreen() {
           {
             onPress: onClearAllPress,
             text: 'Clear all',
+          },
+          {
+            text: 'Share Cart',
+            onPress: onSharePress,
           },
         ],
       );

@@ -23,7 +23,7 @@ import { useInitializer } from '@/components/hooks/useInitializer';
 import { useMenu } from '@/components/hooks/useMenu';
 import { InCartList } from '@/components/lists/InCartList';
 import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
-import { ShoppingList } from '@/components/lists/ShoppingList';
+import { ShoppingList } from '@/components/lists/Shopping';
 import {
   ConfirmModal,
   ConfirmModalProps,

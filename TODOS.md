@@ -1,5 +1,5 @@
 ## MVP
-
+-Add a way to make items mutually exclusive?
 -add a scroll bar like Music player app
 -Move all of the menu items in the Items tab to a search bar and icons
 -Selecting closest store on load not working?

@@ -24,6 +24,7 @@ import { useMenu } from '@/components/hooks/useMenu';
 import { InCartList } from '@/components/lists/InCartList';
 import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
 import { ShoppingList } from '@/components/lists/ShoppingList';
+import { getSorter, SortOrder, SortType } from '@/components/lists/sorters';
 import {
   ConfirmModal,
   ConfirmModalProps,
@@ -59,6 +60,7 @@ import {
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState, savePurchase } from '@/state/thunks';
+import { StoreSpecificValueKey } from '@/types/Item';
 import { Store } from '@/types/Store';
 import { ListName } from '@/types/listSlice';
 import {
@@ -67,8 +69,6 @@ import {
   getStoreDescriptor,
   resetConfirmModalProps,
 } from '@/utils/helpers';
-import { StoreSpecificValueKey } from '@/types/Item';
-import { getSorter, SortOrder, SortType } from '@/components/lists/sorters';
 
 export default function TabOneScreen() {
   const theme = useTheme();
@@ -128,10 +128,14 @@ export default function TabOneScreen() {
       .sort(
         getSorter(SortType.AisleNumber, currentStoreId, SortOrder.Ascending),
       )
-      .map(
-        (item) =>
-          `- ${item.name} - ${item[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 1}`,
-      )
+      .map((item) => {
+        const base = `- ${item[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 1} ${item.unit} of ${item.name}`;
+        const link =
+          item.images.length > 0 && item.imageToUseIndex != null
+            ? ` - (${item.images[item.imageToUseIndex]})`
+            : '';
+        return `${base}${link}\n`;
+      })
       .join('\n');
     const title = `Shopping List for '${getStoreDescriptor(currentStore)}'`;
     const message = `${title}:\n\n${listContent}`;

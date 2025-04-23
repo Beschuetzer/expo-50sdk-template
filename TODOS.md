@@ -1,4 +1,10 @@
 ## MVP
+
+-Add an inventory slice
+  -whenever a item is purchased it gets updated in the inventory slice
+  -inventory rab needed where items can be manually changes
+  -add ability to send notifications around expiration dates
+
 -Add a way to make items mutually exclusive?
 -add a scroll bar like Music player app
 -Move all of the menu items in the Items tab to a search bar and icons

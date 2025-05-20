@@ -1,18 +1,16 @@
 import { Button, ScrollView, Text } from 'native-base';
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { StoreManager } from '@/components/StoreManager';
 import { ReduxViewer } from '@/components/mocks/ReduxViewer';
 import { MockResponseToggle } from '@/components/options/MockResponseToggle';
-import { BACKEND_URL } from '@/components/services/BffService';
 import { ServiceTester } from '@/components/services/manual-testing/ServiceTester';
 import { resetListSlice } from '@/state/slices/listsSlice';
-import { persistor } from '@/state/store';
-import { getIsDevelopmentMode } from '@/utils/helpers';
+import { persistor, useAppDispatch } from '@/state/store';
+import { getBackendUrl, getIsDevelopmentMode } from '@/utils/helpers';
 
 export default function DevOptionsScreen() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onFlushPress = useCallback(() => {
     persistor.flush();
@@ -24,7 +22,7 @@ export default function DevOptionsScreen() {
   return (
     <ScrollView keyboardShouldPersistTaps="always">
       <ServiceTester />
-      <Text>Using backend at: {BACKEND_URL}</Text>
+      <Text>Using backend at: {getBackendUrl()}</Text>
       <MockResponseToggle />
       <ReduxViewer />
       <StoreManager showAddStore showStoreList />

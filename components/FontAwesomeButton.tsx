@@ -7,8 +7,9 @@ import { TouchableOpacityProps } from 'react-native-gesture-handler';
 
 import { FontAwesomeNames } from '@/types/fontAwesome';
 
-type FontAwesomeButtonProps = {
+export type FontAwesomeButtonProps = {
   buttonProps?: TouchableOpacityProps;
+  disabled?: boolean;
   name: FontAwesomeNames;
   onPress: () => void;
   fontAwesomeProps?: Partial<IconProps<any>>;
@@ -20,6 +21,7 @@ export function FontAwesomeButton(props: FontAwesomeButtonProps) {
   const theme = useTheme();
   const {
     buttonProps,
+    disabled,
     name,
     onPress,
     size = theme.sizes[6],
@@ -28,8 +30,21 @@ export function FontAwesomeButton(props: FontAwesomeButtonProps) {
   } = props;
 
   return (
-    <TouchableOpacity {...buttonProps} style={style} onPress={onPress}>
-      <FontAwesome name={name as any} size={size} {...fontAwesomeProps} />
+    <TouchableOpacity
+      {...buttonProps}
+      style={{
+        ...style,
+        opacity: disabled ? 0.25 : 1,
+      }}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <FontAwesome
+        name={name as any}
+        size={size}
+        {...fontAwesomeProps}
+        disabled={disabled}
+      />
     </TouchableOpacity>
   );
 }

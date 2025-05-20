@@ -16,7 +16,9 @@ import { ChildrenProp, ItemProp } from '@/types/general';
 type ItemTileBasicContentProps = ChildrenProp &
   ItemProp<Item> &
   Required<Pick<ItemTileProps<Item>, 'isSelected' | 'isMultiSelectMode'>> &
-  Pick<ItemTileNameAndUpcColumnProps, 'showUpc'>;
+  Pick<ItemTileNameAndUpcColumnProps, 'showUpc'> & {
+    showDeveloperInfo?: boolean;
+  };
 
 const HEIGHT = 46;
 export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
@@ -25,6 +27,7 @@ export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
     item,
     isMultiSelectMode = false,
     isSelected = false,
+    showDeveloperInfo = true,
     showUpc = true,
   } = props;
   return (
@@ -32,7 +35,7 @@ export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
       <Column flex={0}>
         <ImageRenderer
           item={item}
-          source={item.images[item.imageToUseIndex]}
+          source={item?.images[item?.imageToUseIndex]}
           height={HEIGHT}
           width={(HEIGHT * 2) / 3}
           useMarginRight
@@ -40,7 +43,7 @@ export function ItemTileBasicContent(props: ItemTileBasicContentProps) {
       </Column>
       <ItemTileNameAndUpcColumn item={item} showUpc={showUpc}>
         {children}
-        <DeveloperInfo {...item} />
+        {showDeveloperInfo ? <DeveloperInfo {...item} /> : null}
       </ItemTileNameAndUpcColumn>
       <TileIsSelectedBackground
         isMultiSelectMode={isMultiSelectMode}

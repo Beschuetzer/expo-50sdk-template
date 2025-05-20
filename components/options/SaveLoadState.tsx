@@ -2,18 +2,18 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Row, useTheme, Stack, Text } from 'native-base';
 import React, { useCallback, useMemo } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { FILE_NAMES, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
 import {
   currentStoreSelector,
+  inventorySelector,
   itemsListSelector,
   lastPurchasedMapSelector,
   storesListSelector,
   storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
-import { upcProductsSelector } from '@/state/slices/scannerSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
 import {
   displayAlert,
   getDirectory,
@@ -28,13 +28,13 @@ type SaveLoadStateProps = object;
 
 export const SaveLoadState = (props: SaveLoadStateProps) => {
   const theme = useTheme();
-  const itemsList = useSelector(itemsListSelector);
-  const storeSpecificValues = useSelector(storeSpecificValuesMapSelector);
-  const lastPurchasedMap = useSelector(lastPurchasedMapSelector);
-  const upcProducts = useSelector(upcProductsSelector);
-  const stores = useSelector(storesListSelector);
-  const currentStore = useSelector(currentStoreSelector);
-  const dispatch = useDispatch();
+  const itemsList = useAppSelector(itemsListSelector);
+  const storeSpecificValues = useAppSelector(storeSpecificValuesMapSelector);
+  const lastPurchasedMap = useAppSelector(lastPurchasedMapSelector);
+  const inventory = useAppSelector(inventorySelector);
+  const stores = useAppSelector(storesListSelector);
+  const currentStore = useAppSelector(currentStoreSelector);
+  const dispatch = useAppDispatch();
   const iconSize = useMemo(() => theme.sizes[6], [theme]);
 
   const onLoadItemsPress = useCallback(async () => {
@@ -67,11 +67,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         madeDirectory,
         lastPurchasedMap,
       );
-      await saveAppStateToFile(
-        FILE_NAMES.upcProducts,
-        madeDirectory,
-        upcProducts,
-      );
+      await saveAppStateToFile(FILE_NAMES.inventory, madeDirectory, inventory);
       await saveAppStateToFile(FILE_NAMES.stores, madeDirectory, {
         ...stores,
         currentStoreId: getKeyToUse(currentStore),
@@ -84,11 +80,11 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
     }
   }, [
     currentStore.name,
+    inventory,
     itemsList,
     lastPurchasedMap,
     stores,
     storeSpecificValues,
-    upcProducts,
   ]);
 
   return (

@@ -31,7 +31,7 @@ export default function FullscreenImageScreen() {
   );
   const { upcProduct, isLoading } = useUpcProduct({
     upc: item?.upc || EMPTY_STRING,
-    shouldSkip: !!customImageUri,
+    shouldSkip: !!customImageUri || item?.images?.length > 0,
   });
   const imageToUse = useMemo(
     () =>

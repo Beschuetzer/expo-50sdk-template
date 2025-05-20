@@ -36,7 +36,7 @@ type SubmitButtonProps = {
   validation?: InputValidationMessageProps;
 } & ButtonOptions;
 
-type BottomSheetModalWithFixedHeaderProps = {
+export type BottomSheetModalWithFixedHeaderProps = {
   closeButton?: ButtonOptions;
   hideButtons?: boolean;
   onClose?: () => void;
@@ -155,7 +155,7 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
       >
         {title}
       </Heading>
-      <BottomSheetScrollView>
+      <BottomSheetScrollView keyboardShouldPersistTaps="always">
         <Stack
           px={theme.space[FORM_INTER_ITEM_SPACING] * 2}
           space={theme.space[FORM_INTER_ITEM_SPACING]}

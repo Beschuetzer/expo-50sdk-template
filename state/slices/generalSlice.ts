@@ -2,8 +2,13 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
 import {
+  addInventoryItemsThunk,
+  addInventoryLocationsThunk,
   deleteItems,
   deleteStores,
+  loadAll,
+  moveInventoryItemExpirationDatesThunk,
+  moveInventoryItemsThunk,
   saveAll,
   saveItem,
   savePurchase,
@@ -122,12 +127,31 @@ export const generalSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(addInventoryItemsThunk.rejected, (state, action) => {
+      state.isUpToDate = false;
+    });
+    builder.addCase(addInventoryLocationsThunk.rejected, (state, action) => {
+      state.isUpToDate = false;
+    });
     builder.addCase(deleteItems.rejected, (state, action) => {
       state.isUpToDate = false;
     });
     builder.addCase(deleteStores.rejected, (state, action) => {
       state.isUpToDate = false;
     });
+    builder.addCase(loadAll.fulfilled, (state, action) => {
+      state.isUpToDate = true;
+      state.lastSyncTime = Date.now();
+    });
+    builder.addCase(moveInventoryItemsThunk.rejected, (state, action) => {
+      state.isUpToDate = false;
+    });
+    builder.addCase(
+      moveInventoryItemExpirationDatesThunk.rejected,
+      (state, action) => {
+        state.isUpToDate = false;
+      },
+    );
     builder.addCase(saveAll.fulfilled, (state, action) => {
       state.isUpToDate = true;
       state.lastSyncTime = Date.now();

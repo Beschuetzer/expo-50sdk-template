@@ -1,9 +1,13 @@
 import { parseAddress } from './parseAddress';
 
-import { EMPTY_STRING } from '@/constants/general';
+import { ADDRESS_INITIAL, EMPTY_STRING } from '@/constants/general';
 import { Address } from '@/types/general';
 
 describe('parseAddress', () => {
+  test('falsy works', () => {
+    const actual = parseAddress(EMPTY_STRING);
+    expect(actual).toStrictEqual(ADDRESS_INITIAL);
+  });
   test('6 sections works', () => {
     const actual = parseAddress(
       'Target, Mission Viejo, Orange County, California, 92630, United States',

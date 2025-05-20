@@ -1,6 +1,6 @@
 import { useNavigation } from 'expo-router';
 import { Stack, Row, theme, Text } from 'native-base';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
@@ -11,7 +11,12 @@ import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
-import { ListsState, storeItemsCountSelector } from '@/state/slices/listsSlice';
+import {
+  ListsState,
+  setCurrentStoreId,
+  storeItemsCountSelector,
+} from '@/state/slices/listsSlice';
+import { useAppDispatch } from '@/state/store';
 import { Address, StoreProp } from '@/types/general';
 import { getAddressString, getKeyToUse } from '@/utils/helpers';
 
@@ -22,6 +27,7 @@ type StoreTileProps = {
 
 export function StoreTile(props: StoreTileProps) {
   const { currentStoreId, store } = props;
+  const dispatch = useAppDispatch();
   const navigation = useNavigation();
   const storeKeyToUse = useMemo(
     () => getKeyToUse(store || EMPTY_STRING),
@@ -29,15 +35,24 @@ export function StoreTile(props: StoreTileProps) {
   );
   const storeItemsCount = useSelector(storeItemsCountSelector(storeKeyToUse));
 
+  const onLongPress = useCallback(() => {
+    // @ts-ignore
+    navigation.navigate(Routes.StoreModal, {
+      store,
+    });
+  }, [navigation, store]);
+
+  const onTilePress = useCallback(() => {
+    dispatch(setCurrentStoreId(storeKeyToUse));
+    // @ts-ignore
+    navigation.navigate(Routes.ShoppingListScreen);
+  }, [navigation, dispatch, storeKeyToUse]);
+
   return (
     <RectButton
       style={styles.rectButton}
-      onPress={() => {
-        // @ts-ignore
-        navigation.navigate(Routes.StoreModal, {
-          store,
-        });
-      }}
+      onPress={onTilePress}
+      onLongPress={onLongPress}
     >
       <Stack>
         <Row

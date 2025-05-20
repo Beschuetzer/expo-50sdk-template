@@ -36,7 +36,8 @@ export function AbsolutePositionedScreen(props: AbsolutePositionedScreenProps) {
           {...flatListProps}
           data={[{ jsx: contentJSX, index: 1 }]}
           keyExtractor={(item) => item.index.toString()}
-          renderItem={(item) => item.item.jsx}
+          renderItem={(item) => item?.item?.jsx}
+          keyboardShouldPersistTaps="always"
         />
       );
     }

@@ -14,7 +14,9 @@ import {
 import { currentStoreIdSelector } from '@/state/slices/listsSlice';
 import { useAppSelector } from '@/state/store';
 import { Key } from '@/types/Item';
+import { ChildrenProp } from '@/types/general';
 import { SortOrderValue } from '@/types/listSlice';
+import { getHash } from '@/utils/getHash';
 
 type FilterInputProps<T extends Key> = {
   debounceTimeout?: number;
@@ -28,9 +30,10 @@ type FilterInputProps<T extends Key> = {
   startingSortOrderValue?: SortOrderValue;
   swapElementOrder?: boolean;
   swapButtonOrder?: boolean;
-};
+} & ChildrenProp;
 
 export default function FilterListInput<T extends Key>({
+  children,
   debounceTimeout = 300,
   list,
   onFilterChange,
@@ -50,10 +53,12 @@ export default function FilterListInput<T extends Key>({
   );
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const lastRenderRef = useRef<{
+    listHash: number;
     listLength: number;
     filterValue: string;
     sortOrderValue: SortOrderValue;
   }>({
+    listHash: EMPTY_NUMBER,
     listLength: EMPTY_NUMBER,
     filterValue: EMPTY_STRING,
     sortOrderValue: { sortBy: SortType.None, sortOrder: SortOrder.Ascending },
@@ -93,11 +98,15 @@ export default function FilterListInput<T extends Key>({
         lastRenderRef.current.filterValue === filterValue &&
         lastRenderRef.current.sortOrderValue.sortBy === sortOrderValue.sortBy &&
         lastRenderRef.current.sortOrderValue.sortOrder ===
-          sortOrderValue.sortOrder)
-    )
+          sortOrderValue.sortOrder &&
+        lastRenderRef.current.listHash === getHash(list))
+    ) {
       return;
+    }
+
     lastRenderRef.current = {
       listLength: list.length,
+      listHash: getHash(list),
       filterValue,
       sortOrderValue,
     };
@@ -108,22 +117,23 @@ export default function FilterListInput<T extends Key>({
         return item.name?.match(new RegExp(filterValue, 'ig'));
       })
       .sort(
-        getSorter(
-          sortOrderValue.sortBy,
+        getSorter({
+          sortType: sortOrderValue.sortBy,
           currentStoreId,
-          sortOrderValue.sortOrder,
-        ),
+          sortOrder: sortOrderValue.sortOrder,
+        }),
       );
     onFilterChange(newArray, filterValue, sortOrderValue);
   }, [
     currentStoreId,
     list,
+    lastRenderRef.current,
     filterValue,
     sortOrderValue.sortOrder,
     sortOrderValue.sortBy,
   ]);
 
-  function renderRightElements() {
+  function renderElements() {
     return (
       <Row
         space={FORM_INTER_ITEM_SPACING}
@@ -131,6 +141,7 @@ export default function FilterListInput<T extends Key>({
         justifyContent="center"
         flexDirection={swapButtonOrder ? 'row-reverse' : 'row'}
       >
+        {children}
         {Object.values(SortOrder).map((sortOrder) => (
           <Menu
             key={sortOrder}
@@ -209,13 +220,13 @@ export default function FilterListInput<T extends Key>({
     >
       {swapElementOrder ? (
         <>
-          {renderRightElements()}
+          {renderElements()}
           {inputJSX}
         </>
       ) : (
         <>
           {inputJSX}
-          {renderRightElements()}
+          {renderElements()}
         </>
       )}
     </Row>

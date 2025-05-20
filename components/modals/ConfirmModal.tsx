@@ -1,5 +1,5 @@
 import { Button, ScrollView, Text, useTheme } from 'native-base';
-import React, { useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
 
@@ -7,7 +7,7 @@ import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 
 export type ConfirmModalProps = {
   items?: string[];
-  message?: string;
+  message?: string | ReactNode | ReactNode[];
   note?: string;
   onConfirm?: (selectedItem?: string) => void;
 } & Omit<ModalWithBlurProps, 'children' | 'title' | 'onConfirm'> &
@@ -52,7 +52,13 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
       onConfirm={onConfirmPress}
       onCancel={onCancelPress}
     >
-      {message ? <Text>{message}</Text> : null}
+      {message ? (
+        typeof message === 'string' ? (
+          <Text>{message}</Text>
+        ) : (
+          message
+        )
+      ) : null}
       {note ? (
         <Text
           italic

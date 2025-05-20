@@ -73,7 +73,13 @@ export type ItemBase = {
   fullscreenImage?: string;
   images: string[];
   imageToUseIndex: number;
+  inventoryMinimum: number;
+  isFrozen?: boolean;
   lastUpdatedDate: number;
+  /**
+   *This is in milliseconds and it used to determine when the item should should be considered expired after it has been purchased and in the inventory
+   **/
+  timeToExpiration?: number;
   unit: string;
 };
 
@@ -116,8 +122,10 @@ export type StoreSpecificValueKeyTypes = {
 /**
  *Maps the item key to the store specific values
  **/
-export type StoreSpecificValuesMap = { [key: string]: StoreSpecificValues };
-export type LastPurchasedMap = { [key: string]: StoreSpecificValue<number> };
+export type StoreSpecificValuesMap = { [itemKey: string]: StoreSpecificValues };
+export type LastPurchasedMap = {
+  [itemKey: string]: StoreSpecificValue<number>;
+};
 
 /**
  *These are fields which vary based on the store

@@ -5,7 +5,7 @@ import { Dimensions, ImageStyle } from 'react-native';
 import { FORM_INTER_ITEM_SPACING } from './general';
 
 export const maxWidth = {
-  maxWidth: Dimensions.get('window').width >= 800 ? 800 : '100%',
+  maxWidth: Dimensions.get('window').width >= 800 ? 800 : '90%',
 };
 
 export const maxWidthCentered = {

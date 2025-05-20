@@ -13,7 +13,7 @@ export type ModalWithBlurProps = {
   cancelButton?: ButtonOptions;
   confirmButton?: ButtonOptions;
   containerStyles?: IViewProps;
-  isVisible?: boolean;
+  isVisible: boolean;
   title: string | ReactNode | ReactNode[];
   onConfirm?: () => void;
   onCancel?: () => void;
@@ -86,8 +86,9 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
               padding: 20,
               backgroundColor: 'white',
               borderRadius: 10,
-              ...containerStyles,
+              maxHeight: '90%',
               ...maxWidth,
+              ...containerStyles,
             } as ViewStyle
           }
           onTouchEnd={(e) => {

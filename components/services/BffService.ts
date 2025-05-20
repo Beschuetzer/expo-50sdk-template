@@ -7,30 +7,47 @@ import { SaveAllThunkInput } from '@/state/thunks';
 import { Item } from '@/types/Item';
 import { Store } from '@/types/Store';
 import {
-  DeletionResponse,
   ChangePasswordInput,
   ChangePasswordResponse,
-  UserNeeded,
-  UserAccountInput,
-  DispatchNeeded,
   CreateUserResponse,
-  EmailNeeded,
+  DeleteInventoryItemsInput,
+  DeleteInventoryItemsRequest,
+  DeleteInventoryItemsResponse,
+  DeleteInventoryLocationInput,
+  DeleteInventoryLocationsRequest,
+  DeleteInventoryLocationsResponse,
   DeleteItemsInput,
+  DeleteS3ObjectsInput,
   DeleteStoresInput,
   DeleteUserInput,
   DeleteUserResponse,
+  DeletionResponse,
+  DispatchNeeded,
+  EmailNeeded,
   GetSignedUrlInput,
-  SignedUrlResponse,
-  IdNeeded,
   GetUserItemsInput,
   GetUserStoresInput,
-  LoginResponse,
+  IdNeeded,
   LoadAllFromDbInput,
   LoadAllResponse,
+  LoginResponse,
+  MoveInventoryItemExpirationDatesInput,
+  MoveInventoryItemExpirationDatesRequest,
+  MoveInventoryItemExpirationDatesResponse,
+  MoveInventoryItemsInput,
+  MoveInventoryItemsRequest,
+  MoveInventoryItemsResponse,
+  PingResponse,
   ProcessGroceryListInput,
   ProcessGroceryListResponse,
-  SaveAllToDbInput,
   SaveAllResponse,
+  SaveAllToDbInput,
+  SaveInventoryItemsInput,
+  SaveInventoryItemsRequest,
+  SaveInventoryItemsResponse,
+  SaveInventoryLocationsInput,
+  SaveInventoryLocationsRequest,
+  SaveInventoryLocationsResponse,
   SaveItemInput,
   SaveItemRequest,
   SaveItemResponse,
@@ -42,16 +59,17 @@ import {
   SaveStoreInput,
   SaveStoreRequest,
   SaveStoreResponse,
+  SignedUrlResponse,
   UpdateUserInput,
-  PingResponse,
-  DeleteS3ObjectsInput,
+  UserAccountInput,
+  UserNeeded,
 } from '@/types/bffService';
 import {
+  getBackendUrl,
   getIsDevelopmentMode,
   getKeyToUse,
   handleError,
 } from '@/utils/helpers';
-import { logWhenDevelopmentMode } from '@/utils/logging';
 
 function displayAlert(object: object | null) {
   alert(object ? JSON.stringify(object, null, 2) : object);
@@ -61,14 +79,13 @@ function displayAlert(object: object | null) {
  *This is assuming that a phone is being used and not an emulator.
  *Use ipconfig to manually set this atm. (write node script to run when npm start is run?)
  **/
-export const BACKEND_URL = `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:${process.env.EXPO_PUBLIC_PORT_NUMBER}`;
+export const INVENTORY_PATH = '/inventory';
 export const ITEM_PATH = '/item';
 export const LAST_PURCHASED_PATH = '/lastPurchasedMap';
 export const OPEN_AI_PATH = '/openAi';
 export const STORE_PATH = '/store';
 export const S3_PATH = '/s3';
 export const USER_PATH = '/user';
-logWhenDevelopmentMode({ BACKEND_URL });
 
 export const DELETE_ITEMS_RESPONSE_DEFAULT: DeletionResponse = Object.freeze({
   acknowledged: false,
@@ -77,13 +94,8 @@ export const DELETE_ITEMS_RESPONSE_DEFAULT: DeletionResponse = Object.freeze({
 
 class BffService extends AbstractService {
   constructor() {
-    const isDevelopmentMode = getIsDevelopmentMode();
-    super(
-      isDevelopmentMode
-        ? BACKEND_URL
-        : 'https://grocify-bff-ac27c2662495.herokuapp.com',
-    );
-    if (isDevelopmentMode) {
+    super(getBackendUrl());
+    if (getIsDevelopmentMode()) {
       displayAlert({
         bffServiceBaseUrl: this._baseUrl,
         EXPO_PUBLIC_ENV: process.env.EXPO_PUBLIC_ENV,
@@ -181,6 +193,70 @@ class BffService extends AbstractService {
       loadingMsg: `Delete '${keysAsString}'...`,
     });
     return response;
+  }
+
+  async deleteInventoryItems(input: DeleteInventoryItemsInput) {
+    const { dispatch, _id: userId, password, inventoryItems } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!inventoryItems || inventoryItems.length <= 0) {
+      dispatch(
+        setError({
+          statusCode: 500,
+          message: 'No inventoryItems given in deleteInventoryItems()',
+        }),
+      );
+      return null;
+    }
+
+    const body = JSON.stringify({
+      inventoryItems,
+      userId,
+      password,
+    } as DeleteInventoryItemsRequest);
+
+    return await this.makeCall<DeleteInventoryItemsResponse>({
+      dispatch,
+      body,
+      path: `${INVENTORY_PATH}/items`,
+      errorMsg: `Unable to delete inventory items.`,
+      loadingMsg: `Deleting...`,
+      options: {
+        method: 'DELETE',
+      },
+    });
+  }
+
+  async deleteInventoryLocations(input: DeleteInventoryLocationInput) {
+    const { dispatch, _id: userId, password, locations } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!locations || locations.length <= 0) {
+      dispatch(
+        setError({
+          statusCode: 500,
+          message: 'No locations given in deleteInventoryLocations()',
+        }),
+      );
+      return null;
+    }
+
+    const body = JSON.stringify({
+      locations,
+      userId,
+      password,
+    } as DeleteInventoryLocationsRequest);
+
+    return await this.makeCall<DeleteInventoryLocationsResponse>({
+      dispatch,
+      body,
+      path: `${INVENTORY_PATH}/locations`,
+      errorMsg: `Unable to delete inventory locations.`,
+      loadingMsg: `Deleting...`,
+      options: {
+        method: 'DELETE',
+      },
+    });
   }
 
   async deleteItems(input: DeleteItemsInput) {
@@ -379,12 +455,81 @@ class BffService extends AbstractService {
     return response;
   }
 
-  async ping(dispatch: AppDispatch) {
+  async moveInventoryItems(input: MoveInventoryItemsInput) {
+    const { dispatch, _id: userId, password, itemsToMove } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!itemsToMove || itemsToMove.length <= 0) {
+      dispatch(
+        setError({
+          statusCode: 500,
+          message: 'No inventory items to move given in moveInventoryItems()',
+        }),
+      );
+      return null;
+    }
+
+    const body = JSON.stringify({
+      itemsToMove,
+      userId,
+      password,
+    } as MoveInventoryItemsRequest);
+
+    return await this.makeCall<MoveInventoryItemsResponse>({
+      dispatch,
+      body,
+      path: `${INVENTORY_PATH}/items/move`,
+      errorMsg: `Unable to move inventory items.`,
+      loadingMsg: `Moving inventory items...`,
+      options: {
+        method: 'POST',
+      },
+    });
+  }
+
+  async moveInventoryItemExpirationDates(
+    input: MoveInventoryItemExpirationDatesInput,
+  ) {
+    const { dispatch, _id: userId, password, itemsToMove } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!itemsToMove || itemsToMove.length <= 0) {
+      dispatch(
+        setError({
+          statusCode: 500,
+          message:
+            'No inventory items to move given in moveInventoryItemExpirationDates()',
+        }),
+      );
+      return null;
+    }
+    console.log('itemsToMove', itemsToMove);
+
+    const body = JSON.stringify({
+      itemsToMove,
+      userId,
+      password,
+    } as MoveInventoryItemExpirationDatesRequest);
+
+    return await this.makeCall<MoveInventoryItemExpirationDatesResponse>({
+      dispatch,
+      body,
+      path: `${INVENTORY_PATH}/items/move/expiration`,
+      errorMsg: `Unable to move inventory item expiration date.`,
+      loadingMsg: `Moving inventory item expiration date...`,
+      options: {
+        method: 'POST',
+      },
+    });
+  }
+
+  async ping(dispatch: AppDispatch, showLoadingMsg = true) {
     const response = await this.makeCall<PingResponse>({
       dispatch,
       path: `/ping`,
       errorMsg: `The server is not running yet.`,
       loadingMsg: `Waking the server...`,
+      showLoadingMsg,
     });
     return response;
   }
@@ -467,6 +612,70 @@ class BffService extends AbstractService {
       loadingMsg: `Backing up data to the cloud...`,
     });
     return response;
+  }
+
+  async saveInventoryItems(input: SaveInventoryItemsInput) {
+    const { dispatch, _id: userId, password, inventoryItems } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!inventoryItems || inventoryItems.length <= 0) {
+      dispatch(
+        setError({
+          statusCode: 500,
+          message: 'No inventory items given in saveInventoryItems()',
+        }),
+      );
+      return null;
+    }
+
+    const body = JSON.stringify({
+      inventoryItems,
+      userId,
+      password,
+    } as SaveInventoryItemsRequest);
+
+    return await this.makeCall<SaveInventoryItemsResponse>({
+      dispatch,
+      body,
+      path: `${INVENTORY_PATH}/items`,
+      errorMsg: `Unable to save inventory items.`,
+      loadingMsg: `Saving...`,
+      options: {
+        method: 'POST',
+      },
+    });
+  }
+
+  async saveInventoryLocations(input: SaveInventoryLocationsInput) {
+    const { dispatch, _id: userId, password, locations } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!locations || locations.length <= 0) {
+      dispatch(
+        setError({
+          statusCode: 500,
+          message: 'No locations given in saveInventoryLocations()',
+        }),
+      );
+      return null;
+    }
+
+    const body = JSON.stringify({
+      locations,
+      userId,
+      password,
+    } as SaveInventoryLocationsRequest);
+
+    return await this.makeCall<SaveInventoryLocationsResponse>({
+      dispatch,
+      body,
+      path: `${INVENTORY_PATH}/locations`,
+      errorMsg: `Unable to save inventory locations.`,
+      loadingMsg: `Saving...`,
+      options: {
+        method: 'POST',
+      },
+    });
   }
 
   async saveItem(input: SaveItemInput) {
@@ -647,7 +856,6 @@ class BffService extends AbstractService {
         const match = imageUrl
           ?.trim()
           ?.match(/https:\/\/.*\.s3\..*\.amazonaws\.com\/(.*)/);
-        console.log({ match });
         if (match) {
           toReturn.push(match[1]);
         }

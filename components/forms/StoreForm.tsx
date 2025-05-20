@@ -1,10 +1,10 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import _ from 'lodash';
-import { Stack, Input, Row, useTheme, Button } from 'native-base';
+import { Stack, Row, useTheme, Button } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AddressForm } from './AddressForm';
-import { InputText } from './InputText';
+import GeolocationInput from './GeolocationInput';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
 import { BottomSheetModalWithFixedHeader } from '../BottomSheetModalWithFixedHeader';
 import { FontAwesomeButton } from '../FontAwesomeButton';
@@ -19,26 +19,23 @@ import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
 } from '@/constants/general';
-import { setError, setLoading } from '@/state/slices/generalSlice';
+import { setError } from '@/state/slices/generalSlice';
 import {
   currentLocationStateSelector,
   storesListSelector,
 } from '@/state/slices/listsSlice';
 import { autoSaveStoresSelector } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
-import { Store } from '@/types/Store';
+import { GpsCoordinate, Store } from '@/types/Store';
 import { Address, StoreProp } from '@/types/general';
 import { AddStoresListItemPayload } from '@/types/listSlice';
 import {
-  displayAlert,
   getAreStoresEqual,
   getEmptyStore,
-  getGpsCoordinate,
   getKeyToUse,
   getStateFromString,
   trimObjectValues,
 } from '@/utils/helpers';
-import { openMap } from '@/utils/openMap';
 import { parseAddress } from '@/utils/parseAddress';
 
 type StoreFormValdation = {
@@ -65,7 +62,6 @@ export function StoreForm(props: StoreFormProps) {
     getEmptyStore(store, currentLocationState),
   );
   const [searchAddress, setSearchAddress] = useState(getEmptyStore());
-  const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
   const [placeToUse, setPlaceToUse] = useState<ForwardGeocodingPlace>(null);
   const [positionsToShowInModal, setPlacesToShowInModal] = useState<
     ForwardGeocodingPlace[]
@@ -129,23 +125,6 @@ export function StoreForm(props: StoreFormProps) {
     [onClose, onSave, formData],
   );
 
-  const onGetCurrentCoordinatesPress = useCallback(async () => {
-    try {
-      setIsLoadingGpscoords(true);
-      dispatch(setLoading('Fetching current coordinates...'));
-      const gpsCoordinate = await getGpsCoordinate();
-      setFormData((current) => ({
-        ...current,
-        gpsCoordinates: gpsCoordinate,
-      }));
-    } catch (error: any) {
-      displayAlert(error);
-    } finally {
-      setIsLoadingGpscoords(false);
-      dispatch(setLoading(EMPTY_STRING));
-    }
-  }, []);
-
   const onAddressChange = useCallback((address: Address, isValid: boolean) => {
     setIsAddressValid(isValid);
     setFormData((current) => ({
@@ -178,6 +157,13 @@ export function StoreForm(props: StoreFormProps) {
     }
   }, [searchAddress, addressSheetRef.current]);
 
+  const onGeoLocationChange = useCallback((gpsCoordinates: GpsCoordinate) => {
+    setFormData((current) => ({
+      ...current,
+      gpsCoordinates,
+    }));
+  }, []);
+
   const onSearchPress = useCallback(() => {
     setSearchAddress(
       getEmptyStore({
@@ -189,14 +175,6 @@ export function StoreForm(props: StoreFormProps) {
     addressSheetRef.current?.present();
   }, [addressSheetRef.current, formData, nameToUse, currentLocationState]);
 
-  const onMapPress = useCallback(() => {
-    openMap({
-      dispatch,
-      ...formData.gpsCoordinates,
-      label: formData.name,
-    });
-  }, [formData]);
-
   const onSearchAddressChange = useCallback(
     (address: Address, isValid: boolean) => {
       setSearchAddress((current) => ({
@@ -204,6 +182,7 @@ export function StoreForm(props: StoreFormProps) {
         ...address,
         name: address.addressLineOne || EMPTY_STRING,
       }));
+      setIsAddressValid(isValid);
     },
     [],
   );
@@ -273,80 +252,12 @@ export function StoreForm(props: StoreFormProps) {
         </>
       }
     >
-      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <Row alignItems="center" space={theme.space[FORM_INTER_ITEM_SPACING]}>
-          <InputText>Lat:&nbsp;</InputText>
-          <Input
-            variant="outline"
-            keyboardType="numeric"
-            p={theme.space[1]}
-            flex={1}
-            placeholder="latitude"
-            value={formData.gpsCoordinates?.lat.toString()}
-            onChangeText={(newLat) => {
-              setFormData(
-                (current) =>
-                  ({
-                    ...current,
-                    gpsCoordinates: {
-                      ...current.gpsCoordinates,
-                      lat: newLat,
-                    },
-                  }) as any,
-              );
-            }}
-          />
-          <InputText>Long:&nbsp;</InputText>
-          <Input
-            variant="outline"
-            keyboardType="numeric"
-            p={theme.space[1]}
-            flex={1}
-            placeholder="longitude"
-            value={formData.gpsCoordinates?.lon.toString()}
-            onChangeText={(newLon) => {
-              setFormData(
-                (current) =>
-                  ({
-                    ...current,
-                    gpsCoordinates: {
-                      ...current.gpsCoordinates,
-                      lon: newLon,
-                    },
-                  }) as any,
-              );
-            }}
-          />
-          {!formData.gpsCoordinates.lat ||
-          !formData.gpsCoordinates.lon ||
-          !formData.name ? null : (
-            <FontAwesomeButton
-              size={theme.sizes[8]}
-              style={{
-                paddingHorizontal: theme.space[FORM_INTER_ITEM_SPACING] * 2,
-              }}
-              name="map-marker"
-              onPress={onMapPress}
-            />
-          )}
-        </Row>
-        <Row
-          pt={theme.space[FORM_INTER_ITEM_SPACING]}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <FontAwesomeButton
-            name="globe"
-            buttonProps={{ disabled: isLoadingGpscoords }}
-            onPress={onGetCurrentCoordinatesPress}
-          />
-          <FontAwesomeButton
-            name="search"
-            buttonProps={{ disabled: isLoadingGpscoords }}
-            onPress={onSearchPress}
-          />
-        </Row>
-      </Stack>
+      <GeolocationInput
+        onChange={onGeoLocationChange}
+        initialCoordinates={formData.gpsCoordinates}
+      >
+        <FontAwesomeButton name="search" onPress={onSearchPress} />
+      </GeolocationInput>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <AddressForm
           onValueChange={onAddressChange}

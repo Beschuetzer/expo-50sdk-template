@@ -1,5 +1,5 @@
 import { Row, Button, Stack } from 'native-base';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { ModalWithBlur } from './ModalWithBlur';
 
@@ -21,12 +21,13 @@ export const ErrorModal = (props: ErrorModalProps) => {
   const errors = useAppSelector(errorSelector);
   const dispatch = useAppDispatch();
 
-  // displayAlert({
-  //   message: errors.message,
-  //   statusCode: errors.statusCode || ERROR_MODAL_STATUS_CODE_DEFAULT,
-  //   stackTrace: errors.error?.stack || EMPTY_STRING,
-  //   error: errors?.error?.message || EMPTY_STRING,
-  // });
+  // Filter to unique errors by message using useMemo
+  const uniqueErrors = useMemo(() => {
+    return errors.filter(
+      (error, index, self) =>
+        index === self.findIndex((e) => e.message === error.message),
+    );
+  }, [errors]);
 
   const onButtonPress = useCallback((error: Error) => {
     displayAlert({
@@ -37,7 +38,7 @@ export const ErrorModal = (props: ErrorModalProps) => {
 
   const onConfirmPress = useCallback(() => {
     dispatch(setErrors(ERRORS_INITIAL));
-  }, []);
+  }, [dispatch]);
 
   return (
     <ModalWithBlur
@@ -45,10 +46,10 @@ export const ErrorModal = (props: ErrorModalProps) => {
       confirmButton={{ text: 'Ok' }}
       cancelButton={{ isVisible: false }}
       title="Errors Encountered (Press to View)"
-      isVisible={errors.some((error) => Boolean(error.message))}
+      isVisible={uniqueErrors.some((error) => Boolean(error.message))}
     >
       <Stack>
-        {errors.map((error, index) => {
+        {uniqueErrors.map((error, index) => {
           if (!error.message) return null;
           return (
             <Row key={index} justifyContent="space-between" alignItems="center">

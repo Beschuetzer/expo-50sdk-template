@@ -35,7 +35,7 @@ export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
         ...place,
         calculatedDistance: calculateDistance(currentLocation, place),
       }))
-      .sort(getSorter(SortType.Distance));
+      .sort(getSorter({ sortType: SortType.Distance }));
   }, [places]) as ForwardGeocodingPlaceWithDistance[];
 
   const [currentlySelectedPlace, setCurrentlySelectedPlace] =

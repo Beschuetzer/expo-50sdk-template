@@ -4,6 +4,7 @@ import { BFF_SERVICE } from '../services/BffService';
 
 import { resetErrors } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
+import { getIsDevelopmentMode } from '@/utils/helpers';
 
 const MAX_TRY_COUNT = 3;
 
@@ -19,7 +20,7 @@ export const useAwakenBff = () => {
     try {
       tryCountCurrentRef.current += 1;
       if (tryCountCurrentRef.current > MAX_TRY_COUNT) return false;
-      const response = await BFF_SERVICE.ping(dispatch);
+      const response = await BFF_SERVICE.ping(dispatch, getIsDevelopmentMode());
       if (response?.isAwake) {
         return true;
       }

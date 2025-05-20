@@ -2,13 +2,13 @@ import { FontAwesome6 } from '@expo/vector-icons';
 import { Camera, CameraType } from 'expo-camera';
 import { useFocusEffect } from 'expo-router';
 import { Center, Text } from 'native-base';
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useRef, useState } from 'react';
 import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { useSelector } from 'react-redux';
 
 import { useKeyboard } from './hooks/useKeyboard';
 
-import { EMPTY_STRING, LIST_HAPTICS } from '@/constants/general';
+import { EMPTY_NUMBER, EMPTY_STRING, LIST_HAPTICS } from '@/constants/general';
 import { listToDisplaySelector } from '@/state/slices/listsSlice';
 import { scanningModeSelector } from '@/state/slices/optionsSlice';
 import { Item } from '@/types/Item';
@@ -26,6 +26,12 @@ export type BarcodeScannerProps = {
     scanningMode: ScanningMode,
     isItemInList: boolean,
   ) => void;
+
+  /**
+   *   * The time in milliseconds to wait before allowing another scan after a successful scan.
+   *   * This is useful to prevent multiple scans in quick succession.
+   **/
+  resetPeriod?: number;
   scanButton?: ReactNode | ReactNode[];
 };
 
@@ -40,18 +46,28 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
     cameraType = CameraType.back,
     onButtonPress,
     onScanned,
+    resetPeriod = 1000,
     scanButton,
   } = props;
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
+  const lastScanTimeRef = useRef(EMPTY_NUMBER);
 
   const handleBarCodeScanned = useCallback(
     (scannedObj: ScannedObj) => {
       const upc = scannedObj.data;
       const isItemInList = !!getItemFromList(itemsList, upc);
+
+      if (
+        lastScanTimeRef.current &&
+        lastScanTimeRef.current + resetPeriod > Date.now()
+      ) {
+        return;
+      }
       onScanned && onScanned(upc || EMPTY_STRING, scanningMode, isItemInList);
+      lastScanTimeRef.current = Date.now();
       LIST_HAPTICS.handleSelection();
     },
-    [scanningMode, itemsList],
+    [scanningMode, itemsList, resetPeriod, onScanned, lastScanTimeRef],
   );
 
   useFocusEffect(

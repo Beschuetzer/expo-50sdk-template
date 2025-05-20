@@ -12,6 +12,7 @@ import {
   Item,
 } from '@/types/Item';
 import { Store } from '@/types/Store';
+import { InventoryLocation } from '@/types/inventory';
 import { getEmptyList } from '@/utils/helpers';
 
 export const MOCK_STORE_SPECIFIC_VALUES = {
@@ -1037,6 +1038,16 @@ export const MOCK_STORE_SPECIFIC_VALUES = {
 
 export const MOCK_ITEMS_LIST = {
   data: [
+    {
+      frequency: 604801110,
+      unit: 'package',
+      images: [],
+      imageToUseIndex: 0,
+      name: 'apple with all lowercase',
+      upc: '804305050411',
+      addedDate: 1711465154119,
+      lastUpdatedDate: 1714599009112,
+    },
     {
       frequency: 604800000,
       unit: 'package',
@@ -2617,9 +2628,28 @@ export function getMockStoresList(numStores: number = 10): List<Store> {
   };
 }
 
+export function getMockLocationsList(
+  numLocations: number = 10,
+): InventoryLocation[] {
+  const inventoryLocations: InventoryLocation[] = [];
+  for (let i = 0; i < numLocations; i++) {
+    inventoryLocations.push({
+      _id: `location-${i}`,
+      name: `location-${i}`,
+      gpsCoordinates: {
+        lat: (45 + i * 0.01).toString(),
+        lon: (-93 - i * 0.01).toString(),
+      },
+      description: `location-${i} description`,
+    });
+  }
+  return inventoryLocations;
+}
+
 export function getMockItemsListWithStoreSpecificValues(
   count: number,
   startUpc: number,
+  storesToPickFrom: string[] = [],
 ) {
   const itemsList = getEmptyList<Item>();
   const storeSpecificValuesMap: StoreSpecificValuesMap = {};
@@ -2628,7 +2658,8 @@ export function getMockItemsListWithStoreSpecificValues(
     const upcToUse =
       startUpc + index.toString().padStart(UPC_REQUIRED_CHAR_LENGTH, '0');
     itemsList.data.push(getRandomItem(upcToUse));
-    storeSpecificValuesMap[upcToUse] = getRandomStoreSpecificValues();
+    storeSpecificValuesMap[upcToUse] =
+      getRandomStoreSpecificValues(storesToPickFrom);
   }
   return {
     itemsList,

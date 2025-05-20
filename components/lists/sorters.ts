@@ -36,29 +36,37 @@ export const SORT_TYPE_DESCRIPTIONS: { [key in SortType]: string } = {
   [SortType.Upc]: 'Upc',
 };
 
-export function getSorter(
-  key: SortType,
-  currentStoreId: string = EMPTY_STRING,
-  direction: SortOrder = SortOrder.Ascending,
-) {
+export type GetSorterInput = {
+  currentStoreId?: string;
+  isCaseSensitive?: boolean;
+  sortOrder?: SortOrder;
+  sortType: SortType;
+};
+
+export function getSorter({
+  sortType,
+  currentStoreId = EMPTY_STRING,
+  sortOrder: direction = SortOrder.Ascending,
+  isCaseSensitive = false,
+}: GetSorterInput) {
   return (next: any, current: any) => {
-    let currentItem = current[key];
-    let nextItem = next[key];
+    let currentItem = typeof current === 'object' ? current[sortType] : current;
+    let nextItem = typeof next === 'object' ? next[sortType] : next;
     if (
       currentStoreId &&
-      current?.[key]?.[currentStoreId] !== undefined &&
-      next?.[key]?.[currentStoreId] !== undefined
+      current?.[sortType]?.[currentStoreId] !== undefined &&
+      next?.[sortType]?.[currentStoreId] !== undefined
     ) {
       currentItem = currentItem[currentStoreId];
       nextItem = nextItem[currentStoreId];
       if (
-        key === SortType.ItemId ||
-        key === SortType.Price ||
-        key === SortType.Quantity
+        sortType === SortType.ItemId ||
+        sortType === SortType.Price ||
+        sortType === SortType.Quantity
       ) {
         currentItem = parseFloat(currentItem);
         nextItem = parseFloat(nextItem);
-      } else if (key === SortType.AisleNumber) {
+      } else if (sortType === SortType.AisleNumber) {
         //todo: need to use the custom sorter for the store
         // currentItem = currentItem?.replace(/[a-zA-Z]/g, EMPTY_STRING);
         // nextItem = nextItem?.replace(/[a-zA-Z]/g, EMPTY_STRING);
@@ -66,6 +74,16 @@ export function getSorter(
     }
 
     const isDescending = direction === SortOrder.Descending;
+
+    if (
+      !isCaseSensitive &&
+      typeof currentItem === 'string' &&
+      typeof nextItem === 'string'
+    ) {
+      currentItem = currentItem?.toLowerCase();
+      nextItem = nextItem?.toLowerCase();
+    }
+
     if (!currentItem && nextItem) return isDescending ? 1 : -1;
     if (currentItem && !nextItem) return isDescending ? -1 : 1;
     if (currentItem === nextItem) return 0;

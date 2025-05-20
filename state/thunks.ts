@@ -16,6 +16,14 @@ import {
   removeStoresListItems,
   handleLoadAllResponse,
   setCurrentLocationState,
+  addInventoryLocations,
+  insertInventoryItems,
+  moveInventoryItemExpirationDates,
+  moveInventoryItems,
+  removeInventoryItems,
+  removeInventoryLocations,
+  removeMostRecentInventoryItem,
+  setInventory,
 } from './slices/listsSlice';
 import { RootState } from './store';
 
@@ -45,10 +53,23 @@ import {
   MakeCallInput,
   UserAccount,
   ProcessedGroceryListItem,
+  SaveInventoryLocationsResponse,
+  DeleteInventoryLocationsResponse,
+  DeleteInventoryItemsResponse,
+  MoveInventoryItemsResponse,
+  MoveInventoryItemExpirationDatesResponse,
 } from '@/types/bffService';
 import { Error, SetAppDataInput, State } from '@/types/general';
+import { Inventory, MoveInventoryItemExpirationDates } from '@/types/inventory';
+import {
+  InsertInventoryItemPayload,
+  MoveInventoryItemPayload,
+  RemoveInventoryItemPayload,
+} from '@/types/inventorySlice';
 import { ItemFormOnSave } from '@/types/itemForm';
-import { AddStoresListItemPayload, ListName } from '@/types/listSlice';
+import { AddStoresListItemPayload } from '@/types/listSlice';
+import { getExpirationDates } from '@/utils/getExpirationDates';
+import { getMostRecentExpirationDates } from '@/utils/getMostRecentExpirationDates';
 import {
   getKeyToUse,
   handleError,
@@ -60,20 +81,129 @@ import {
 } from '@/utils/helpers';
 import { logWhenDevelopmentMode } from '@/utils/logging';
 
+export type AddInventoryItemsInput = InsertInventoryItemPayload[];
+
+export type AddInventoryLocationInput = Pick<Inventory, 'locations'>;
+export type DeleteInventoryItemsThunkInput = RemoveInventoryItemPayload[];
+export type DeleteInventoryLocationInput = AddInventoryLocationInput;
+
 export type DeleteItemsThunkInput = {
   items: Item[];
 };
+export type DeleteMostRecentInventoryItemThunkInput = Omit<
+  RemoveInventoryItemPayload,
+  'expirationDates'
+>;
 export type DeleteStoresThunkInput = {
   stores: Store[];
 };
 export type GetCurrentStoreInput = {
   gpsCoordinate: GpsCoordinate;
 } & Pick<MakeCallInput, 'showLoadingMsg'>;
+export type MoveInventoryItemExpirationDatesThunkInput =
+  MoveInventoryItemExpirationDates[];
+export type MoveInventoryItemsThunkInput = MoveInventoryItemPayload[];
 export type SaveAllThunkInput = Omit<
   SetAppDataInput,
   'dispatch' | 'upcProducts'
 >;
 export type SavePurchaseThunkInput = void;
+
+export const addInventoryItemsThunk = createAsyncThunk(
+  'addInventoryItemsThunk',
+  async (
+    inventoryItems: AddInventoryItemsInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    let response: SaveInventoryLocationsResponse;
+    let shouldDisplayError = true;
+
+    try {
+      if (!inventoryItems || inventoryItems.length === 0)
+        throw new Error(
+          'Must provide a locationId, itemId and expirationDates in order to save a new inventory item.',
+        );
+      const state = getState() as RootState;
+      const account = state.general.account;
+
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const isSuccess = await BFF_SERVICE.saveInventoryItems({
+        dispatch,
+        ...account,
+        inventoryItems: inventoryItems.map((item) => ({
+          ...item,
+          locationId:
+            item.locationId ||
+            state.lists.inventory.currentLocationId ||
+            EMPTY_STRING,
+        })),
+      });
+      if (!isSuccess) {
+        shouldDisplayError = false;
+        throw new Error('Unable to save inventory items.');
+      }
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Error saving inventory items.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(insertInventoryItems(inventoryItems));
+    }
+  },
+);
+
+export const addInventoryLocationsThunk = createAsyncThunk(
+  'addInventoryLocations',
+  async (
+    input: AddInventoryLocationInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    let response: SaveInventoryLocationsResponse;
+    let shouldDisplayError = true;
+
+    try {
+      if (!input) throw new Error('Must provide locations to save.');
+      const state = getState() as RootState;
+      const account = state.general.account;
+
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const isSuccess = await BFF_SERVICE.saveInventoryLocations({
+        ...input,
+        dispatch,
+        ...account,
+        locations: input.locations,
+      });
+      if (!isSuccess) {
+        shouldDisplayError = false;
+        throw new Error('Unable to save locations.');
+      }
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Error saving Locations.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(addInventoryLocations(input.locations));
+    }
+  },
+);
 
 export const changePassword = createAsyncThunk(
   'changePassword',
@@ -227,10 +357,11 @@ export const login = createAsyncThunk(
       if (state.general.shouldSaveOnLogin) {
         dispatch(
           saveAll({
-            items: state.lists[ListName.ItemsList],
+            inventory: state.lists.inventory,
+            items: state.lists.itemsList,
             lastPurchasedMap: state.lists.lastPurchasedMap,
             stores: {
-              ...state.lists[ListName.StoresList],
+              ...state.lists.storesList,
               currentStoreId: state.lists.currentStoreId,
             },
             storeSpecificValues: state.lists.storeSpecificValuesMap,
@@ -245,6 +376,155 @@ export const login = createAsyncThunk(
         response,
         baseMsg: `Unable to login to '${user.email}'.`,
         genericMsg: 'Please check your credentials.',
+      });
+    }
+  },
+);
+
+export const deleteMostRecentInventoryItemThunk = createAsyncThunk(
+  'deleteMostRecentInventoryItemThunk',
+  async (
+    input: DeleteMostRecentInventoryItemThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    let response: DeleteInventoryItemsResponse;
+    let shouldDisplayError = true;
+
+    try {
+      if (!input) throw new Error('Must provide inventory item to delete.');
+      const state = getState() as RootState;
+      const account = state.general.account;
+
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const bulkResult = await BFF_SERVICE.deleteInventoryItems({
+        dispatch,
+        ...account,
+        inventoryItems: [
+          {
+            ...input,
+            locationId:
+              input.locationId ||
+              state.lists.inventory.currentLocationId ||
+              EMPTY_STRING,
+            expirationDates: getMostRecentExpirationDates(
+              state.lists.inventory.items[input?.locationId || EMPTY_STRING]?.[
+                input.itemId
+              ]?.expirationDates || {},
+              1,
+            ),
+          },
+        ],
+      });
+      if (!bulkResult) {
+        shouldDisplayError = false;
+        throw new Error('Unable to delete item.');
+      }
+      dispatch(removeMostRecentInventoryItem(input));
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Error deleting inventory item.  Please try again later.`,
+        shouldDisplayError,
+      });
+    }
+  },
+);
+
+export const deleteInventoryItemsThunk = createAsyncThunk(
+  'deleteInventoryItemsThunk',
+  async (
+    input: DeleteInventoryItemsThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    let response: DeleteInventoryItemsResponse;
+    let shouldDisplayError = true;
+
+    try {
+      if (!input || input.length === 0)
+        throw new Error('Must provide inventory items to delete.');
+      const state = getState() as RootState;
+      const account = state.general.account;
+
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const isSuccess = await BFF_SERVICE.deleteInventoryItems({
+        ...input,
+        dispatch,
+        ...account,
+        inventoryItems: input.map((item) => ({
+          ...item,
+          locationId:
+            item.locationId ||
+            state.lists.inventory.currentLocationId ||
+            EMPTY_STRING,
+        })),
+      });
+      if (!isSuccess) {
+        shouldDisplayError = false;
+        throw new Error('Unable to delete items.');
+      }
+      dispatch(removeInventoryItems(input));
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Error deleting inventory items.  Please try again later.`,
+        shouldDisplayError,
+      });
+    }
+  },
+);
+
+export const deleteInventoryLocationsThunk = createAsyncThunk(
+  'deleteInventoryLocationsThunk',
+  async (
+    input: DeleteInventoryLocationInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    let response: DeleteInventoryLocationsResponse;
+    let shouldDisplayError = true;
+
+    try {
+      if (!input) throw new Error('Must provide locations to delete.');
+      const state = getState() as RootState;
+      const account = state.general.account;
+
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const isSuccess = await BFF_SERVICE.deleteInventoryLocations({
+        ...input,
+        dispatch,
+        ...account,
+        locations: input.locations,
+      });
+      if (!isSuccess) {
+        shouldDisplayError = false;
+        throw new Error('Unable to save locations.');
+      }
+      dispatch(removeInventoryLocations(input.locations));
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Error saving Locations.  Please try again later.`,
+        shouldDisplayError,
       });
     }
   },
@@ -424,6 +704,7 @@ export const loadAll = createAsyncThunk(
         throw new Error('Unable to backup data.');
       }
       dispatch(handleLoadAllResponse(response));
+      dispatch(setInventory(response.inventory || {}));
       return response;
     } catch (error) {
       return handleErrorsWithRejection({
@@ -657,6 +938,114 @@ export const savePurchase = createAsyncThunk(
   },
 );
 
+export const moveInventoryItemsThunk = createAsyncThunk(
+  'moveInventoryItems',
+  async (
+    input: MoveInventoryItemsThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const state = getState() as RootState;
+    const account = state.general.account;
+    let shouldDisplayError = true;
+    let response: MoveInventoryItemsResponse;
+
+    if (!input) {
+      handleError(dispatch, {
+        message: 'Must provide payload to transfer inventory items.',
+      });
+    }
+    try {
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No user account info given.');
+      }
+      const isSuccess = await BFF_SERVICE.moveInventoryItems({
+        ...input,
+        dispatch,
+        ...account,
+        itemsToMove: input.map((item) => ({
+          ...item,
+          originLocationId:
+            item.originLocationId ||
+            state.lists.inventory.currentLocationId ||
+            EMPTY_STRING,
+        })),
+      });
+      if (!isSuccess) {
+        shouldDisplayError = false;
+        throw new Error('Unable to move inventory items in database.');
+      }
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to save action of moving inventory items.  Try again later.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(moveInventoryItems(input));
+    }
+  },
+);
+
+export const moveInventoryItemExpirationDatesThunk = createAsyncThunk(
+  'moveInventoryItemExpirationDates',
+  async (
+    input: MoveInventoryItemExpirationDatesThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const state = getState() as RootState;
+    const account = state.general.account;
+    let shouldDisplayError = true;
+    let response: MoveInventoryItemExpirationDatesResponse;
+
+    if (!input) {
+      handleError(dispatch, {
+        message:
+          'Must provide payload to transfer inventory item expiration dates.',
+      });
+    }
+    try {
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No user account info given.');
+      }
+      const isSuccess = await BFF_SERVICE.moveInventoryItemExpirationDates({
+        ...input,
+        dispatch,
+        ...account,
+        itemsToMove: input.map((item) => ({
+          ...item,
+          originLocationId:
+            item.originLocationId ||
+            state.lists.inventory.currentLocationId ||
+            EMPTY_STRING,
+          expirationDates: getExpirationDates(item.expirationDates),
+        })),
+      });
+      if (!isSuccess) {
+        shouldDisplayError = false;
+        throw new Error(
+          'Unable to move inventory item expiration dates in database.',
+        );
+      }
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to save action of moving inventory item expiration dates.  Try again later.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(moveInventoryItemExpirationDates(input));
+    }
+  },
+);
+
 export const saveStore = createAsyncThunk(
   'saveStore',
   async (
@@ -737,7 +1126,7 @@ type HandleErrorsWithRejectionInput<T> = {
   genericMsg?: string;
   shouldDisplayError?: boolean;
 };
-function handleErrorsWithRejection<T>(
+export function handleErrorsWithRejection<T>(
   input: HandleErrorsWithRejectionInput<T>,
 ) {
   const {

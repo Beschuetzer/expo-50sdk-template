@@ -15,6 +15,7 @@ import { SortType, SortOrder } from '@/components/lists/sorters';
 export enum ListName {
   InCartList = 'inCartList',
   ItemsList = 'itemsList',
+  InventoryList = 'InventoryList',
   PreviouslyPurchased = 'previouslyPurchased',
   ShoppingList = 'shoppingList',
   StoresList = 'storesList',

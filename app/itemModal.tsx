@@ -8,9 +8,17 @@ import { ItemForm } from '@/components/forms/ItemForm';
 import { ListHeaderRight } from '@/components/header/ListHeaderRight';
 import { useMenu } from '@/components/hooks/useMenu';
 import { useUpcProduct } from '@/components/hooks/useUpcProduct';
+import {
+  AddItemToInventoryModal,
+  AddItemToInventoryModalValues,
+} from '@/components/modals/AddItemToInventoryModal';
 import { StoreSelectionModal } from '@/components/modals/StoreSelectionModal';
 import { BFF_SERVICE } from '@/components/services/BffService';
-import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
+import {
+  EMPTY_NUMBER,
+  EMPTY_STRING,
+  TIME_TO_EXPIRATION_DEFAULT,
+} from '@/constants/general';
 import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { accountSelector } from '@/state/slices/generalSlice';
 import {
@@ -26,7 +34,7 @@ import {
   nameOrderTemplateSelector,
 } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
-import { saveItem } from '@/state/thunks';
+import { addInventoryItemsThunk, saveItem } from '@/state/thunks';
 import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { UpcProduct } from '@/types/UpcResponse';
 import { ItemFormOnSave } from '@/types/itemForm';
@@ -67,18 +75,26 @@ export default function ItemModal() {
   const s3ImagesToDeleteOnSaveRef = useRef<string[]>([]);
   const originalKeyRef = useRef<Key>(key);
   const canSkipUseUpcProductRef = useRef(false);
+  const [
+    isAddItemToInventoryModalVisible,
+    setIsAddItemToInventoryModalVisible,
+  ] = useState(false);
 
   const isAutoSaveEnabled = useMemo(() => {
     return !!(autoSaveItems && (!!itemInList || !!callerList));
   }, [autoSaveItems, itemInList, callerList]);
 
-  const { upcProduct, errorMsg } = useUpcProduct({
+  const { upcProduct, error } = useUpcProduct({
     upc: key?.upc,
     shouldSkip: isAutoSaveEnabled
       ? !!itemInList && canSkipUseUpcProductRef.current
       : !!itemInList,
   });
   const fallbackItem = useMemo(() => getItemFromUpc(upcProduct), [upcProduct]);
+
+  const closeAddItemToInventoryModal = useCallback(() => {
+    setIsAddItemToInventoryModalVisible(false);
+  }, []);
 
   const handleClose = useCallback(() => {
     navigation.canGoBack() && navigation.goBack();
@@ -129,6 +145,41 @@ export default function ItemModal() {
     return item;
   }
 
+  const onAddToInventoryPress = useCallback(() => {
+    if (!itemInList) {
+      return;
+    }
+    setIsAddItemToInventoryModalVisible(true);
+  }, [itemInList]);
+
+  const onAddItemToInventoryModalConfirm = useCallback(
+    (values: AddItemToInventoryModalValues) => {
+      if (!values?.location || !values?.number) {
+        return;
+      }
+
+      const itemExpirationDate =
+        Date.now() +
+        (itemInList?.timeToExpiration || TIME_TO_EXPIRATION_DEFAULT);
+
+      dispatch(
+        addInventoryItemsThunk([
+          {
+            item: {
+              expirationDates: {
+                [itemExpirationDate]: values.number,
+              },
+            },
+            locationId: getKeyToUse(values.location),
+            itemId: getKeyToUse(itemInList || EMPTY_STRING),
+          },
+        ]),
+      );
+      closeAddItemToInventoryModal();
+    },
+    [itemInList, dispatch, closeAddItemToInventoryModal],
+  );
+
   useMenu({
     navigationOptionsGetter: itemInList
       ? (menuRef) => ({
@@ -136,6 +187,12 @@ export default function ItemModal() {
             <ListHeaderRight
               ref={menuRef}
               options={[
+                itemInList
+                  ? {
+                      text: 'Add to Inventory',
+                      onPress: onAddToInventoryPress,
+                    }
+                  : undefined,
                 {
                   text: 'Copy Store Specific Values from ...',
                   onPress: () => {
@@ -153,10 +210,10 @@ export default function ItemModal() {
     if (!itemInList && !upcProduct && !showBlank) {
       return (
         <Center height="100%">
-          {errorMsg ? (
+          {error ? (
             <>
               <Heading>Error Fetching Data</Heading>
-              <Text>{errorMsg}</Text>
+              <Text>{error.message}</Text>
             </>
           ) : (
             <>
@@ -191,6 +248,14 @@ export default function ItemModal() {
           shouldAddToCart={callerList === ListName.InCartList}
           autoSave={isAutoSaveEnabled}
           storeSpecificValuesMap={storeSpecificValuesMap}
+        />
+        <AddItemToInventoryModal
+          modalProps={{
+            isVisible: isAddItemToInventoryModalVisible,
+            title: `Add '${itemInList?.name || 'Item'}' to Inventory`,
+          }}
+          onCancel={closeAddItemToInventoryModal}
+          onConfirm={onAddItemToInventoryModalConfirm}
         />
         <StoreSelectionModal
           title={`Copy '${ensureMaxLength(itemInList?.name || EMPTY_STRING, 20)} values from:'`}

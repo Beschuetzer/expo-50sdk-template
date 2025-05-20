@@ -1,4 +1,5 @@
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import * as Notifications from 'expo-notifications';
 import { useNavigation } from 'expo-router';
 import { Button, Row, FormControl, Input, useTheme, Stack } from 'native-base';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -29,7 +30,12 @@ import {
 } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState } from '@/state/thunks';
-import { displayAlert, getGpsCoordinate } from '@/utils/helpers';
+import {
+  displayAlert,
+  getGpsCoordinate,
+  getIsDevelopmentMode,
+  scheduleNotification,
+} from '@/utils/helpers';
 
 const DEBOUNCE_TIMEOUT = 500;
 
@@ -66,9 +72,34 @@ export default function OptionsScreen() {
     }
   }, [BFF_SERVICE]);
 
-  function onDonePress() {
+  const onDonePress = useCallback(() => {
     navigation.goBack();
-  }
+  }, [navigation]);
+
+  const onTestNotificationLocalPress = useCallback(async () => {
+    displayAlert({
+      message: 'Local notification scheduled for 3 seconds.',
+    });
+    await scheduleNotification({
+      content: {
+        title: 'Local Notification',
+        body: 'This is a test local high priority notification.',
+        data: { test: 'test' },
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
+      trigger: {
+        seconds: 3,
+      },
+    });
+  }, []);
+
+  const onTestNotificationRemotePress = useCallback(() => {
+    (async () => {
+      displayAlert({
+        message: 'Need to implement remote notification!',
+      });
+    })();
+  }, []);
 
   function handleReduxUpdate(
     key: string,
@@ -156,16 +187,24 @@ export default function OptionsScreen() {
         >
           Update Current Location
         </Button>
-        <Button
-          onPress={() => {
-            // @ts-ignore
-            navigation.navigate(Routes.DevOptionsScreen);
-          }}
-        >
-          Developer Options
-        </Button>
+        {getIsDevelopmentMode() ? (
+          <Button
+            onPress={() => {
+              // @ts-ignore
+              navigation.navigate(Routes.DevOptionsScreen);
+            }}
+          >
+            Developer Options
+          </Button>
+        ) : null}
         <Button isDisabled={isPinging} onPress={onPingBffPress}>
           Ping Bff
+        </Button>
+        <Button onPress={onTestNotificationLocalPress}>
+          Test Local Notification (3sec)
+        </Button>
+        <Button onPress={onTestNotificationRemotePress}>
+          Test Remote Notification (30sec)
         </Button>
       </Stack>
     </AbsolutePositionedScreen>

@@ -32,7 +32,9 @@ export default function TabLayout() {
         options={{
           title: 'Shopping',
           headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="shopping-bag" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -66,6 +68,17 @@ export default function TabLayout() {
             <TabBarIcon name="list-alt" color={color} />
           ),
           lazy: true,
+        }}
+      />
+      <Tabs.Screen
+        name={Routes.InventoryScreen}
+        options={{
+          lazy: true,
+          title: 'Inventory',
+          headerTitleAlign: 'center',
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="list-ul" color={color} />
+          ),
         }}
       />
       <Tabs.Screen

@@ -2,6 +2,7 @@ import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/typ
 import _ from 'lodash';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
 import React, {
+  MutableRefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -9,14 +10,16 @@ import React, {
   useState,
 } from 'react';
 
-import { FrequencyInput } from './FrequencyInput';
+import CheckboxInput from './CheckboxInput';
+import { DurationInput } from './DurationInput';
 import { InputText } from './InputText';
 import { ItemFormStoreSpecific } from './ItemFormStoreSpecificItems';
+import { NumberInput } from './NumberInput';
 import { ThumbnailPicker } from './ThumbnailPicker';
 import { UnitInput } from './UnitInput';
 import { AbsolutePositionedScreen } from '../AbsolutelyPositionedScreen';
-import { Barcode } from '../Barcode';
 import { InputValidationMessage } from '../InputValidationMessage';
+import { BarcodeScannerModal } from '../modals/BarcodeScannerModal';
 import { ALLOW_OVERRIDE_WHEN_SAME_UPC_MESSAGE } from '../options/CanCreateMultipleItemsWithSameUpcToggle';
 
 import {
@@ -25,6 +28,9 @@ import {
   EMPTY_NUMBER,
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
+  INVENTORY_MINIMUM_DEFAULT,
+  IS_FROZEN_DEFAULT,
+  TIME_TO_EXPIRATION_DEFAULT,
 } from '@/constants/general';
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import {
@@ -44,7 +50,7 @@ import {
   deleteFile,
   displayAlert,
   getEmptyItem,
-  getFrequencyValue,
+  getDurationValue,
   getId,
   getItemValidation,
   getKeyToUse,
@@ -95,6 +101,12 @@ export function ItemForm(props: ItemFormProps) {
     selectedUrl:
       itemToUse?.images?.[itemToUse?.imageToUseIndex] || EMPTY_STRING,
   });
+
+  const isFrozenRef = useRef<boolean>(itemToUse?.isFrozen || IS_FROZEN_DEFAULT);
+  const inventoryMinimumRef = useRef<number>(
+    itemToUse?.inventoryMinimum || INVENTORY_MINIMUM_DEFAULT,
+  );
+  const timeToExpirationRef = useRef<number>(itemToUse?.timeToExpiration || -1);
   const frequencyInMsRef = useRef<number>(itemToUse?.frequency || -1);
   const unitRef = useRef<string>(EMPTY_STRING);
   const lastSavedKeyRef = useRef<string>(EMPTY_STRING);
@@ -152,12 +164,14 @@ export function ItemForm(props: ItemFormProps) {
       const now = Date.now();
       const itemToSave = {
         ...itemInList,
+        ...formData,
+        inventoryMinimum: inventoryMinimumRef.current,
+        isFrozen: isFrozenRef.current,
+        timeToExpiration: timeToExpirationRef.current,
         frequency: frequencyInMsRef.current,
         unit: unitRef.current,
         images: imagesToSaveRef.current,
         imageToUseIndex: foundIndex >= 0 ? foundIndex : DEFAULT_IMAGE_INDEX,
-        name: formData.name,
-        upc: formData.upc,
         addedDate: itemToUse?.addedDate || now,
         lastUpdatedDate: now,
       } as Item;
@@ -242,8 +256,11 @@ export function ItemForm(props: ItemFormProps) {
     [
       currentStore,
       formData,
+      timeToExpirationRef,
       frequencyInMsRef,
       imagesToSaveRef,
+      inventoryMinimumRef,
+      isFrozenRef,
       itemToUse,
       itemInList,
       lastSavedKeyRef,
@@ -275,12 +292,12 @@ export function ItemForm(props: ItemFormProps) {
     };
   }, [autoSave, isSavingDisabled, autoSaveTimeoutRef, formData, onSavePress]);
 
-  const onFrequencyChange = useCallback(
-    (frequencyInMs: number) => {
-      frequencyInMsRef.current = frequencyInMs;
+  const onRefValueChange = useCallback(
+    <T,>(newValue: T, timeSpanRef: MutableRefObject<T>) => {
+      timeSpanRef.current = newValue;
       handleAutoSave();
     },
-    [frequencyInMsRef, handleAutoSave],
+    [handleAutoSave],
   );
 
   const onItemSpecificValueChange = useCallback(
@@ -361,47 +378,45 @@ export function ItemForm(props: ItemFormProps) {
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText>Upc</InputText>
-        <Row>
-          <Input
-            flex={1}
-            variant="outline"
-            keyboardType="numeric"
-            p={theme.space[1]}
-            placeholder="UPC Code"
-            value={formData.upc}
-            onChangeText={(newText) => {
-              setFormData((current) => ({
-                ...current,
-                upc: newText,
-              }));
-              setShowOverrideMsg(true);
-            }}
-            isInvalid={
-              !UPC_REGEX.test(formData.upc || EMPTY_STRING) &&
-              formData.upc.length !== 0
-            }
-            InputRightElement={
-              <Barcode
-                ref={barcodeModalRef}
-                style={{ marginRight: theme.space[2] }}
-                onPress={() => barcodeModalRef.current?.present()}
-                onScannedValue={(upc) => {
-                  if (!upc) {
-                    displayAlert({
-                      msg: 'Invalid Upc',
-                      upc,
-                    });
-                  }
-                  setFormData((current) => ({
-                    ...current,
+        <Input
+          flex={1}
+          variant="outline"
+          keyboardType="numeric"
+          p={theme.space[1]}
+          placeholder="UPC Code"
+          value={formData.upc}
+          onChangeText={(newText) => {
+            setFormData((current) => ({
+              ...current,
+              upc: newText,
+            }));
+            setShowOverrideMsg(true);
+          }}
+          isInvalid={
+            !UPC_REGEX.test(formData.upc || EMPTY_STRING) &&
+            formData.upc.length !== 0
+          }
+          InputRightElement={
+            <BarcodeScannerModal
+              ref={barcodeModalRef}
+              style={{ marginRight: theme.space[2] }}
+              onPress={() => barcodeModalRef.current?.present()}
+              onScannedValue={(upc) => {
+                if (!upc) {
+                  displayAlert({
+                    msg: 'Invalid Upc',
                     upc,
-                  }));
-                }}
-                size={37}
-              />
-            }
-          />
-        </Row>
+                  });
+                }
+                setFormData((current) => ({
+                  ...current,
+                  upc,
+                }));
+              }}
+              size={37}
+            />
+          }
+        />
         <InputValidationMessage
           isValid={isUpcValid}
           message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} or ${UPC_REQUIRED_CHAR_LENGTH + 1} numbers (currently ${formData.upc.length})`}
@@ -427,11 +442,55 @@ export function ItemForm(props: ItemFormProps) {
           initialImages={initialImages}
         />
       </Stack>
-      <FrequencyInput
-        onValueChange={onFrequencyChange}
+      <DurationInput
+        title="Time Until Expiration"
+        onValueChange={(newValue) =>
+          onRefValueChange(newValue, timeToExpirationRef)
+        }
         headingTag={InputText}
         spacing={theme.space[1]}
-        initialFrequency={getFrequencyValue(itemToUse?.frequency)}
+        initialDuration={getDurationValue(
+          itemToUse?.timeToExpiration || TIME_TO_EXPIRATION_DEFAULT,
+        )}
+      />
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <NumberInput
+          initialValue={inventoryMinimumRef.current}
+          title="Inventory Minimum"
+          headingTag={InputText}
+          onMinusPress={() => {
+            inventoryMinimumRef.current = inventoryMinimumRef.current - 1;
+          }}
+          onPlusPress={() => {
+            inventoryMinimumRef.current = inventoryMinimumRef.current + 1;
+          }}
+          onValueChange={(newValue) => {
+            onRefValueChange(
+              Math.max(newValue, EMPTY_NUMBER),
+              inventoryMinimumRef,
+            );
+          }}
+        />
+      </Stack>
+      <CheckboxInput
+        initialValue={isFrozenRef.current}
+        label="Is Frozen"
+        onValueChange={(newValue) => {
+          onRefValueChange(newValue, isFrozenRef);
+        }}
+        rowProps={{
+          mt: theme.space[FORM_INTER_ITEM_SPACING] * 2,
+        }}
+      />
+      <DurationInput
+        title="Frequency"
+        subTitle="Next expected purchase time:"
+        onValueChange={(newValue) =>
+          onRefValueChange(newValue, frequencyInMsRef)
+        }
+        headingTag={InputText}
+        spacing={theme.space[1]}
+        initialDuration={getDurationValue(itemToUse?.frequency)}
       />
       <UnitInput
         initialValue={itemToUse?.unit}

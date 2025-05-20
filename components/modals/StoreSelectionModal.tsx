@@ -1,10 +1,21 @@
-import { Button, FlatList } from 'native-base';
-import React, { useCallback, useEffect, useState } from 'react';
+import { FlashList } from '@shopify/flash-list';
+import { Button } from 'native-base';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
 import { ListItemSeparator } from '../lists/ListItemSeparator';
 
-import { LIST_HAPTICS } from '@/constants/general';
+import {
+  EMPTY_STRING,
+  ESTIMATED_SIZE_FOR_STORE_SELECTION_MODAL,
+  LIST_HAPTICS,
+} from '@/constants/general';
 import {
   storesListSelector,
   currentStoreSelector,
@@ -18,6 +29,7 @@ export type StoreSelectionModalProps = Omit<
   'children' | 'onConfirm'
 > & {
   canSelectCurrentStore?: boolean;
+  initialStoreId?: Store['_id'];
   storesToOmit?: Store[];
   onConfirm: (selectedStore: Store | null) => void;
 };
@@ -25,6 +37,7 @@ export type StoreSelectionModalProps = Omit<
 export function StoreSelectionModal(props: StoreSelectionModalProps) {
   const {
     canSelectCurrentStore,
+    initialStoreId = EMPTY_STRING,
     isVisible,
     onConfirm,
     onCancel,
@@ -32,15 +45,27 @@ export function StoreSelectionModal(props: StoreSelectionModalProps) {
   } = props;
   const storesList = useAppSelector(storesListSelector);
   const currentStore = useAppSelector(currentStoreSelector);
-  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const initialStoreToUse = useMemo(
+    () =>
+      initialStoreId
+        ? storesList?.data?.find(
+            (store) => getKeyToUse(store) === initialStoreId,
+          ) || null
+        : null,
+    [initialStoreId, storesList.data],
+  );
+  const [selectedStore, setSelectedStore] = useState<Store | null>(
+    initialStoreToUse,
+  );
+  const hasUserSelectedStoreRef = useRef(false);
 
   const onCancelPressLocal = useCallback(() => {
     onCancel && onCancel();
   }, [onCancel]);
 
   const onConfirmPressLocal = useCallback(() => {
-    onConfirm && onConfirm(selectedStore);
-  }, [onConfirm, selectedStore]);
+    onConfirm && onConfirm(selectedStore || initialStoreToUse);
+  }, [onConfirm, selectedStore, initialStoreToUse]);
 
   useEffect(() => {
     setSelectedStore(null);
@@ -53,7 +78,8 @@ export function StoreSelectionModal(props: StoreSelectionModalProps) {
       onConfirm={onConfirmPressLocal}
       onCancel={onCancelPressLocal}
     >
-      <FlatList
+      <FlashList
+        estimatedItemSize={ESTIMATED_SIZE_FOR_STORE_SELECTION_MODAL}
         keyboardShouldPersistTaps="always"
         data={storesList.data.filter((store) => {
           let shouldInclude = true;
@@ -67,24 +93,28 @@ export function StoreSelectionModal(props: StoreSelectionModalProps) {
         })}
         keyExtractor={(store) => store._id}
         ItemSeparatorComponent={() => <ListItemSeparator />}
-        renderItem={({ item: store, index }) => (
-          <Button
-            key={getKeyToUse(store)}
-            onPress={() => {
-              setSelectedStore(store);
-              LIST_HAPTICS.handleSelection();
-            }}
-            variant="ghost"
-            isDisabled={
-              !!(
-                selectedStore &&
-                getKeyToUse(selectedStore) === getKeyToUse(store)
-              )
-            }
-          >
-            {getStoreDescriptor(store)}
-          </Button>
-        )}
+        renderItem={({ item: store, index }) => {
+          let isSelected = false;
+          if (selectedStore) {
+            isSelected = getKeyToUse(store) === getKeyToUse(selectedStore);
+          } else if (initialStoreToUse && !hasUserSelectedStoreRef.current) {
+            isSelected = getKeyToUse(store) === getKeyToUse(initialStoreToUse);
+          }
+          return (
+            <Button
+              key={getKeyToUse(store)}
+              onPress={() => {
+                hasUserSelectedStoreRef.current = true;
+                setSelectedStore(store);
+                LIST_HAPTICS.handleSelection();
+              }}
+              variant="ghost"
+              isDisabled={isSelected}
+            >
+              {getStoreDescriptor(store)}
+            </Button>
+          );
+        }}
       />
     </ModalWithBlur>
   );

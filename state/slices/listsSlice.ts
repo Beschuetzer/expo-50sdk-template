@@ -27,6 +27,22 @@ import { GpsCoordinate, Store } from '@/types/Store';
 import { LoadAllResponse } from '@/types/bffService';
 import { CurrentLocation, OriginalKeyProp, State } from '@/types/general';
 import {
+  Inventory,
+  InventoryItemWithItemDetails,
+  InventoryLocation,
+  InventoryLocationItem,
+  MoveInventoryItemExpirationDates,
+} from '@/types/inventory';
+import {
+  InsertInventoryItemPayload,
+  InventoryItemSelectorProps,
+  InventoryItemSelectorResponse,
+  InventorySliceState,
+  MoveInventoryItemPayload,
+  ProcessItemToLocationMap,
+  RemoveInventoryItemPayload,
+} from '@/types/inventorySlice';
+import {
   ListName,
   AddAllToShoppingCartPayload,
   AddItemsListItemPayload,
@@ -43,7 +59,10 @@ import {
   MoveItemToAnotherCartPayload,
   CopyStoreSpecificValuesPayload,
 } from '@/types/listSlice';
+import { getExpirationDatesQuantity } from '@/utils/getExpirationDatesQuantity';
 import { getItemWithStoreSpecificValues } from '@/utils/getItemWithStoreSpecificValues';
+import { getMostRecentExpirationDates } from '@/utils/getMostRecentExpirationDates';
+import { getUpdatedExpirationDates } from '@/utils/getUpdatedExpirationDates';
 import {
   calculateDistance,
   deleteImages,
@@ -83,6 +102,7 @@ export type ListsState = {
   [ListName.ShoppingList]: ShoppingList;
   [ListName.StoresList]: StoreList;
   lastPurchasedMap: LastPurchasedMap;
+  inventory: InventorySliceState;
   isMultiSelectModeForShoppingCart: boolean;
   isMultiSelectModeForPreviouslyPurchased: boolean;
   isMultiSelectModeForInCart: boolean;
@@ -96,6 +116,16 @@ const initialState: ListsState = {
   currentLocation: CURRENT_LOCATION_INITIAL,
   currentLocationState: CURRENT_LOCATION_STATE_INITIAL,
   currentStoreId: EMPTY_STRING,
+  /**
+   *inventory was originally a separate slice but I was getting strange redux persistence issues
+   *so I moved it into the lists slice.
+   **/
+  inventory: {
+    currentLocationId: EMPTY_STRING,
+    items: {},
+    locations: [],
+    lastDecrementedItemId: EMPTY_STRING,
+  },
   isMultiSelectModeForInCart: IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   isMultiSelectModeForPreviouslyPurchased:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
@@ -132,6 +162,26 @@ export const listsSlice = createSlice({
 
       for (const item of items) {
         updateStoreSpecificValueMap(state, item, storeSpecificValuesToUpdate);
+      }
+    },
+    addInventoryLocation: (
+      state: ListsState,
+      action: PayloadAction<InventoryLocation>,
+    ) => {
+      addInventoryLocationHelper(state, action.payload, true);
+    },
+    addInventoryLocations: (
+      state: ListsState,
+      action: PayloadAction<InventoryLocation[]>,
+    ) => {
+      const locations = action.payload;
+      for (let index = 0; index < locations.length; index++) {
+        const location = locations[index];
+        addInventoryLocationHelper(
+          state,
+          location,
+          index === locations.length - 1,
+        );
       }
     },
     addItemToCart: (
@@ -217,8 +267,12 @@ export const listsSlice = createSlice({
     ) => {
       const itemsList = action.payload;
       state[ListName.ItemsList] = {
-        ...state[ListName.ItemsList],
-        ...itemsList,
+        data: [
+          ...(state[ListName.ItemsList]?.data || []),
+          ...(itemsList?.data || []),
+        ],
+        filters: itemsList.filters,
+        sortOrderValue: itemsList.sortOrderValue,
       };
     },
     addStoresListItem: (
@@ -499,9 +553,99 @@ export const listsSlice = createSlice({
         }
       }
     },
+    insertInventoryItem: (
+      state: ListsState,
+      action: PayloadAction<InsertInventoryItemPayload>,
+    ) => {
+      insertInventoryItemHelper(state, action?.payload);
+    },
+    insertInventoryItems: (
+      state: ListsState,
+      action: PayloadAction<InsertInventoryItemPayload[]>,
+    ) => {
+      action?.payload?.forEach((item) =>
+        insertInventoryItemHelper(state, item),
+      );
+    },
     moveAllToInCart: (state: ListsState) => {
       moveItems(state, Object.keys(state.storeSpecificValuesMap));
       state.selectedItemsFromShoppingCart = [];
+    },
+    moveInventoryItem: (
+      state: ListsState,
+      action: PayloadAction<MoveInventoryItemPayload>,
+    ) => {
+      moveInventoryItemsHelper(state, action.payload);
+    },
+    moveInventoryItems: (
+      state: ListsState,
+      action: PayloadAction<MoveInventoryItemPayload[]>,
+    ) => {
+      for (const payload of action?.payload || []) {
+        moveInventoryItemsHelper(state, payload);
+      }
+    },
+    moveInventoryItemExpirationDates: (
+      state: ListsState,
+      action: PayloadAction<MoveInventoryItemExpirationDates[]>,
+    ) => {
+      if (!action.payload || action.payload.length === 0) {
+        return;
+      }
+      for (const moveInventoryItemToLocationItem of action.payload) {
+        const { itemId, originLocationId, targetLocationId, expirationDates } =
+          moveInventoryItemToLocationItem;
+        if (
+          !itemId ||
+          !originLocationId ||
+          !targetLocationId ||
+          !expirationDates ||
+          expirationDates.length === 0
+        ) {
+          continue;
+        }
+
+        for (const expirationDate of expirationDates) {
+          const foundOriginalExpirationDate =
+            state.inventory.items?.[originLocationId]?.[itemId]
+              ?.expirationDates?.[expirationDate];
+
+          if (
+            !foundOriginalExpirationDate ||
+            foundOriginalExpirationDate <= 0
+          ) {
+            continue;
+          } else {
+            state.inventory.items[originLocationId][itemId].expirationDates[
+              expirationDate
+            ]--;
+          }
+
+          if (!state.inventory.items[targetLocationId]) {
+            state.inventory.items[targetLocationId] = {};
+          }
+          if (!state.inventory.items[targetLocationId][itemId]) {
+            state.inventory.items[targetLocationId][itemId] = {
+              expirationDates: {
+                [expirationDate]: 1,
+              },
+            } as InventoryItemWithItemDetails;
+          } else {
+            state.inventory.items[targetLocationId][itemId].expirationDates[
+              expirationDate
+            ]++;
+          }
+        }
+
+        if (
+          state.inventory.items[originLocationId]?.[itemId]?.expirationDates &&
+          getExpirationDatesQuantity(
+            state.inventory.items[originLocationId][itemId].expirationDates,
+          ) === 0
+        ) {
+          delete state.inventory.items[originLocationId][itemId];
+        }
+      }
     },
     moveItemToAnotherCart: (
       state: ListsState,
@@ -588,6 +732,117 @@ export const listsSlice = createSlice({
       state.isMultiSelectModeForPreviouslyPurchased = false;
       state.selectedItemsFromPreviouslyPurchased = [];
     },
+    processItemToLocationMap: (
+      state: ListsState,
+      action: PayloadAction<ProcessItemToLocationMap>,
+    ) => {
+      const itemPayload = action.payload;
+      const { itemToLocationMap } = itemPayload;
+      for (const [itemId, locationObj] of Object.entries(itemToLocationMap)) {
+        const { locationId, timeToExpiration, quantity } = locationObj;
+        if (!itemId || !locationId || !timeToExpiration || quantity <= 0) {
+          continue;
+        }
+        if (!state.inventory.items[locationId]) {
+          state.inventory.items[locationId] = {};
+        }
+        if (!state.inventory.items[locationId][itemId]) {
+          state.inventory.items[locationId][itemId] = {
+            expirationDates: {},
+          } as InventoryItemWithItemDetails;
+        }
+        if (!state.inventory.items[locationId][itemId].expirationDates) {
+          state.inventory.items[locationId][itemId].expirationDates = {};
+        }
+        state.inventory.items[locationId][itemId].expirationDates = {
+          ...state.inventory.items[locationId][itemId].expirationDates,
+          [Date.now() + timeToExpiration]: quantity,
+        };
+      }
+    },
+    removeMostRecentInventoryItem: (
+      state: ListsState,
+      action: PayloadAction<
+        Pick<RemoveInventoryItemPayload, 'itemId' | 'locationId'>
+      >,
+    ) => {
+      const itemPayload = action.payload;
+      const { itemId, locationId } = itemPayload;
+      if (
+        !itemId ||
+        !locationId ||
+        !state.inventory.items[locationId]?.[itemId]?.expirationDates
+      ) {
+        return;
+      }
+      if (
+        getExpirationDatesQuantity(
+          state.inventory.items[locationId][itemId].expirationDates,
+        ) <= 0
+      ) {
+        delete state.inventory.items[locationId][itemId];
+      } else {
+        const mostRecentExpirationDate = Object.keys(
+          getMostRecentExpirationDates(
+            state.inventory.items[locationId][itemId].expirationDates,
+            1,
+          ),
+        );
+
+        state.inventory.items[locationId][itemId].expirationDates[
+          mostRecentExpirationDate[0]
+        ]--;
+
+        if (
+          getExpirationDatesQuantity(
+            state.inventory.items[locationId][itemId].expirationDates,
+          ) <= 0
+        ) {
+          delete state.inventory.items[locationId][itemId];
+        } else if (
+          state.inventory.items[locationId][itemId].expirationDates[
+            mostRecentExpirationDate[0]
+          ] <= 0
+        ) {
+          delete state.inventory.items[locationId][itemId].expirationDates[
+            mostRecentExpirationDate[0]
+          ];
+        }
+      }
+      state.inventory.lastDecrementedItemId = itemId;
+    },
+    removeInventoryItem: (
+      state: ListsState,
+      action: PayloadAction<RemoveInventoryItemPayload>,
+    ) => {
+      const itemPayload = action.payload;
+      removeInventoryItemHelper(state, itemPayload);
+    },
+    removeInventoryItems: (
+      state: ListsState,
+      action: PayloadAction<RemoveInventoryItemPayload[]>,
+    ) => {
+      const itemPayload = action.payload;
+      for (const item of itemPayload) {
+        removeInventoryItemHelper(state, item);
+      }
+    },
+    removeInventoryLocation: (
+      state: ListsState,
+      action: PayloadAction<InventoryLocation>,
+    ) => {
+      const location = action.payload;
+      removeInventoryLocationHelper(state, location);
+    },
+    removeInventoryLocations: (
+      state: ListsState,
+      action: PayloadAction<InventoryLocation[]>,
+    ) => {
+      const locations = action.payload;
+      for (const location of locations) {
+        removeInventoryLocationHelper(state, location);
+      }
+    },
     removeItemsListItems: (
       state: ListsState,
       action: PayloadAction<Item[]>,
@@ -599,6 +854,10 @@ export const listsSlice = createSlice({
         (itemBeingRemoved) => {
           deleteImages(itemBeingRemoved.images);
         },
+      );
+      removeItemsFromInventory(
+        state,
+        action.payload?.map((item) => getKeyToUse(item)),
       );
     },
     removeShoppingListItems: (
@@ -641,8 +900,8 @@ export const listsSlice = createSlice({
     ) => {
       const { listName } = action.payload;
       const emptyList = getEmptyList<any>(listName);
-      emptyList.data = state[listName]?.data || [];
-      state[listName] = emptyList;
+      emptyList.data = (state as any)[listName]?.data || [];
+      (state as any)[listName] = emptyList;
 
       switch (listName) {
         case ListName.InCartList:
@@ -667,9 +926,16 @@ export const listsSlice = createSlice({
     ) => {
       const { listName } = action.payload;
       const emptyList = getEmptyList<any>(listName);
-      emptyList.data = state[listName].data || [];
-      emptyList.sortOrderValue = state[listName].sortOrderValue;
-      state[listName] = emptyList;
+      emptyList.data = (state as any)[listName].data || [];
+      emptyList.sortOrderValue = (state as any)[listName].sortOrderValue;
+      (state as any)[listName] = emptyList;
+    },
+    resetInventoryItems: (state: ListsState) => {
+      state.inventory.items = {};
+    },
+    resetInventoryLocations: (state: ListsState) => {
+      state.inventory.locations = [];
+      state.inventory.currentLocationId = null;
     },
     resetItemsList: (state: ListsState) => {
       state.itemsList = getEmptyList(ListName.ItemsList);
@@ -693,6 +959,17 @@ export const listsSlice = createSlice({
     },
     resetCurrentStoreId: (state: ListsState) => {
       state.currentStoreId = EMPTY_STRING;
+    },
+    setCurrentInventoryLocationId: (
+      state: ListsState,
+      action: PayloadAction<InventoryLocation['_id'] | undefined | null>,
+    ) => {
+      const locationId = action.payload;
+      if (locationId) {
+        state.inventory.currentLocationId = locationId;
+      } else {
+        state.inventory.currentLocationId = null;
+      }
     },
     setCurrentLocation: (
       state: ListsState,
@@ -737,14 +1014,35 @@ export const listsSlice = createSlice({
         }
       }
 
-      state[listName].filters = filters;
+      (state as any)[listName].filters = filters;
     },
+    setInventory: (state: ListsState, action: PayloadAction<Inventory>) => {
+      const { items, locations, currentLocationId } = action.payload;
+      if (!items || !locations) {
+        return;
+      }
+      state.inventory.items = items || {};
+      state.inventory.locations = locations || [];
+      if (locations && locations.length > 0) {
+        state.inventory.currentLocationId =
+          currentLocationId || locations[0]?._id || null;
+      } else {
+        state.inventory.currentLocationId = null;
+      }
+    },
+
     setItemsList: (
       state: ListsState,
       action: PayloadAction<ListsState['itemsList']>,
     ) => {
       if (!action.payload) return;
       state.itemsList = action.payload;
+    },
+    setLastDecrementedItemId: (
+      state: ListsState,
+      action: PayloadAction<string>,
+    ) => {
+      state.inventory.lastDecrementedItemId = action.payload || EMPTY_STRING;
     },
     setLastPurchasedMap: (
       state: ListsState,
@@ -753,26 +1051,32 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       state.lastPurchasedMap = action.payload;
     },
+
     setSortOrder: (
       state: ListsState,
       action: PayloadAction<SetSortOrderPayload>,
     ) => {
       const { listName, sortBy, sortOrder } = action.payload;
-      const listToSort = state[listName];
+      const listToSort = (state as any)[listName];
 
       if (!listToSort) {
         alert(`Unable to find a list with name of '${listName}'.`);
         return;
       }
 
-      const newSortBy = sortBy || state[listName].sortOrderValue.sortBy;
+      const newSortBy =
+        sortBy || (state as any)[listName].sortOrderValue.sortBy;
       const newSortOrder =
-        sortOrder || state[listName].sortOrderValue.sortOrder;
+        sortOrder || (state as any)[listName].sortOrderValue.sortOrder;
       listToSort.data?.sort(
-        getSorter(newSortBy, state.currentStoreId, newSortOrder),
+        getSorter({
+          sortType: newSortBy,
+          currentStoreId: state.currentStoreId,
+          sortOrder: newSortOrder,
+        }),
       );
 
-      state[listName].sortOrderValue = {
+      (state as any)[listName].sortOrderValue = {
         sortBy: newSortBy,
         sortOrder: newSortOrder,
       };
@@ -821,13 +1125,14 @@ export const listsSlice = createSlice({
     ) => {
       const { listName } = action.payload;
 
-      if (!state[listName].sortOrderValue) return;
+      if (!(state as any)[listName].sortOrderValue) return;
       const sortOrder =
-        state[listName].sortOrderValue?.sortOrder === SortOrder.Ascending
+        (state as any)[listName].sortOrderValue?.sortOrder ===
+        SortOrder.Ascending
           ? SortOrder.Descending
           : SortOrder.Ascending;
 
-      state[listName].sortOrderValue.sortOrder = sortOrder;
+      (state as any)[listName].sortOrderValue.sortOrder = sortOrder;
     },
     updateSelectedItemsFromInCart: (
       state: ListsState,
@@ -937,6 +1242,55 @@ export const isMultiSelectModeForPreviouslyPurchasedSelector = (
 export const isMultiSelectModeForShoppingCartSelector = (state: RootState) =>
   state[listsSlice.name].isMultiSelectModeForShoppingCart;
 
+/**
+ *This selector is used to get the list count for an item, i.e. how many quantity are in all of the store lists.
+
+ *@returns current inventory count for the item in the specified inventory location and any store lists.
+ **/
+export const itemInListsCountSelector = ({
+  itemId,
+  includeInCartItems = true,
+}: {
+  itemId: string;
+  includeInCartItems?: boolean;
+}) =>
+  createSelector(
+    [(state: RootState) => state.lists.storeSpecificValuesMap],
+    (storeSpecificValuesMap) => {
+      if (!itemId) {
+        return EMPTY_NUMBER;
+      }
+      const itemStoreSpecificValues = storeSpecificValuesMap[itemId] || {};
+      const storeListCount = Object.entries(itemStoreSpecificValues).reduce(
+        (acc, [key, store]) => {
+          if (!store || key !== StoreSpecificValueKey.Quantity) {
+            return acc;
+          }
+
+          const quantityInAllLists = Object.entries(store || {}).reduce(
+            (acc, [storeId, storeSpecificValue]) => {
+              const shouldInclude = !includeInCartItems
+                ? !itemStoreSpecificValues?.[StoreSpecificValueKey.IsInCart]?.[
+                    storeId
+                  ]
+                : true;
+
+              if (!shouldInclude) {
+                return acc;
+              }
+
+              return acc + (storeSpecificValue || 0);
+            },
+            EMPTY_NUMBER,
+          );
+          return acc + quantityInAllLists;
+        },
+        EMPTY_NUMBER,
+      );
+      return storeListCount;
+    },
+  );
+
 export const lastPurchasedMapSelector = (state: RootState) =>
   state[listsSlice.name].lastPurchasedMap;
 
@@ -956,18 +1310,17 @@ export const lastPurchasedSelector = (key: Key) =>
  **/
 export const listToDisplaySelector = (listName: ListName) =>
   createSelector(
-    [(state: RootState) => state[listsSlice.name]?.[listName]],
+    [(state: RootState) => (state[listsSlice.name] as any)?.[listName]],
     (list) => {
       if (!list) return [];
       const { filters, sortOrderValue, data } = list;
 
       const filteredList = getFilteredList<unknown>(data, filters);
       filteredList.sort(
-        getSorter(
-          sortOrderValue.sortBy,
-          EMPTY_STRING,
-          sortOrderValue.sortOrder,
-        ),
+        getSorter({
+          sortType: sortOrderValue.sortBy,
+          sortOrder: sortOrderValue.sortOrder,
+        }),
       );
       return filteredList;
     },
@@ -1004,11 +1357,11 @@ export const itemsPurchasedAtStoreSelector = createSelector(
       }
     }
     return previoulsyPurchasedItems.sort(
-      getSorter(
-        previouslyPurchasedList.sortOrderValue?.sortBy,
+      getSorter({
+        sortType: previouslyPurchasedList.sortOrderValue?.sortBy,
         currentStoreId,
-        previouslyPurchasedList.sortOrderValue?.sortOrder,
-      ),
+        sortOrder: previouslyPurchasedList.sortOrderValue?.sortOrder,
+      }),
     );
   },
 );
@@ -1019,7 +1372,7 @@ export const previouslyPurchasedListSelector = (state: RootState) =>
 export const priceOfItemsSelector = (listname: ListName) =>
   createSelector(
     [
-      (state: RootState) => state[listsSlice.name][listname],
+      (state: RootState) => (state[listsSlice.name] as any)[listname],
       (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
       (state: RootState) => state[listsSlice.name].currentStoreId,
     ],
@@ -1128,15 +1481,17 @@ export const storeSpecificListSelector = (
           : inCartList.filters,
       );
       filteredList.sort(
-        getSorter(
-          listname === ListName.ShoppingList
-            ? shoppingList.sortOrderValue.sortBy
-            : inCartList.sortOrderValue.sortBy,
+        getSorter({
+          sortType:
+            listname === ListName.ShoppingList
+              ? shoppingList.sortOrderValue.sortBy
+              : inCartList.sortOrderValue.sortBy,
           currentStoreId,
-          listname === ListName.ShoppingList
-            ? shoppingList.sortOrderValue.sortOrder
-            : inCartList.sortOrderValue.sortOrder,
-        ),
+          sortOrder:
+            listname === ListName.ShoppingList
+              ? shoppingList.sortOrderValue.sortOrder
+              : inCartList.sortOrderValue.sortOrder,
+        }),
       );
       return filteredList;
     },
@@ -1204,6 +1559,8 @@ export const storeSpecificValuesSelector = (
 
 export const {
   addAllToShoppingCart,
+  addInventoryLocation,
+  addInventoryLocations,
   addItemsListItem,
   addItemsToItemsList,
   addItemToCart,
@@ -1214,18 +1571,31 @@ export const {
   copyStoreSpecificValues,
   handleLoadAllResponse,
   handleSaveAllResponse,
+  insertInventoryItem,
+  insertInventoryItems,
   moveAllToInCart,
-  moveItemToShoppingList,
+  moveInventoryItem,
+  moveInventoryItemExpirationDates,
+  moveInventoryItems,
   moveItemToAnotherCart,
-  moveSelectedToCart,
+  moveItemToShoppingList,
   moveSelectedPreviouslyPurchasedItemsToShopping,
+  moveSelectedToCart,
   moveSelectedToShopping,
+  processItemToLocationMap,
+  removeInventoryItem,
+  removeInventoryItems,
+  removeInventoryLocation,
+  removeInventoryLocations,
   removeItemsListItems,
+  removeMostRecentInventoryItem,
   removeShoppingListItems,
   removeStoresListItems,
   resetCurrentLocation,
   resetCurrentLocationState,
   resetCurrentStoreId,
+  resetInventoryItems,
+  resetInventoryLocations,
   resetItemsList,
   resetLastPurchasedMap,
   resetListSlice,
@@ -1233,18 +1603,21 @@ export const {
   resetListToDisplayFilters,
   resetSelectedItemsInShopping,
   resetStoresList,
+  setCurrentInventoryLocationId,
   setCurrentLocation,
   setCurrentLocationState,
   setCurrentStoreId,
   setFilters,
+  setInventory,
+  setIsMultiSelectModeForInCartCart,
+  setIsMultiSelectModeForPreviouslyPurchased,
+  setIsMultiSelectModeForShoppingCart,
   setItemsList,
+  setLastDecrementedItemId,
   setLastPurchasedMap,
   setSortOrder,
   setStoresList,
   setStoreSpecificValues,
-  setIsMultiSelectModeForInCartCart,
-  setIsMultiSelectModeForPreviouslyPurchased,
-  setIsMultiSelectModeForShoppingCart,
   toggleSortOrder,
   updateSelectedItemsFromInCart,
   updateSelectedItemsFromPreviouslyPurchased,
@@ -1326,15 +1699,15 @@ function updateListWithItem<T extends Key>(props: UpdateListWithItemInput<T>) {
     return;
   }
 
-  const itemIndex = state[listName].data.findIndex((item: Key) => {
+  const itemIndex = (state as any)[listName].data.findIndex((item: Key) => {
     const keyLocal = getKeyToUse(item);
     return keyLocal === itemKeyToUse;
   });
 
   if (itemIndex > -1) {
-    state[listName].data[itemIndex] = item as any;
+    (state as any)[listName].data[itemIndex] = item as any;
   } else {
-    state[listName].data.push(item as any);
+    (state as any)[listName].data.push(item as any);
   }
 
   if (originalKeyToUse && newKeyToUse !== originalKeyToUse) {
@@ -1435,25 +1808,38 @@ function removeItems<T extends Key>(
 ) {
   if (!itemsToRemove || itemsToRemove.length === 0) return;
   const keysToUse = itemsToRemove.map((item) => getKeyToUse(item));
-  state[listName].data = state[listName].data.filter((item: Key) => {
-    if (item?._id) {
-      return !keysToUse.includes(item._id);
-    } else if (item?.upc && item.name) {
-      const isMatch = !keysToUse.includes(item.upc);
+  (state as any)[listName].data = (state as any)[listName].data.filter(
+    (item: Key) => {
+      if (item?._id) {
+        return !keysToUse.includes(item._id);
+      } else if (item?.upc && item.name) {
+        const isMatch = !keysToUse.includes(item.upc);
+        if (!isMatch) {
+          onRemoveItem && onRemoveItem(item as T);
+        }
+        return isMatch;
+      }
+      const isMatch = !keysToUse.includes(item?.name || EMPTY_STRING);
       if (!isMatch) {
         onRemoveItem && onRemoveItem(item as T);
       }
       return isMatch;
-    }
-    const isMatch = !keysToUse.includes(item?.name || EMPTY_STRING);
-    if (!isMatch) {
-      onRemoveItem && onRemoveItem(item as T);
-    }
-    return isMatch;
-  }) as any;
+    },
+  ) as any;
 
   for (const keyToUse of keysToUse) {
     state.storeSpecificValuesMap[keyToUse] = {} as StoreSpecificValues;
+  }
+}
+
+function removeItemsFromInventory(state: ListsState, itemIds: string[]) {
+  if (!state?.inventory.items || !itemIds || itemIds.length === 0) return;
+  for (const itemId of itemIds) {
+    for (const locationId of Object.keys(state.inventory.items || {})) {
+      if (state.inventory.items[locationId]?.[itemId]) {
+        delete state.inventory.items[locationId][itemId];
+      }
+    }
   }
 }
 
@@ -1528,5 +1914,283 @@ function getCurrentStore(
 // }
 // state.currentStoreId = newKey;
 // }
+
+//#endregion
+
+//#region Inventory Stuff
+
+export const currentInventoryLocationIdSelector = (state: RootState) =>
+  state[listsSlice.name].inventory.currentLocationId || EMPTY_STRING;
+
+export const currentInventoryLocationSelector = (state: RootState) =>
+  state[listsSlice.name].inventory.locations.find(
+    (location) =>
+      location._id === state[listsSlice.name].inventory.currentLocationId,
+  ) || null;
+
+export const currentInventoryLocationItemsSelector = createSelector(
+  [
+    (state: RootState) => state.lists.itemsList.data,
+    (state: RootState) => state[listsSlice.name].inventory.items,
+    (state: RootState) => state[listsSlice.name].inventory.locations,
+    (state: RootState) => state[listsSlice.name].inventory.currentLocationId,
+  ],
+  (itemsList, inventoryItems, inventoryLocations, currentLocationId) => {
+    const currentLocation =
+      inventoryLocations.find(
+        (location) => location._id === currentLocationId,
+      ) || null;
+    if (!currentLocation || !inventoryItems?.[currentLocation._id]) {
+      return {};
+    }
+    const currentInventoryLocationItems = {
+      ...inventoryItems[currentLocation._id],
+    };
+
+    for (const [itemId, currentInventoryLocationItem] of Object.entries(
+      currentInventoryLocationItems,
+    )) {
+      const itemFound = itemsList.find((item) => {
+        return item._id === itemId;
+      });
+      if (itemFound) {
+        currentInventoryLocationItems[itemId] = {
+          ...currentInventoryLocationItem,
+          item: itemFound,
+        } as InventoryItemWithItemDetails;
+      }
+    }
+    return currentInventoryLocationItems as InventoryLocationItem<InventoryItemWithItemDetails>;
+  },
+);
+
+export const inventoryItemSelector = ({
+  /**
+   *The id of the item to which the inventory item corresponds.
+   **/
+  itemId,
+  /**
+   *The locationId to use. If not provided, the currentLocationId will be used.
+   **/
+  locationId = EMPTY_STRING,
+}: InventoryItemSelectorProps) =>
+  createSelector(
+    [
+      (state: RootState) => state.lists.itemsList.data,
+      (state: RootState) => state[listsSlice.name].inventory.items,
+      (state: RootState) => state[listsSlice.name].inventory.currentLocationId,
+    ],
+    (itemsList, inventoryItems, currentLocationId) => {
+      if (!itemId) {
+        return {
+          item: undefined,
+          inventoryItem: undefined,
+        } as InventoryItemSelectorResponse;
+      }
+      const itemFound = itemsList.find((item) => item._id === itemId);
+      const inventoryItemFound =
+        inventoryItems[locationId || currentLocationId || EMPTY_STRING]?.[
+          itemId
+        ];
+      return {
+        inventoryItem: inventoryItemFound,
+        item: itemFound,
+      } as InventoryItemSelectorResponse;
+    },
+  );
+
+export const inventorySelector = createSelector(
+  [
+    (state: RootState) => state[listsSlice.name].inventory.items,
+    (state: RootState) => state[listsSlice.name].inventory.locations,
+    (state: RootState) => state[listsSlice.name].inventory.currentLocationId,
+  ],
+  (items, locations, currentLocationId) => {
+    return {
+      currentLocationId,
+      items,
+      locations,
+    } as Inventory;
+  },
+);
+
+export const inventoryItemsSelector = (state: RootState) =>
+  state[listsSlice.name].inventory.items;
+
+export const inventoryLocationsSelector = (state: RootState) =>
+  state[listsSlice.name].inventory.locations;
+
+export const lastDecrementedItemIdSelector = (state: RootState) =>
+  state[listsSlice.name].inventory.lastDecrementedItemId;
+
+//#region Helpers
+function addInventoryLocationHelper(
+  state: ListsState,
+  location: InventoryLocation,
+  shouldMakeCurrentLocationId: boolean = true,
+) {
+  const { _id } = location;
+  if (!_id) {
+    return;
+  }
+  if (!state.inventory.locations) {
+    state.inventory.locations = [location];
+  } else {
+    const index = state.inventory.locations.findIndex((l) => l._id === _id);
+    if (index === -1) {
+      state.inventory.locations.push(location);
+    } else {
+      state.inventory.locations[index] = location;
+    }
+  }
+  if (shouldMakeCurrentLocationId) {
+    state.inventory.currentLocationId = _id;
+  }
+}
+
+function moveInventoryItemsHelper(
+  state: ListsState,
+  payload: MoveInventoryItemPayload,
+) {
+  const { itemId, originLocationId, targetLocationId } = payload;
+
+  const originLocationIdToUse =
+    originLocationId || state.inventory.currentLocationId || EMPTY_STRING;
+
+  if (!itemId || !originLocationIdToUse || !targetLocationId) {
+    return;
+  }
+  const originalEntryCopy = state.inventory.items?.[originLocationIdToUse]?.[
+    itemId
+  ]
+    ? {
+        ...state.inventory.items?.[originLocationIdToUse]?.[itemId],
+      }
+    : null;
+  if (!originalEntryCopy) {
+    return;
+  }
+
+  delete state.inventory.items[originLocationIdToUse][itemId];
+
+  if (!state.inventory.items[targetLocationId]) {
+    state.inventory.items[targetLocationId] = {};
+  }
+  if (!state.inventory.items[targetLocationId][itemId]) {
+    state.inventory.items[targetLocationId][itemId] = {
+      expirationDates: originalEntryCopy.expirationDates,
+    } as InventoryItemWithItemDetails;
+  } else {
+    if (!state.inventory.items[targetLocationId][itemId].expirationDates) {
+      state.inventory.items[targetLocationId][itemId].expirationDates = {};
+    }
+    state.inventory.items[targetLocationId][itemId].expirationDates = {
+      ...state.inventory.items[targetLocationId][itemId].expirationDates,
+      ...originalEntryCopy.expirationDates,
+    };
+  }
+}
+
+function removeInventoryItemHelper(
+  state: ListsState,
+  itemPayload: RemoveInventoryItemPayload,
+) {
+  const { itemId, locationId, expirationDates } = itemPayload;
+  const inventoryLocationIdToUse =
+    locationId || state.inventory.currentLocationId;
+  if (
+    !itemId ||
+    !inventoryLocationIdToUse ||
+    !state.inventory.items[inventoryLocationIdToUse]?.[itemId]?.expirationDates
+  ) {
+    return;
+  }
+  if (
+    getExpirationDatesQuantity(
+      state.inventory.items[inventoryLocationIdToUse]?.[itemId]
+        ?.expirationDates,
+    ) <= 0
+  ) {
+    delete state.inventory.items[inventoryLocationIdToUse][itemId];
+  } else {
+    state.inventory.items[inventoryLocationIdToUse][itemId].expirationDates =
+      getUpdatedExpirationDates(
+        state.inventory.items[inventoryLocationIdToUse][itemId].expirationDates,
+        expirationDates,
+        'remove',
+      );
+
+    if (
+      getExpirationDatesQuantity(
+        state.inventory.items[inventoryLocationIdToUse][itemId].expirationDates,
+      ) <= 0
+    ) {
+      delete state.inventory.items[inventoryLocationIdToUse][itemId];
+    }
+  }
+  state.inventory.lastDecrementedItemId = itemId;
+}
+
+function removeInventoryLocationHelper(
+  state: ListsState,
+  location: InventoryLocation,
+) {
+  const { _id } = location;
+  if (!_id) {
+    return;
+  }
+  if (!state.inventory.locations) {
+    return;
+  }
+  const index = state.inventory.locations.findIndex((l) => l._id === _id);
+  if (index === -1) {
+    return;
+  }
+
+  //remove the location from the list of locations
+  state.inventory.locations.splice(index, 1);
+  //remove all items for this location
+  Object.keys(state.inventory.items).forEach((locationId) => {
+    if (locationId === _id) {
+      delete state.inventory.items[locationId];
+    }
+  });
+
+  if (state.inventory.currentLocationId === _id) {
+    state.inventory.currentLocationId = EMPTY_STRING;
+  }
+}
+
+function insertInventoryItemHelper(
+  state: ListsState,
+  itemPayload: InsertInventoryItemPayload,
+) {
+  const { item, itemId, locationId } = itemPayload || {};
+  const { expirationDates } = item || {};
+  const inventoryLocationIdToUse =
+    locationId || state.inventory.currentLocationId || EMPTY_STRING;
+
+  if (!itemId || !inventoryLocationIdToUse || !expirationDates) {
+    return;
+  }
+  if (!state.inventory.items[inventoryLocationIdToUse]) {
+    state.inventory.items[inventoryLocationIdToUse] = {
+      [itemId]: item,
+    };
+  } else if (
+    !state.inventory.items[inventoryLocationIdToUse][itemId]?.expirationDates
+  ) {
+    state.inventory.items[inventoryLocationIdToUse][itemId] = item;
+  } else if (state.inventory.items[inventoryLocationIdToUse][itemId]) {
+    state.inventory.items[inventoryLocationIdToUse][itemId].expirationDates =
+      getUpdatedExpirationDates(
+        state.inventory.items[inventoryLocationIdToUse][itemId].expirationDates,
+        expirationDates,
+        'add',
+      );
+  }
+  state.inventory.lastDecrementedItemId = EMPTY_STRING;
+}
+//#endregion
 
 //#endregion

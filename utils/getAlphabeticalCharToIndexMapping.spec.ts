@@ -1,5 +1,6 @@
 import { getAlphabeticalCharToIndexMapping } from './getAlphabeticalCharToIndexMapping';
 
+import { SortOrder } from '@/components/lists/sorters';
 import { MOCK_ITEMS_LIST } from '@/constants/testing';
 
 describe('getAlphabeticalCharToIndexMapping', () => {
@@ -7,32 +8,32 @@ describe('getAlphabeticalCharToIndexMapping', () => {
     const actual = getAlphabeticalCharToIndexMapping(MOCK_ITEMS_LIST.data);
     expect(actual).toStrictEqual({
       A: 0,
-      B: 6,
-      C: 23,
-      D: 33,
-      E: 35,
-      F: 40,
-      G: 43,
-      H: 52,
-      K: 56,
-      L: 58,
-      M: 61,
-      N: 67,
-      O: 68,
-      P: 72,
-      R: 89,
-      S: 91,
-      T: 108,
-      U: 119,
-      V: 121,
-      Y: 128,
-      Z: 129,
+      B: 7,
+      C: 24,
+      D: 34,
+      E: 36,
+      F: 41,
+      G: 44,
+      H: 53,
+      K: 57,
+      L: 59,
+      M: 62,
+      N: 68,
+      O: 69,
+      P: 73,
+      R: 90,
+      S: 92,
+      T: 109,
+      U: 120,
+      V: 122,
+      Y: 129,
+      Z: 130,
     });
   });
   test('it works descending', async () => {
     const actual = getAlphabeticalCharToIndexMapping(
       MOCK_ITEMS_LIST.data,
-      'descending',
+      SortOrder.Descending,
     );
     expect(actual).toStrictEqual({
       A: 125,

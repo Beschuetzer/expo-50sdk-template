@@ -7,12 +7,22 @@ import {
   StoreSpecificValuesMap,
 } from './Item';
 import { Store } from './Store';
+import {
+  Inventory,
+  InventoryItemExpirationDates,
+  MoveInventoryItemExpirationDates,
+} from './inventory';
 import { ItemFormOnSave } from './itemForm';
 import { SortOrderValue } from './listSlice';
 import { BulkWriteResult, DocumentResult } from './mongoose';
 
 import { GenericResponse } from '@/components/services/AbstractService';
-import { SaveAllThunkInput } from '@/state/thunks';
+import {
+  AddInventoryItemsInput,
+  DeleteInventoryItemsThunkInput,
+  MoveInventoryItemsThunkInput,
+  SaveAllThunkInput,
+} from '@/state/thunks';
 
 //#region General Types
 export type AccountInfoNeeded = Omit<UserAccount, 'email'>;
@@ -64,6 +74,20 @@ export type ChangePasswordInput = CredentialsNeeded &
   NewPasswordNeeded;
 export type DeleteS3ObjectsInput = { objKeys: string[] } & DispatchNeeded &
   CredentialsNeeded;
+export type DeleteInventoryItemsInput = {
+  inventoryItems: DeleteInventoryItemsThunkInput;
+} & UserAccount &
+  DispatchNeeded;
+export type DeleteInventoryItemsRequest = Pick<
+  DeleteInventoryItemsInput,
+  'inventoryItems'
+> &
+  UserIdNeeded &
+  PasswordNeeded;
+export type DeleteInventoryItemsResponse = BulkWriteResult | GenericResponse;
+export type DeleteInventoryLocationInput = SaveInventoryLocationsInput;
+export type DeleteInventoryLocationsRequest = SaveInventoryLocationsRequest;
+export type DeleteInventoryLocationsResponse = boolean | GenericResponse;
 export type DeleteItemsInput = ItemsNeeded & DispatchNeeded & CredentialsNeeded;
 export type DeleteStoresInput = IdsNeeded & DispatchNeeded & CredentialsNeeded;
 export type DeleteUserInput = DispatchNeeded & CredentialsNeeded;
@@ -86,11 +110,55 @@ export type MakeCallInput = {
    **/
   useErrorMessage?: boolean;
 } & DispatchNeeded;
+export type MoveInventoryItemExpirationDatesInput = {
+  itemsToMove: ({ expirationDates: InventoryItemExpirationDates } & Omit<
+    MoveInventoryItemExpirationDates,
+    'expirationDates'
+  >)[];
+} & UserAccount &
+  DispatchNeeded;
+export type MoveInventoryItemExpirationDatesResponse =
+  | BulkWriteResult
+  | GenericResponse;
+export type MoveInventoryItemExpirationDatesRequest =
+  MoveInventoryItemExpirationDatesInput & UserIdNeeded & PasswordNeeded;
+export type MoveInventoryItemsInput = {
+  itemsToMove: MoveInventoryItemsThunkInput;
+} & UserAccount &
+  DispatchNeeded;
+export type MoveInventoryItemsRequest = Pick<
+  MoveInventoryItemsInput,
+  'itemsToMove'
+> &
+  UserIdNeeded &
+  PasswordNeeded;
+export type MoveInventoryItemsResponse = BulkWriteResult | GenericResponse;
 export type ProcessGroceryListInput = DispatchNeeded &
   UserIdNeeded &
   PasswordNeeded &
   ImageNeeded<string>;
 export type SaveAllToDbInput = SaveAllThunkInput & DispatchNeeded & UserAccount;
+export type SaveInventoryItemsInput = {
+  inventoryItems: AddInventoryItemsInput;
+} & DispatchNeeded &
+  UserAccount;
+export type SaveInventoryItemsRequest = Omit<
+  SaveInventoryItemsInput,
+  'dispatch'
+> &
+  UserIdNeeded &
+  PasswordNeeded;
+export type SaveInventoryItemsResponse = BulkWriteResult | GenericResponse;
+export type SaveInventoryLocationsInput = Pick<Inventory, 'locations'> &
+  DispatchNeeded &
+  UserAccount;
+export type SaveInventoryLocationsRequest = Omit<
+  SaveInventoryLocationsInput,
+  'dispatch'
+> &
+  UserIdNeeded &
+  PasswordNeeded;
+export type SaveInventoryLocationsResponse = BulkWriteResult | GenericResponse;
 export type SaveItemInput = DispatchNeeded & UserAccount & ItemFormOnSave;
 export type SaveItemRequest = Omit<
   SaveItemInput,
@@ -143,6 +211,7 @@ export type DeleteUserResponse =
   | GenericResponse;
 export type LoadAllResponse =
   | {
+      inventory: Inventory;
       items: Item[];
       stores: Store[];
       storeSpecificValues: StoreSpecificValuesMap;

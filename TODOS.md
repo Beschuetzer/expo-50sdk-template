@@ -1,21 +1,25 @@
 ## MVP
+-Make aisle number field accept letters (check the sorting)
+    --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
+    --each route object will be associated with a storeId and userId to allow for sharing later
+    --if there is a route for a store, the store-specific input in ItemForm for aisle number should become a picker
+    --figure out why items with no aisle are not being sorted at the front or the end but in the middle somewhere
 
+
+
+-need a way to edit inventory locations?
 -Add an inventory slice
-  -whenever a item is purchased it gets updated in the inventory slice
-  -inventory rab needed where items can be manually changes
-  -add ability to send notifications around expiration dates
+    --add ability to send notifications around expiration dates
+-add a field called associatedUpcs which would be used when:
+    --finding items when a new upc is scanned (in the effort of hitting the upc service too much);
+    --adding/removing inventory items when scanning a upc which doesn't exist as an item
 
+
+-add an option to scan an item while in the shopping list and have it move it to the cart if it's is in the shopping list other show a toast saying it is not in the shopping list
 -Add a way to make items mutually exclusive?
 -add a scroll bar like Music player app
 -Move all of the menu items in the Items tab to a search bar and icons
--Selecting closest store on load not working?
--add indication the multi select mode is enabled for a list
 -add ability to share items (add a list of permissions (e.g. read and write) which the server checks for doing anything; POST endpoints need write permission and GET needs either)
-
--Make aisle number field accept letters (check the sorting)
-    --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
-    --figure out why items with no aisle are not being sorted at the front or the end but in the middle somewhere
-
 
 -Add a flow where you can add a store from the ItemForm (via a bottomsheet modal using the store forn?)
     --modify the StoreManager to have the option to select new store which opens the bottom sheet modal

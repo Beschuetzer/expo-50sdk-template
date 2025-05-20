@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { useNavigation } from 'expo-router';
-import { Button, FlatList, Row, Stack, theme } from 'native-base';
+import { Button, Row, Stack, theme, Text, Center, FlatList } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
@@ -133,7 +133,9 @@ export default function QuickAddModal() {
       if (entries.length === 0 && newItemPayloads.length === 0) return;
       for (const [parsedName, { quantity, id }] of entries) {
         if (!id) continue;
-        logWhenDevelopmentMode(`updating quantity for ${parsedName} to ${quantity}`);
+        logWhenDevelopmentMode(
+          `updating quantity for ${parsedName} to ${quantity}`,
+        );
         dispatch(
           updateStoreSpecificValues({
             key: { _id: id, name: EMPTY_STRING },
@@ -229,7 +231,16 @@ export default function QuickAddModal() {
           keyboardShouldPersistTaps="always"
           ItemSeparatorComponent={() => <ListItemSeparator />}
           keyExtractor={(item) => item?.[0] || EMPTY_STRING}
+          ListEmptyComponent={
+            <Center p={theme.space[FORM_INTER_ITEM_SPACING]}>
+              <Text>
+                No items in the quick add list. Press one of the buttons above
+                to get started.
+              </Text>
+            </Center>
+          }
           renderItem={(itemLocal) => {
+            //@ts-ignore
             const { index, item } = itemLocal;
             return (
               <SwipeableRow

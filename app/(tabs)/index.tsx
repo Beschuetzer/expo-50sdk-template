@@ -21,10 +21,15 @@ import { useAwakenBff } from '@/components/hooks/useAwakenBff';
 import { useGpsCoordinate } from '@/components/hooks/useGeoLocation';
 import { useInitializer } from '@/components/hooks/useInitializer';
 import { useMenu } from '@/components/hooks/useMenu';
+import { useNotificationsPermissions } from '@/components/hooks/useNotificationsPermissions';
 import { InCartList } from '@/components/lists/InCartList';
 import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
 import { ShoppingList } from '@/components/lists/ShoppingList';
 import { getSorter, SortOrder, SortType } from '@/components/lists/sorters';
+import {
+  CompletePurchaseModal,
+  CompletePurchaseModalItemToLocationMap,
+} from '@/components/modals/CompletePurchaseModal';
 import {
   ConfirmModal,
   ConfirmModalProps,
@@ -57,6 +62,7 @@ import {
   moveItemToAnotherCart,
   updateSelectedItemsFromShoppingCart,
   updateSelectedItemsFromInCart,
+  processItemToLocationMap,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState, savePurchase } from '@/state/thunks';
@@ -82,6 +88,7 @@ export default function TabOneScreen() {
   useAwakenBff();
   useAutoLogin();
   useInitializer();
+  useNotificationsPermissions();
   const layout = useWindowDimensions();
   const account = useAppSelector(accountSelector);
   const itemsPurchasedAtStore = useAppSelector(itemsPurchasedAtStoreSelector);
@@ -102,11 +109,13 @@ export default function TabOneScreen() {
 
   const [viewingMode, setViewingMode] = useState(ItemTileViewingMode.Basic);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
-    {},
+    {} as ConfirmModalProps,
   );
   const [isStoreSelectionModalVisible, setIsStoreSelectionModalVisible] =
     useState(false);
   const [index, setIndex] = useState(0);
+  const [isCompletePurchaseModalVisible, setIsCompletePurchaseModalVisible] =
+    useState(false);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
 
@@ -126,7 +135,11 @@ export default function TabOneScreen() {
     const listContent = shoppingListItems
       .filter((item) => !!item.name)
       .sort(
-        getSorter(SortType.AisleNumber, currentStoreId, SortOrder.Ascending),
+        getSorter({
+          sortType: SortType.AisleNumber,
+          currentStoreId,
+          sortOrder: SortOrder.Ascending,
+        }),
       )
       .map((item) => {
         const base = `- ${item[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 1} ${item.unit} of ${item.name}`;
@@ -220,6 +233,10 @@ export default function TabOneScreen() {
     ],
     [firstTabTitle, secondTabTitle, thirdTabTitle],
   );
+
+  const closeCompletePurchaseModal = useCallback(() => {
+    setIsCompletePurchaseModalVisible(false);
+  }, []);
 
   const onToggleViewingModePress = useCallback(() => {
     setViewingMode((current) => getNewViewingMode(current));
@@ -350,8 +367,17 @@ export default function TabOneScreen() {
   }, []);
 
   const onCompletePurchasePress = useCallback(() => {
-    dispatch(savePurchase());
+    setIsCompletePurchaseModalVisible(true);
   }, []);
+
+  const onCompletePurchaseModalConfirm = useCallback(
+    (itemToLocationMap: CompletePurchaseModalItemToLocationMap) => {
+      dispatch(savePurchase());
+      dispatch(processItemToLocationMap({ itemToLocationMap }));
+      closeCompletePurchaseModal();
+    },
+    [],
+  );
 
   const onMoveAllRecommendedToShoppingPress = useCallback(() => {
     const recommended = itemsPurchasedAtStore.filter(
@@ -490,6 +516,13 @@ export default function TabOneScreen() {
         }}
       />
       <ConfirmModal {...confirmModalProps} />
+      <CompletePurchaseModal
+        isVisible={isCompletePurchaseModalVisible}
+        title="Select a Location for Each Item"
+        onConfirm={onCompletePurchaseModalConfirm}
+        onCancel={closeCompletePurchaseModal}
+        onBlurPress={closeCompletePurchaseModal}
+      />
     </>
   );
 }

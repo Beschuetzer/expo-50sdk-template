@@ -20,7 +20,7 @@ import { tileContainerStyles } from '@/constants/styles';
 import { lastPurchasedSelector } from '@/state/slices/listsSlice';
 import { Item } from '@/types/Item';
 import { ItemProp, ListNameProp } from '@/types/general';
-import { getFrequencyValue } from '@/utils/helpers';
+import { getDurationValue } from '@/utils/helpers';
 
 export enum ItemTileViewingMode {
   Basic = 'Basic',
@@ -50,10 +50,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
     viewingMode = ItemTileViewingMode.Basic,
   } = props;
   const lastPurchased = useSelector(lastPurchasedSelector(item)) || 0;
-  const frequencyObj = useMemo(
-    () => getFrequencyValue(item?.frequency),
-    [item],
-  );
+  const frequencyObj = useMemo(() => getDurationValue(item?.frequency), [item]);
 
   function renderContent() {
     switch (viewingMode) {

@@ -41,7 +41,7 @@ export function handleStoreSpecificValuesImport(
       const storeFound = getItemForImport(storeKey, stores);
       if (!storeFound) {
         console.warn(
-          `handleStoreSpecificValuesImport: Unable to find a store with key of '${storeSpecificValueKey}' in imported stores list`,
+          `handleStoreSpecificValuesImport: Unable to find a store with key of '${storeKey}' in imported stores list`,
         );
       } else {
         if (storeFound._id) {

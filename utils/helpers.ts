@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system';
 import { StorageAccessFramework } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import * as Notifications from 'expo-notifications';
 import _ from 'lodash';
 import React from 'react';
 import { Insets } from 'react-native';
@@ -13,6 +14,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { handleLastPurchasedMapImport } from './handleLastPurchasedMapImport';
 import { handleStoreSpecificValuesImport } from './handleStoreSpecificValuesImport';
 import { logWhenDevelopmentMode } from './logging';
+import { getUpcProduct } from './model-mappings';
 
 import { ListFilterFilters } from '@/components/lists/ListFilter';
 import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
@@ -23,7 +25,7 @@ import {
   EMPTY_STRING,
   ERROR_MODAL_STATUS_CODE_DEFAULT,
   FILE_NAMES,
-  FREQUENCY_INITIAL,
+  DURATION_INITIAL,
   GPS_COORDINATES_DEFAULT,
   HOUR_IN_MS,
   IMAGE_QUALITY,
@@ -31,6 +33,13 @@ import {
   SORT_ORDER_VALUE_BY_NAME_DEFAULT,
   US_COUNTRY_CODE,
   WEEK_IN_MS,
+  TIME_SPAN_TO_MILLISECONDS_MAPPING,
+  DURATION_INITIAL_NUMBER,
+  DURATION_INITIAL_TIME_SPAN,
+  INVENTORY_MINIMUM_DEFAULT,
+  IS_FROZEN_DEFAULT,
+  MONTH_IN_MS,
+  YEAR_IN_MS,
 } from '@/constants/general';
 import {
   AMAZON_S3_REGEX,
@@ -41,21 +50,22 @@ import {
 } from '@/constants/regexs';
 import { setError } from '@/state/slices/generalSlice';
 import {
+  setInventory,
   setItemsList,
   setLastPurchasedMap,
   setStoresList,
   setStoreSpecificValues,
 } from '@/state/slices/listsSlice';
-import { setUpcProducts } from '@/state/slices/scannerSlice';
 import { Item, ItemUnit, Key, List } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
+import { UpcResponse } from '@/types/UpcResponse';
 import { UserAccount, CredentialsNeeded } from '@/types/bffService';
 import {
   Address,
   CurrentLocation,
   Error,
   FileNames,
-  Frequency,
+  Duration,
   SetAppDataInput,
   State,
   TimeSpan,
@@ -193,6 +203,12 @@ export function getAreStoresEqual(storeOne?: Store, storeTwo?: Store) {
   );
 }
 
+export function getBackendUrl() {
+  return getIsDevelopmentMode()
+    ? `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:${process.env.EXPO_PUBLIC_PORT_NUMBER}`
+    : 'https://grocify-bff-ac27c2662495.herokuapp.com';
+}
+
 /**
  *Default is 10 for each side
  **/
@@ -226,9 +242,15 @@ export function getEmptyItem(): Item {
     hasBeenSaved: false,
     images: [],
     imageToUseIndex: 0,
+    inventoryMinimum: INVENTORY_MINIMUM_DEFAULT,
+    isFrozen: IS_FROZEN_DEFAULT,
     lastUpdatedDate: Date.now(),
     name: EMPTY_STRING,
     needsSaving: true,
+    timeToExpiration: getDurationInMilliseconds({
+      number: 1,
+      timeSpan: TimeSpan.Week,
+    }),
     unit: ItemUnit.Package,
     upc: EMPTY_STRING,
   };
@@ -276,7 +298,7 @@ export function getId() {
 }
 
 export function getIsDevelopmentMode() {
-  return process.env.EXPO_PUBLIC_ENV?.match(/dev/);
+  return !!process.env.EXPO_PUBLIC_ENV?.match(/dev/);
 }
 
 export function getIsPreviouslyPurchasedItemRecommended(
@@ -326,22 +348,37 @@ export function getKeyToUseFieldName(key: Key) {
   return key.upc ? 'upc' : 'name';
 }
 
-export function getFrequencyValue(number?: number): Frequency {
+export function getDurationInMilliseconds(duration?: Duration) {
+  return (
+    (duration?.number || DURATION_INITIAL_NUMBER) *
+    TIME_SPAN_TO_MILLISECONDS_MAPPING?.[
+      duration?.timeSpan || DURATION_INITIAL_TIME_SPAN
+    ]
+  );
+}
+
+export function getDurationValue(number?: number): Duration {
   if (!number)
     return {
-      ...FREQUENCY_INITIAL,
+      ...DURATION_INITIAL,
     };
 
-  let numberToUse = FREQUENCY_INITIAL.number;
-  let timeSpan: TimeSpan = FREQUENCY_INITIAL.timeSpan;
-  if (number % WEEK_IN_MS === 0) {
+  let numberToUse = DURATION_INITIAL.number;
+  let timeSpan: TimeSpan = DURATION_INITIAL.timeSpan;
+  if (number % YEAR_IN_MS === 0) {
+    numberToUse = number / YEAR_IN_MS;
+    timeSpan = TimeSpan.Year;
+  } else if (number % MONTH_IN_MS === 0) {
+    numberToUse = number / MONTH_IN_MS;
+    timeSpan = TimeSpan.Month;
+  } else if (number % WEEK_IN_MS === 0) {
     numberToUse = number / WEEK_IN_MS;
     timeSpan = TimeSpan.Week;
   } else if (number % DAY_IN_MS === 0) {
     numberToUse = number / DAY_IN_MS;
     timeSpan = TimeSpan.Day;
   } else {
-    numberToUse = number / HOUR_IN_MS;
+    numberToUse = Math.ceil(number / HOUR_IN_MS);
     timeSpan = TimeSpan.Hour;
   }
 
@@ -351,7 +388,7 @@ export function getFrequencyValue(number?: number): Frequency {
   };
 }
 
-export function getDurationFromFrequency(frequency?: Frequency) {
+export function getDurationFromFrequency(frequency?: Duration) {
   if (!frequency || !frequency.number || !frequency.timeSpan) return 0;
   let multiplier: number;
   switch (frequency.timeSpan) {
@@ -483,6 +520,7 @@ export function getS3ObjectKey(url: string) {
     }
     const objKey = new URL(urlToUse)?.pathname?.substring(1);
     return objKey || EMPTY_STRING;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return EMPTY_STRING;
   }
@@ -501,6 +539,7 @@ export function getSortOrderValues(listName: ListName) {
     case ListName.PreviouslyPurchased:
     case ListName.StoresList:
     case ListName.ItemsList:
+    case ListName.InventoryList:
     default:
       return SORT_ORDER_VALUE_BY_NAME_DEFAULT;
   }
@@ -582,6 +621,42 @@ export function joinWithAnd(array: (string | undefined)[]) {
   } else {
     const lastItem = array.pop(); // Remove the last item from the array
     return array.join(', ') + ', and ' + lastItem;
+  }
+}
+
+export async function fetchUpcProduct(
+  upc?: string | number,
+  dispatch?: Dispatch,
+) {
+  try {
+    if (!upc) return null;
+    const url = `https://world.openfoodfacts.org/api/v0/product/${upc}`;
+    logWhenDevelopmentMode(`Fetching data from ${url}`);
+    const response = await fetch(url);
+
+    if (response.ok) {
+      const data = (await response.json()) as UpcResponse;
+      return (
+        data?.product ||
+        getUpcProduct(
+          {
+            name: EMPTY_STRING,
+            upc,
+          } as Item,
+          false,
+        )
+      );
+    } else {
+      throw new Error(
+        `Invalid response from service for '${upc}'.  Make sure you have a data connection and try again in a few seconds.`,
+      );
+    }
+  } catch (error) {
+    logWhenDevelopmentMode('Error fetching data from service', error);
+    if (dispatch) {
+      dispatch(setError(error as Error));
+    }
+    return null;
   }
 }
 
@@ -750,7 +825,7 @@ export function setAppData(input: SetAppDataInput) {
     lastPurchasedMap,
     storeSpecificValues,
     stores,
-    upcProducts,
+    inventory,
   } = input;
   items.data.forEach((item) => {
     if (!item._id) {
@@ -782,9 +857,9 @@ export function setAppData(input: SetAppDataInput) {
       handleLastPurchasedMapImport(lastPurchasedMap, items.data, stores.data),
     ),
   );
+  dispatch(setInventory(inventory));
   dispatch(setItemsList(items));
   dispatch(setStoresList(stores));
-  dispatch(setUpcProducts(upcProducts));
 }
 
 export async function measureExecutionTime(
@@ -816,6 +891,12 @@ export function sanitizeKey<T extends Key>(key: T) {
 export function sanitize(str?: string) {
   if (!str) return '';
   return str?.replace(/\./g, '');
+}
+
+export async function scheduleNotification(
+  request: Notifications.NotificationRequestInput,
+) {
+  await Notifications.scheduleNotificationAsync(request);
 }
 
 export function trimObjectValues<T>(obj: T) {

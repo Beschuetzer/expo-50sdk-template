@@ -1,8 +1,7 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import { Picker } from '@react-native-picker/picker';
 import _ from 'lodash';
-import { Heading, Input, Row, useTheme, Stack, Text } from 'native-base';
-import { IInputProps } from 'native-base/lib/typescript/components/primitives/Input/types';
+import { Heading, Row, useTheme, Stack, Text } from 'native-base';
 import React, {
   useCallback,
   useEffect,
@@ -10,7 +9,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Dimensions } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 
 import { BottomSheetModalWithFixedHeader } from './BottomSheetModalWithFixedHeader';
@@ -21,7 +19,7 @@ import {
   ItemSearchModal,
   ItemSearchModalSelectedItem,
 } from './modals/ItemSearchModal';
-import { ModalWithBlur } from './modals/ModalWithBlur';
+import QuantityModifierModal from './modals/QuantityModifierModal';
 import { ItemTileCopyModal } from './tiles/ItemTileCopyModal';
 
 import {
@@ -38,7 +36,7 @@ import { QuickAddRowProps } from '@/types/quickAdd';
 import { getItemValidation, getKeyToUse } from '@/utils/helpers';
 import { logWhenDevelopmentMode } from '@/utils/logging';
 
-const DEFAULT_QUANTITY = 1;
+export const QUICK_ADD_ROW_DEFAULT_QUANTITY = 1;
 export function QuickAddRow(props: QuickAddRowProps) {
   const theme = useTheme();
   const {
@@ -63,18 +61,12 @@ export function QuickAddRow(props: QuickAddRowProps) {
   >(null);
   const [searchedItem, setSearchedItem] =
     useState<ItemSearchModalSelectedItem<Item>>(null);
-  const [cursorPosition, setCursorPosition] = useState<
-    IInputProps['selection']
-  >({
-    start: 0,
-    end: 0,
-  });
   const delayedOnAddNewItemCallTimeoutRef = useRef<any>();
   const itemFormSheetRef = useRef<BottomSheetModalMethods>(null);
   const pickerRef = useRef<Picker<any>>(null);
   const [isQuantityModalVisible, setIsQuantityModalVisible] = useState(false);
   const [quantityToUse, setQuantityToUse] = useState(
-    parsedQuantity || DEFAULT_QUANTITY,
+    parsedQuantity || QUICK_ADD_ROW_DEFAULT_QUANTITY,
   );
   const [selectedIndex, setSelectedIndex] = useState(
     previouslySelectedIndex || EMPTY_NUMBER,
@@ -142,6 +134,10 @@ export function QuickAddRow(props: QuickAddRowProps) {
     [pickerItems, selectedIndex],
   );
 
+  const closeQuantityModal = useCallback(() => {
+    setIsQuantityModalVisible(false);
+  }, []);
+
   const onItemFormSave = useCallback(
     (onSavePayload: ItemFormOnSave) => {
       if (!onSavePayload) return;
@@ -167,20 +163,6 @@ export function QuickAddRow(props: QuickAddRowProps) {
     [newItemPayload],
   );
 
-  const updateCursorPosition = useCallback((quantity: number) => {
-    const cursorPositionToUse = String(quantity).length;
-    setCursorPosition({
-      start: cursorPositionToUse,
-      end: cursorPositionToUse,
-    });
-  }, []);
-
-  const onBlurNumberInput = useCallback(() => {
-    if (quantityToUse <= 0) {
-      setQuantityToUse(DEFAULT_QUANTITY);
-    }
-  }, [parsedQuantity, quantityToUse]);
-
   const onChangeNumber = useCallback(
     (newQuantity: string) => {
       const newParsedQuantity = parseInt(newQuantity || `${EMPTY_NUMBER}`, 10);
@@ -193,14 +175,9 @@ export function QuickAddRow(props: QuickAddRowProps) {
           newParsedQuantity;
       }
       onQuantityChange && onQuantityChange(parsedName, newParsedQuantity);
-      updateCursorPosition(newParsedQuantity);
     },
-    [updateCursorPosition, parsedName, newItem],
+    [parsedName, newItem, currentStore._id, onQuantityChange],
   );
-
-  const onFocusNumberInput = useCallback(() => {
-    updateCursorPosition(quantityToUse);
-  }, [updateCursorPosition, quantityToUse]);
 
   const onItemPress = useCallback(() => {
     if (
@@ -408,47 +385,21 @@ export function QuickAddRow(props: QuickAddRowProps) {
           );
         }}
       />
-      <ModalWithBlur
+      <QuantityModifierModal
         title={`Edit '${parsedName}'`}
+        initialQuantity={quantityToUse}
+        minimumQuantity={1}
         isVisible={isQuantityModalVisible}
-        onConfirm={() => setIsQuantityModalVisible(false)}
+        onConfirm={closeQuantityModal}
         cancelButton={{
           isVisible: false,
         }}
         confirmButton={{
           text: 'Done',
         }}
-        onBlurPress={() => setIsQuantityModalVisible(false)}
-      >
-        <Stack>
-          <Row
-            space={theme.sizes[FORM_INTER_ITEM_SPACING] * 2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Heading size="sm">Quantity:</Heading>
-            <Input
-              keyboardType="numeric"
-              onChangeText={onChangeNumber}
-              selection={cursorPosition}
-              value={String(quantityToUse)}
-              maxW={Dimensions.get('window').width * 0.25}
-              onFocus={onFocusNumberInput}
-              onBlur={onBlurNumberInput}
-            />
-            <FontAwesomeButton
-              name="plus"
-              onPress={() => setQuantityToUse((current) => current + 1)}
-            />
-            <FontAwesomeButton
-              name="minus"
-              onPress={() =>
-                setQuantityToUse((current) => (current <= 1 ? 1 : current - 1))
-              }
-            />
-          </Row>
-        </Stack>
-      </ModalWithBlur>
+        onBlurPress={closeQuantityModal}
+        onQuantityChange={onChangeNumber}
+      />
       <BottomSheetModalWithFixedHeader
         ref={itemFormSheetRef}
         title={`Add Item for '${parsedName}'`}

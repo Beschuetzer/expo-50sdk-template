@@ -8,7 +8,7 @@ import {
 } from '@/types/Item';
 import { GpsCoordinate } from '@/types/Store';
 import { UpcProduct } from '@/types/UpcResponse';
-import { Frequency, TimeSpan } from '@/types/general';
+import { Duration, TimeSpan } from '@/types/general';
 import { SortOrderValue } from '@/types/listSlice';
 
 export const EMPTY_NUMBER = 0;
@@ -31,23 +31,27 @@ export const AUTO_SET_STORE_WHEN_CLOSE_ENOUGH_INITIAL = true;
 export const BFF_SERVICE_ABORT_TIMEOUT = 10000;
 export const CAN_OVERRIDE_DEFAULT = false;
 export const DEFAULT_IMAGE_INDEX = 0;
+export const DURATION_INITIAL_NUMBER = 1;
+export const DURATION_INITIAL_TIME_SPAN = TimeSpan.Week;
+export const DURATION_INITIAL = Object.freeze({
+  number: DURATION_INITIAL_NUMBER,
+  timeSpan: DURATION_INITIAL_TIME_SPAN,
+} as Duration);
 export const ERROR_MODAL_STATUS_CODE_DEFAULT = 500;
 export const ESTIMATED_SIZE_FOR_ITEMS_LIST = 108;
 export const ESTIMATED_SIZE_FOR_QUICK_ADD_MODAL_SEARCH_LIST = 117;
 export const ESTIMATED_SIZE_FOR_SHOPPING_LISTS = 133;
+export const ESTIMATED_SIZE_FOR_STORE_SELECTION_MODAL = 44;
+export const ESTIMATED_SIZE_FOR_LOCATION_SELECTION_MODAL = 44;
 export const ESTIMATED_SIZE_FOR_STORES_LIST = 61;
 export const FILE_NAMES = {
+  inventory: 'inventory',
   items: 'items',
+  lastPurchasedMap: 'lastPurchasedMap',
   stores: 'stores',
   storeSpecificValues: 'storeSpecificValues',
-  lastPurchasedMap: 'lastPurchasedMap',
-  upcProducts: 'upcProducts',
 };
 export const FORM_INTER_ITEM_SPACING = 0.5;
-export const FREQUENCY_INITIAL = Object.freeze({
-  number: 1,
-  timeSpan: TimeSpan.Week,
-} as Frequency);
 export const GPS_COORDINATES_DEFAULT = Object.freeze({
   lat: EMPTY_STRING,
   lon: EMPTY_STRING,
@@ -56,6 +60,8 @@ export const HEADER_BUTTON_SIZE_DEFAULT = 8;
 export const HOUR_IN_MS = 1000 * 60 * 60;
 export const DAY_IN_MS = HOUR_IN_MS * 24;
 export const WEEK_IN_MS = DAY_IN_MS * 7;
+export const MONTH_IN_MS = DAY_IN_MS * 30;
+export const YEAR_IN_MS = DAY_IN_MS * 365;
 export const IMAGE_ROLL_LOCATION = 'file:///storage/emulated/0/Pictures';
 export const IMAGE_RENDERER_TITLE_DEFAULT = 'Image Viewer';
 export const IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT = true;
@@ -73,6 +79,8 @@ export const IMAGE_PRIORITY_MAPPING: {
 export const ITEM_TILE_WIDTH = 30;
 export const ITEM_TILE_ICON_SIZE = 5;
 export const ITEM_UNIT_INITIAL = ItemUnit.Package;
+export const INVENTORY_MINIMUM_DEFAULT = 0;
+export const IS_FROZEN_DEFAULT = false;
 export const LIST_HAPTICS = {
   handleIsSelected: (isSelected: boolean) => () => {
     if (isSelected) {
@@ -122,7 +130,10 @@ export const TIME_SPAN_TO_MILLISECONDS_MAPPING: { [key in TimeSpan]: number } =
     [TimeSpan.Hour]: HOUR_IN_MS,
     [TimeSpan.Day]: DAY_IN_MS,
     [TimeSpan.Week]: WEEK_IN_MS,
+    [TimeSpan.Month]: MONTH_IN_MS,
+    [TimeSpan.Year]: YEAR_IN_MS,
   };
+export const TIME_TO_EXPIRATION_DEFAULT = 1000 * 60 * 60 * 24 * 14; // 7 days
 export const TYPING_DEBOUNCE_THRESHOLD = 333;
 export const US_COUNTRY_CODE = 'US';
 export const UUID_NAME_SPACE = 'f5250e05-c053-4863-9686-a0f045ae566d';

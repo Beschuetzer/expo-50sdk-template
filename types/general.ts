@@ -14,9 +14,8 @@ import {
 import { GpsCoordinate, Store } from './Store';
 import { UpcProduct } from './UpcResponse';
 import { CurrentStoreNeeded, DispatchNeeded } from './bffService';
+import { Inventory } from './inventory';
 import { ListName } from './listSlice';
-
-import { UpcProducts } from '@/state/slices/scannerSlice';
 
 export enum ScanningMode {
   AddToCart = 'Add to Cart',
@@ -27,7 +26,13 @@ export enum TimeSpan {
   Hour = 'Hour',
   Day = 'Day',
   Week = 'Week',
+  Month = 'Month',
+  Year = 'Year',
 }
+
+export type TimeStamp = {
+  timestamp: number;
+};
 
 export enum State {
   None = 'Select a State',
@@ -109,6 +114,11 @@ export type ButtonOptions = {
 
 export type CurrentLocation = GpsCoordinate | null;
 
+export type Duration = {
+  number: number;
+  timeSpan: TimeSpan;
+};
+
 export type ErrorNative = {
   stack?: string;
   message?: string;
@@ -126,11 +136,6 @@ export type ErrorMessage = {
   errorResponse: {
     message: string;
   };
-};
-
-export type Frequency = {
-  number: number;
-  timeSpan: TimeSpan;
 };
 
 export type ChildrenProp = {
@@ -175,6 +180,7 @@ export type ItemOrItemWithStoreSpecificValuesProp = {
 export type ItemWithStoreSpecificValuesProp = {
   itemWithStoreSpecificValues: ItemWithStoreSpecificValues;
 };
+export type UpcProducts = { [key: string]: UpcProduct & TimeStamp };
 
 export type UpcProp = {
   upc: string;
@@ -203,7 +209,7 @@ export type FileNames = {
   stores: StoreList & CurrentStoreNeeded;
   storeSpecificValues: StoreSpecificValuesMap;
   lastPurchasedMap: LastPurchasedMap;
-  upcProducts: UpcProducts;
+  inventory: Inventory;
 };
 export type ResolvedType<T> = T extends Promise<infer R> ? R : T;
 export type SetAppDataInput = FileNames & DispatchNeeded;

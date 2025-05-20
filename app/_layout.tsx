@@ -5,6 +5,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -17,6 +18,8 @@ import { PersistGate } from 'redux-persist/integration/react';
 
 import { Text } from '@/components/Themed';
 import { CloseButton } from '@/components/header/CloseButton';
+import { useAppState } from '@/components/hooks/tanstack/useAppState';
+import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
 import { AutoSetStoreModal } from '@/components/modals/AutoSetStoreModal';
 import { ErrorModal } from '@/components/modals/ErrorModal';
@@ -64,78 +67,96 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: 3, retryDelay: 1000 } },
+  });
+
+  useOnlineManager();
+  useAppState();
+
   return (
     // <ErrorBoundary>
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Provider store={store}>
-        <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
-          <NativeBaseProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <MenuProvider>
-                <BottomSheetModalProvider>
-                  <AutoSetStoreModal />
-                  <ErrorModal />
-                  <LoadingModal />
-                  <Stack>
-                    <Stack.Screen
-                      name="(tabs)"
-                      options={{
-                        headerShown: false,
-                        headerTitleAlign: 'center',
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.FullscreenImageScreen}
-                      options={{
-                        presentation: 'modal',
-                        title: IMAGE_RENDERER_TITLE_DEFAULT,
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.ItemModal}
-                      options={{
-                        presentation: 'modal',
-                        title: 'Item Details',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.QuickAddModal}
-                      options={{
-                        presentation: 'modal',
-                        title: 'Quick Add',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.PasswordResetScreen}
-                      options={{
-                        title: 'Password Reset',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                    <Stack.Screen
-                      name={Routes.StoreModal}
-                      options={{
-                        presentation: 'modal',
-                        title: 'Store Details',
-                        headerTitleAlign: 'center',
-                        headerLeft: () => <CloseButton />,
-                      }}
-                    />
-                  </Stack>
-                </BottomSheetModalProvider>
-              </MenuProvider>
-            </GestureHandlerRootView>
-          </NativeBaseProvider>
-        </PersistGate>
-      </Provider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Provider store={store}>
+          <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
+            <NativeBaseProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <MenuProvider>
+                  <BottomSheetModalProvider>
+                    <AutoSetStoreModal />
+                    <ErrorModal />
+                    <LoadingModal />
+                    <Stack>
+                      <Stack.Screen
+                        name="(tabs)"
+                        options={{
+                          headerShown: false,
+                          headerTitleAlign: 'center',
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.FullscreenImageScreen}
+                        options={{
+                          presentation: 'modal',
+                          title: IMAGE_RENDERER_TITLE_DEFAULT,
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.ItemModal}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Item Details',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.InventoryLocationModal}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Add Inventory Location',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.QuickAddModal}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Quick Add',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.PasswordResetScreen}
+                        options={{
+                          title: 'Password Reset',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.StoreModal}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Store Details',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                    </Stack>
+                  </BottomSheetModalProvider>
+                </MenuProvider>
+              </GestureHandlerRootView>
+            </NativeBaseProvider>
+          </PersistGate>
+        </Provider>
+      </ThemeProvider>
+    </QueryClientProvider>
     // </ErrorBoundary>
   );
 }

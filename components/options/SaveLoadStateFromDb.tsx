@@ -11,6 +11,7 @@ import {
 } from '@/state/slices/generalSlice';
 import {
   currentStoreSelector,
+  inventorySelector,
   itemsListSelector,
   lastPurchasedMapSelector,
   storesListSelector,
@@ -28,6 +29,7 @@ export const SaveLoadStateViaDb = (props: SaveLoadStateViaDbProps) => {
   const storesList = useAppSelector(storesListSelector);
   const storeSpecificValues = useAppSelector(storeSpecificValuesMapSelector);
   const lastPurchasedMap = useAppSelector(lastPurchasedMapSelector);
+  const inventory = useAppSelector(inventorySelector);
   const stores = useAppSelector(storesListSelector);
   const currentStore = useAppSelector(currentStoreSelector);
   const userAccount = useAppSelector(accountSelector);
@@ -45,6 +47,7 @@ export const SaveLoadStateViaDb = (props: SaveLoadStateViaDbProps) => {
   const onBackupPress = useCallback(async () => {
     dispatch(
       saveAll({
+        inventory,
         items: itemsList,
         lastPurchasedMap,
         stores: {
@@ -57,6 +60,7 @@ export const SaveLoadStateViaDb = (props: SaveLoadStateViaDbProps) => {
   }, [
     currentStore.name,
     itemsList,
+    inventory,
     lastPurchasedMap,
     stores,
     storeSpecificValues,

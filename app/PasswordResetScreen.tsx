@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
 import { InputValidationMessage } from '@/components/InputValidationMessage';
 import { InputText } from '@/components/forms/InputText';
-import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { PASSWORD_SCHEMA } from '@/constants/schema';
 import { accountSelector } from '@/state/slices/generalSlice';
@@ -92,7 +91,6 @@ export default function PasswordResetScreen() {
       <Row>
         <Button onPress={onChangePasswordPress}>Change Password</Button>
       </Row>
-      <ConfirmModal {...ConfirmModal} />
     </AbsolutePositionedScreen>
   );
 }

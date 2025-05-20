@@ -65,7 +65,7 @@ export default function ScannerScreen() {
   const [isSnackbarVisible, setIsSnackbarVisible] = useState(false);
   const lastItemScannedRef = useRef<Item | undefined>(undefined);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
-    {},
+    {} as ConfirmModalProps,
   );
   const isFocused = useIsFocused();
   const storeNameToAddToListRef = useRef<string>(currentStore.name);

@@ -7,6 +7,8 @@ export const MOCK_UPCS = [
   '072273487254',
 ];
 
+export const MOCK_SCAN_TEST_UPC = '850021920678';
+
 export const MOCK_UPC_PRODUCTS = {
   [MOCK_UPCS[0]]: {
     code: MOCK_UPCS[0],

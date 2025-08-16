@@ -1,0 +1,2 @@
+I want you to analyze the current project, which is an app used to make create grocery lists simplier and more convenient.  I want to add a feature whereby users can save cooking instructions.  Here are the requirements:
+- there must be a button on each recipe page that allows users to save cooking instructions for that recipe. When clicked, the button should open a modal or form where users can enter and save their instructions.

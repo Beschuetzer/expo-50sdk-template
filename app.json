@@ -1,5 +1,4 @@
 {
-  "icon": "./assets/images/icon.png",
   "expo": {
     "name": "grocify",
     "slug": "grocify",
@@ -18,9 +17,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "photosPermission": "Allow $(PRODUCT_NAME) to access your photos for selecting items",
-      "cameraPermission": "Allow $(PRODUCT_NAME) to access your photos for taking pictures of items",
-      "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to easily create new stores",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos for selecting items",
+        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your photos for taking pictures of items",
+        "NSLocationWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to use your location to easily create new stores",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow $(PRODUCT_NAME) to use your location to easily create new stores"
+      },
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -37,7 +39,8 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE"
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.DETECT_SCREEN_CAPTURE"
       ],
       "package": "com.beschuetzer.grocify"
     },
@@ -57,7 +60,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to pick an image for an item",
+          "photosPermission": "The app accesses your photos to pick an image for an item"
         }
       ],
       [
@@ -73,7 +76,8 @@
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
           "isAccessMediaLocationEnabled": true
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

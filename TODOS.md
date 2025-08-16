@@ -1,5 +1,10 @@
 ## MVP
+
+-add a way to record cooking instructions and save them to the db
+    -analyze the current project and propose the top 2 approaches
+
 -Make aisle number field accept letters (check the sorting)
+    --on route creation screen, have one input row at the top which is used to add new items to the route.  Inputs are "name" (e.g. "184" or "electronics section"; some string) and a number input to correspond to the location that the item will be inserted at (instead of making the list items dragable);  Each item should have up and down arrows for re-positioning as well
     --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
     --each route object will be associated with a storeId and userId to allow for sharing later
     --if there is a route for a store, the store-specific input in ItemForm for aisle number should become a picker

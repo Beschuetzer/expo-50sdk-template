@@ -1,5 +1,5 @@
 import { FontAwesome6 } from '@expo/vector-icons';
-import { Camera, CameraType } from 'expo-camera';
+import { Camera, CameraType } from 'expo-camera/legacy';
 import { useFocusEffect } from 'expo-router';
 import { Center, Text } from 'native-base';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';

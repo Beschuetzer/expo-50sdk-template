@@ -1,6 +1,6 @@
 import { Picker } from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native';
-import { CameraType } from 'expo-camera';
+import { CameraType } from 'expo-camera/legacy';
 import { useFocusEffect, useNavigation } from 'expo-router';
 import { Button, View, Row, Text, Heading, useTheme } from 'native-base';
 import React, { useState, useCallback, useRef, useEffect } from 'react';

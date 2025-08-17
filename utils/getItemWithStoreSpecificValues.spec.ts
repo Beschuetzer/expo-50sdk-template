@@ -18,12 +18,13 @@ const MOCK_ITEM = {
   frequency: 10000,
   name: 'Test',
   upc: '000000000001',
+  inventoryMinimum: 0,
   needsSaving: true,
 } as Item;
 
 const MOCK_STORE_SPECIFIC_VALUES = {
   [StoreSpecificValueKey.AisleNumber]: {
-    [MOCK_STORES[0].name]: 123,
+    [MOCK_STORES[0].name]: '123',
   },
   [StoreSpecificValueKey.IsInCart]: {
     [MOCK_STORES[0].name]: true,
@@ -40,7 +41,7 @@ const MOCK_STORE_SPECIFIC_VALUES = {
   [StoreSpecificValueKey.Quantity]: {
     [MOCK_STORES[0].name]: 3,
   },
-} as Required<StoreSpecificValues>;
+} as unknown as Required<StoreSpecificValues>;
 
 describe('getItemWithStoreSpecificValues', () => {
   test('it works', async () => {

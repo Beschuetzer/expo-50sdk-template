@@ -370,7 +370,10 @@ export function ItemFormStoreSpecific(
           placeholder="Note"
           value={(note || EMPTY_STRING).toString()}
           onChangeText={(newValue) => setNote(newValue || EMPTY_STRING)}
+          totalLines={4}
+          onTextInput={() => {}}
           autoCompleteType={false}
+          tvParallaxProperties={undefined}
         />
       </Stack>
       <ItemSearchModal<ItemSearchModalValue>

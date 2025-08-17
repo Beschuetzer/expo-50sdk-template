@@ -2,16 +2,17 @@ import { View, useTheme, Heading } from 'native-base';
 import { useSelector } from 'react-redux';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { ListName, priceOfItemsSelector } from '@/state/slices/listsSlice';
+import { priceOfItemsSelector } from '@/state/slices/listsSlice';
+import { ListName } from '@/types/listSlice';
 import { roundNumber } from '@/utils/helpers';
 
 type TotalListPriceProps = {
-  listname: ListName;
+  listName: ListName; // corrected prop name casing
 };
 
 export function TotalListPrice(props: TotalListPriceProps) {
-  const { listname } = props;
-  const priceOfItemsInCart = useSelector(priceOfItemsSelector(listname));
+  const { listName } = props;
+  const priceOfItemsInCart = useSelector(priceOfItemsSelector(listName));
   const theme = useTheme();
   return (
     <View

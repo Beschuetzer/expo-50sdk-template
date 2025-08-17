@@ -66,7 +66,7 @@ describe('getLastPurchasedFromStoreSpecificValues', () => {
           [MOCK_STORES[1].name]: 2,
         },
       },
-    } as StoreSpecificValuesMap;
+    } as unknown as StoreSpecificValuesMap;
     const actual = getLastPurchasedFromStoreSpecificValues(
       mockStoreSpecificValues,
       MOCK_STORES[0].name,

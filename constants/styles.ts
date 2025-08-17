@@ -1,6 +1,6 @@
 import { theme } from 'native-base';
 import { ResponsiveValue } from 'native-base/lib/typescript/components/types';
-import { Dimensions, ImageStyle } from 'react-native';
+import { Dimensions, ViewStyle } from 'react-native';
 
 import { FORM_INTER_ITEM_SPACING } from './general';
 
@@ -29,4 +29,4 @@ export const tileContainerStyles = {
   justifyContent: 'space-between',
   flexDirection: 'column',
   backgroundColor: 'white',
-} as ImageStyle;
+} as ViewStyle;

@@ -863,7 +863,7 @@ export function setAppData(input: SetAppDataInput) {
 }
 
 export async function measureExecutionTime(
-  func: () => void,
+  func: () => Promise<void>,
   key = 'Func',
   shouldLog = true,
 ) {
@@ -899,10 +899,11 @@ export async function scheduleNotification(
   await Notifications.scheduleNotificationAsync(request);
 }
 
-export function trimObjectValues<T>(obj: T) {
+export function trimObjectValues<T extends Record<string, any>>(obj: T) {
   for (const key in obj) {
-    if (typeof obj[key] === 'string') {
-      (obj as any)[key] = obj[key].trim();
+    const value = obj[key];
+    if (typeof value === 'string') {
+      (obj as any)[key] = value.trim();
     }
   }
   return obj as T;

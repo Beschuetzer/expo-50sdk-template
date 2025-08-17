@@ -1,5 +1,5 @@
 import { FontAwesome6 } from '@expo/vector-icons';
-import { Camera, CameraType } from 'expo-camera/legacy';
+import { CameraView } from 'expo-camera';
 import { useFocusEffect } from 'expo-router';
 import { Center, Text } from 'native-base';
 import React, { ReactNode, useCallback, useRef, useState } from 'react';
@@ -16,9 +16,12 @@ import { ScanningMode } from '@/types/general';
 import { ListName } from '@/types/listSlice';
 import { getItemFromList } from '@/utils/helpers';
 
+// New API uses string literals instead of CameraType enum
+export type CameraFacing = 'front' | 'back';
+
 type ScannedObj = { data: string };
 export type BarcodeScannerProps = {
-  cameraType?: CameraType;
+  cameraType?: CameraFacing;
   isEnabled?: boolean;
   onButtonPress?: () => void;
   onScanned?: (
@@ -43,7 +46,7 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
   const scanningMode = useSelector(scanningModeSelector);
   const {
     isEnabled = true,
-    cameraType = CameraType.back,
+    cameraType = 'back',
     onButtonPress,
     onScanned,
     resetPeriod = 1000,
@@ -103,10 +106,10 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
 
   return shouldRenderCamera ? (
     <>
-      <Camera
+      <CameraView
         style={styles.camera}
-        type={cameraType}
-        onBarCodeScanned={handleBarCodeScanned}
+        facing={cameraType}
+        onBarcodeScanned={handleBarCodeScanned}
       />
       {isEnabled ? (
         <Center position="absolute" top={0} bottom={0} left={0} right={0}>

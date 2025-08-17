@@ -11,7 +11,7 @@ function getMockItemData(id: string, quantity: number) {
 describe('getQuickAddGuesses', () => {
   test('All', () => {
     const actual = getQuickAddGuesses(
-      MOCK_ITEMS_LIST.data,
+      MOCK_ITEMS_LIST.data as any, // data items already conform to Item type with inventoryMinimum
       MOCK_PROCESSED_GROCERY_LIST,
     );
     expect(actual).toStrictEqual({
@@ -49,10 +49,13 @@ describe('getQuickAddGuesses', () => {
 
   describe('Variations', () => {
     test('One word that matches', () => {
-      const actual = getQuickAddGuesses(MOCK_ITEMS_LIST.data, {
-        store: 'Costco',
-        items: [['salmon', 2, 'unit']],
-      } as ProcessedGroceryList);
+      const actual = getQuickAddGuesses(
+        MOCK_ITEMS_LIST.data as any,
+        {
+          store: 'Costco',
+          items: [['salmon', 2, 'unit']],
+        } as ProcessedGroceryList,
+      );
       expect(actual).toStrictEqual({
         salmon: [
           getMockItemData('1f62daf7-06f7-46fe-93dc-2e7bed90635f', 23),
@@ -61,10 +64,13 @@ describe('getQuickAddGuesses', () => {
       });
     });
     test('One word and partial of another', () => {
-      const actual = getQuickAddGuesses(MOCK_ITEMS_LIST.data, {
-        store: 'Costco',
-        items: [['salmon burger', 2, 'unit']],
-      } as ProcessedGroceryList);
+      const actual = getQuickAddGuesses(
+        MOCK_ITEMS_LIST.data as any,
+        {
+          store: 'Costco',
+          items: [['salmon burger', 2, 'unit']],
+        } as ProcessedGroceryList,
+      );
       expect(actual).toStrictEqual({
         'salmon burger': [
           getMockItemData('1f62daf7-06f7-46fe-93dc-2e7bed90635f', 26),
@@ -72,10 +78,13 @@ describe('getQuickAddGuesses', () => {
       });
     });
     test('One word and one with no match', () => {
-      const actual = getQuickAddGuesses(MOCK_ITEMS_LIST.data, {
-        store: 'Costco',
-        items: [['salmon patty', 2, 'unit']],
-      } as ProcessedGroceryList);
+      const actual = getQuickAddGuesses(
+        MOCK_ITEMS_LIST.data as any,
+        {
+          store: 'Costco',
+          items: [['salmon patty', 2, 'unit']],
+        } as ProcessedGroceryList,
+      );
       expect(actual).toStrictEqual({
         'salmon patty': [
           getMockItemData('1f62daf7-06f7-46fe-93dc-2e7bed90635f', 8),

@@ -1,4 +1,5 @@
 ## MVP
+- add a link field for items and the ability to use the share feature in a browser and have it add the link to a selected item (user clicks share button in chrome for example, grocify is an option and when pressed prompts the user to select an item [or create one?])  The url i s then added to the item and a button or link shows up for pressing and navigating to the url in a browser.
 
 -add a way to record cooking instructions and save them to the db
     -analyze the current project and propose the top 2 approaches

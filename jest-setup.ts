@@ -58,4 +58,10 @@ jest.mock('@/constants/general', () => ({
     Month: 1000 * 60 * 60 * 24 * 30,
     Year: 1000 * 60 * 60 * 24 * 365,
   },
+  IMAGE_PRIORITY_MAPPING: {
+    0: 'image_front_thumb_url',
+    1: 'image_thumb_url',
+    2: 'image_ingredients_thumb_url',
+    3: 'image_nutrition_thumb_url',
+  },
 }));

@@ -34,7 +34,8 @@
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_EXTERNAL_STORAGE"
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.DETECT_SCREEN_CAPTURE"
       ],
       "package": "com.beschuetzer.grocify"
     },

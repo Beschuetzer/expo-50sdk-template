@@ -81,6 +81,7 @@ export type ItemBase = {
    **/
   timeToExpiration?: number;
   unit: string;
+  url?: string;
 };
 
 /**

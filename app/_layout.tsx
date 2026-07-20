@@ -6,6 +6,7 @@ import {
   ThemeProvider,
 } from '@react-navigation/native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -16,6 +17,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
+import { ShareIntentHandler } from '@/components/ShareIntentHandler';
 import { Text } from '@/components/Themed';
 import { CloseButton } from '@/components/header/CloseButton';
 import { useAppState } from '@/components/hooks/tanstack/useAppState';
@@ -27,6 +29,14 @@ import { LoadingModal } from '@/components/modals/LoadingModal';
 import { IMAGE_RENDERER_TITLE_DEFAULT } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { persistor, store } from '@/state/store';
+
+// expo-share-intent requires a native dev build — never import it statically.
+// Conditional require() ensures the module factory never runs in Expo Go.
+const ShareIntentProvider: React.ComponentType<{ children: React.ReactNode }> =
+  Constants.appOwnership === 'expo'
+    ? ({ children }: { children: React.ReactNode }) => <>{children}</>
+    : (require('expo-share-intent') as typeof import('expo-share-intent'))
+        .ShareIntentProvider;
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -62,7 +72,11 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <ShareIntentProvider>
+      <RootLayoutNav />
+    </ShareIntentProvider>
+  );
 }
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
@@ -84,6 +98,7 @@ function RootLayoutNav() {
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <MenuProvider>
                   <BottomSheetModalProvider>
+                    <ShareIntentHandler />
                     <AutoSetStoreModal />
                     <ErrorModal />
                     <LoadingModal />
@@ -146,6 +161,14 @@ function RootLayoutNav() {
                           title: 'Store Details',
                           headerTitleAlign: 'center',
                           headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.ShareIntentScreen}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Link URL to Item',
+                          headerTitleAlign: 'center',
                         }}
                       />
                     </Stack>

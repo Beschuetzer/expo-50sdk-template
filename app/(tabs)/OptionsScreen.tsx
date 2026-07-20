@@ -37,6 +37,8 @@ import {
   scheduleNotification,
 } from '@/utils/helpers';
 
+const MOCK_SHARE_URL = 'https://www.amazon.com/dp/B0EXAMPLE123';
+
 const DEBOUNCE_TIMEOUT = 500;
 
 export default function OptionsScreen() {
@@ -196,6 +198,18 @@ export default function OptionsScreen() {
             }}
           >
             Developer Options
+          </Button>
+        ) : null}
+        {getIsDevelopmentMode() ? (
+          <Button
+            onPress={() => {
+              // @ts-ignore
+              navigation.navigate(Routes.ShareIntentScreen, {
+                mockUrl: MOCK_SHARE_URL,
+              });
+            }}
+          >
+            Test Share Intent Screen
           </Button>
         ) : null}
         <Button isDisabled={isPinging} onPress={onPingBffPress}>

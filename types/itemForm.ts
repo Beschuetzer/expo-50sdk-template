@@ -21,6 +21,7 @@ export type ItemFormOnSave = {
 
 export type ItemFormData = {
   selectedUrl: string;
+  url: string;
 } & Required<Pick<Item, '_id' | 'name' | 'upc'>>;
 
 export type ItemFormProps = {
@@ -28,6 +29,7 @@ export type ItemFormProps = {
   autoSaveDebounce?: number;
   autoSaveOverride?: boolean;
   hideStoreManagerRow?: boolean;
+  initialUrl?: string;
   itemInList?: Item | null;
   canOverrideItem: boolean;
   currentStore: Store;

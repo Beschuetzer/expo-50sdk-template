@@ -67,7 +67,7 @@ export function InCartList(props: InCartListProps) {
   );
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
-    if (index === 0) return <TotalListPrice listname={ListName.InCartList} />;
+    if (index === 0) return <TotalListPrice listName={ListName.InCartList} />;
     return (
       <SwipeableRow
         key={getKeyToUse(item)}

@@ -1,6 +1,9 @@
 import { Column, ITextProps, Row, Text, useTheme } from 'native-base';
 import { useMemo } from 'react';
+import { Linking } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
+import { COLORS } from '@/constants/colors';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { Item } from '@/types/Item';
 import { ChildrenProp, ItemProp } from '@/types/general';
@@ -32,13 +35,24 @@ export function ItemTileNameAndUpcColumn(props: ItemTileNameAndUpcColumnProps) {
   );
 
   if (!item) return null;
+
   return (
     <Column flex={1}>
       <TagToUse space={spacingToUse}>
         <Column flex={1}>
-          <Text noOfLines={1} color={color} {...nameProps}>
-            {item?.name}
-          </Text>
+          <TouchableOpacity
+            disabled={!item.url}
+            onPress={() => item.url && Linking.openURL(item.url)}
+          >
+            <Text
+              noOfLines={1}
+              color={item.url ? COLORS.light.tint : color}
+              underline={!!item.url}
+              {...nameProps}
+            >
+              {item?.name}
+            </Text>
+          </TouchableOpacity>
         </Column>
         <Column flex={0}>
           {showUpc && item.upc ? (

@@ -37,7 +37,14 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.DETECT_SCREEN_CAPTURE"
       ],
-      "package": "com.beschuetzer.grocify"
+      "package": "com.beschuetzer.grocify",
+      "intentFilters": [
+        {
+          "action": "android.intent.action.SEND",
+          "data": [{ "mimeType": "text/plain" }],
+          "category": ["android.intent.category.DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -46,6 +53,16 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-share-intent",
+        {
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
+            "NSExtensionActivationSupportsWebPageWithMaxCount": 1
+          },
+          "androidIntentFilters": ["text/*"]
+        }
+      ],
       [
         "expo-camera",
         {

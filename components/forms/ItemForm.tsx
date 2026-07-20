@@ -67,6 +67,7 @@ export function ItemForm(props: ItemFormProps) {
     currentStore,
     hideStoreManagerRow,
     initialQuantity = 0,
+    initialUrl,
     item,
     items,
     itemInList,
@@ -100,6 +101,7 @@ export function ItemForm(props: ItemFormProps) {
     name: itemToUse?.name || EMPTY_STRING,
     selectedUrl:
       itemToUse?.images?.[itemToUse?.imageToUseIndex] || EMPTY_STRING,
+    url: initialUrl || itemToUse?.url || EMPTY_STRING,
   });
 
   const isFrozenRef = useRef<boolean>(itemToUse?.isFrozen || IS_FROZEN_DEFAULT);
@@ -420,6 +422,23 @@ export function ItemForm(props: ItemFormProps) {
         <InputValidationMessage
           isValid={isUpcValid}
           message={`Must be ${UPC_REQUIRED_CHAR_LENGTH} or ${UPC_REQUIRED_CHAR_LENGTH + 1} numbers (currently ${formData.upc.length})`}
+        />
+      </Stack>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <InputText>URL</InputText>
+        <Input
+          variant="outline"
+          p={theme.space[1]}
+          placeholder="https://example.com/product"
+          value={formData.url}
+          onChangeText={(newText) => {
+            setFormData((current) => ({
+              ...current,
+              url: newText,
+            }));
+          }}
+          autoCapitalize="none"
+          keyboardType="url"
         />
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>

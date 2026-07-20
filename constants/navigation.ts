@@ -12,6 +12,7 @@ export enum Routes {
   PasswordResetScreen = 'PasswordResetScreen',
   QuickAddModal = 'QuickAddModal',
   ScannerScreen = 'ScannerScreen',
+  ShareIntentScreen = 'ShareIntentScreen',
   ShoppingList = 'ShoppingList',
   ShoppingListScreen = 'index',
   StoreModal = 'StoreModal',

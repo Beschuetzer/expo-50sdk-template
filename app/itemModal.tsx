@@ -57,6 +57,7 @@ export default function ItemModal() {
     showOverrideMsg,
     showBlank = false,
     callerList,
+    sharedUrl,
   } = (route.params || {}) as any;
   const keyToUse = getKeyToUse(key);
   const itemInList = useAppSelector(
@@ -239,6 +240,7 @@ export default function ItemModal() {
           onSave={handleSave}
           showOverrideMsgInitial={showOverrideMsg}
           shouldFocusFirstField={!itemInList}
+          initialUrl={sharedUrl}
           initialQuantity={
             callerList === ListName.ShoppingList ||
             callerList === ListName.PreviouslyPurchased

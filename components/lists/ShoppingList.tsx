@@ -104,7 +104,7 @@ export function ShoppingList(props: ShoppingListProps) {
   );
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
-    if (index === 0) return <TotalListPrice listname={ListName.ShoppingList} />;
+    if (index === 0) return <TotalListPrice listName={ListName.ShoppingList} />;
 
     return (
       <SwipeableRow

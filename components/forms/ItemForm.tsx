@@ -143,10 +143,12 @@ export function ItemForm(props: ItemFormProps) {
     () =>
       !formValidation.isValid ||
       !formData.name ||
+      !isUpcValid ||
       (!canOverrideItem && isProposedItemPresent),
     [
       formData.name,
       formValidation.isValid,
+      isUpcValid,
       canOverrideItem,
       isProposedItemPresent,
     ],

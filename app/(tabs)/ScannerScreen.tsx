@@ -1,6 +1,6 @@
 import { Picker } from '@react-native-picker/picker';
 import { useIsFocused } from '@react-navigation/native';
-// Removed legacy CameraType import
+import { CameraType } from 'expo-camera';
 import { useFocusEffect, useNavigation } from 'expo-router';
 import { Button, View, Row, Text, Heading, useTheme } from 'native-base';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
@@ -55,7 +55,7 @@ export default function ScannerScreen() {
   const itemsList = useAppSelector(itemsListSelector);
   const storesList = useAppSelector(storesListSelector);
   const [isScannerEnabled, setIsScannerEnabled] = useState(false);
-  const [type, setType] = useState<'back' | 'front'>('back');
+  const [type, setType] = useState(CameraType.back);
   const [isManuallyEntering, setIsManuallyEntering] = useState(false);
   const hasPermission = useRequestCameraPermissions();
   const navigation = useNavigation();
@@ -199,7 +199,9 @@ export default function ScannerScreen() {
   );
 
   const onSwitchCameraPress = useCallback(() => {
-    setType((current) => (current === 'back' ? 'front' : 'back'));
+    setType((current) =>
+      current === CameraType.back ? CameraType.front : CameraType.back,
+    );
   }, []);
 
   const onManuallyEnter = useCallback(() => {

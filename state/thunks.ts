@@ -837,14 +837,20 @@ export const saveItem = createAsyncThunk(
         throw new Error('No account found.');
       }
 
-      const [savedImageUrl, savedImageIndex, customImageUrl] =
-        await saveCustomImageToS3(itemToDispatch.item, account, dispatch);
+      const savedImageResults = await saveCustomImageToS3(
+        itemToDispatch.item,
+        account,
+        dispatch,
+      );
+      const anySaved = savedImageResults.some(([url]) => !!url);
 
-      if (!input.item.needsSaving && !savedImageUrl) {
+      if (!input.item.needsSaving && !anySaved) {
         shouldDisplayError = false;
         throw new Error('No need to save item.');
-      } else if (savedImageUrl) {
-        newImages[savedImageIndex] = savedImageUrl;
+      } else if (anySaved) {
+        for (const [savedImageUrl, savedImageIndex] of savedImageResults) {
+          if (savedImageUrl) newImages[savedImageIndex] = savedImageUrl;
+        }
         itemToDispatch.item.images = newImages;
       }
 
@@ -857,19 +863,35 @@ export const saveItem = createAsyncThunk(
       });
       if (!response?._id) {
         if (!input.item.hasBeenSaved) {
-          newImages[savedImageIndex] = customImageUrl;
+          // Roll back: restore local URLs and delete the uploaded S3 objects
+          const objKeys: string[] = [];
+          for (const [
+            savedImageUrl,
+            savedImageIndex,
+            customImageUrl,
+          ] of savedImageResults) {
+            if (savedImageUrl) {
+              newImages[savedImageIndex] = customImageUrl;
+              const objectKey = getS3ObjectKey(savedImageUrl);
+              if (objectKey) objKeys.push(objectKey);
+            }
+          }
           itemToDispatch.item.images = newImages;
-          const objectKey = getS3ObjectKey(savedImageUrl);
-          await BFF_SERVICE.deleteS3Objects({
-            dispatch,
-            objKeys: objectKey ? [objectKey] : [],
-            ...getUserCredentials(account),
-          });
+          if (objKeys.length > 0) {
+            await BFF_SERVICE.deleteS3Objects({
+              dispatch,
+              objKeys,
+              ...getUserCredentials(account),
+            });
+          }
         }
 
         throw new Error(`Unable to save ${getKeyToUse(itemToDispatch.item)}`);
       }
-      deleteFile(customImageUrl);
+      // Clean up local files after successful save
+      for (const [, , customImageUrl] of savedImageResults) {
+        deleteFile(customImageUrl);
+      }
       itemToDispatch.item.needsSaving = false;
       itemToDispatch.item.hasBeenSaved = true;
     } catch (error) {
@@ -1151,61 +1173,75 @@ async function saveCustomImageToS3(
   item: Item,
   account: UserAccount,
   dispatch: Dispatch,
-): Promise<ProcessedGroceryListItem> {
+): Promise<ProcessedGroceryListItem[]> {
   logWhenDevelopmentMode({ item, account });
-  const defaultReturn = [EMPTY_STRING, EMPTY_NUMBER, EMPTY_STRING] as [
-    string,
-    number,
-    string,
+  const emptyResult: ProcessedGroceryListItem = [
+    EMPTY_STRING,
+    EMPTY_NUMBER,
+    EMPTY_STRING,
   ];
   try {
-    const customImageUrlIndex = item.images.findIndex((image) =>
-      image.match(LOCAL_FILE_REGEX),
-    );
-    const customImageUrl = item.images[customImageUrlIndex];
-
-    if (!customImageUrl || !customImageUrl.match(LOCAL_FILE_REGEX)) {
-      throw new Error('No need to save image in saveImage.');
-    }
     if (!account._id || !account.password) {
       throw new Error('No credentials found');
     }
 
-    const split = customImageUrl.split('/');
-    const filename = split[split.length - 1];
+    const localImageEntries = item.images
+      .map((image, idx) => [idx, image] as [number, string])
+      .filter(([, image]) => !!image.match(LOCAL_FILE_REGEX));
 
-    logWhenDevelopmentMode({ filename, customImageUrl });
-    const signedUrlResponse = await BFF_SERVICE.getSignedUrlForUpload({
-      dispatch,
-      ...getUserCredentials(account),
-      filename,
-    });
+    if (localImageEntries.length === 0) return [];
 
-    logWhenDevelopmentMode({ signedUrlResponse });
+    const results = await Promise.all(
+      localImageEntries.map(async ([customImageUrlIndex, customImageUrl]) => {
+        try {
+          const split = customImageUrl.split('/');
+          const filename = split[split.length - 1];
 
-    if (!signedUrlResponse?.uploadUrl || !signedUrlResponse.downloadUrl) {
-      throw new Error('Unable to get signed url.');
-    }
+          logWhenDevelopmentMode({ filename, customImageUrl });
+          const signedUrlResponse = await BFF_SERVICE.getSignedUrlForUpload({
+            dispatch,
+            ...getUserCredentials(account),
+            filename,
+          });
 
-    const blob = await uriToBlob(customImageUrl);
-    if (!blob) {
-      return defaultReturn;
-    }
+          logWhenDevelopmentMode({ signedUrlResponse });
 
-    const savedResponse = await fetch(signedUrlResponse.uploadUrl, {
-      body: blob,
-      method: 'PUT',
-    });
+          if (!signedUrlResponse?.uploadUrl || !signedUrlResponse.downloadUrl) {
+            throw new Error('Unable to get signed url.');
+          }
 
-    logWhenDevelopmentMode({ savedResponse });
+          const blob = await uriToBlob(customImageUrl);
+          if (!blob) return emptyResult;
 
-    if (!savedResponse.ok) {
-      throw new Error('Unable to save image.');
-    }
+          const savedResponse = await fetch(signedUrlResponse.uploadUrl, {
+            body: blob,
+            method: 'PUT',
+          });
 
-    return [signedUrlResponse.downloadUrl, customImageUrlIndex, customImageUrl];
+          logWhenDevelopmentMode({ savedResponse });
+
+          if (!savedResponse.ok) {
+            throw new Error('Unable to save image.');
+          }
+
+          return [
+            signedUrlResponse.downloadUrl,
+            customImageUrlIndex,
+            customImageUrl,
+          ] as ProcessedGroceryListItem;
+        } catch (error) {
+          logWhenDevelopmentMode({
+            source: 'saveCustomImageToS3 (item)',
+            error,
+          });
+          return emptyResult;
+        }
+      }),
+    );
+
+    return results.filter(([url]) => !!url);
   } catch (error) {
     logWhenDevelopmentMode({ source: 'saveCustomImageToS3', error });
-    return defaultReturn;
+    return [];
   }
 }

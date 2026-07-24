@@ -1,6 +1,7 @@
 import { ImagePickerAsset } from 'expo-image-picker';
 import { Center, Column, Row, theme } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
 import { ThumbnailPickerImage } from './ThumbnailPickerImage';
@@ -8,7 +9,11 @@ import { ImageCapturer } from '../ImageCapturer';
 import { useIsDarkMode } from '../hooks/useIsDarkTheme';
 import { ModalWithBlur } from '../modals/ModalWithBlur';
 
-import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
+import {
+  EMPTY_NUMBER,
+  EMPTY_STRING,
+  MAX_CUSTOM_IMAGES,
+} from '@/constants/general';
 import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { SpacingProp, StyleProp } from '@/types/general';
 import { logWhenDevelopmentMode } from '@/utils/logging';
@@ -44,6 +49,30 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   const lastLongPressImageIndexRef = useRef<number>(EMPTY_NUMBER);
   const lastAddedImageUrlRef = useRef<string>(EMPTY_STRING);
 
+  const customImagesCount = useMemo(
+    () =>
+      images.filter(
+        (image) =>
+          !!image.match(LOCAL_FILE_REGEX) || !!image.match(AMAZON_S3_REGEX),
+      ).length,
+    [images],
+  );
+  const atLimit = useMemo(
+    () => customImagesCount >= MAX_CUSTOM_IMAGES,
+    [customImagesCount],
+  );
+  const slotsRemaining = useMemo(
+    () => MAX_CUSTOM_IMAGES - customImagesCount,
+    [customImagesCount],
+  );
+
+  const showLimitAlert = useCallback(() => {
+    Alert.alert(
+      'Image Limit Reached',
+      `You can only have ${MAX_CUSTOM_IMAGES} custom images. Please delete an existing image before adding a new one.`,
+    );
+  }, []);
+
   const handleLongPress = useCallback(
     (index: number, imageUrl?: string) => {
       if (!imageUrl) return;
@@ -65,47 +94,30 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
 
   const onImageReturned = useCallback(
     (result: ImagePickerAsset) => {
-      const urlToUse = result.uri;
-      const hasCustomImageAlready = images.some((image) => {
-        const isLocalFile = !!image.match(LOCAL_FILE_REGEX);
-        const isS3File = !!image.match(AMAZON_S3_REGEX);
-        logWhenDevelopmentMode({
-          AMAZON_S3_REGEX,
-          LOCAL_FILE_REGEX,
-          image,
-          isLocalFile,
-          isS3File,
-        });
-        return isLocalFile || isS3File;
-      });
-
-      if (hasCustomImageAlready) {
-        logWhenDevelopmentMode('has a local file already');
-        setImages((current) => {
-          const imagesWithoutCustomImages = [...current].filter((image) => {
-            const isLocalImage = !!image.match(LOCAL_FILE_REGEX);
-            const isS3Image = !!image.match(AMAZON_S3_REGEX);
-
-            if (isLocalImage || isS3Image) {
-              onDeleteImage && onDeleteImage(image);
-            }
-            return !isLocalImage && !isS3Image;
-          });
-          imagesWithoutCustomImages.push(urlToUse);
-          return imagesWithoutCustomImages;
-        });
-      } else {
-        logWhenDevelopmentMode('does not have a local file already');
-        setImages((current) => [...current, urlToUse]);
+      if (atLimit) {
+        showLimitAlert();
+        return;
       }
-      handleSelect(
-        hasCustomImageAlready ? images.length - 1 : images.length,
-        urlToUse,
-        true,
-      );
+      const urlToUse = result.uri;
+      logWhenDevelopmentMode({
+        customImagesCount,
+        slotsRemaining,
+        MAX_CUSTOM_IMAGES,
+      });
+      logWhenDevelopmentMode('adding custom image');
+      setImages((current) => [...current, urlToUse]);
+      handleSelect(images.length, urlToUse, true);
       lastAddedImageUrlRef.current = urlToUse;
     },
-    [handleSelect, images, lastAddedImageUrlRef],
+    [
+      atLimit,
+      customImagesCount,
+      slotsRemaining,
+      handleSelect,
+      images,
+      lastAddedImageUrlRef,
+      showLimitAlert,
+    ],
   );
 
   useEffect(() => {
@@ -141,10 +153,18 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         }}
       />
       <Row space={spacing} mt={spacing}>
-        <ImageCapturer
-          onImageChange={onImageReturned}
-          borderColor={modeColor}
-        />
+        <View style={styles.imageCaptureWrapper}>
+          <ImageCapturer
+            onImageChange={onImageReturned}
+            borderColor={modeColor}
+          />
+          {atLimit && (
+            <TouchableOpacity
+              style={StyleSheet.absoluteFillObject}
+              onPress={showLimitAlert}
+            />
+          )}
+        </View>
       </Row>
       <ModalWithBlur
         title="Delete Image"
@@ -174,3 +194,9 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     </Column>
   );
 }
+
+const styles = StyleSheet.create({
+  imageCaptureWrapper: {
+    position: 'relative',
+  },
+});

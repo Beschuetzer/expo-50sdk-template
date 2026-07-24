@@ -1,4 +1,5 @@
 ## MVP
+
 -add a way to record cooking instructions and save them to the db
     -analyze the current project and propose the top 2 approaches
 

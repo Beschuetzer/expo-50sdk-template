@@ -1,5 +1,7 @@
-import { View, useTheme } from 'native-base';
-import { TouchableOpacity } from 'react-native';
+import { useTheme } from 'native-base';
+import { useCallback } from 'react';
+import { Animated, TouchableOpacity } from 'react-native';
+import { TapGestureHandler, State } from 'react-native-gesture-handler';
 
 import { ImageRenderer } from '../ImageRenderer';
 
@@ -9,6 +11,7 @@ type ThumbnailPickerImageProps = {
   borderColor?: string;
   imageUrl: string;
   index?: number;
+  onDoubleTap?: (imageUrl: string) => void;
   onLongPress?: (imageUrl: string) => void;
   onPress?: (imageUrl: string) => void;
 };
@@ -18,30 +21,43 @@ export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
     imageUrl,
     index = EMPTY_NUMBER,
     borderColor = 'transparent',
+    onDoubleTap,
     onLongPress,
     onPress,
   } = props;
   const theme = useTheme();
 
+  const handleDoubleTap = useCallback(
+    (event: any) => {
+      if (event.nativeEvent.state === State.ACTIVE) {
+        onDoubleTap?.(imageUrl);
+      }
+    },
+    [onDoubleTap, imageUrl],
+  );
+
   return (
-    <View
-      ml={index > 0 ? theme.space[FORM_INTER_ITEM_SPACING] / 4 : 0}
-      key={imageUrl}
-      borderWidth={2}
-      borderColor={borderColor}
-    >
-      <TouchableOpacity
-        onPress={() => onPress && onPress(imageUrl)}
-        onLongPress={() => onLongPress && onLongPress(imageUrl)}
+    <TapGestureHandler numberOfTaps={2} onHandlerStateChange={handleDoubleTap}>
+      <Animated.View
+        style={{
+          marginLeft: index > 0 ? theme.space[FORM_INTER_ITEM_SPACING] / 4 : 0,
+          borderWidth: 2,
+          borderColor,
+        }}
       >
-        <ImageRenderer
-          showFullscreenOnPress={false}
-          source={imageUrl}
-          contentFit="cover"
-          transition={1000}
-          cachePolicy="memory"
-        />
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          onPress={() => onPress?.(imageUrl)}
+          onLongPress={() => onLongPress?.(imageUrl)}
+        >
+          <ImageRenderer
+            showFullscreenOnPress={false}
+            source={imageUrl}
+            contentFit="cover"
+            transition={1000}
+            cachePolicy="memory"
+          />
+        </TouchableOpacity>
+      </Animated.View>
+    </TapGestureHandler>
   );
 }

@@ -69,6 +69,7 @@ export const IMAGE_RENDERER_WIDTH_DEFAULT = 60;
 export const IMAGE_RENDERER_ASPECT_RATIO_DEFAULT = 1.5;
 export const IMAGE_QUALITY = 0.25;
 export const MAX_CUSTOM_IMAGES = 3;
+export const MAX_COOKING_INSTRUCTION_IMAGES = 1;
 export const IMAGE_PRIORITY_MAPPING: {
   [key: number | string]: keyof UpcProduct;
 } = {

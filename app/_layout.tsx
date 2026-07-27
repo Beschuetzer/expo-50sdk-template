@@ -164,6 +164,15 @@ function RootLayoutNav() {
                         }}
                       />
                       <Stack.Screen
+                        name={Routes.CookingInstructionsScreen}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Cooking Instructions',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
                         name={Routes.ShareIntentScreen}
                         options={{
                           presentation: 'modal',

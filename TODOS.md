@@ -1,8 +1,11 @@
+## Mutually Exclusive Items
+
+I want to add the notion of mutually exclusive items.  The way this relationship shows up by having a special tile in the ShoppingList and InCartList which can be expanded to show the full details of the two items.  The two items though should visually be inside of the expanded mutally exclusive item.  The way to add a new mutually exclusive item would be via the menu and a screen that allows you to select two items.  Please implement this
+
 ## MVP
 
--add a way to record cooking instructions and save them to the db
-    -analyze the current project and propose the top 2 approaches
-
+- Add a way to make items mutually exclusive?
+- add return items?
 -Make aisle number field accept letters (check the sorting)
     --on route creation screen, have one input row at the top which is used to add new items to the route.  Inputs are "name" (e.g. "184" or "electronics section"; some string) and a number input to correspond to the location that the item will be inserted at (instead of making the list items dragable);  Each item should have up and down arrows for re-positioning as well
     --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
@@ -21,7 +24,7 @@
 
 
 -add an option to scan an item while in the shopping list and have it move it to the cart if it's is in the shopping list other show a toast saying it is not in the shopping list
--Add a way to make items mutually exclusive?
+
 -add a scroll bar like Music player app
 -Move all of the menu items in the Items tab to a search bar and icons
 -add ability to share items (add a list of permissions (e.g. read and write) which the server checks for doing anything; POST endpoints need write permission and GET needs either)

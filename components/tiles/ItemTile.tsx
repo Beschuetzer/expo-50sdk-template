@@ -1,8 +1,13 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, theme } from 'native-base';
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
+import {
+  RectButton,
+  RectButtonProps,
+  TouchableOpacity,
+} from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
 import { DeveloperInfo } from './DeveloperInfo';
@@ -51,6 +56,20 @@ export function ItemTile(props: ItemTileProps<Item>) {
   } = props;
   const lastPurchased = useSelector(lastPurchasedSelector(item)) || 0;
   const frequencyObj = useMemo(() => getDurationValue(item?.frequency), [item]);
+  const hasCookingInstructions =
+    (item?.cookingInstructions?.steps?.length ?? 0) > 0 ||
+    (item?.cookingInstructions?.images?.length ?? 0) > 0;
+
+  const openCookingInstructions = () => {
+    // @ts-ignore
+    navigation.navigate(Routes.CookingInstructionsScreen, { item });
+  };
+
+  const cookingInstructionsIcon = hasCookingInstructions ? (
+    <TouchableOpacity onPress={openCookingInstructions}>
+      <FontAwesome name="book" size={13} color={theme.colors.primary[500]} />
+    </TouchableOpacity>
+  ) : null;
 
   function renderContent() {
     switch (viewingMode) {
@@ -60,7 +79,9 @@ export function ItemTile(props: ItemTileProps<Item>) {
             item={item}
             isMultiSelectMode={isMultiSelectMode}
             isSelected={isSelected}
-          />
+          >
+            {cookingInstructionsIcon}
+          </ItemTileBasicContent>
         );
       default:
         return (
@@ -73,6 +94,7 @@ export function ItemTile(props: ItemTileProps<Item>) {
               />
             </Column>
             <ItemTileNameAndUpcColumn item={item}>
+              {cookingInstructionsIcon}
               <Text>
                 1 {item.unit || ITEM_UNIT_INITIAL} every{' '}
                 {frequencyObj.number > 1

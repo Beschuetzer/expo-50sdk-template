@@ -12,6 +12,7 @@ export const COLORS = {
     muted: '#888',
     selected: '#27AE60',
     disabled: '#ccc',
+    noteBackground: '#FFFBEB',
   },
   dark: {
     text: '#fff',
@@ -22,5 +23,6 @@ export const COLORS = {
     muted: '#888',
     selected: '#27AE60',
     disabled: '#ccc',
+    noteBackground: '#FFFBEB',
   },
 };

@@ -65,7 +65,13 @@ export type Key = XOR<
 > &
   Partial<Id>;
 
+export type CookingInstructions = {
+  steps: string[];
+  images: string[];
+};
+
 export type ItemBase = {
+  cookingInstructions?: CookingInstructions;
   /**
    *This is in milliseconds
    **/

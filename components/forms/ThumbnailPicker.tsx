@@ -1,4 +1,5 @@
 import { ImagePickerAsset } from 'expo-image-picker';
+import { useNavigation } from 'expo-router';
 import { Center, Column, Row, theme } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
@@ -14,12 +15,15 @@ import {
   EMPTY_STRING,
   MAX_CUSTOM_IMAGES,
 } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
+import { Item } from '@/types/Item';
 import { SpacingProp, StyleProp } from '@/types/general';
 import { logWhenDevelopmentMode } from '@/utils/logging';
 
 type ThumbnailPickerProps = {
   initialImages: string[];
+  maxCustomImages?: number;
   onDeleteImage?: (url: string) => void;
   onSelectImage?: (url: string, isCustomImage: boolean) => void;
   onChange?: (images: string[]) => void;
@@ -30,12 +34,14 @@ type ThumbnailPickerProps = {
 export function ThumbnailPicker(props: ThumbnailPickerProps) {
   const {
     initialImages,
+    maxCustomImages = MAX_CUSTOM_IMAGES,
     onChange,
     onDeleteImage,
     onSelectImage,
     selectedIndex = EMPTY_NUMBER,
     spacing,
   } = props;
+  const navigation = useNavigation();
   const [currentIndex, setCurrentIndex] = useState(selectedIndex);
   const isDarkMode = useIsDarkMode();
   const modeColor = useMemo(
@@ -58,20 +64,22 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     [images],
   );
   const atLimit = useMemo(
-    () => customImagesCount >= MAX_CUSTOM_IMAGES,
-    [customImagesCount],
+    () => customImagesCount >= maxCustomImages,
+    [customImagesCount, maxCustomImages],
   );
   const slotsRemaining = useMemo(
-    () => MAX_CUSTOM_IMAGES - customImagesCount,
-    [customImagesCount],
+    () => maxCustomImages - customImagesCount,
+    [customImagesCount, maxCustomImages],
   );
 
   const showLimitAlert = useCallback(() => {
     Alert.alert(
       'Image Limit Reached',
-      `You can only have ${MAX_CUSTOM_IMAGES} custom images. Please delete an existing image before adding a new one.`,
+      `You can only have ${maxCustomImages} custom image${
+        maxCustomImages !== 1 ? 's' : ''
+      }. Please delete an existing image before adding a new one.`,
     );
-  }, []);
+  }, [maxCustomImages]);
 
   const handleLongPress = useCallback(
     (index: number, imageUrl?: string) => {
@@ -101,6 +109,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
       const urlToUse = result.uri;
       logWhenDevelopmentMode({
         customImagesCount,
+        maxCustomImages,
         slotsRemaining,
         MAX_CUSTOM_IMAGES,
       });
@@ -147,6 +156,15 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
               imageUrl={imageUrl}
               onPress={(imageUrl) => handleSelect(index, imageUrl, false)}
               onLongPress={(imageUrl) => handleLongPress(index, imageUrl)}
+              onDoubleTap={(imageUrl) => {
+                // @ts-ignore
+                navigation.navigate(Routes.FullscreenImageScreen, {
+                  item: {
+                    images: [imageUrl],
+                    imageToUseIndex: 0,
+                  } as unknown as Item,
+                });
+              }}
               index={index}
             />
           );

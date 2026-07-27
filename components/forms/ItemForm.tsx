@@ -1,4 +1,5 @@
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { useNavigation } from '@react-navigation/native';
 import _ from 'lodash';
 import { Stack, Input, Row, useTheme, Button } from 'native-base';
 import React, {
@@ -32,9 +33,11 @@ import {
   IS_FROZEN_DEFAULT,
   TIME_TO_EXPIRATION_DEFAULT,
 } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import { UPC_REGEX, UPC_REQUIRED_CHAR_LENGTH } from '@/constants/regexs';
 import {
   Item,
+  CookingInstructions,
   ItemWithStoreSpecificValues,
   Key,
   StoreSpecificValueKey,
@@ -46,6 +49,7 @@ import {
   ItemFormData,
   ItemFormValdation,
 } from '@/types/itemForm';
+import { registerCookingCallback } from '@/utils/cookingInstructionsCallbackRegistry';
 import {
   deleteFile,
   displayAlert,
@@ -122,6 +126,13 @@ export function ItemForm(props: ItemFormProps) {
   const storeSpecificValuesRef = useRef<StoreSpecificValues>(null);
   const imagesToSaveRef = useRef<string[]>([]);
   const initialImages = useMemo(() => itemToUse?.images || [], [itemToUse]);
+  const [cookingInstructions, setCookingInstructions] =
+    useState<CookingInstructions>({
+      steps: itemToUse?.cookingInstructions?.steps ?? [],
+      images: itemToUse?.cookingInstructions?.images ?? [],
+    });
+  // @ts-ignore
+  const formNavigation = useNavigation();
   const formValidation: ItemFormValdation = useMemo(
     () => getItemValidation(formData),
     [formData],
@@ -176,6 +187,11 @@ export function ItemForm(props: ItemFormProps) {
         unit: unitRef.current,
         images: imagesToSaveRef.current,
         imageToUseIndex: foundIndex >= 0 ? foundIndex : DEFAULT_IMAGE_INDEX,
+        cookingInstructions:
+          cookingInstructions.steps.length > 0 ||
+          cookingInstructions.images.length > 0
+            ? cookingInstructions
+            : undefined,
         addedDate: itemToUse?.addedDate || now,
         lastUpdatedDate: now,
       } as Item;
@@ -258,6 +274,7 @@ export function ItemForm(props: ItemFormProps) {
       shouldClose && onClose && onClose();
     },
     [
+      cookingInstructions,
       currentStore,
       formData,
       timeToExpirationRef,
@@ -519,6 +536,45 @@ export function ItemForm(props: ItemFormProps) {
         headingTag={InputText}
         spacing={theme.space[FORM_INTER_ITEM_SPACING]}
       />
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <Row alignItems="center" justifyContent="space-between">
+          <InputText>Cooking Instructions</InputText>
+          <Button
+            size="xs"
+            variant="ghost"
+            onPress={() => {
+              const callbackKey = registerCookingCallback(
+                (updated: CookingInstructions) => {
+                  setCookingInstructions(updated);
+                },
+              );
+              // @ts-ignore – expo-router v3 typed params; key is serializable
+              formNavigation.navigate(Routes.CookingInstructionsScreen, {
+                cookingInstructions,
+                callbackKey,
+              });
+            }}
+          >
+            {cookingInstructions.steps.length > 0 ||
+            cookingInstructions.images.length > 0
+              ? `Edit (${[
+                  cookingInstructions.steps.length > 0
+                    ? `${cookingInstructions.steps.length} step${
+                        cookingInstructions.steps.length !== 1 ? 's' : ''
+                      }`
+                    : null,
+                  cookingInstructions.images.length > 0
+                    ? `${cookingInstructions.images.length} photo${
+                        cookingInstructions.images.length !== 1 ? 's' : ''
+                      }`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(', ')})`
+              : 'Add'}
+          </Button>
+        </Row>
+      </Stack>
       <ItemFormStoreSpecific
         item={itemToUse}
         onValueChange={onItemSpecificValueChange}

@@ -34,7 +34,7 @@ import {
   ReverseGeocodingResponse,
 } from '@/components/services/GeoCodingService';
 import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
-import { LOCAL_FILE_REGEX } from '@/constants/regexs';
+import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { Item, LastPurchasedMap } from '@/types/Item';
 import { GpsCoordinate, Store } from '@/types/Store';
 import {
@@ -570,6 +570,31 @@ export const deleteItems = createAsyncThunk(
       if (!response?.acknowledged) {
         throw new Error('Unable to delete items.');
       }
+
+      // Remove S3-hosted images (item photos + cooking instruction photos)
+      const s3ObjKeys: string[] = [];
+      for (const item of itemsInDb) {
+        for (const url of item.images ?? []) {
+          if (url.match(AMAZON_S3_REGEX)) {
+            const key = getS3ObjectKey(url);
+            if (key) s3ObjKeys.push(key);
+          }
+        }
+        for (const url of item.cookingInstructions?.images ?? []) {
+          if (url.match(AMAZON_S3_REGEX)) {
+            const key = getS3ObjectKey(url);
+            if (key) s3ObjKeys.push(key);
+          }
+        }
+      }
+      if (s3ObjKeys.length > 0) {
+        await BFF_SERVICE.deleteS3Objects({
+          dispatch,
+          objKeys: s3ObjKeys,
+          ...getUserCredentials(account),
+        });
+      }
+
       dispatch(removeItemsListItems(items));
     } catch (error) {
       dispatch(removeItemsListItems(itemsNotInDb));
@@ -844,14 +869,40 @@ export const saveItem = createAsyncThunk(
       );
       const anySaved = savedImageResults.some(([url]) => !!url);
 
-      if (!input.item.needsSaving && !anySaved) {
+      // Upload any local cooking instruction photos to S3
+      const cookingPhotos =
+        itemToDispatch.item.cookingInstructions?.images ?? [];
+      const savedCookingPhotoResults = await uploadLocalImages(
+        cookingPhotos,
+        account,
+        dispatch,
+      );
+      const anyCookingPhotosSaved = savedCookingPhotoResults.some(
+        ([url]) => !!url,
+      );
+
+      if (!input.item.needsSaving && !anySaved && !anyCookingPhotosSaved) {
         shouldDisplayError = false;
         throw new Error('No need to save item.');
-      } else if (anySaved) {
+      }
+      if (anySaved) {
         for (const [savedImageUrl, savedImageIndex] of savedImageResults) {
           if (savedImageUrl) newImages[savedImageIndex] = savedImageUrl;
         }
         itemToDispatch.item.images = newImages;
+      }
+      if (anyCookingPhotosSaved && itemToDispatch.item.cookingInstructions) {
+        const newCookingPhotos = [...cookingPhotos];
+        for (const [
+          savedImageUrl,
+          savedImageIndex,
+        ] of savedCookingPhotoResults) {
+          if (savedImageUrl) newCookingPhotos[savedImageIndex] = savedImageUrl;
+        }
+        itemToDispatch.item.cookingInstructions = {
+          ...itemToDispatch.item.cookingInstructions,
+          images: newCookingPhotos,
+        };
       }
 
       dispatch(setLoading(`Saving '${getKeyToUse(input.item)}' in Database`));
@@ -877,6 +928,25 @@ export const saveItem = createAsyncThunk(
             }
           }
           itemToDispatch.item.images = newImages;
+          // Roll back cooking instruction photos
+          if (itemToDispatch.item.cookingInstructions) {
+            const rolledBackPhotos = [...cookingPhotos];
+            for (const [
+              savedImageUrl,
+              savedImageIndex,
+              customImageUrl,
+            ] of savedCookingPhotoResults) {
+              if (savedImageUrl) {
+                rolledBackPhotos[savedImageIndex] = customImageUrl;
+                const objectKey = getS3ObjectKey(savedImageUrl);
+                if (objectKey) objKeys.push(objectKey);
+              }
+            }
+            itemToDispatch.item.cookingInstructions = {
+              ...itemToDispatch.item.cookingInstructions,
+              images: rolledBackPhotos,
+            };
+          }
           if (objKeys.length > 0) {
             await BFF_SERVICE.deleteS3Objects({
               dispatch,
@@ -892,6 +962,19 @@ export const saveItem = createAsyncThunk(
       for (const [, , customImageUrl] of savedImageResults) {
         deleteFile(customImageUrl);
       }
+      for (const [, , customImageUrl] of savedCookingPhotoResults) {
+        deleteFile(customImageUrl);
+      }
+      // Delete S3 cooking instruction images that the user removed
+      const prevItem = state.lists.itemsList.data.find(
+        (i) => i._id === input.item._id,
+      );
+      await deleteRemovedCookingInstructionImages(
+        prevItem?.cookingInstructions?.images ?? [],
+        itemToDispatch.item.cookingInstructions?.images ?? [],
+        account,
+        dispatch,
+      );
       itemToDispatch.item.needsSaving = false;
       itemToDispatch.item.hasBeenSaved = true;
     } catch (error) {
@@ -1169,12 +1252,11 @@ export function handleErrorsWithRejection<T>(
   return rejectWithValue(messageToUse);
 }
 
-async function saveCustomImageToS3(
-  item: Item,
+async function uploadLocalImages(
+  images: string[],
   account: UserAccount,
   dispatch: Dispatch,
 ): Promise<ProcessedGroceryListItem[]> {
-  logWhenDevelopmentMode({ item, account });
   const emptyResult: ProcessedGroceryListItem = [
     EMPTY_STRING,
     EMPTY_NUMBER,
@@ -1185,7 +1267,7 @@ async function saveCustomImageToS3(
       throw new Error('No credentials found');
     }
 
-    const localImageEntries = item.images
+    const localImageEntries = images
       .map((image, idx) => [idx, image] as [number, string])
       .filter(([, image]) => !!image.match(LOCAL_FILE_REGEX));
 
@@ -1230,10 +1312,7 @@ async function saveCustomImageToS3(
             customImageUrl,
           ] as ProcessedGroceryListItem;
         } catch (error) {
-          logWhenDevelopmentMode({
-            source: 'saveCustomImageToS3 (item)',
-            error,
-          });
+          logWhenDevelopmentMode({ source: 'uploadLocalImages (item)', error });
           return emptyResult;
         }
       }),
@@ -1241,7 +1320,42 @@ async function saveCustomImageToS3(
 
     return results.filter(([url]) => !!url);
   } catch (error) {
-    logWhenDevelopmentMode({ source: 'saveCustomImageToS3', error });
+    logWhenDevelopmentMode({ source: 'uploadLocalImages', error });
     return [];
+  }
+}
+
+async function saveCustomImageToS3(
+  item: Item,
+  account: UserAccount,
+  dispatch: Dispatch,
+): Promise<ProcessedGroceryListItem[]> {
+  logWhenDevelopmentMode({ item, account });
+  return uploadLocalImages(item.images, account, dispatch);
+}
+
+/**
+ * Compares the previous and new cooking instruction image arrays and deletes
+ * from S3 any images that were present before but have since been removed.
+ */
+async function deleteRemovedCookingInstructionImages(
+  prevImages: string[],
+  nextImages: string[],
+  account: UserAccount,
+  dispatch: Dispatch,
+): Promise<void> {
+  const removedS3Images = prevImages.filter(
+    (img) => img.match(AMAZON_S3_REGEX) && !nextImages.includes(img),
+  );
+  if (removedS3Images.length === 0) return;
+  const objKeys = removedS3Images
+    .map((url) => getS3ObjectKey(url))
+    .filter(Boolean) as string[];
+  if (objKeys.length > 0) {
+    await BFF_SERVICE.deleteS3Objects({
+      dispatch,
+      objKeys,
+      ...getUserCredentials(account),
+    });
   }
 }

@@ -2,7 +2,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { Row, Column, Text, useTheme } from 'native-base';
 import { useCallback, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Alert } from 'react-native';
 import { RectButton, TouchableOpacity } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -12,6 +12,7 @@ import { TileIsSelectedBackground } from './ItemTileIsSelectedColumn';
 import { ItemTileNameAndUpcColumn } from './ItemTileNameAndUpcColumn';
 import { ImageRenderer } from '../ImageRenderer';
 
+import { COLORS } from '@/constants/colors';
 import {
   FORM_INTER_ITEM_SPACING,
   IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
@@ -49,6 +50,14 @@ export function ItemTileWithStoreSpecificValues(
   const dispatch = useDispatch();
   const theme = useTheme();
   const navigation = useNavigation();
+  const hasCookingInstructions =
+    (item?.cookingInstructions?.steps?.length ?? 0) > 0 ||
+    (item?.cookingInstructions?.images?.length ?? 0) > 0;
+
+  const openCookingInstructions = () => {
+    // @ts-ignore
+    navigation.navigate(Routes.CookingInstructionsScreen, { item });
+  };
 
   const quantityAtStore = useSelector(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.Quantity),
@@ -113,6 +122,32 @@ export function ItemTileWithStoreSpecificValues(
         </Row>
 
         <Row space={theme.space[FORM_INTER_ITEM_SPACING] * 3} flex={0}>
+          {noteAtStore ? (
+            <TouchableOpacity
+              hitSlop={getButtonHitSlop(2)}
+              onPress={() =>
+                Alert.alert(item.name || 'Note', String(noteAtStore))
+              }
+            >
+              <FontAwesome
+                color={theme.colors.primary[900]}
+                size={theme.sizes[3]}
+                name="sticky-note-o"
+              />
+            </TouchableOpacity>
+          ) : null}
+          {hasCookingInstructions ? (
+            <TouchableOpacity
+              hitSlop={getButtonHitSlop(2)}
+              onPress={openCookingInstructions}
+            >
+              <FontAwesome
+                color={theme.colors.primary[900]}
+                size={theme.sizes[3]}
+                name="book"
+              />
+            </TouchableOpacity>
+          ) : null}
           <TouchableOpacity
             hitSlop={getButtonHitSlop(2)}
             onPress={onTransferPressLocal}
@@ -150,6 +185,8 @@ export function ItemTileWithStoreSpecificValues(
     decrementQuantity,
     incrementQuantity,
     item,
+    noteAtStore,
+    onTransferPressLocal,
     priceAtStore,
     quantityAtStore,
   ]);
@@ -220,10 +257,11 @@ export function ItemTileWithStoreSpecificValues(
         }
       }}
     >
-      <Column>
+      <Column bg={noteAtStore ? COLORS.light.noteBackground : undefined}>
         <Row padding={theme.space[FORM_INTER_ITEM_SPACING] * 1}>
           {renderContent()}
         </Row>
+
       </Column>
     </RectButton>
   );

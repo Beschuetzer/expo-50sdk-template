@@ -173,6 +173,15 @@ function RootLayoutNav() {
                         }}
                       />
                       <Stack.Screen
+                        name={Routes.MutuallyExclusiveCreatorScreen}
+                        options={{
+                          presentation: 'modal',
+                          title: 'New Mutually Exclusive Pair',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
                         name={Routes.ShareIntentScreen}
                         options={{
                           presentation: 'modal',

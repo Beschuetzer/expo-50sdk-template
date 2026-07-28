@@ -48,6 +48,7 @@ export const FILE_NAMES = {
   inventory: 'inventory',
   items: 'items',
   lastPurchasedMap: 'lastPurchasedMap',
+  mutuallyExclusiveGroups: 'mutuallyExclusiveGroups',
   stores: 'stores',
   storeSpecificValues: 'storeSpecificValues',
 };

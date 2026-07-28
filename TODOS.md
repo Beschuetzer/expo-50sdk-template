@@ -1,17 +1,33 @@
-## Mutually Exclusive Items
-
-I want to add the notion of mutually exclusive items.  The way this relationship shows up by having a special tile in the ShoppingList and InCartList which can be expanded to show the full details of the two items.  The two items though should visually be inside of the expanded mutally exclusive item.  The way to add a new mutually exclusive item would be via the menu and a screen that allows you to select two items.  Please implement this
-
 ## MVP
 
-- Add a way to make items mutually exclusive?
-- add return items?
--Make aisle number field accept letters (check the sorting)
-    --on route creation screen, have one input row at the top which is used to add new items to the route.  Inputs are "name" (e.g. "184" or "electronics section"; some string) and a number input to correspond to the location that the item will be inserted at (instead of making the list items dragable);  Each item should have up and down arrows for re-positioning as well
-    --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
-    --each route object will be associated with a storeId and userId to allow for sharing later
-    --if there is a route for a store, the store-specific input in ItemForm for aisle number should become a picker
-    --figure out why items with no aisle are not being sorted at the front or the end but in the middle somewhere
+- Return items:
+    I want you to create a way to add return items to a shopping list for a store.  There should be a menu item called "Add Return Item", which when pressed opens a modal for selecting an item to return.  Return items appear similarly to regular items in the shopping list with two exceptions:
+        1. They are always the first items in the list (at the top)
+        2. They are styled differently so it is clear they are returns.
+        
+    pressing the "Clear Cart" button in the shopping list menu should remove all return items as well.
+        
+- I want you to create a new feature called route creation.  THe idea is that users can create routes for a store based on the locations in the store.  You will need to do the following to make this work properly:
+
+    1. Create a new field on the Item type (store-specific value type) called "location" which is a string.  You will also need to create a "routes" field on the Store type with is an array of type Route (see below).  Users will need to be able to create new locations for a given store, so you will need a way to do that in the route creation screen.
+    ```typescript
+
+    // the idea is to create a "Route" or way to go through the store.
+    type Route = {
+        name: string // name of the route
+        userId: string // person who created the route
+        storeId: string // store to which the route 
+        locations: string[] // the ordering here matters.  The location at index 0 is the first location in the route and the last location is the last location in the route.
+    }
+    
+    
+    ```
+    2. Create a route creation screen that allows users to create locations for a store.  On this screen should be the name of the store as the screen's title.  Each location should be a box/item that can be dragged to adjust the order for the route.  The route then should be saved to either a new slice or an existing slice if it makes sense and will save the storeId, userId, and the locationIds
+    3. The item form will need a way to display the new location field.
+    4. The shopping list should have a menu item called "Start Route" added.  This will open a modal where users can select a route.  Once the route is selected and the "Start" button is pressed, the items in the shopping cart will be re-arranged based on their location in the selected route (items at the beginning of the route come before items after it).  The idea is that the user can more easily go through the store and find the items in the order that they appear on the route.
+
+    old stuff:
+        --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
 
 
 
@@ -83,9 +99,8 @@ Check forms and other components for cases where a component is being reset via 
 ## Features
 -ability to add a "frequency" field which guesses the time before expected next purchase date for each item.  When pulling up a store, the date each item was last in the basket is used to provide recommendaitons for what may be needed this trip (add ability to sort on the date items were last in basket)
 -ability to remove all items
--gps detection of store you're at when opening the app
 -route memorization feature which shows the sequence of items and their pics after X seconds (i.e. flashcards)
-the ability to create a store layout and have a map/route be generated based on the items in the cart (and where they are in the store).
+-the ability to create a store layout and have a map/route be generated based on the items in the cart (and where they are in the store).
 -have the ability to share/post created store layouts
 -ability to start a "shopping run" and have it track where you are in the run and provide images of the current item and accept input to change to the next item (or go back)
 -voice commands like adding an item to the list

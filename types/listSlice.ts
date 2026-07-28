@@ -58,6 +58,50 @@ export type CopyStoreSpecificValuesPayload = {
 
 export type CompletePurchasePayload = LastPurchasedMap | undefined;
 
+export type MutuallyExclusiveGroup = {
+  id: string;
+  name?: string;
+  itemKeys1: string[];
+  itemKeys2: string[];
+  quantities1: number[];
+  quantities2: number[];
+};
+
+export type AddMutuallyExclusiveGroupPayload = {
+  name: string;
+  itemKeys1: string[];
+  itemKeys2: string[];
+  quantities1?: number[];
+  quantities2?: number[];
+};
+
+export type RemoveItemFromMutuallyExclusiveGroupPayload = {
+  groupId: string;
+  side: 1 | 2;
+  itemKey: string;
+};
+
+export type UpdateMutuallyExclusiveGroupPayload = {
+  id: string;
+  name: string;
+  itemKeys1: string[];
+  itemKeys2: string[];
+  quantities1: number[];
+  quantities2: number[];
+};
+
+export type RemoveMutuallyExclusiveGroupPayload = {
+  id: string;
+  /** When true the group is dissolved but items remain in the shopping list */
+  keepItems?: boolean;
+};
+
+export type AcceptMutuallyExclusiveGroupSidePayload = {
+  id: string;
+  /** 1 = keep Side A (remove Side B items), 2 = keep Side B (remove Side A items) */
+  acceptedSide: 1 | 2;
+};
+
 export type HandleSaveAllResponsePayload = SaveAllResponse & {
   /**
    *The items that should have been saved

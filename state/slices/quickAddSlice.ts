@@ -13,7 +13,6 @@ import {
   QuickAddState,
   ProcessedGroceryListWithGuesses,
 } from '@/types/quickAdd';
-import { getItemFromList } from '@/utils/helpers';
 
 //#region Defaults
 export const QUICK_ADD_ITEMS_INITIAL = Object.freeze({

@@ -248,6 +248,14 @@ export default function TabOneScreen() {
         text: 'Toggle Viewing Mode',
         onPress: onToggleViewingModePress,
       },
+      {
+        text: 'Add Mutual Exclusion Group',
+        onPress: () => {
+          closeMenu();
+          // @ts-ignore
+          navigation.navigate(Routes.MutuallyExclusiveCreatorScreen);
+        },
+      },
     ];
     if (index === 0) {
       options.push({

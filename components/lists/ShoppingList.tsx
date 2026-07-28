@@ -13,6 +13,7 @@ import FilterListInput from '../FilterListInput';
 import { StoreSelectionModal } from '../modals/StoreSelectionModal';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
+import { MutuallyExclusiveTile } from '../tiles/MutuallyExclusiveTile';
 
 import {
   EMPTY_STRING,
@@ -25,6 +26,7 @@ import {
   addItemToCart,
   currentStoreSelector,
   isMultiSelectModeForShoppingCartSelector,
+  mutuallyExclusiveGroupsSelector,
   selectedItemsFromShoppingCartSelector,
   storeSpecificListSelector,
   setIsMultiSelectModeForShoppingCart,
@@ -33,7 +35,6 @@ import {
   moveItemToAnotherCart,
 } from '@/state/slices/listsSlice';
 import { Item, ItemWithStoreSpecificValues, Key } from '@/types/Item';
-import { ListRow } from '@/types/general';
 import { ListName } from '@/types/listSlice';
 import { ensureMaxLength, getKeyToUse } from '@/utils/helpers';
 
@@ -64,6 +65,7 @@ export function ShoppingList(props: ShoppingListProps) {
   const { viewingMode } = props;
   const shoppingList = useSelector(storeSpecificListSelector(listName));
   const currentStore = useSelector(currentStoreSelector);
+  const meGroups = useSelector(mutuallyExclusiveGroupsSelector);
   const theme = useTheme();
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
@@ -75,6 +77,28 @@ export function ShoppingList(props: ShoppingListProps) {
   const [itemToTransfer, setItemToTransfer] = useState<Item | null>(null);
   const [shoppingListToDisplay, setShoppingListToDisplay] =
     useState(shoppingList);
+
+  // Keys belonging to any ME group that has at least one item in the live list
+  // Resolved ME group entries with their item data (from live Redux list).
+  // Always show all ME groups so newly created pairs are immediately visible
+  // even if neither item has been added to the shopping list yet.
+  const meEntries = useMemo(() => {
+    if (!meGroups?.length) return [];
+    return meGroups.map((g) => ({
+      _entryType: 'meGroup' as const,
+      group: g,
+      items1: g.itemKeys1.map((k) =>
+        shoppingList.find((i) => getKeyToUse(i) === k),
+      ),
+      items2: g.itemKeys2.map((k) =>
+        shoppingList.find((i) => getKeyToUse(i) === k),
+      ),
+    }));
+  }, [meGroups, shoppingList]);
+
+  // All shopping-list items keep their own individual tiles; the ME tile
+  // coexists as a relationship indicator above them.
+  const regularItems = shoppingListToDisplay;
 
   const iconSize = useMemo(() => {
     return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
@@ -103,12 +127,26 @@ export function ShoppingList(props: ShoppingListProps) {
     [listRef],
   );
 
-  function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {
+  function renderItem({ item, index }: { item: any; index: number }) {
     if (index === 0) return <TotalListPrice listName={ListName.ShoppingList} />;
 
+    // Mutually exclusive group entry
+    if (item._entryType === 'meGroup') {
+      return (
+        <MutuallyExclusiveTile
+          group={item.group}
+          items1={item.items1}
+          items2={item.items2}
+          listName={listName}
+          viewingMode={viewingMode}
+        />
+      );
+    }
+
+    const typedItem = item as ItemWithStoreSpecificValues;
     return (
       <SwipeableRow
-        key={getKeyToUse(item)}
+        key={getKeyToUse(typedItem)}
         leftSwipe={{
           title: (
             <Stack paddingRight={theme.space[2]} alignItems="center">
@@ -121,11 +159,11 @@ export function ShoppingList(props: ShoppingListProps) {
             </Stack>
           ),
           backgroundColor: theme.colors.red[900],
-          onPress: onSwipeLeft.bind(null, item),
+          onPress: onSwipeLeft.bind(null, typedItem),
         }}
         rightSwipe={{
           backgroundColor: theme.colors.primary[900],
-          onPress: onSwipeRight.bind(null, item),
+          onPress: onSwipeRight.bind(null, typedItem),
           title: currentStore.name ? (
             <Stack
               paddingLeft={theme.space[FORM_INTER_ITEM_SPACING]}
@@ -153,17 +191,17 @@ export function ShoppingList(props: ShoppingListProps) {
         <ItemTileWithStoreSpecificValues
           isMultiSelectMode={isMultiSelectMode}
           listName={listName}
-          item={item}
+          item={typedItem}
           viewingMode={viewingMode}
           onTransferPress={() => {
-            setItemToTransfer(item);
+            setItemToTransfer(typedItem);
           }}
           buttonProps={{
             onLongPress: () => {
               dispatch(
                 updateSelectedItemsFromShoppingCart({
                   operation: 'set',
-                  item: isMultiSelectMode ? undefined : item,
+                  item: isMultiSelectMode ? undefined : typedItem,
                 }),
               );
               dispatch(setIsMultiSelectModeForShoppingCart(!isMultiSelectMode));
@@ -193,7 +231,7 @@ export function ShoppingList(props: ShoppingListProps) {
           }}
           isSelected={
             !!selectedItems.find(
-              (itemLocal) => getKeyToUse(item) === getKeyToUse(itemLocal),
+              (itemLocal) => getKeyToUse(typedItem) === getKeyToUse(itemLocal),
             )
           }
         />
@@ -224,10 +262,10 @@ export function ShoppingList(props: ShoppingListProps) {
             setRefreshing(false);
           }, 2000);
         }}
-        data={[{ name: 'in-cart price' } as any, ...shoppingListToDisplay]}
+        data={[{ name: 'in-cart price' } as any, ...meEntries, ...regularItems]}
         renderItem={renderItem}
-        keyExtractor={(item: ItemWithStoreSpecificValues, index: number) =>
-          getKeyToUse(item)
+        keyExtractor={(item: any, index: number) =>
+          item._entryType === 'meGroup' ? item.group.id : getKeyToUse(item)
         }
         estimatedItemSize={ESTIMATED_SIZE_FOR_SHOPPING_LISTS}
         ItemSeparatorComponent={() => <ListItemSeparator />}

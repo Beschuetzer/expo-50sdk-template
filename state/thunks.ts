@@ -360,6 +360,7 @@ export const login = createAsyncThunk(
             inventory: state.lists.inventory,
             items: state.lists.itemsList,
             lastPurchasedMap: state.lists.lastPurchasedMap,
+            mutuallyExclusiveGroups: state.lists.mutuallyExclusiveGroups,
             stores: {
               ...state.lists.storesList,
               currentStoreId: state.lists.currentStoreId,

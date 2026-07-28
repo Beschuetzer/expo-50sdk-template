@@ -47,8 +47,14 @@ import {
   AddAllToShoppingCartPayload,
   AddItemsListItemPayload,
   AddStoresListItemPayload,
+  AddMutuallyExclusiveGroupPayload,
+  AcceptMutuallyExclusiveGroupSidePayload,
+  RemoveItemFromMutuallyExclusiveGroupPayload,
+  UpdateMutuallyExclusiveGroupPayload,
   CompletePurchasePayload,
   HandleSaveAllResponsePayload,
+  MutuallyExclusiveGroup,
+  RemoveMutuallyExclusiveGroupPayload,
   ResetListToDisplayPayload,
   ResetListToDisplayFiltersPayload,
   SetFiltersPayload,
@@ -110,6 +116,7 @@ export type ListsState = {
   selectedItemsFromShoppingCart: ItemWithStoreSpecificValues[];
   selectedItemsFromInCart: ItemWithStoreSpecificValues[];
   storeSpecificValuesMap: StoreSpecificValuesMap;
+  mutuallyExclusiveGroups: MutuallyExclusiveGroup[];
 };
 
 const initialState: ListsState = {
@@ -141,6 +148,7 @@ const initialState: ListsState = {
   selectedItemsFromShoppingCart: getEmptyArray(),
   selectedItemsFromInCart: getEmptyArray(),
   storeSpecificValuesMap: getEmptyObject(),
+  mutuallyExclusiveGroups: [],
 };
 //#endregion
 
@@ -148,6 +156,58 @@ export const listsSlice = createSlice({
   name: 'lists',
   initialState,
   reducers: {
+    acceptMutuallyExclusiveGroupSide: (
+      state: ListsState,
+      action: PayloadAction<AcceptMutuallyExclusiveGroupSidePayload>,
+    ) => {
+      if (!state.mutuallyExclusiveGroups) {
+        state.mutuallyExclusiveGroups = [];
+        return;
+      }
+      const { id, acceptedSide } = action.payload;
+      const group = state.mutuallyExclusiveGroups.find((g) => g.id === id);
+      if (!group) return;
+
+      state.mutuallyExclusiveGroups = state.mutuallyExclusiveGroups.filter(
+        (g) => g.id !== id,
+      );
+
+      const storeId = state.currentStoreId;
+      if (!storeId) return;
+
+      // For each accepted-side item:
+      //   - in cart → skip (InCartList items are ignored)
+      //   - already in shopping list (qty > 0) → increment by group qty
+      //   - not in list (qty = 0 / no entry) → set to group qty
+      const acceptedItemKeys =
+        acceptedSide === 1 ? group.itemKeys1 : group.itemKeys2;
+      const acceptedQtys =
+        acceptedSide === 1
+          ? group.quantities1 ?? group.itemKeys1.map(() => 1)
+          : group.quantities2 ?? group.itemKeys2.map(() => 1);
+
+      for (const [i, key] of acceptedItemKeys.entries()) {
+        const isInCart = (state.storeSpecificValuesMap[key] as any)?.[
+          StoreSpecificValueKey.IsInCart
+        ]?.[storeId];
+        if (isInCart) continue;
+
+        if (!state.storeSpecificValuesMap[key]) {
+          (state.storeSpecificValuesMap as any)[key] = {};
+        }
+        const entry = state.storeSpecificValuesMap[key] as any;
+        if (!entry[StoreSpecificValueKey.Quantity]) {
+          entry[StoreSpecificValueKey.Quantity] = {};
+        }
+        if (!entry[StoreSpecificValueKey.IsInCart]) {
+          entry[StoreSpecificValueKey.IsInCart] = {};
+        }
+        const currentQty = entry[StoreSpecificValueKey.Quantity][storeId] ?? 0;
+        entry[StoreSpecificValueKey.Quantity][storeId] =
+          currentQty + acceptedQtys[i];
+        entry[StoreSpecificValueKey.IsInCart][storeId] = false;
+      }
+    },
     addAllToShoppingCart: (
       state: ListsState,
       action: PayloadAction<AddAllToShoppingCartPayload>,
@@ -275,6 +335,34 @@ export const listsSlice = createSlice({
         sortOrderValue: itemsList.sortOrderValue,
       };
     },
+    addMutuallyExclusiveGroup: (
+      state: ListsState,
+      action: PayloadAction<AddMutuallyExclusiveGroupPayload>,
+    ) => {
+      if (!state.mutuallyExclusiveGroups) state.mutuallyExclusiveGroups = [];
+      const { itemKeys1, itemKeys2, quantities1, quantities2 } = action.payload;
+
+      const sortedId = (keys: string[]) => [...keys].sort().join('|');
+      const id1 = sortedId(itemKeys1);
+      const id2 = sortedId(itemKeys2);
+      const already = state.mutuallyExclusiveGroups.some((g) => {
+        const gId1 = sortedId(g.itemKeys1);
+        const gId2 = sortedId(g.itemKeys2);
+        return (gId1 === id1 && gId2 === id2) || (gId1 === id2 && gId2 === id1);
+      });
+      if (already) return;
+
+      state.mutuallyExclusiveGroups.push({
+        id: `${id1}__${id2}__${Date.now()}`,
+        name: action.payload.name,
+        itemKeys1,
+        itemKeys2,
+        quantities1: quantities1 ?? itemKeys1.map(() => 1),
+        quantities2: quantities2 ?? itemKeys2.map(() => 1),
+      });
+      // The group is purely a relationship record — shopping list items are
+      // not added or modified on group creation.
+    },
     addStoresListItem: (
       state: ListsState,
       action: PayloadAction<AddStoresListItemPayload>,
@@ -302,6 +390,7 @@ export const listsSlice = createSlice({
       };
     },
     clearShopping: (state: ListsState) => {
+      state.mutuallyExclusiveGroups = [];
       iterateStoreSpecificValuesMap({
         storeSpecificValuesMap: state.storeSpecificValuesMap,
         onNewItemStart: (input) => {
@@ -811,6 +900,52 @@ export const listsSlice = createSlice({
       }
       state.inventory.lastDecrementedItemId = itemId;
     },
+    removeMutuallyExclusiveGroup: (
+      state: ListsState,
+      action: PayloadAction<RemoveMutuallyExclusiveGroupPayload>,
+    ) => {
+      if (!state.mutuallyExclusiveGroups) {
+        state.mutuallyExclusiveGroups = [];
+        return;
+      }
+
+      const groupToRemove = state.mutuallyExclusiveGroups.find(
+        (g) => g.id === action.payload.id,
+      );
+
+      state.mutuallyExclusiveGroups = state.mutuallyExclusiveGroups.filter(
+        (g) => g.id !== action.payload.id,
+      );
+
+      if (!groupToRemove || action.payload.keepItems) return;
+
+      const storeId = state.currentStoreId;
+      if (!storeId) return;
+
+      for (const key of [
+        ...groupToRemove.itemKeys1,
+        ...groupToRemove.itemKeys2,
+      ]) {
+        // Leave the item alone if it belongs to another ME group
+        const inAnotherGroup = state.mutuallyExclusiveGroups.some(
+          (g) => g.itemKeys1.includes(key) || g.itemKeys2.includes(key),
+        );
+        if (inAnotherGroup) continue;
+
+        const entry = state.storeSpecificValuesMap[key] as any;
+        if (!entry) continue;
+
+        // Don't touch items the user has already moved to cart
+        const isInCart = entry?.[StoreSpecificValueKey.IsInCart]?.[storeId];
+        if (isInCart) continue;
+
+        const currentQty =
+          entry?.[StoreSpecificValueKey.Quantity]?.[storeId] ?? 0;
+        if (currentQty <= 0) continue;
+
+        entry[StoreSpecificValueKey.Quantity][storeId] = 0;
+      }
+    },
     removeInventoryItem: (
       state: ListsState,
       action: PayloadAction<RemoveInventoryItemPayload>,
@@ -842,6 +977,54 @@ export const listsSlice = createSlice({
       for (const location of locations) {
         removeInventoryLocationHelper(state, location);
       }
+    },
+    removeItemFromMutuallyExclusiveGroup: (
+      state: ListsState,
+      action: PayloadAction<RemoveItemFromMutuallyExclusiveGroupPayload>,
+    ) => {
+      const { groupId, side, itemKey } = action.payload;
+      const groupIdx = state.mutuallyExclusiveGroups.findIndex(
+        (g) => g.id === groupId,
+      );
+      if (groupIdx === -1) return;
+      const group = state.mutuallyExclusiveGroups[groupIdx];
+      const keysField = side === 1 ? 'itemKeys1' : 'itemKeys2';
+      const qtysField = side === 1 ? 'quantities1' : 'quantities2';
+      const itemIdx = group[keysField].indexOf(itemKey);
+      if (itemIdx === -1) return;
+
+      group[keysField] = group[keysField].filter((_, i) => i !== itemIdx);
+      group[qtysField] = group[qtysField].filter((_, i) => i !== itemIdx);
+
+      // Helper to zero a key's quantity if safe to do so
+      const storeId = state.currentStoreId;
+      const zeroIfSafe = (key: string) => {
+        if (!storeId) return;
+        const inAnotherGroup = state.mutuallyExclusiveGroups.some(
+          (g) =>
+            g.id !== groupId &&
+            (g.itemKeys1.includes(key) || g.itemKeys2.includes(key)),
+        );
+        if (inAnotherGroup) return;
+        const entry = state.storeSpecificValuesMap[key] as any;
+        if (!entry) return;
+        if (entry?.[StoreSpecificValueKey.IsInCart]?.[storeId]) return;
+        const qty = entry?.[StoreSpecificValueKey.Quantity]?.[storeId] ?? 0;
+        if (qty > 0) entry[StoreSpecificValueKey.Quantity][storeId] = 0;
+      };
+
+      // If a side is now empty the whole group must go
+      if (group.itemKeys1.length === 0 || group.itemKeys2.length === 0) {
+        for (const key of [...group.itemKeys1, ...group.itemKeys2]) {
+          zeroIfSafe(key);
+        }
+        state.mutuallyExclusiveGroups.splice(groupIdx, 1);
+        return;
+      }
+
+      // Only zero the removed item if it isn’t still on the other side
+      const otherSideKeys = side === 1 ? group.itemKeys2 : group.itemKeys1;
+      if (!otherSideKeys.includes(itemKey)) zeroIfSafe(itemKey);
     },
     removeItemsListItems: (
       state: ListsState,
@@ -1030,7 +1213,6 @@ export const listsSlice = createSlice({
         state.inventory.currentLocationId = null;
       }
     },
-
     setItemsList: (
       state: ListsState,
       action: PayloadAction<ListsState['itemsList']>,
@@ -1051,7 +1233,6 @@ export const listsSlice = createSlice({
       if (!action.payload) return;
       state.lastPurchasedMap = action.payload;
     },
-
     setSortOrder: (
       state: ListsState,
       action: PayloadAction<SetSortOrderPayload>,
@@ -1081,6 +1262,13 @@ export const listsSlice = createSlice({
         sortOrder: newSortOrder,
       };
     },
+    setMutuallyExclusiveGroups: (
+      state: ListsState,
+      action: PayloadAction<MutuallyExclusiveGroup[]>,
+    ) => {
+      state.mutuallyExclusiveGroups = action.payload ?? [];
+    },
+
     setStoresList: (
       state: ListsState,
       action: PayloadAction<
@@ -1133,6 +1321,70 @@ export const listsSlice = createSlice({
           : SortOrder.Ascending;
 
       (state as any)[listName].sortOrderValue.sortOrder = sortOrder;
+    },
+    updateMutuallyExclusiveGroup: (
+      state: ListsState,
+      action: PayloadAction<UpdateMutuallyExclusiveGroupPayload>,
+    ) => {
+      const { id, itemKeys1, itemKeys2, quantities1, quantities2 } =
+        action.payload;
+      const group = state.mutuallyExclusiveGroups.find((g) => g.id === id);
+      if (!group) return;
+
+      const storeId = state.currentStoreId;
+      const oldAllKeys = new Set([...group.itemKeys1, ...group.itemKeys2]);
+      const newAllKeys = new Set([...itemKeys1, ...itemKeys2]);
+
+      // Zero quantities for items removed from the group
+      if (storeId) {
+        for (const key of oldAllKeys) {
+          if (newAllKeys.has(key)) continue;
+          const inAnotherGroup = state.mutuallyExclusiveGroups.some(
+            (g) =>
+              g.id !== id &&
+              (g.itemKeys1.includes(key) || g.itemKeys2.includes(key)),
+          );
+          if (inAnotherGroup) continue;
+          const entry = state.storeSpecificValuesMap[key] as any;
+          if (!entry) continue;
+          if (entry?.[StoreSpecificValueKey.IsInCart]?.[storeId]) continue;
+          const qty = entry?.[StoreSpecificValueKey.Quantity]?.[storeId] ?? 0;
+          if (qty > 0) entry[StoreSpecificValueKey.Quantity][storeId] = 0;
+        }
+      }
+
+      // Update the group
+      group.name = action.payload.name;
+      group.itemKeys1 = itemKeys1;
+      group.itemKeys2 = itemKeys2;
+      group.quantities1 = quantities1;
+      group.quantities2 = quantities2;
+
+      // Add newly introduced items to the shopping list
+      if (storeId) {
+        const allKeys = [...itemKeys1, ...itemKeys2];
+        const allQtys = [...quantities1, ...quantities2];
+        for (const [i, key] of allKeys.entries()) {
+          if (oldAllKeys.has(key)) continue; // already in the list
+          const currentQty =
+            (state.storeSpecificValuesMap[key] as any)?.[
+              StoreSpecificValueKey.Quantity
+            ]?.[storeId] ?? 0;
+          if (currentQty > 0) continue;
+          if (!state.storeSpecificValuesMap[key]) {
+            (state.storeSpecificValuesMap as any)[key] = {};
+          }
+          const entry = state.storeSpecificValuesMap[key] as any;
+          if (!entry[StoreSpecificValueKey.Quantity]) {
+            entry[StoreSpecificValueKey.Quantity] = {};
+          }
+          entry[StoreSpecificValueKey.Quantity][storeId] = allQtys[i];
+          if (!entry[StoreSpecificValueKey.IsInCart]) {
+            entry[StoreSpecificValueKey.IsInCart] = {};
+          }
+          entry[StoreSpecificValueKey.IsInCart][storeId] = false;
+        }
+      }
     },
     updateSelectedItemsFromInCart: (
       state: ListsState,
@@ -1187,6 +1439,9 @@ export const currentLocationSelector = (state: RootState) =>
 
 export const currentLocationStateSelector = (state: RootState) =>
   state[listsSlice.name].currentLocationState;
+
+export const mutuallyExclusiveGroupsSelector = (state: RootState) =>
+  state[listsSlice.name].mutuallyExclusiveGroups ?? [];
 
 export const currentStoreSelector = createSelector(
   [
@@ -1558,12 +1813,14 @@ export const storeSpecificValuesSelector = (
   );
 
 export const {
+  acceptMutuallyExclusiveGroupSide,
   addAllToShoppingCart,
   addInventoryLocation,
   addInventoryLocations,
   addItemsListItem,
   addItemsToItemsList,
   addItemToCart,
+  addMutuallyExclusiveGroup,
   addStoresListItem,
   addStoreSpecificValues,
   clearShopping,
@@ -1587,8 +1844,10 @@ export const {
   removeInventoryItems,
   removeInventoryLocation,
   removeInventoryLocations,
+  removeItemFromMutuallyExclusiveGroup,
   removeItemsListItems,
   removeMostRecentInventoryItem,
+  removeMutuallyExclusiveGroup,
   removeShoppingListItems,
   removeStoresListItems,
   resetCurrentLocation,
@@ -1616,9 +1875,11 @@ export const {
   setLastDecrementedItemId,
   setLastPurchasedMap,
   setSortOrder,
+  setMutuallyExclusiveGroups,
   setStoresList,
   setStoreSpecificValues,
   toggleSortOrder,
+  updateMutuallyExclusiveGroup,
   updateSelectedItemsFromInCart,
   updateSelectedItemsFromPreviouslyPurchased,
   updateSelectedItemsFromShoppingCart,

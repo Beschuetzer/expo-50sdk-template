@@ -53,6 +53,7 @@ import {
   setInventory,
   setItemsList,
   setLastPurchasedMap,
+  setMutuallyExclusiveGroups,
   setStoresList,
   setStoreSpecificValues,
 } from '@/state/slices/listsSlice';
@@ -826,6 +827,7 @@ export function setAppData(input: SetAppDataInput) {
     storeSpecificValues,
     stores,
     inventory,
+    mutuallyExclusiveGroups,
   } = input;
   items.data.forEach((item) => {
     if (!item._id) {
@@ -860,6 +862,7 @@ export function setAppData(input: SetAppDataInput) {
   dispatch(setInventory(inventory));
   dispatch(setItemsList(items));
   dispatch(setStoresList(stores));
+  dispatch(setMutuallyExclusiveGroups(mutuallyExclusiveGroups ?? []));
 }
 
 export async function measureExecutionTime(

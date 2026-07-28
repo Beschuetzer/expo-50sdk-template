@@ -9,6 +9,7 @@ export enum Routes {
   InventoryScreenItem = 'InventoryScreenItem',
   ItemModal = 'itemModal',
   ItemsScreen = 'ItemsScreen',
+  MutuallyExclusiveCreatorScreen = 'MutuallyExclusiveCreatorScreen',
   OptionsScreen = 'OptionsScreen',
   PasswordResetScreen = 'PasswordResetScreen',
   QuickAddModal = 'QuickAddModal',

@@ -9,26 +9,23 @@
         
 - I want you to create a new feature called route creation.  THe idea is that users can create routes for a store based on the locations in the store.  You will need to do the following to make this work properly:
 
-    1. Create a new field on the Item type (store-specific value type) called "location" which is a string.  You will also need to create a "routes" field on the Store type with is an array of type Route (see below).  Users will need to be able to create new locations for a given store, so you will need a way to do that in the route creation screen.
+    1. Create a new store-specific string field called "location" which is a string.  You will also need to create a "routes" field on the Store type with is an array of type Route (see below).  Users will need to be able to create new locations for a given store, so you will need a way to do that in the route creation screen.
     ```typescript
-
     // the idea is to create a "Route" or way to go through the store.
     type Route = {
-        name: string // name of the route
-        userId: string // person who created the route
-        storeId: string // store to which the route 
         locations: string[] // the ordering here matters.  The location at index 0 is the first location in the route and the last location is the last location in the route.
+        name: string // name of the route
+        storeId: string // store to which the route 
+        userId: string // person who created the route
+        userIdsWithAccess: string[] // these are users that have access to the route but are not the creator
     }
-    
-    
     ```
-    2. Create a route creation screen that allows users to create locations for a store.  On this screen should be the name of the store as the screen's title.  Each location should be a box/item that can be dragged to adjust the order for the route.  The route then should be saved to either a new slice or an existing slice if it makes sense and will save the storeId, userId, and the locationIds
-    3. The item form will need a way to display the new location field.
+    2. Create a route creation screen that allows users to create locations for a store.  On this screen should be the name of the store as the screen's title.  Each location should be a box/item that can be dragged to adjust the order for the route.  The route then should be saved to either a new slice or an existing slice if it makes sense and will be saved per the Route type above.
+    3. The item form will need a way to display the new location field.  This should be a picker based on all of the locations associated with a storeId.  To get all of the unique locations, you will need a selector which grabs all of the routes for a given storeId and then transforms those routes to a set of locations.
     4. The shopping list should have a menu item called "Start Route" added.  This will open a modal where users can select a route.  Once the route is selected and the "Start" button is pressed, the items in the shopping cart will be re-arranged based on their location in the selected route (items at the beginning of the route come before items after it).  The idea is that the user can more easily go through the store and find the items in the order that they appear on the route.
 
     old stuff:
         --need to add a new screen called RouteCreator which allows the user to drag and drop (arrange) all of the aisle numbers that have been given for a specific store and give a name to a route. (add link in store form).  This route will be saved in the db and can be selected in the shopping screen (index.tsx).  The route will then be used in the getSorter helper by getting the index for each of the aisle numbers being sorted.  Return 1 if the current item index in this new array is greater than the next item index.  Return -1 if the next item index is greater otherwise return 0.
-
 
 
 -need a way to edit inventory locations?

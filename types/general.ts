@@ -15,7 +15,7 @@ import { GpsCoordinate, Store } from './Store';
 import { UpcProduct } from './UpcResponse';
 import { CurrentStoreNeeded, DispatchNeeded } from './bffService';
 import { Inventory } from './inventory';
-import { ListName, MutuallyExclusiveGroup } from './listSlice';
+import { ListName, MutuallyExclusiveGroup, ReturnItemsMap } from './listSlice';
 
 export enum ScanningMode {
   AddToCart = 'Add to Cart',
@@ -211,6 +211,7 @@ export type FileNames = {
   lastPurchasedMap: LastPurchasedMap;
   inventory: Inventory;
   mutuallyExclusiveGroups: MutuallyExclusiveGroup[];
+  returnItems: ReturnItemsMap;
 };
 export type ResolvedType<T> = T extends Promise<infer R> ? R : T;
 export type SetAppDataInput = FileNames & DispatchNeeded;

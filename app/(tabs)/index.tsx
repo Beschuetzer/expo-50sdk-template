@@ -34,6 +34,7 @@ import {
   ConfirmModal,
   ConfirmModalProps,
 } from '@/components/modals/ConfirmModal';
+import { ReturnItemModal } from '@/components/modals/ReturnItemModal';
 import { StoreSelectionModal } from '@/components/modals/StoreSelectionModal';
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import { EMPTY_STRING } from '@/constants/general';
@@ -115,6 +116,8 @@ export default function TabOneScreen() {
     useState(false);
   const [index, setIndex] = useState(0);
   const [isCompletePurchaseModalVisible, setIsCompletePurchaseModalVisible] =
+    useState(false);
+  const [isReturnItemModalVisible, setIsReturnItemModalVisible] =
     useState(false);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
@@ -247,6 +250,13 @@ export default function TabOneScreen() {
       {
         text: 'Toggle Viewing Mode',
         onPress: onToggleViewingModePress,
+      },
+      {
+        text: 'Add Return Item',
+        onPress: () => {
+          closeMenu();
+          setIsReturnItemModalVisible(true);
+        },
       },
       {
         text: 'Add Mutual Exclusion Group',
@@ -524,6 +534,11 @@ export default function TabOneScreen() {
         }}
       />
       <ConfirmModal {...confirmModalProps} />
+      <ReturnItemModal
+        isVisible={isReturnItemModalVisible}
+        storeId={getKeyToUse(currentStore)}
+        onClose={() => setIsReturnItemModalVisible(false)}
+      />
       <CompletePurchaseModal
         isVisible={isCompletePurchaseModalVisible}
         title="Select a Location for Each Item"

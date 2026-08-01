@@ -1,12 +1,4 @@
 ## MVP
-
-- Return items:
-    I want you to create a way to add return items to a shopping list for a store.  There should be a menu item called "Add Return Item", which when pressed opens a modal for selecting an item to return.  Return items appear similarly to regular items in the shopping list with two exceptions:
-        1. They are always the first items in the list (at the top)
-        2. They are styled differently so it is clear they are returns.
-        
-    pressing the "Clear Cart" button in the shopping list menu should remove all return items as well.
-        
 - I want you to create a new feature called route creation.  THe idea is that users can create routes for a store based on the locations in the store.  You will need to do the following to make this work properly:
 
     1. Create a new store-specific string field called "location" which is a string.  You will also need to create a "routes" field on the Store type with is an array of type Route (see below).  Users will need to be able to create new locations for a given store, so you will need a way to do that in the route creation screen.

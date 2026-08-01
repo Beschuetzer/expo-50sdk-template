@@ -11,6 +11,7 @@ import {
   itemsListSelector,
   lastPurchasedMapSelector,
   mutuallyExclusiveGroupsSelector,
+  returnItemsSelector,
   storesListSelector,
   storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
@@ -38,6 +39,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
   const mutuallyExclusiveGroups = useAppSelector(
     mutuallyExclusiveGroupsSelector,
   );
+  const returnItems = useAppSelector(returnItemsSelector);
   const dispatch = useAppDispatch();
   const iconSize = useMemo(() => theme.sizes[6], [theme]);
 
@@ -81,6 +83,11 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         madeDirectory,
         mutuallyExclusiveGroups,
       );
+      await saveAppStateToFile(
+        FILE_NAMES.returnItems,
+        madeDirectory,
+        returnItems,
+      );
     } catch (error) {
       displayAlert({
         msg: 'Unable to save app data.',
@@ -93,6 +100,7 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
     itemsList,
     lastPurchasedMap,
     mutuallyExclusiveGroups,
+    returnItems,
     stores,
     storeSpecificValues,
   ]);

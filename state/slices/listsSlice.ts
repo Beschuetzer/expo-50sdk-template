@@ -51,6 +51,9 @@ import {
   AcceptMutuallyExclusiveGroupSidePayload,
   RemoveItemFromMutuallyExclusiveGroupPayload,
   UpdateMutuallyExclusiveGroupPayload,
+  AddReturnItemPayload,
+  RemoveReturnItemPayload,
+  ReturnItemsMap,
   CompletePurchasePayload,
   HandleSaveAllResponsePayload,
   MutuallyExclusiveGroup,
@@ -117,6 +120,7 @@ export type ListsState = {
   selectedItemsFromInCart: ItemWithStoreSpecificValues[];
   storeSpecificValuesMap: StoreSpecificValuesMap;
   mutuallyExclusiveGroups: MutuallyExclusiveGroup[];
+  returnItems: ReturnItemsMap;
 };
 
 const initialState: ListsState = {
@@ -138,17 +142,18 @@ const initialState: ListsState = {
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
   isMultiSelectModeForShoppingCart:
     IS_MULTI_SELECT_MODE_FOR_SHOPPING_CART_INITIAL,
+  lastPurchasedMap: getEmptyObject(),
   [ListName.InCartList]: getEmptyList(ListName.InCartList),
   [ListName.ItemsList]: getEmptyList(ListName.ItemsList),
   [ListName.PreviouslyPurchased]: getEmptyList(ListName.PreviouslyPurchased),
   [ListName.ShoppingList]: getEmptyList(ListName.ShoppingList),
   [ListName.StoresList]: getEmptyList(ListName.StoresList),
-  lastPurchasedMap: getEmptyObject(),
+  mutuallyExclusiveGroups: getEmptyArray(),
+  returnItems: getEmptyObject(),
   selectedItemsFromPreviouslyPurchased: getEmptyArray(),
   selectedItemsFromShoppingCart: getEmptyArray(),
   selectedItemsFromInCart: getEmptyArray(),
   storeSpecificValuesMap: getEmptyObject(),
-  mutuallyExclusiveGroups: [],
 };
 //#endregion
 
@@ -363,6 +368,17 @@ export const listsSlice = createSlice({
       // The group is purely a relationship record — shopping list items are
       // not added or modified on group creation.
     },
+    addReturnItem: (
+      state: ListsState,
+      action: PayloadAction<AddReturnItemPayload>,
+    ) => {
+      const { storeId, itemKey } = action.payload;
+      if (!state.returnItems) state.returnItems = {};
+      if (!state.returnItems[storeId]) state.returnItems[storeId] = [];
+      if (!state.returnItems[storeId].includes(itemKey)) {
+        state.returnItems[storeId].push(itemKey);
+      }
+    },
     addStoresListItem: (
       state: ListsState,
       action: PayloadAction<AddStoresListItemPayload>,
@@ -391,6 +407,9 @@ export const listsSlice = createSlice({
     },
     clearShopping: (state: ListsState) => {
       state.mutuallyExclusiveGroups = [];
+      if (state.currentStoreId) {
+        delete (state.returnItems as any)[state.currentStoreId];
+      }
       iterateStoreSpecificValuesMap({
         storeSpecificValuesMap: state.storeSpecificValuesMap,
         onNewItemStart: (input) => {
@@ -1043,6 +1062,16 @@ export const listsSlice = createSlice({
         action.payload?.map((item) => getKeyToUse(item)),
       );
     },
+    removeReturnItem: (
+      state: ListsState,
+      action: PayloadAction<RemoveReturnItemPayload>,
+    ) => {
+      const { storeId, itemKey } = action.payload;
+      if (!state.returnItems?.[storeId]) return;
+      state.returnItems[storeId] = state.returnItems[storeId].filter(
+        (k) => k !== itemKey,
+      );
+    },
     removeShoppingListItems: (
       state: ListsState,
       action: PayloadAction<Item[]>,
@@ -1267,6 +1296,13 @@ export const listsSlice = createSlice({
       action: PayloadAction<MutuallyExclusiveGroup[]>,
     ) => {
       state.mutuallyExclusiveGroups = action.payload ?? [];
+    },
+
+    setReturnItems: (
+      state: ListsState,
+      action: PayloadAction<ReturnItemsMap>,
+    ) => {
+      state.returnItems = action.payload ?? {};
     },
 
     setStoresList: (
@@ -1876,6 +1912,7 @@ export const {
   setLastPurchasedMap,
   setSortOrder,
   setMutuallyExclusiveGroups,
+  setReturnItems,
   setStoresList,
   setStoreSpecificValues,
   toggleSortOrder,
@@ -1884,7 +1921,12 @@ export const {
   updateSelectedItemsFromPreviouslyPurchased,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
+  addReturnItem,
+  removeReturnItem,
 } = listsSlice.actions;
+
+export const returnItemsSelector = (state: RootState) =>
+  (state[listsSlice.name].returnItems ?? {}) as ReturnItemsMap;
 
 export default listsSlice.reducer;
 

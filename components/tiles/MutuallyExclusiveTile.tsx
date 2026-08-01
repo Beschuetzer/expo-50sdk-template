@@ -167,7 +167,7 @@ export function MutuallyExclusiveTile(props: MutuallyExclusiveTileProps) {
           <HStack
             px={3}
             py={2}
-            alignItems="center"
+            alignItems="flex-start"
             justifyContent="center"
             borderBottomWidth={0.5}
             borderBottomColor={theme.colors.muted[100]}
@@ -189,8 +189,10 @@ export function MutuallyExclusiveTile(props: MutuallyExclusiveTileProps) {
                 </Text>
               )}
             </VStack>
-            {quantityButton}
-            {buttonJsx}
+            <HStack flex={0} space={4} alignItems="center" height="100%" mr={2}>
+              {quantityButton}
+              {buttonJsx}
+            </HStack>
           </HStack>
         </TouchableOpacity>
       );

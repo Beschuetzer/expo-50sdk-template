@@ -102,6 +102,19 @@ export type AcceptMutuallyExclusiveGroupSidePayload = {
   acceptedSide: 1 | 2;
 };
 
+export type AddReturnItemPayload = {
+  storeId: string;
+  itemKey: string;
+};
+
+export type RemoveReturnItemPayload = {
+  storeId: string;
+  itemKey: string;
+};
+
+/** Map of storeId → array of item keys marked as returns at that store */
+export type ReturnItemsMap = { [storeId: string]: string[] };
+
 export type HandleSaveAllResponsePayload = SaveAllResponse & {
   /**
    *The items that should have been saved

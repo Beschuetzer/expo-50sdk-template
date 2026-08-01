@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Image, ImageProps } from 'expo-image';
 import { useNavigation } from 'expo-router';
-import { AspectRatio, View, useTheme } from 'native-base';
+import { View, useTheme } from 'native-base';
 import { useCallback, useMemo, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
@@ -56,7 +56,6 @@ export function ImageRenderer(props: ImageRendererProps) {
           display="flex"
           alignItems="center"
           justifyContent="center"
-          style={{ marginRight: marginRight * 4 }}
         >
           <FontAwesome
             name="image"
@@ -66,24 +65,21 @@ export function ImageRenderer(props: ImageRendererProps) {
           />
         </View>
       ) : (
-        <AspectRatio
-          ratio={{
-            base: 1 / IMAGE_RENDERER_ASPECT_RATIO_DEFAULT,
-            md: 9 / 10,
-          }}
-          height={{
-            base: height,
-            md: width,
-          }}
-          mr={marginRight}
+        <View
+          height={height}
+          width={width}
+          style={{ marginRight: marginRight * 4 }}
+          overflow="hidden"
         >
           <Image
             cachePolicy={cachePolicy}
             {...props}
             source={source || itemImage}
+            contentFit="cover"
+            style={{ width: '100%', height: '100%' }}
             onError={() => setIsError(true)}
           />
-        </AspectRatio>
+        </View>
       )}
     </TouchableOpacity>
   );

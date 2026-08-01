@@ -121,7 +121,7 @@ export function ItemTileWithStoreSpecificValues(
           </Text>
         </Row>
 
-        <Row space={theme.space[FORM_INTER_ITEM_SPACING] * 3} flex={0}>
+        <Row space={theme.space[FORM_INTER_ITEM_SPACING] * 3} flex={0} mr={2}>
           {noteAtStore ? (
             <TouchableOpacity
               hitSlop={getButtonHitSlop(2)}

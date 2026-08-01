@@ -3,7 +3,6 @@ import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Stack } from 'native-base';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
@@ -14,6 +13,7 @@ import { StoreSelectionModal } from '../modals/StoreSelectionModal';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
 import { ItemTileWithStoreSpecificValues } from '../tiles/ItemTileWithStoreSpecificValues';
 import { MutuallyExclusiveTile } from '../tiles/MutuallyExclusiveTile';
+import { ReturnItemTile } from '../tiles/ReturnItemTile';
 
 import {
   EMPTY_STRING,
@@ -27,6 +27,7 @@ import {
   currentStoreSelector,
   isMultiSelectModeForShoppingCartSelector,
   mutuallyExclusiveGroupsSelector,
+  returnItemsSelector,
   selectedItemsFromShoppingCartSelector,
   storeSpecificListSelector,
   setIsMultiSelectModeForShoppingCart,
@@ -34,6 +35,7 @@ import {
   updateStoreSpecificValues,
   moveItemToAnotherCart,
 } from '@/state/slices/listsSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
 import { Item, ItemWithStoreSpecificValues, Key } from '@/types/Item';
 import { ListName } from '@/types/listSlice';
 import { ensureMaxLength, getKeyToUse } from '@/utils/helpers';
@@ -63,21 +65,30 @@ const listName: ListName = ListName.ShoppingList;
  **/
 export function ShoppingList(props: ShoppingListProps) {
   const { viewingMode } = props;
-  const shoppingList = useSelector(storeSpecificListSelector(listName));
-  const currentStore = useSelector(currentStoreSelector);
-  const meGroups = useSelector(mutuallyExclusiveGroupsSelector);
+  const shoppingList = useAppSelector(storeSpecificListSelector(listName));
+  const currentStore = useAppSelector(currentStoreSelector);
+  const meGroups = useAppSelector(mutuallyExclusiveGroupsSelector);
+  const returnItemsMap = useAppSelector(returnItemsSelector);
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const selectedItems = useSelector(selectedItemsFromShoppingCartSelector);
-  const isMultiSelectMode = useSelector(
+  const selectedItems = useAppSelector(selectedItemsFromShoppingCartSelector);
+  const isMultiSelectMode = useAppSelector(
     isMultiSelectModeForShoppingCartSelector,
   );
   const [itemToTransfer, setItemToTransfer] = useState<Item | null>(null);
   const [shoppingListToDisplay, setShoppingListToDisplay] =
     useState(shoppingList);
 
+  const currentStoreId = useMemo(
+    () => (currentStore ? getKeyToUse(currentStore) : ''),
+    [currentStore],
+  );
+  const returnItemKeys = useMemo(
+    () => returnItemsMap[currentStoreId] ?? [],
+    [returnItemsMap, currentStoreId],
+  );
   // Keys belonging to any ME group that has at least one item in the live list
   // Resolved ME group entries with their item data (from live Redux list).
   // Always show all ME groups so newly created pairs are immediately visible
@@ -129,6 +140,11 @@ export function ShoppingList(props: ShoppingListProps) {
 
   function renderItem({ item, index }: { item: any; index: number }) {
     if (index === 0) return <TotalListPrice listName={ListName.ShoppingList} />;
+
+    // Return items
+    if (item._entryType === 'returnItem') {
+      return <ReturnItemTile itemKey={item.itemKey} storeId={item.storeId} />;
+    }
 
     // Mutually exclusive group entry
     if (item._entryType === 'meGroup') {
@@ -262,11 +278,23 @@ export function ShoppingList(props: ShoppingListProps) {
             setRefreshing(false);
           }, 2000);
         }}
-        data={[{ name: 'in-cart price' } as any, ...meEntries, ...regularItems]}
+        data={[
+          { name: 'in-cart price' } as any,
+          ...returnItemKeys.map((itemKey) => ({
+            _entryType: 'returnItem' as const,
+            itemKey,
+            storeId: currentStoreId,
+          })),
+          ...meEntries,
+          ...regularItems,
+        ]}
         renderItem={renderItem}
-        keyExtractor={(item: any, index: number) =>
-          item._entryType === 'meGroup' ? item.group.id : getKeyToUse(item)
-        }
+        keyExtractor={(item: any, index: number) => {
+          if (item._entryType === 'returnItem') return `return-${item.itemKey}`;
+          return item._entryType === 'meGroup'
+            ? item.group.id
+            : getKeyToUse(item);
+        }}
         estimatedItemSize={ESTIMATED_SIZE_FOR_SHOPPING_LISTS}
         ItemSeparatorComponent={() => <ListItemSeparator />}
         stickyHeaderIndices={[0]}

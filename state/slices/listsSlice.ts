@@ -359,11 +359,12 @@ export const listsSlice = createSlice({
 
       state.mutuallyExclusiveGroups.push({
         id: `${id1}__${id2}__${Date.now()}`,
-        name: action.payload.name,
         itemKeys1,
         itemKeys2,
+        name: action.payload.name,
         quantities1: quantities1 ?? itemKeys1.map(() => 1),
         quantities2: quantities2 ?? itemKeys2.map(() => 1),
+        storeId: state.currentStoreId,
       });
       // The group is purely a relationship record — shopping list items are
       // not added or modified on group creation.
@@ -1794,8 +1795,15 @@ export const shoppingListSelector = (state: RootState) =>
 //Note: this is currently exponential time complexity
 export const storeItemsCountSelector = (storeId: string) =>
   createSelector(
-    [(state: RootState) => state[listsSlice.name].storeSpecificValuesMap],
-    (storeSpecificValuesMap) => {
+    [
+      (state: RootState) => state[listsSlice.name].storeSpecificValuesMap,
+      (state: RootState) =>
+        state[listsSlice.name].returnItems as ReturnItemsMap,
+      (state: RootState) =>
+        state[listsSlice.name]
+          .mutuallyExclusiveGroups as MutuallyExclusiveGroup[],
+    ],
+    (storeSpecificValuesMap, returnItems, mutuallyExclusiveGroups) => {
       if (!storeId) return EMPTY_NUMBER;
       const items = new Set<string>();
       iterateStoreSpecificValuesMap({
@@ -1822,7 +1830,13 @@ export const storeItemsCountSelector = (storeId: string) =>
           }
         },
       });
-      return items.size;
+
+      const returnCount = returnItems?.[storeId]?.length ?? 0;
+      const megCount =
+        mutuallyExclusiveGroups?.filter((g) => g.storeId === storeId).length ??
+        0;
+
+      return items.size + returnCount + megCount;
     },
   );
 

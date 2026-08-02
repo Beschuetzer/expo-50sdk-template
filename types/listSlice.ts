@@ -60,32 +60,33 @@ export type CompletePurchasePayload = LastPurchasedMap | undefined;
 
 export type MutuallyExclusiveGroup = {
   id: string;
-  name?: string;
   itemKeys1: string[];
   itemKeys2: string[];
+  name?: string;
   quantities1: number[];
   quantities2: number[];
+  storeId: string;
 };
 
 export type AddMutuallyExclusiveGroupPayload = {
-  name: string;
   itemKeys1: string[];
   itemKeys2: string[];
+  name: string;
   quantities1?: number[];
   quantities2?: number[];
 };
 
 export type RemoveItemFromMutuallyExclusiveGroupPayload = {
   groupId: string;
-  side: 1 | 2;
   itemKey: string;
+  side: 1 | 2;
 };
 
 export type UpdateMutuallyExclusiveGroupPayload = {
   id: string;
-  name: string;
   itemKeys1: string[];
   itemKeys2: string[];
+  name: string;
   quantities1: number[];
   quantities2: number[];
 };

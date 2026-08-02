@@ -95,17 +95,19 @@ export function ShoppingList(props: ShoppingListProps) {
   // even if neither item has been added to the shopping list yet.
   const meEntries = useMemo(() => {
     if (!meGroups?.length) return [];
-    return meGroups.map((g) => ({
-      _entryType: 'meGroup' as const,
-      group: g,
-      items1: g.itemKeys1.map((k) =>
-        shoppingList.find((i) => getKeyToUse(i) === k),
-      ),
-      items2: g.itemKeys2.map((k) =>
-        shoppingList.find((i) => getKeyToUse(i) === k),
-      ),
-    }));
-  }, [meGroups, shoppingList]);
+    return meGroups
+      .filter((g) => !g.storeId || g.storeId === currentStoreId)
+      .map((g) => ({
+        _entryType: 'meGroup' as const,
+        group: g,
+        items1: g.itemKeys1.map((k) =>
+          shoppingList.find((i) => getKeyToUse(i) === k),
+        ),
+        items2: g.itemKeys2.map((k) =>
+          shoppingList.find((i) => getKeyToUse(i) === k),
+        ),
+      }));
+  }, [meGroups, shoppingList, currentStoreId]);
 
   // All shopping-list items keep their own individual tiles; the ME tile
   // coexists as a relationship indicator above them.

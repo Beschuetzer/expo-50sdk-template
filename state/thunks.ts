@@ -361,6 +361,7 @@ export const login = createAsyncThunk(
             items: state.lists.itemsList,
             lastPurchasedMap: state.lists.lastPurchasedMap,
             mutuallyExclusiveGroups: state.lists.mutuallyExclusiveGroups,
+            returnItems: (state.lists as any).returnItems ?? {},
             stores: {
               ...state.lists.storesList,
               currentStoreId: state.lists.currentStoreId,

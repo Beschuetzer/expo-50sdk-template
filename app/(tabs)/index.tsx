@@ -37,8 +37,9 @@ import {
 import { ReturnItemModal } from '@/components/modals/ReturnItemModal';
 import { StoreSelectionModal } from '@/components/modals/StoreSelectionModal';
 import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
-import { EMPTY_STRING } from '@/constants/general';
+import { EMPTY_STRING, ITEM_UNIT_INITIAL } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
+import { LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { accountSelector, setError } from '@/state/slices/generalSlice';
 import {
   currentStoreSelector,
@@ -64,6 +65,9 @@ import {
   updateSelectedItemsFromShoppingCart,
   updateSelectedItemsFromInCart,
   processItemToLocationMap,
+  mutuallyExclusiveGroupsSelector,
+  returnItemsSelector,
+  itemsListSelector,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState, savePurchase } from '@/state/thunks';
@@ -107,6 +111,9 @@ export default function TabOneScreen() {
   const selectedPreviouslyPurchasedItems = useAppSelector(
     selectedItemsFromPreviouslyPurchasedSelector,
   );
+  const meGroups = useAppSelector(mutuallyExclusiveGroupsSelector);
+  const returnItemsMap = useAppSelector(returnItemsSelector);
+  const itemsList = useAppSelector(itemsListSelector);
 
   const [viewingMode, setViewingMode] = useState(ItemTileViewingMode.Basic);
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
@@ -145,16 +152,69 @@ export default function TabOneScreen() {
         }),
       )
       .map((item) => {
-        const base = `- ${item[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 1} ${item.unit} of ${item.name}`;
-        const link =
-          item.images.length > 0 && item.imageToUseIndex != null
-            ? ` - (${item.images[item.imageToUseIndex]})`
-            : '';
-        return `${base}${link}\n`;
+        const base = `- ${item[StoreSpecificValueKey.Quantity]?.[currentStoreId] || 1} ${item.unit || ITEM_UNIT_INITIAL} of ${item.name || 'Unknown Item Name'}`;
+        // const imageUrl =
+        //   item.images.length > 0 && item.imageToUseIndex != null
+        //     ? item.images[item.imageToUseIndex]
+        //     : EMPTY_STRING;
+        // Only remote URLs are useful to a recipient — local file:// paths
+        // only exist on this device. Put the URL on its own line, unwrapped,
+        // so messaging/email apps auto-linkify it as a tappable link.
+        // const link =
+        // imageUrl && !LOCAL_FILE_REGEX.test(imageUrl) ? `\n${imageUrl}` : '';
+        return `${base}`;
       })
       .join('\n');
+
+    // MEGs for this store
+    const storeGroups = meGroups.filter(
+      (g) => !g.storeId || g.storeId === currentStoreId,
+    );
+
+    const formatSide = (keys: string[], qtys: number[]) =>
+      keys
+        .map((k, i) => {
+          const item = itemsList.data.find(
+            (it) => it._id === k || it.upc === k || it.name === k,
+          );
+          const name = item?.name ?? k;
+          const qty = qtys[i] ?? 1;
+          return qty === 1 ? name : `${qty} of ${name}`;
+        })
+        .join(' and ');
+
+    const meContent = storeGroups
+      .map((g) => {
+        const side1 = formatSide(
+          g.itemKeys1,
+          g.quantities1 ?? g.itemKeys1.map(() => 1),
+        );
+        const side2 = formatSide(
+          g.itemKeys2,
+          g.quantities2 ?? g.itemKeys2.map(() => 1),
+        );
+        const label = g.name ? `${g.name} — ` : '';
+        return `- ${label}Buy ${side1} OR ${side2}`;
+      })
+      .join('\n');
+
+    // Return items for this store
+    const returnKeys = returnItemsMap[currentStoreId] ?? [];
+    const returnContent = returnKeys
+      .map((k) => {
+        const item = itemsList.data.find(
+          (it) => it._id === k || it.upc === k || it.name === k,
+        );
+        return `- ${item?.name ?? k}`;
+      })
+      .join('\n');
+
     const title = `Shopping List for '${getStoreDescriptor(currentStore)}'`;
-    const message = `${title}:\n\n${listContent}`;
+    const sections: string[] = [`${title}:`];
+    if (returnContent) sections.push(`\nReturn Items:\n${returnContent}`);
+    if (meContent) sections.push(`\nMutually Exclusive Groups:\n${meContent}`);
+    if (listContent) sections.push(`\nShopping List:\n${listContent}`);
+    const message = sections.join('\n');
 
     try {
       await Share.share(
@@ -169,7 +229,7 @@ export default function TabOneScreen() {
     } catch (error) {
       dispatch(setError(error as Error));
     }
-  }, [shoppingListItems, currentStore]);
+  }, [shoppingListItems, currentStore, meGroups, returnItemsMap, itemsList]);
 
   const renderScene = useMemo(
     () =>

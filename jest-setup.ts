@@ -16,6 +16,13 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));
 
+jest.mock('@/components/tiles/ItemTile', () => ({
+  ItemTileViewingMode: {
+    Basic: 'Basic',
+    Full: 'Full',
+  },
+}));
+
 // Mock ListName enum
 jest.mock('./state/slices/listsSlice', () => ({
   ListName: {

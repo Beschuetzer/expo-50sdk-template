@@ -3,13 +3,16 @@ import {
   AsyncThunkAction,
   AsyncThunkConfig,
 } from '@reduxjs/toolkit/dist/createAsyncThunk';
+import _ from 'lodash';
 
 import { ACCOUNT_INITIAL, setAccount, setLoading } from './slices/generalSlice';
 import { getLastPurchasedFromStoreSpecificValues } from './slices/helpers/getLastPurchasedMapFromStoreSpecificValues';
 import {
   listsSlice,
   addItemsListItem,
+  addRoute,
   addStoresListItem,
+  addStoreSpecificValues,
   completePurchase,
   handleSaveAllResponse,
   removeItemsListItems,
@@ -24,6 +27,8 @@ import {
   removeInventoryLocations,
   removeMostRecentInventoryItem,
   setInventory,
+  updateRoute,
+  deleteRoute,
 } from './slices/listsSlice';
 import { RootState } from './store';
 
@@ -35,8 +40,13 @@ import {
 } from '@/components/services/GeoCodingService';
 import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
 import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
-import { Item, LastPurchasedMap } from '@/types/Item';
-import { GpsCoordinate, Store } from '@/types/Store';
+import {
+  Item,
+  LastPurchasedMap,
+  StoreSpecificValueKey,
+  StoreSpecificValuesMap,
+} from '@/types/Item';
+import { GpsCoordinate, Route, Store } from '@/types/Store';
 import {
   ChangePasswordResponse,
   ProcessGroceryListResponse,
@@ -50,6 +60,10 @@ import {
   SaveItemResponse,
   SavePurchaseResponse,
   SaveStoreResponse,
+  SaveStoreRoutesResponse,
+  GetStoreRoutesResponse,
+  DeleteStoreRoutesResponse,
+  SaveStoreSpecificValuesResponse,
   MakeCallInput,
   UserAccount,
   ProcessedGroceryListItem,
@@ -67,7 +81,7 @@ import {
   RemoveInventoryItemPayload,
 } from '@/types/inventorySlice';
 import { ItemFormOnSave } from '@/types/itemForm';
-import { AddStoresListItemPayload } from '@/types/listSlice';
+import { AddStoresListItemPayload, AddRoutePayload } from '@/types/listSlice';
 import { getExpirationDates } from '@/utils/getExpirationDates';
 import { getMostRecentExpirationDates } from '@/utils/getMostRecentExpirationDates';
 import {
@@ -103,6 +117,53 @@ export type GetCurrentStoreInput = {
 export type MoveInventoryItemExpirationDatesThunkInput =
   MoveInventoryItemExpirationDates[];
 export type MoveInventoryItemsThunkInput = MoveInventoryItemPayload[];
+export type SaveStoreRoutesThunkInput = {
+  storeId: string;
+  route?: AddRoutePayload;
+};
+export type GetStoreRoutesThunkInput = {
+  storeId: string;
+};
+export type DeleteStoreRoutesThunkInput = {
+  storeId: string;
+  ids: string[];
+};
+export type RouteConflict = {
+  local: Route;
+  remote: Route;
+};
+export type AssignLocationToItemsThunkInput = {
+  storeId: string;
+  /**
+   *Locations are assigned per-route (not per-store) so the same item can
+   *sit at a different location depending on which route through the store
+   *is active.
+   **/
+  routeId: string;
+  location: string;
+  itemKeysToAssign: string[];
+  itemKeysToUnassign: string[];
+};
+export type UpdateItemsForRouteLocationChangeThunkInput = {
+  routeId: string;
+  oldLocationName: string;
+  /**
+   *When provided, items assigned to `oldLocationName` are renamed to this
+   *value. When omitted (or empty), items assigned to `oldLocationName` are
+   *simply unassigned (location cleared) — used when a location is deleted.
+   **/
+  newLocationName?: string;
+};
+export type AssignLocationsToItemsThunkInput = {
+  routeId: string;
+  /**
+   *Map of item key -> location name to assign that item to (for the given
+   *`routeId`). Unlike {@link assignLocationToItems}, which assigns a single
+   *location to a batch of items, this assigns a potentially different
+   *location to each item in one save.
+   **/
+  assignments: Record<string, string>;
+};
 export type SaveAllThunkInput = Omit<
   SetAppDataInput,
   'dispatch' | 'upcProducts'
@@ -1198,8 +1259,9 @@ export const saveStore = createAsyncThunk(
       dispatch(
         setLoading(`Saving '${getKeyToUse(input.newStore.name)}' in Database`),
       );
+
       response = await BFF_SERVICE.saveStore({
-        store: input.newStore,
+        store: storeToSave.newStore,
         dispatch,
         ...getUserCredentials(account),
       });
@@ -1220,6 +1282,437 @@ export const saveStore = createAsyncThunk(
     } finally {
       dispatch(setLoading(EMPTY_STRING));
       dispatch(addStoresListItem(storeToSave));
+    }
+  },
+);
+
+export const saveStoreRoutes = createAsyncThunk(
+  'saveStoreRoutes',
+  async (
+    input: SaveStoreRoutesThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const state = getState() as RootState;
+    const account = state.general.account;
+    const { storeId, route } = input || {};
+    let shouldDisplayError = true;
+    let response: SaveStoreRoutesResponse | undefined;
+
+    try {
+      if (!storeId) {
+        shouldDisplayError = false;
+        throw new Error('Must provide a storeId to save routes for.');
+      }
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No user account info given.');
+      }
+
+      const store = state.lists.storesList.data.find(
+        (s) => getKeyToUse(s) === storeId,
+      );
+      if (!store) {
+        shouldDisplayError = false;
+        throw new Error(`Unable to find store with id of '${storeId}'.`);
+      }
+
+      // If a route was provided, decide whether it's an add or an update and
+      // dispatch the appropriate local slice action before persisting.
+      if (route) {
+        const doesRouteExist = Boolean(
+          route.id && store.routes?.some((r) => r.id === route.id),
+        );
+        if (doesRouteExist) {
+          dispatch(updateRoute({ ...route, storeId, id: route.id as string }));
+        } else {
+          dispatch(addRoute({ ...route, storeId }));
+        }
+      }
+
+      dispatch(setLoading(`Saving routes in Database`));
+
+      // Re-read state since the local dispatch above already updated the
+      // store's routes array synchronously.
+      const updatedStore = (getState() as RootState).lists.storesList.data.find(
+        (s) => getKeyToUse(s) === storeId,
+      );
+
+      response = await BFF_SERVICE.saveStoreRoutes({
+        storeId,
+        routes: updatedStore?.routes ?? [],
+        dispatch,
+        ...getUserCredentials(account),
+      });
+
+      if (!response) {
+        throw new Error('Unable to save routes.');
+      }
+
+      return response;
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to save routes.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(setLoading(EMPTY_STRING));
+    }
+  },
+);
+
+export const getStoreRoutes = createAsyncThunk(
+  'getStoreRoutes',
+  async (
+    input: GetStoreRoutesThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const { storeId } = input || {};
+    let shouldDisplayError = true;
+    let response: GetStoreRoutesResponse | undefined;
+
+    try {
+      if (!storeId) {
+        shouldDisplayError = false;
+        throw new Error('Must provide a storeId to download routes for.');
+      }
+
+      response = await BFF_SERVICE.getStoreRoutes({ storeId, dispatch });
+
+      if (!response || !Array.isArray(response)) {
+        throw new Error('Unable to download routes.');
+      }
+
+      const state = getState() as RootState;
+      const store = state.lists.storesList.data.find(
+        (s) => getKeyToUse(s) === storeId,
+      );
+      const localRoutes = store?.routes ?? [];
+      const localRoutesById = new Map(
+        localRoutes.map((route) => [route.id, route]),
+      );
+      const conflicts: RouteConflict[] = [];
+
+      // Additive merge: routes that only exist remotely are added locally;
+      // routes that exist in both but differ are flagged as conflicts for
+      // the caller to resolve with the user. Routes that only exist locally
+      // are left untouched.
+      for (const remoteRoute of response) {
+        const localRoute = localRoutesById.get(remoteRoute.id);
+        if (!localRoute) {
+          dispatch(addRoute({ ...remoteRoute, storeId }));
+        } else if (!_.isEqual(localRoute, remoteRoute)) {
+          conflicts.push({ local: localRoute, remote: remoteRoute });
+        }
+      }
+
+      return { routes: response, conflicts };
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to download routes.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(setLoading(EMPTY_STRING));
+    }
+  },
+);
+
+export const deleteStoreRoutes = createAsyncThunk(
+  'deleteStoreRoutes',
+  async (
+    input: DeleteStoreRoutesThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const state = getState() as RootState;
+    const account = state.general.account;
+    const { storeId, ids } = input || {};
+    let shouldDisplayError = true;
+    let response: DeleteStoreRoutesResponse | undefined;
+
+    try {
+      if (!storeId) {
+        shouldDisplayError = false;
+        throw new Error('Must provide a storeId to delete routes for.');
+      }
+      if (!ids || ids.length <= 0) {
+        shouldDisplayError = false;
+        throw new Error('Must provide at least one route id to delete.');
+      }
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No user account info given.');
+      }
+
+      dispatch(setLoading(`Deleting routes in Database`));
+
+      response = await BFF_SERVICE.deleteStoreRoutes({
+        storeId,
+        ids,
+        dispatch,
+        ...getUserCredentials(account),
+      });
+
+      if (!response) {
+        throw new Error('Unable to delete routes.');
+      }
+
+      // Only remove the routes locally once the db deletion succeeds.
+      ids.forEach((id) => dispatch(deleteRoute({ id, storeId })));
+
+      return response;
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to delete routes.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(setLoading(EMPTY_STRING));
+    }
+  },
+);
+
+/**
+ *Assigns/unassigns `location` (for the given `routeId`) on every item in
+ *`itemKeysToAssign`/`itemKeysToUnassign` by building a single
+ *storeSpecificValues diff and persisting it in one call via
+ *{@link BFF_SERVICE.saveStoreSpecificValues}. Large batches (350+ items)
+ *previously dispatched a separate {@link saveItem} thunk per item -- each
+ *with its own network round trip and several redux dispatches -- which
+ *fired hundreds of near-simultaneous store updates and triggered a
+ *"Maximum update depth exceeded" warning; batching avoids that entirely.
+ **/
+export const assignLocationToItems = createAsyncThunk(
+  'assignLocationToItems',
+  async (
+    input: AssignLocationToItemsThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const { routeId, location, itemKeysToAssign, itemKeysToUnassign } =
+      input || {};
+    const state = getState() as RootState;
+    const account = state.general.account;
+    let shouldDisplayError = true;
+    let response: SaveStoreSpecificValuesResponse | undefined;
+    const keysToUpdate = [
+      ...(itemKeysToAssign || []),
+      ...(itemKeysToUnassign || []),
+    ];
+    const updatedStoreSpecificValuesMap: StoreSpecificValuesMap = {};
+
+    try {
+      if (keysToUpdate.length === 0) {
+        shouldDisplayError = false;
+        throw new Error('No item changes to save.');
+      }
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const storeSpecificValuesMap = state.lists.storeSpecificValuesMap;
+
+      for (const key of keysToUpdate) {
+        const shouldAssign = itemKeysToAssign.includes(key);
+        const currentValues = storeSpecificValuesMap[key] || {};
+        updatedStoreSpecificValuesMap[key] = {
+          ...currentValues,
+          [StoreSpecificValueKey.Location]: {
+            ...currentValues?.[StoreSpecificValueKey.Location],
+            [routeId]: shouldAssign ? location : EMPTY_STRING,
+          },
+        };
+      }
+
+      response = await BFF_SERVICE.saveStoreSpecificValues({
+        storeSpecificValuesMap: updatedStoreSpecificValuesMap,
+        dispatch,
+        ...account,
+      });
+
+      if (!response) {
+        throw new Error('Unable to save location assignments.');
+      }
+
+      return response;
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to save location assignments.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(addStoreSpecificValues(updatedStoreSpecificValuesMap));
+    }
+  },
+);
+
+/**
+ *Assigns a (potentially different) location to each item in `assignments`
+ *for the given `routeId`, building a single storeSpecificValues diff and
+ *persisting it in one call via {@link BFF_SERVICE.saveStoreSpecificValues}
+ *-- the same batching approach {@link assignLocationToItems} uses, just for
+ *a per-item map of locations instead of one location applied to every item.
+ **/
+export const assignLocationsToItems = createAsyncThunk(
+  'assignLocationsToItems',
+  async (
+    input: AssignLocationsToItemsThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const { routeId, assignments } = input || {};
+    const state = getState() as RootState;
+    const account = state.general.account;
+    let shouldDisplayError = true;
+    let response: SaveStoreSpecificValuesResponse | undefined;
+    const updatedStoreSpecificValuesMap: StoreSpecificValuesMap = {};
+    const keysToUpdate = Object.keys(assignments || {});
+
+    try {
+      if (keysToUpdate.length === 0) {
+        shouldDisplayError = false;
+        throw new Error('No item changes to save.');
+      }
+      if (!routeId) {
+        shouldDisplayError = false;
+        throw new Error('Must provide a routeId to assign locations for.');
+      }
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const storeSpecificValuesMap = state.lists.storeSpecificValuesMap;
+
+      for (const key of keysToUpdate) {
+        const currentValues = storeSpecificValuesMap[key] || {};
+        updatedStoreSpecificValuesMap[key] = {
+          ...currentValues,
+          [StoreSpecificValueKey.Location]: {
+            ...currentValues?.[StoreSpecificValueKey.Location],
+            [routeId]: assignments[key],
+          },
+        };
+      }
+
+      response = await BFF_SERVICE.saveStoreSpecificValues({
+        storeSpecificValuesMap: updatedStoreSpecificValuesMap,
+        dispatch,
+        ...account,
+      });
+
+      if (!response) {
+        throw new Error('Unable to save location assignments.');
+      }
+
+      return response;
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to save location assignments.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(addStoreSpecificValues(updatedStoreSpecificValuesMap));
+    }
+  },
+);
+
+/**
+ *Keeps items in sync when a route's location is renamed or deleted:
+ *finds every item currently assigned (for the given `routeId`) to
+ *`oldLocationName` and either renames it to `newLocationName` (rename) or
+ *clears it (delete, when `newLocationName` is omitted/empty), persisting the
+ *change via {@link BFF_SERVICE.saveStoreSpecificValues}, which updates only
+ *the storeSpecificValues document instead of saving/updating any items.
+ **/
+export const updateItemsForRouteLocationChange = createAsyncThunk(
+  'updateItemsForRouteLocationChange',
+  async (
+    input: UpdateItemsForRouteLocationChangeThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    const { routeId, oldLocationName, newLocationName } = input || {};
+    const state = getState() as RootState;
+    const account = state.general.account;
+    let shouldDisplayError = true;
+    let response: SaveStoreSpecificValuesResponse | undefined;
+    const updatedStoreSpecificValuesMap: StoreSpecificValuesMap = {};
+
+    try {
+      if (!routeId || !oldLocationName) {
+        shouldDisplayError = false;
+        throw new Error('Must provide a routeId and location to update.');
+      }
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+
+      const storeSpecificValuesMap = state.lists.storeSpecificValuesMap;
+
+      const keysToUpdate = Object.keys(storeSpecificValuesMap || {}).filter(
+        (key) =>
+          storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Location]?.[
+            routeId
+          ] === oldLocationName,
+      );
+
+      if (keysToUpdate.length === 0) {
+        shouldDisplayError = false;
+        throw new Error('No items are assigned to this location.');
+      }
+
+      for (const key of keysToUpdate) {
+        const currentValues = storeSpecificValuesMap[key] || {};
+        updatedStoreSpecificValuesMap[key] = {
+          ...currentValues,
+          [StoreSpecificValueKey.Location]: {
+            ...currentValues?.[StoreSpecificValueKey.Location],
+            [routeId]: newLocationName || EMPTY_STRING,
+          },
+        };
+      }
+
+      response = await BFF_SERVICE.saveStoreSpecificValues({
+        storeSpecificValuesMap: updatedStoreSpecificValuesMap,
+        dispatch,
+        ...account,
+      });
+
+      if (!response) {
+        throw new Error('Unable to save location changes.');
+      }
+
+      return response;
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to update item locations.`,
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(addStoreSpecificValues(updatedStoreSpecificValuesMap));
     }
   },
 );

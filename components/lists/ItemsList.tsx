@@ -1,10 +1,11 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useNavigation } from 'expo-router';
-import { Text, useTheme, Stack } from 'native-base';
+import { Text, useTheme, Stack, useToast } from 'native-base';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 
+import { ListActionToast } from './ListActionToast';
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 import { SortType } from './sorters';
@@ -53,6 +54,7 @@ export function ItemsList(props: ItemsListProps) {
   const itemsList = useAppSelector(itemsListSelector);
   const currentStore = useAppSelector(currentStoreSelector);
   const theme = useTheme();
+  const toast = useToast();
   const dispatch = useAppDispatch();
   const listRef = useRef<FlashList<Item> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -124,9 +126,35 @@ export function ItemsList(props: ItemsListProps) {
   }, []);
 
   const onAddAllToShoppingPress = useCallback(() => {
-    dispatch(addAllToShoppingCart(selectedItems));
+    const itemsAdded = [...selectedItems];
+    dispatch(addAllToShoppingCart(itemsAdded));
     resetMultiSelectionMode();
-  }, [selectedItems, resetMultiSelectionMode]);
+    toast.closeAll();
+    toast.show({
+      id: 'items-list-add-all-to-shopping',
+      placement: 'bottom',
+      duration: 4000,
+      render: () => (
+        <ListActionToast
+          message={`${itemsAdded.length} item${itemsAdded.length === 1 ? '' : 's'} added to Shopping List.`}
+          onUndo={() => {
+            for (const item of itemsAdded) {
+              dispatch(
+                updateStoreSpecificValues({
+                  key: item,
+                  storeSpecificValuesToUpdate: {
+                    quantity: (currentQuantity: number) =>
+                      Math.max(currentQuantity - 1, 0),
+                  },
+                }),
+              );
+            }
+            toast.closeAll();
+          }}
+        />
+      ),
+    });
+  }, [selectedItems, resetMultiSelectionMode, dispatch, toast]);
 
   const onDeleteSelectedPress = useCallback(() => {
     setConfirmModalProps({
@@ -135,17 +163,28 @@ export function ItemsList(props: ItemsListProps) {
       message: `Are you sure you want to delete ${joinWithAnd(selectedItems.map((item) => `'${item.name || item.upc}'`))}?`,
       onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: () => {
+        const itemsDeleted = [...selectedItems];
         dispatch(
           deleteItems({
-            items: selectedItems,
+            items: itemsDeleted,
           }),
         );
-        removeItemsListItems(selectedItems);
         resetMultiSelectionMode();
         resetConfirmModalProps(setConfirmModalProps);
+        toast.closeAll();
+        toast.show({
+          id: 'items-list-delete',
+          placement: 'bottom',
+          duration: 4000,
+          render: () => (
+            <ListActionToast
+              message={`${itemsDeleted.length} item${itemsDeleted.length === 1 ? '' : 's'} deleted.`}
+            />
+          ),
+        });
       },
     });
-  }, [selectedItems, resetMultiSelectionMode]);
+  }, [selectedItems, resetMultiSelectionMode, dispatch, toast]);
 
   const onToggleViewingModePress = useCallback(() => {
     setViewingMode((current) => getNewViewingMode(current));
@@ -165,8 +204,31 @@ export function ItemsList(props: ItemsListProps) {
           },
         }),
       );
+      toast.closeAll();
+      toast.show({
+        id: 'items-list-add-to-shopping',
+        placement: 'bottom',
+        duration: 4000,
+        render: () => (
+          <ListActionToast
+            message={`'${key.name || key.upc || 'Item'}' added to Shopping List.`}
+            onUndo={() => {
+              dispatch(
+                updateStoreSpecificValues({
+                  key,
+                  storeSpecificValuesToUpdate: {
+                    quantity: (currentQuantity: number) =>
+                      Math.max(currentQuantity - 1, 0),
+                  },
+                }),
+              );
+              toast.closeAll();
+            }}
+          />
+        ),
+      });
     },
-    [closeMenu],
+    [closeMenu, dispatch, toast],
   );
 
   const onSwipeLeft = useCallback(
@@ -194,12 +256,24 @@ export function ItemsList(props: ItemsListProps) {
               items: [item],
             }),
           );
+          dispatch(removeItemsListItems([item]));
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           resetConfirmModalProps(setConfirmModalProps);
+          toast.closeAll();
+          toast.show({
+            id: 'items-list-delete',
+            placement: 'bottom',
+            duration: 4000,
+            render: () => (
+              <ListActionToast
+                message={`'${keyToDisplay || 'Item'}' deleted.`}
+              />
+            ),
+          });
         },
       });
     },
-    [listRef, closeMenu],
+    [listRef, closeMenu, dispatch, toast],
   );
 
   function renderItem({ item, index }: ListRow<Item>) {

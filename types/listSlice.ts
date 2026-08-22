@@ -5,7 +5,7 @@ import {
   StoreSpecificValueUpdater,
   Key,
 } from './Item';
-import { Store } from './Store';
+import { Route, Store } from './Store';
 import { SaveAllResponse } from './bffService';
 import { ListNameProp } from './general';
 
@@ -115,6 +115,10 @@ export type RemoveReturnItemPayload = {
 
 /** Map of storeId → array of item keys marked as returns at that store */
 export type ReturnItemsMap = { [storeId: string]: string[] };
+
+export type AddRoutePayload = Omit<Route, 'id'> & { id?: string };
+export type UpdateRoutePayload = Route;
+export type DeleteRoutePayload = { id: string; storeId: string };
 
 export type HandleSaveAllResponsePayload = SaveAllResponse & {
   /**

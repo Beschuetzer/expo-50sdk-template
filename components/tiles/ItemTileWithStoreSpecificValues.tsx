@@ -22,6 +22,9 @@ import {
 import { Routes } from '@/constants/navigation';
 import { tileContainerStyles } from '@/constants/styles';
 import {
+  activeRouteSelector,
+  currentStoreIdSelector,
+  storeSpecificValueForIdSelector,
   storeSpecificValuesSelector,
   updateStoreSpecificValues,
 } from '@/state/slices/listsSlice';
@@ -65,12 +68,24 @@ export function ItemTileWithStoreSpecificValues(
   const priceAtStore = useSelector(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.Price),
   );
-  const aisleNumberAtStore = useSelector(
-    storeSpecificValuesSelector(item, StoreSpecificValueKey.AisleNumber),
+  const currentStoreId = useSelector(currentStoreIdSelector);
+  const activeRoute = useSelector(activeRouteSelector(currentStoreId));
+  // Location is keyed by routeId (not storeId): the same item can be at a
+  // different location depending on which route through the store is active.
+  const locationAtRoute = useSelector(
+    storeSpecificValueForIdSelector(
+      item,
+      StoreSpecificValueKey.Location,
+      activeRoute?.id,
+    ),
   );
   const noteAtStore = useSelector(
     storeSpecificValuesSelector(item, StoreSpecificValueKey.Note),
   );
+  const displayedLocation =
+    activeRoute && activeRoute.locations.includes(String(locationAtRoute || ''))
+      ? locationAtRoute
+      : undefined;
   const imageHeightInFullMode = useMemo(() => {
     const defaultHeight =
       IMAGE_RENDERER_WIDTH_DEFAULT * IMAGE_RENDERER_ASPECT_RATIO_DEFAULT;
@@ -115,8 +130,8 @@ export function ItemTileWithStoreSpecificValues(
                 : ''}
             </Text>
             {priceAtStore ? <Text> at ${priceAtStore}</Text> : null}
-            {aisleNumberAtStore ? (
-              <Text> (aisle {aisleNumberAtStore})</Text>
+            {displayedLocation ? (
+              <Text> (located in {displayedLocation})</Text>
             ) : null}
           </Text>
         </Row>
@@ -183,6 +198,7 @@ export function ItemTileWithStoreSpecificValues(
     );
   }, [
     decrementQuantity,
+    displayedLocation,
     incrementQuantity,
     item,
     noteAtStore,
@@ -261,7 +277,6 @@ export function ItemTileWithStoreSpecificValues(
         <Row padding={theme.space[FORM_INTER_ITEM_SPACING] * 1}>
           {renderContent()}
         </Row>
-
       </Column>
     </RectButton>
   );

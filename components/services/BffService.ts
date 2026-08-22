@@ -19,12 +19,17 @@ import {
   DeleteItemsInput,
   DeleteS3ObjectsInput,
   DeleteStoresInput,
+  DeleteStoreRoutesInput,
+  DeleteStoreRoutesRequest,
+  DeleteStoreRoutesResponse,
   DeleteUserInput,
   DeleteUserResponse,
   DeletionResponse,
   DispatchNeeded,
   EmailNeeded,
   GetSignedUrlInput,
+  GetStoreRoutesInput,
+  GetStoreRoutesResponse,
   GetUserItemsInput,
   GetUserStoresInput,
   IdNeeded,
@@ -59,6 +64,12 @@ import {
   SaveStoreInput,
   SaveStoreRequest,
   SaveStoreResponse,
+  SaveStoreRoutesInput,
+  SaveStoreRoutesRequest,
+  SaveStoreRoutesResponse,
+  SaveStoreSpecificValuesInput,
+  SaveStoreSpecificValuesRequest,
+  SaveStoreSpecificValuesResponse,
   SignedUrlResponse,
   UpdateUserInput,
   UserAccountInput,
@@ -307,6 +318,46 @@ class BffService extends AbstractService {
     return response;
   }
 
+  async deleteStoreRoutes(input: DeleteStoreRoutesInput) {
+    const { dispatch, storeId, ids, userId, password } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!storeId) {
+      handleError(dispatch, {
+        statusCode: 500,
+        message: 'No storeId given in deleteStoreRoutes()',
+      });
+      return null;
+    }
+
+    if (!ids || ids.length <= 0) {
+      handleError(dispatch, {
+        statusCode: 500,
+        message: 'No ids given in deleteStoreRoutes()',
+      });
+      return null;
+    }
+
+    const body = JSON.stringify({
+      storeId,
+      ids,
+      userId,
+      password,
+    } as DeleteStoreRoutesRequest);
+
+    const response = await this.makeCall<DeleteStoreRoutesResponse>({
+      dispatch,
+      body,
+      options: {
+        method: 'DELETE',
+      },
+      path: `${STORE_PATH}/routes`,
+      errorMsg: `Unable to delete routes for store '${storeId}'.`,
+      loadingMsg: `Deleting routes...`,
+    });
+    return response;
+  }
+
   async deleteUser(input: DeleteUserInput) {
     const { dispatch, userId, password } = input || {};
     if (!this.validateCredentials(userId, password, dispatch)) return;
@@ -361,6 +412,26 @@ class BffService extends AbstractService {
       dispatch,
       errorMsg: `Unable to get store with id of '${_id}'`,
       loadingMsg: `Getting store with id of '${_id}'...`,
+    });
+    return response;
+  }
+
+  async getStoreRoutes(input: GetStoreRoutesInput) {
+    const { storeId, dispatch } = input || {};
+    if (!storeId) {
+      dispatch(
+        setError({
+          statusCode: 500,
+          message: 'No storeId given in getStoreRoutes()',
+        }),
+      );
+      return;
+    }
+    const response = await this.makeCall<GetStoreRoutesResponse>({
+      path: `${STORE_PATH}/routes/${storeId}`,
+      dispatch,
+      errorMsg: `Unable to get routes for store with id of '${storeId}'`,
+      loadingMsg: `Downloading routes...`,
     });
     return response;
   }
@@ -824,6 +895,82 @@ class BffService extends AbstractService {
       path: STORE_PATH,
       errorMsg: `Unable to save '${store.name}'.`,
       loadingMsg: `Saving store '${store.name}'...`,
+    });
+    return response;
+  }
+
+  /**
+   *Persists just the `routes` field for a store instead of resaving the
+   *entire store document.
+   **/
+  async saveStoreRoutes(input: SaveStoreRoutesInput) {
+    const { dispatch, storeId, routes, userId, password } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!storeId) {
+      handleError(dispatch, {
+        statusCode: 500,
+        message: 'No storeId given in saveStoreRoutes()',
+      });
+      return null;
+    }
+
+    const body = JSON.stringify({
+      storeId,
+      routes,
+      userId,
+      password,
+    } as SaveStoreRoutesRequest);
+
+    const response = await this.makeCall<SaveStoreRoutesResponse>({
+      dispatch,
+      body,
+      options: {
+        method: 'POST',
+      },
+      path: `${STORE_PATH}/routes`,
+      errorMsg: `Unable to save routes for store '${storeId}'.`,
+      loadingMsg: `Saving routes...`,
+    });
+    return response;
+  }
+
+  /**
+   *Persists just the `storeSpecificValuesMap` document for the user instead
+   *of saving/updating any items.
+   **/
+  async saveStoreSpecificValues(input: SaveStoreSpecificValuesInput) {
+    const {
+      dispatch,
+      _id: userId,
+      password,
+      storeSpecificValuesMap,
+    } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) return;
+
+    if (!storeSpecificValuesMap) {
+      handleError(dispatch, {
+        statusCode: 500,
+        message: 'No storeSpecificValuesMap given in saveStoreSpecificValues()',
+      });
+      return null;
+    }
+
+    const body = JSON.stringify({
+      storeSpecificValuesMap,
+      userId,
+      password,
+    } as SaveStoreSpecificValuesRequest);
+
+    const response = await this.makeCall<SaveStoreSpecificValuesResponse>({
+      dispatch,
+      body,
+      options: {
+        method: 'POST',
+      },
+      path: `${ITEM_PATH}/storeSpecificValues`,
+      errorMsg: `Unable to save store specific values.`,
+      loadingMsg: `Saving...`,
     });
     return response;
   }

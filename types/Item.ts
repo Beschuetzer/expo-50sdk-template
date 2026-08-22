@@ -104,6 +104,7 @@ export enum StoreSpecificValueKey {
   AisleNumber = 'aisleNumber',
   IsInCart = 'isInCart',
   ItemId = 'itemId',
+  Location = 'location',
   Note = 'note',
   Price = 'price',
   Quantity = 'quantity',
@@ -117,13 +118,15 @@ export type StoreSpecificValueKeyTypes = {
       ? boolean
       : key extends StoreSpecificValueKey.ItemId
         ? string
-        : key extends StoreSpecificValueKey.Note
+        : key extends StoreSpecificValueKey.Location
           ? string
-          : key extends StoreSpecificValueKey.Price
-            ? number
-            : key extends StoreSpecificValueKey.Quantity
+          : key extends StoreSpecificValueKey.Note
+            ? string
+            : key extends StoreSpecificValueKey.Price
               ? number
-              : never;
+              : key extends StoreSpecificValueKey.Quantity
+                ? number
+                : never;
 };
 
 /**
@@ -141,6 +144,12 @@ export type StoreSpecificValues = {
   [StoreSpecificValueKey.AisleNumber]?: StoreSpecificValue<string>;
   [StoreSpecificValueKey.IsInCart]?: StoreSpecificValue<boolean>;
   [StoreSpecificValueKey.ItemId]?: StoreSpecificValue<string>;
+  /**
+   *Unlike the other store-specific values, this is keyed by `routeId`, not
+   *`storeId` - the same item can be at a different location depending on
+   *which route through the store is active (see {@link Route}).
+   **/
+  [StoreSpecificValueKey.Location]?: StoreSpecificValue<string>;
   [StoreSpecificValueKey.Note]?: StoreSpecificValue<string>;
   [StoreSpecificValueKey.Price]?: StoreSpecificValue<number>;
   [StoreSpecificValueKey.Quantity]?: StoreSpecificValue<number>;

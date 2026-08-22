@@ -14,14 +14,16 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  [generalSlice.name]: persistReducer(persistConfig, generalReducer),
-  [listsSlice.name]: persistReducer(persistConfig, listsReducer),
-  [optionsSlice.name]: persistReducer(persistConfig, optionsReducer),
-  [quickAddSlice.name]: persistReducer(persistConfig, quickAddReducer),
+  [generalSlice.name]: generalReducer,
+  [listsSlice.name]: listsReducer,
+  [optionsSlice.name]: optionsReducer,
+  [quickAddSlice.name]: quickAddReducer,
 });
 
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware({
       serializableCheck: false,

@@ -19,6 +19,7 @@ export function TileIsSelectedBackground(props: ItemTileIsSelectedColumnProps) {
       bottom={0}
       opacity={opacity}
       backgroundColor={colorToUse}
+      pointerEvents="none"
     />
   );
 }

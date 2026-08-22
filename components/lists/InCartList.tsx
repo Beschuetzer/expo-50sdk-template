@@ -1,10 +1,11 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { Text, useTheme, Stack } from 'native-base';
+import { Stack, Text, useTheme, useToast } from 'native-base';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { ListActionToast } from './ListActionToast';
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 import { TotalListPrice } from './TotalListPrice';
@@ -20,13 +21,14 @@ import {
 } from '@/constants/general';
 import {
   isMultiSelectModeForInCartSelector,
+  addItemToCart,
   moveItemToShoppingList,
   selectedItemsFromInCartSelector,
   storeSpecificListSelector,
   setIsMultiSelectModeForInCartCart,
   updateSelectedItemsFromInCart,
 } from '@/state/slices/listsSlice';
-import { ItemWithStoreSpecificValues, Key } from '@/types/Item';
+import { ItemWithStoreSpecificValues } from '@/types/Item';
 import { ListRow } from '@/types/general';
 import { ListName } from '@/types/listSlice';
 import { getKeyToUse } from '@/utils/helpers';
@@ -46,6 +48,7 @@ export function InCartList(props: InCartListProps) {
   const { viewingMode } = props;
   const inCartList = useSelector(storeSpecificListSelector(listName));
   const theme = useTheme();
+  const toast = useToast();
   const dispatch = useDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,12 +61,27 @@ export function InCartList(props: InCartListProps) {
   }, [viewingMode]);
 
   const onSwipeLeft = useCallback(
-    (key: Key) => {
+    (item: ItemWithStoreSpecificValues) => {
       LIST_HAPTICS.handleSwipeItem(true)();
-      dispatch(moveItemToShoppingList(key));
+      dispatch(moveItemToShoppingList(item));
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      toast.closeAll();
+      toast.show({
+        id: 'in-cart-list-move',
+        placement: 'bottom',
+        duration: 4000,
+        render: () => (
+          <ListActionToast
+            message={`'${item.name || item.upc || 'Item'}' moved back to Shopping.`}
+            onUndo={() => {
+              dispatch(addItemToCart(item));
+              toast.closeAll();
+            }}
+          />
+        ),
+      });
     },
-    [listRef],
+    [dispatch, listRef, theme, toast],
   );
 
   function renderItem({ item, index }: ListRow<ItemWithStoreSpecificValues>) {

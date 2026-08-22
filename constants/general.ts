@@ -43,6 +43,7 @@ export const ESTIMATED_SIZE_FOR_QUICK_ADD_MODAL_SEARCH_LIST = 117;
 export const ESTIMATED_SIZE_FOR_SHOPPING_LISTS = 133;
 export const ESTIMATED_SIZE_FOR_STORE_SELECTION_MODAL = 44;
 export const ESTIMATED_SIZE_FOR_LOCATION_SELECTION_MODAL = 44;
+export const ESTIMATED_SIZE_FOR_ROUTE_LOCATION_SEARCH_MODAL = 48;
 export const ESTIMATED_SIZE_FOR_STORES_LIST = 61;
 export const FILE_NAMES = {
   inventory: 'inventory',
@@ -396,6 +397,7 @@ export const STORE_SPECIFIC_VALUE_KEY_DEFAULTS: StoreSpecificValueKeyTypes = {
   [StoreSpecificValueKey.AisleNumber]: EMPTY_NUMBER,
   [StoreSpecificValueKey.IsInCart]: false,
   [StoreSpecificValueKey.ItemId]: EMPTY_STRING,
+  [StoreSpecificValueKey.Location]: EMPTY_STRING,
   [StoreSpecificValueKey.Note]: EMPTY_STRING,
   [StoreSpecificValueKey.Price]: EMPTY_NUMBER,
   [StoreSpecificValueKey.Quantity]: EMPTY_NUMBER,

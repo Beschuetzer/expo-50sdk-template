@@ -63,18 +63,10 @@ export default function CookingInstructionsScreen() {
 
   if (isEditMode) {
     return (
-      <ScrollView
-        contentContainerStyle={{
-          padding: theme.space[4],
-          paddingBottom: 32,
-        }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <CookingInstructionsEditor
-          value={localInstructions}
-          onChange={setLocalInstructions}
-        />
-      </ScrollView>
+      <CookingInstructionsEditor
+        value={localInstructions}
+        onChange={setLocalInstructions}
+      />
     );
   }
 
@@ -88,6 +80,7 @@ export default function CookingInstructionsScreen() {
       contentContainerStyle={{
         padding: theme.space[4],
         paddingBottom: 32,
+        margin: theme.space[2],
       }}
     >
       {images.length > 0 && (

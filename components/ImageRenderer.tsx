@@ -36,7 +36,6 @@ export function ImageRenderer(props: ImageRendererProps) {
     width = IMAGE_RENDERER_WIDTH_DEFAULT,
     useMarginRight = false,
   } = props;
-  const marginRight = useMarginRight ? theme.space[FORM_INTER_ITEM_SPACING] : 0;
   const [isError, setIsError] = useState(false);
   const itemImage = useMemo(() => item?.images[item?.imageToUseIndex], [item]);
 
@@ -48,29 +47,25 @@ export function ImageRenderer(props: ImageRendererProps) {
 
   return (
     <TouchableOpacity onPress={onImagePress}>
-      {(!source && !itemImage) || isError ? (
-        <View
-          height={height}
-          width={width}
-          backgroundColor={theme.colors.gray[200]}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
+      <View
+        height={height}
+        width={width}
+        backgroundColor={theme.colors.gray[200]}
+        display="flex"
+        overflow="hidden"
+        mt={1}
+        mr={useMarginRight ? 1.5 : 0}
+        alignItems="center"
+        justifyContent="center"
+      >
+        {(!source && !itemImage) || isError ? (
           <FontAwesome
             name="image"
             size={
               parseFloat(width as string) / IMAGE_RENDERER_ASPECT_RATIO_DEFAULT
             }
           />
-        </View>
-      ) : (
-        <View
-          height={height}
-          width={width}
-          style={{ marginRight: marginRight * 4 }}
-          overflow="hidden"
-        >
+        ) : (
           <Image
             cachePolicy={cachePolicy}
             {...props}
@@ -79,8 +74,8 @@ export function ImageRenderer(props: ImageRendererProps) {
             style={{ width: '100%', height: '100%' }}
             onError={() => setIsError(true)}
           />
-        </View>
-      )}
+        )}
+      </View>
     </TouchableOpacity>
   );
 }

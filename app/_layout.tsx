@@ -182,6 +182,48 @@ function RootLayoutNav() {
                         }}
                       />
                       <Stack.Screen
+                        name={Routes.RouteCreationScreen}
+                        options={{
+                          presentation: 'modal',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.RouteSelectionScreen}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Select a Route',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.RouteConflictResolutionScreen}
+                        options={{
+                          presentation: 'modal',
+                          title: 'Resolve Route Conflicts',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.LocationItemAssignmentScreen}
+                        options={{
+                          presentation: 'modal',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
+                        name={Routes.RouteUnassignedItemsScreen}
+                        options={{
+                          presentation: 'modal',
+                          headerTitleAlign: 'center',
+                          headerLeft: () => <CloseButton />,
+                        }}
+                      />
+                      <Stack.Screen
                         name={Routes.ShareIntentScreen}
                         options={{
                           presentation: 'modal',

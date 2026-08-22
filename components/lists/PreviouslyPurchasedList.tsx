@@ -1,7 +1,5 @@
 import { FlashList } from '@shopify/flash-list';
-import { Column } from 'native-base';
 import React, { useCallback, useState } from 'react';
-import { FlatList } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { ListItemSeparator } from './ListItemSeparator';
@@ -22,6 +20,7 @@ import {
   ItemWithStoreSpecificValues,
   Key,
   PrevioulsyPurchasedItem,
+  StoreSpecificValueKey,
 } from '@/types/Item';
 import { ListRow } from '@/types/general';
 import { ListName } from '@/types/listSlice';
@@ -65,6 +64,18 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
     );
   }, []);
 
+  const onRemovePress = useCallback((key: Key) => {
+    dispatch(
+      updateStoreSpecificValues({
+        key,
+        storeSpecificValuesToUpdate: {
+          [StoreSpecificValueKey.IsInCart]: () => false,
+          [StoreSpecificValueKey.Quantity]: () => 0,
+        },
+      }),
+    );
+  }, []);
+
   function renderItem({ item, index }: ListRow<PrevioulsyPurchasedItem>) {
     const keyToUse = getKeyToUse(item);
     const itemInCart = itemsInCart.find(
@@ -98,6 +109,9 @@ export function PreviouslyPurchasedList(props: PreviouslyPurchasedListProps) {
         }}
         onAddPress={() => {
           onAddPress(item);
+        }}
+        onRemovePress={() => {
+          onRemovePress(item);
         }}
         onSelect={(item) => {
           const isSelected = !!selectedItems.find(

@@ -6,7 +6,7 @@ import {
   StoreSpecificValues,
   StoreSpecificValuesMap,
 } from './Item';
-import { Store } from './Store';
+import { Route, Store } from './Store';
 import {
   Inventory,
   InventoryItemExpirationDates,
@@ -59,6 +59,8 @@ export type StoreSpecificValuesMapNeeded = {
   storeSpecificValuesMap?: StoreSpecificValuesMap;
 };
 export type PasswordNeeded = { password: string };
+export type StoreIdNeeded = { storeId: string };
+export type RoutesNeeded = { routes: Route[] };
 export type UserNeeded<T> = { user: T };
 export type UserIdNeeded = { userId: string };
 export type UserAccount = {
@@ -96,6 +98,7 @@ export type GetSignedUrlInput = { filename: string } & UserIdNeeded &
   DispatchNeeded;
 export type GetUserItemsInput = DispatchNeeded & UserIdNeeded;
 export type GetUserStoresInput = GetUserItemsInput;
+export type GetStoreRoutesInput = StoreIdNeeded & DispatchNeeded;
 export type LoadAllFromDbInput = DispatchNeeded & UserIdNeeded & PasswordNeeded;
 export type MakeCallInput = {
   body?: string;
@@ -176,6 +179,37 @@ export type SaveItemsRequest = Omit<SaveItemsInput, 'dispatch'> &
   UserIdNeeded &
   PasswordNeeded;
 export type SaveStoreInput = StoreNeeded & DispatchNeeded & CredentialsNeeded;
+export type SaveStoreRoutesInput = StoreIdNeeded &
+  RoutesNeeded &
+  DispatchNeeded &
+  CredentialsNeeded;
+export type SaveStoreRoutesRequest = Omit<SaveStoreRoutesInput, 'dispatch'> &
+  UserIdNeeded &
+  PasswordNeeded;
+export type DeleteStoreRoutesInput = StoreIdNeeded &
+  IdsNeeded &
+  DispatchNeeded &
+  CredentialsNeeded;
+export type DeleteStoreRoutesRequest = Omit<
+  DeleteStoreRoutesInput,
+  'dispatch'
+> &
+  UserIdNeeded &
+  PasswordNeeded;
+/**
+ *For persisting just the storeSpecificValuesMap document instead of
+ *saving/updating any items.
+ **/
+export type SaveStoreSpecificValuesInput = {
+  storeSpecificValuesMap: StoreSpecificValuesMap;
+} & DispatchNeeded &
+  UserAccount;
+export type SaveStoreSpecificValuesRequest = Omit<
+  SaveStoreSpecificValuesInput,
+  'dispatch'
+> &
+  UserIdNeeded &
+  PasswordNeeded;
 export type SavePurchaseInput = LastPurchasedMapNeeded &
   DispatchNeeded &
   CredentialsNeeded;
@@ -238,6 +272,12 @@ export type SaveAllResponse =
 export type SaveItemResponse = Item | GenericResponse;
 export type SavePurchaseResponse = IdNeeded | GenericResponse;
 export type SaveStoreResponse = Store | GenericResponse;
+export type SaveStoreRoutesResponse = Route[] | GenericResponse;
+export type GetStoreRoutesResponse = Route[] | GenericResponse;
+export type DeleteStoreRoutesResponse = Route[] | GenericResponse;
+export type SaveStoreSpecificValuesResponse =
+  | DocumentResult<StoreSpecificValuesMap>
+  | GenericResponse;
 export type SignedUrlResponse =
   | { downloadUrl: string; uploadUrl: string }
   | GenericResponse;

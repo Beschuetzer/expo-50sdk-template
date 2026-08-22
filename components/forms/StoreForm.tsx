@@ -1,6 +1,16 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import { useNavigation } from 'expo-router';
 import _ from 'lodash';
-import { Stack, Row, useTheme, Button } from 'native-base';
+import {
+  Stack,
+  Row,
+  useTheme,
+  Button,
+  HStack,
+  Pressable,
+  Text,
+} from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AddressForm } from './AddressForm';
@@ -19,14 +29,16 @@ import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
 } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import { setError } from '@/state/slices/generalSlice';
 import {
   currentLocationStateSelector,
+  routesForStoreSelector,
   storesListSelector,
 } from '@/state/slices/listsSlice';
 import { autoSaveStoresSelector } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
-import { GpsCoordinate, Store } from '@/types/Store';
+import { GpsCoordinate, Route, Store } from '@/types/Store';
 import { Address, StoreProp } from '@/types/general';
 import { AddStoresListItemPayload } from '@/types/listSlice';
 import {
@@ -37,6 +49,7 @@ import {
   trimObjectValues,
 } from '@/utils/helpers';
 import { parseAddress } from '@/utils/parseAddress';
+import { InputText } from './InputText';
 
 type StoreFormValdation = {
   isValid: boolean;
@@ -55,9 +68,15 @@ export function StoreForm(props: StoreFormProps) {
   const { onClose, onSave, store } = props;
   const theme = useTheme();
   const dispatch = useAppDispatch();
+  const navigation = useNavigation();
   const storesList = useAppSelector(storesListSelector);
   const autoSaveStores = useAppSelector(autoSaveStoresSelector);
   const currentLocationState = useAppSelector(currentLocationStateSelector);
+  const storeId = useMemo(
+    () => (store ? getKeyToUse(store) : EMPTY_STRING),
+    [store],
+  );
+  const storeRoutes = useAppSelector(routesForStoreSelector(storeId));
   const [formData, setFormData] = useState(
     getEmptyStore(store, currentLocationState),
   );
@@ -175,6 +194,26 @@ export function StoreForm(props: StoreFormProps) {
     addressSheetRef.current?.present();
   }, [addressSheetRef.current, formData, nameToUse, currentLocationState]);
 
+  const onEditRoute = useCallback(
+    (route: Route) => {
+      // @ts-ignore
+      navigation.navigate(Routes.RouteCreationScreen, {
+        storeId,
+        storeName: store?.name,
+        routeId: route.id,
+      });
+    },
+    [navigation, storeId, store?.name],
+  );
+
+  const onManageRoutesPress = useCallback(() => {
+    // @ts-ignore
+    navigation.navigate(Routes.RouteSelectionScreen, {
+      storeId,
+      storeName: store?.name,
+    });
+  }, [navigation, storeId, store?.name]);
+
   const onSearchAddressChange = useCallback(
     (address: Address, isValid: boolean) => {
       setSearchAddress((current) => ({
@@ -275,6 +314,69 @@ export function StoreForm(props: StoreFormProps) {
           }}
         />
       </Stack>
+      {store ? (
+        <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+          <Row justifyContent="space-between" alignItems="center" mb={2}>
+            <InputText>Routes</InputText>
+            <Pressable onPress={onManageRoutesPress} hitSlop={8}>
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                color={theme.colors.primary[600]}
+              >
+                Manage Routes
+              </Text>
+            </Pressable>
+          </Row>
+          {storeRoutes.length === 0 ? (
+            <Text fontSize="xs" color={theme.colors.muted[400]}>
+              No routes for this store yet.
+            </Text>
+          ) : (
+            <Stack space={1}>
+              {storeRoutes.map((route) => (
+                <Pressable
+                  key={route.id}
+                  onPress={() => onEditRoute(route)}
+                  _pressed={{ opacity: 0.5 }}
+                >
+                  <HStack
+                    alignItems="center"
+                    justifyContent="space-between"
+                    px={3}
+                    py={2}
+                    borderWidth={1}
+                    borderColor={theme.colors.muted[200]}
+                    borderRadius={6}
+                  >
+                    <Stack flex={1}>
+                      <Text fontSize="sm" fontWeight="600" numberOfLines={1}>
+                        {route.name}
+                      </Text>
+                      <Text fontSize="2xs" color={theme.colors.muted[500]}>
+                        {route.locations.length} location
+                        {route.locations.length !== 1 ? 's' : ''}
+                      </Text>
+                    </Stack>
+                    <Pressable
+                      onPress={() => onEditRoute(route)}
+                      hitSlop={8}
+                      p={2}
+                      _pressed={{ opacity: 0.5 }}
+                    >
+                      <FontAwesome
+                        name="pencil"
+                        size={14}
+                        color={theme.colors.muted[500]}
+                      />
+                    </Pressable>
+                  </HStack>
+                </Pressable>
+              ))}
+            </Stack>
+          )}
+        </Stack>
+      ) : null}
       <BottomSheetModalWithFixedHeader
         ref={addressSheetRef}
         title="Search Stores"

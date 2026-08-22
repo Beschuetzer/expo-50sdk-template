@@ -21,6 +21,7 @@ type ItemTileForPreviouslyPurchasedProps = {
   isInShopping?: boolean;
   isRecommended?: boolean;
   onAddPress?: () => void;
+  onRemovePress?: () => void;
 } & ItemTileProps<ItemWithStoreSpecificValues>;
 
 export function ItemTileForPreviouslyPurchased(
@@ -36,6 +37,7 @@ export function ItemTileForPreviouslyPurchased(
     listName,
     item,
     onAddPress,
+    onRemovePress,
     onSelect,
   } = props;
   const theme = useTheme();
@@ -74,6 +76,10 @@ export function ItemTileForPreviouslyPurchased(
     onAddPress && onAddPress();
   }, [onAddPress]);
 
+  const onRemovePressLocal = useCallback(() => {
+    onRemovePress && onRemovePress();
+  }, [onRemovePress]);
+
   return (
     <RectButton
       {...buttonProps}
@@ -108,18 +114,28 @@ export function ItemTileForPreviouslyPurchased(
         />
         <Row alignItems="center" flex={0} justifyContent="flex-end">
           {isInShopping ? (
-            <FontAwesome
-              name="check"
-              size={theme.sizes[5]}
-              color={greenColor}
-            />
+            <TouchableOpacity
+              onPress={onRemovePressLocal}
+              hitSlop={getButtonHitSlop(2)}
+            >
+              <FontAwesome
+                name="times"
+                size={theme.sizes[ITEM_TILE_ICON_SIZE]}
+                color={greenColor}
+              />
+            </TouchableOpacity>
           ) : null}
           {isInCart ? (
-            <FontAwesome
-              name="shopping-cart"
-              size={theme.sizes[ITEM_TILE_ICON_SIZE]}
-              color={greenColor}
-            />
+            <TouchableOpacity
+              onPress={onRemovePressLocal}
+              hitSlop={getButtonHitSlop(2)}
+            >
+              <FontAwesome
+                name="times"
+                size={theme.sizes[ITEM_TILE_ICON_SIZE]}
+                color={greenColor}
+              />
+            </TouchableOpacity>
           ) : null}
           {!isInCart && !isInShopping ? (
             <TouchableOpacity

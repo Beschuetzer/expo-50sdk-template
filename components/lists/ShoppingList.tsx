@@ -1,13 +1,14 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { Text, useTheme, Stack } from 'native-base';
+import { Stack, Text, useTheme, useToast } from 'native-base';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 
+import { ListActionToast } from './ListActionToast';
 import { ListItemSeparator } from './ListItemSeparator';
 import { SwipeableRow } from './SwipeableRow';
 import { TotalListPrice } from './TotalListPrice';
-import { SortType } from './sorters';
+import { SortOrder, SortType } from './sorters';
 import FilterListInput from '../FilterListInput';
 import { StoreSelectionModal } from '../modals/StoreSelectionModal';
 import { ItemTileProps, ItemTileViewingMode } from '../tiles/ItemTile';
@@ -28,15 +29,23 @@ import {
   isMultiSelectModeForShoppingCartSelector,
   mutuallyExclusiveGroupsSelector,
   returnItemsSelector,
+  activeRouteSelector,
   selectedItemsFromShoppingCartSelector,
   storeSpecificListSelector,
   setIsMultiSelectModeForShoppingCart,
   updateSelectedItemsFromShoppingCart,
   updateStoreSpecificValues,
   moveItemToAnotherCart,
+  moveItemToShoppingList,
+  setActiveRouteId,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
-import { Item, ItemWithStoreSpecificValues, Key } from '@/types/Item';
+import {
+  Item,
+  ItemWithStoreSpecificValues,
+  Key,
+  StoreSpecificValueKey,
+} from '@/types/Item';
 import { ListName } from '@/types/listSlice';
 import { ensureMaxLength, getKeyToUse } from '@/utils/helpers';
 
@@ -70,6 +79,7 @@ export function ShoppingList(props: ShoppingListProps) {
   const meGroups = useAppSelector(mutuallyExclusiveGroupsSelector);
   const returnItemsMap = useAppSelector(returnItemsSelector);
   const theme = useTheme();
+  const toast = useToast();
   const dispatch = useAppDispatch();
   const listRef = useRef<FlashList<ItemWithStoreSpecificValues> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -80,11 +90,22 @@ export function ShoppingList(props: ShoppingListProps) {
   const [itemToTransfer, setItemToTransfer] = useState<Item | null>(null);
   const [shoppingListToDisplay, setShoppingListToDisplay] =
     useState(shoppingList);
+  // Tracks the last filter/sort values reported by FilterListInput so the
+  // active route is only cleared when the user actually changes the filter
+  // text or sort order, not whenever the underlying list data mutates (which
+  // happens whenever a menu action anywhere adds/removes/updates items,
+  // since this component stays mounted across tabs).
+  const previousFilterStateRef = useRef<{
+    filterValue: string;
+    sortBy: SortType;
+    sortOrder: SortOrder;
+  } | null>(null);
 
   const currentStoreId = useMemo(
     () => (currentStore ? getKeyToUse(currentStore) : ''),
     [currentStore],
   );
+  const activeRoute = useAppSelector(activeRouteSelector(currentStoreId));
   const returnItemKeys = useMemo(
     () => returnItemsMap[currentStoreId] ?? [],
     [returnItemsMap, currentStoreId],
@@ -111,17 +132,49 @@ export function ShoppingList(props: ShoppingListProps) {
 
   // All shopping-list items keep their own individual tiles; the ME tile
   // coexists as a relationship indicator above them.
-  const regularItems = shoppingListToDisplay;
+  // When a route is active, items are sorted by their location's position in the route.
+  const regularItems = useMemo(() => {
+    if (!activeRoute) return shoppingListToDisplay;
+    return [...shoppingListToDisplay].sort((a, b) => {
+      const locA =
+        (a as any)?.[StoreSpecificValueKey.Location]?.[activeRoute.id] ?? '';
+      const locB =
+        (b as any)?.[StoreSpecificValueKey.Location]?.[activeRoute.id] ?? '';
+      const idxA = locA ? activeRoute.locations.indexOf(locA) : -1;
+      const idxB = locB ? activeRoute.locations.indexOf(locB) : -1;
+      const posA = idxA === -1 ? Number.MAX_SAFE_INTEGER : idxA;
+      const posB = idxB === -1 ? Number.MAX_SAFE_INTEGER : idxB;
+      return posA - posB;
+    });
+  }, [shoppingListToDisplay, activeRoute]);
 
   const iconSize = useMemo(() => {
     return theme.sizes[viewingMode === ItemTileViewingMode.Basic ? 4 : 8];
   }, [viewingMode]);
 
-  const onSwipeRight = useCallback((item: ItemWithStoreSpecificValues) => {
-    LIST_HAPTICS.handleSwipeItem()();
-    setRefreshing(false);
-    dispatch(addItemToCart(item));
-  }, []);
+  const onSwipeRight = useCallback(
+    (item: ItemWithStoreSpecificValues) => {
+      LIST_HAPTICS.handleSwipeItem()();
+      setRefreshing(false);
+      dispatch(addItemToCart(item));
+      toast.closeAll();
+      toast.show({
+        id: 'shopping-list-move',
+        placement: 'bottom',
+        duration: 4000,
+        render: () => (
+          <ListActionToast
+            message={`${item.name || item.upc || 'Item'} moved to In Cart.`}
+            onUndo={() => {
+              dispatch(moveItemToShoppingList(item));
+              toast.closeAll();
+            }}
+          />
+        ),
+      });
+    },
+    [dispatch, theme, toast],
+  );
 
   const onSwipeLeft = useCallback(
     (key: Key) => {
@@ -136,8 +189,15 @@ export function ShoppingList(props: ShoppingListProps) {
         }),
       );
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      toast.closeAll();
+      toast.show({
+        id: 'shopping-list-remove',
+        placement: 'bottom',
+        duration: 3000,
+        render: () => <ListActionToast message="Item removed from Shopping." />,
+      });
     },
-    [listRef],
+    [dispatch, listRef, theme, toast],
   );
 
   function renderItem({ item, index }: { item: any; index: number }) {
@@ -261,8 +321,24 @@ export function ShoppingList(props: ShoppingListProps) {
     <>
       <FilterListInput
         list={shoppingList}
-        onFilterChange={(filteredValues) => {
+        onFilterChange={(filteredValues, filterValue, sortOrderValue) => {
           setShoppingListToDisplay(filteredValues);
+          const previous = previousFilterStateRef.current;
+          const isUserFilterOrSortChange =
+            previous !== null &&
+            (previous.filterValue !== filterValue ||
+              previous.sortBy !== sortOrderValue.sortBy ||
+              previous.sortOrder !== sortOrderValue.sortOrder);
+          previousFilterStateRef.current = {
+            filterValue,
+            sortBy: sortOrderValue.sortBy,
+            sortOrder: sortOrderValue.sortOrder,
+          };
+          if (isUserFilterOrSortChange) {
+            dispatch(
+              setActiveRouteId({ storeId: currentStoreId, routeId: null }),
+            );
+          }
         }}
         sortTypes={Object.values(SortType).filter(
           (sortType) =>

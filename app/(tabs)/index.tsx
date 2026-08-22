@@ -1,6 +1,6 @@
 import { useIsFocused } from '@react-navigation/native';
 import { useFocusEffect, useNavigation } from 'expo-router';
-import { useTheme } from 'native-base';
+import { useTheme, useToast } from 'native-base';
 import {
   useCallback,
   useEffect,
@@ -23,6 +23,7 @@ import { useInitializer } from '@/components/hooks/useInitializer';
 import { useMenu } from '@/components/hooks/useMenu';
 import { useNotificationsPermissions } from '@/components/hooks/useNotificationsPermissions';
 import { InCartList } from '@/components/lists/InCartList';
+import { ListActionToast } from '@/components/lists/ListActionToast';
 import { PreviouslyPurchasedList } from '@/components/lists/PreviouslyPurchasedList';
 import { ShoppingList } from '@/components/lists/ShoppingList';
 import { getSorter, SortOrder, SortType } from '@/components/lists/sorters';
@@ -43,7 +44,9 @@ import { LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { accountSelector, setError } from '@/state/slices/generalSlice';
 import {
   currentStoreSelector,
+  addItemToCart,
   moveAllToInCart,
+  moveItemToShoppingList,
   moveSelectedToCart,
   moveSelectedToShopping,
   resetListToDisplay,
@@ -68,6 +71,9 @@ import {
   mutuallyExclusiveGroupsSelector,
   returnItemsSelector,
   itemsListSelector,
+  activeRouteIdSelector,
+  activeRouteSelector,
+  setActiveRouteId,
 } from '@/state/slices/listsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { getCurrentState, savePurchase } from '@/state/thunks';
@@ -76,6 +82,7 @@ import { Store } from '@/types/Store';
 import { ListName } from '@/types/listSlice';
 import {
   getKeyToUse,
+  getIsDevelopmentMode,
   getNewViewingMode,
   getStoreDescriptor,
   resetConfirmModalProps,
@@ -83,6 +90,7 @@ import {
 
 export default function TabOneScreen() {
   const theme = useTheme();
+  const toast = useToast();
   const dispatch = useAppDispatch();
   useGpsCoordinate({
     onSuccess: (gpsCoordinate) => {
@@ -126,8 +134,37 @@ export default function TabOneScreen() {
     useState(false);
   const [isReturnItemModalVisible, setIsReturnItemModalVisible] =
     useState(false);
+  const currentStoreId = currentStore ? getKeyToUse(currentStore) : '';
+  const activeRouteId = useAppSelector(activeRouteIdSelector(currentStoreId));
+  const activeRoute = useAppSelector(activeRouteSelector(currentStoreId));
+  const activeRouteLabel = activeRoute ? ` [${activeRoute.name}]` : '';
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+
+  const showListActionToast = useCallback(
+    (message: string, onUndo?: () => void) => {
+      toast.closeAll();
+      toast.show({
+        id: 'list-action',
+        placement: 'bottom',
+        duration: 4000,
+        render: () => (
+          <ListActionToast
+            message={message}
+            onUndo={
+              onUndo
+                ? () => {
+                    onUndo();
+                    toast.closeAll();
+                  }
+                : undefined
+            }
+          />
+        ),
+      });
+    },
+    [toast],
+  );
 
   const [, closeMenu] = useMenu({
     navigationOptionsGetter: (menuRef) => ({
@@ -135,7 +172,7 @@ export default function TabOneScreen() {
         <ListHeaderRight ref={menuRef} options={getMenuOptions()} />
       ),
       headerLeft: () => <AddButton onPress={onAddItemPress} />,
-      headerTitle: `Shopping (${currentStore.name})`,
+      headerTitle: `Shopping (${currentStore.name})${activeRouteLabel}`,
     }),
   });
 
@@ -257,22 +294,22 @@ export default function TabOneScreen() {
   const firstTabTitle = useMemo(() => {
     const main = 'Need';
     if (shoppingListItems.length === 0 && inCartListItems.length === 0) {
-      return main;
+      return `${main}${activeRouteLabel}`;
     }
     return shoppingListItems.length > 0
-      ? `${main} (${shoppingListItems.length})`
-      : `Finished`;
-  }, [shoppingListItems.length, inCartListItems.length]);
+      ? `${main} (${shoppingListItems.length})${activeRouteLabel}`
+      : `Finished${activeRouteLabel}`;
+  }, [activeRouteLabel, shoppingListItems.length, inCartListItems.length]);
 
   const secondTabTitle = useMemo(() => {
     const main = 'In Cart';
     if (shoppingListItems.length === 0 && inCartListItems.length === 0) {
-      return main;
+      return `${main}${activeRouteLabel}`;
     }
     return inCartListItems.length > 0
-      ? `${main} (${inCartListItems.length})`
-      : `Cart Empty`;
-  }, [shoppingListItems.length, inCartListItems.length]);
+      ? `${main} (${inCartListItems.length})${activeRouteLabel}`
+      : `Cart Empty${activeRouteLabel}`;
+  }, [activeRouteLabel, shoppingListItems.length, inCartListItems.length]);
 
   const thirdTabTitle = useMemo(() => {
     const main = 'Previously Purchased';
@@ -319,14 +356,36 @@ export default function TabOneScreen() {
         },
       },
       {
-        text: 'Add Mutual Exclusion Group',
+        text: activeRouteId ? 'Change Route' : 'Start Route',
         onPress: () => {
           closeMenu();
           // @ts-ignore
-          navigation.navigate(Routes.MutuallyExclusiveCreatorScreen);
+          navigation.push(Routes.RouteSelectionScreen, {
+            storeId: currentStoreId,
+            storeName: currentStore.name,
+          });
         },
       },
     ];
+    if (activeRouteId) {
+      options.push({
+        text: 'Clear Route',
+        onPress: () => {
+          closeMenu();
+          dispatch(
+            setActiveRouteId({ storeId: currentStoreId, routeId: null }),
+          );
+        },
+      });
+    }
+    options.push({
+      text: 'Add Mutual Exclusion Group',
+      onPress: () => {
+        closeMenu();
+        // @ts-ignore
+        navigation.navigate(Routes.MutuallyExclusiveCreatorScreen);
+      },
+    });
     if (index === 0) {
       options.push({
         text:
@@ -408,6 +467,12 @@ export default function TabOneScreen() {
         onPress: onMoveAllRecommendedToShoppingPress,
         text: 'Move All Recommended to Shopping',
       });
+      if (getIsDevelopmentMode()) {
+        options.push({
+          onPress: onMoveAllToShoppingPress,
+          text: 'Move All Previously Purchased to Shopping',
+        });
+      }
     }
 
     return options;
@@ -419,6 +484,13 @@ export default function TabOneScreen() {
     shoppingListItems.length,
     inCartListItems.length,
     account,
+    activeRouteId,
+    currentStore,
+    currentStoreId,
+    navigation,
+    closeMenu,
+    onToggleViewingModePress,
+    onSharePress,
   ]);
 
   const onAddItemPress = useCallback(() => {
@@ -439,10 +511,11 @@ export default function TabOneScreen() {
       onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: () => {
         dispatch(clearShopping());
+        showListActionToast('In Cart was cleared.');
         resetConfirmModalProps(setConfirmModalProps);
       },
     });
-  }, []);
+  }, [dispatch, showListActionToast]);
 
   const onCompletePurchasePress = useCallback(() => {
     setIsCompletePurchaseModalVisible(true);
@@ -462,27 +535,59 @@ export default function TabOneScreen() {
       (item) => item.isRecommended,
     );
     dispatch(addAllToShoppingCart(recommended));
-  }, [itemsPurchasedAtStore]);
+    showListActionToast(
+      `${recommended.length} item${recommended.length === 1 ? '' : 's'} moved to Shopping.`,
+    );
+  }, [itemsPurchasedAtStore, showListActionToast]);
+
+  const onMoveAllToShoppingPress = useCallback(() => {
+    dispatch(addAllToShoppingCart(itemsPurchasedAtStore));
+    showListActionToast(
+      `${itemsPurchasedAtStore.length} item${itemsPurchasedAtStore.length === 1 ? '' : 's'} moved to Shopping.`,
+    );
+  }, [itemsPurchasedAtStore, showListActionToast]);
 
   const onMoveSelectedToAnotherCartPress = useCallback(() => {
     setIsStoreSelectionModalVisible(true);
   }, []);
 
   const onMoveSelectedToCartPress = useCallback(() => {
+    const itemsToMove = [...selectedShoppingCartItems];
     dispatch(moveSelectedToCart());
-  }, []);
+    showListActionToast(
+      `${itemsToMove.length} item${itemsToMove.length === 1 ? '' : 's'} moved to In Cart.`,
+      () => {
+        itemsToMove.forEach((item) => dispatch(moveItemToShoppingList(item)));
+      },
+    );
+  }, [dispatch, selectedShoppingCartItems, showListActionToast]);
 
   const onMoveSelectedToShoppingPress = useCallback(() => {
+    const itemsToMove = [...selectedInCartItems];
     dispatch(moveSelectedToShopping());
-  }, []);
+    showListActionToast(
+      `${itemsToMove.length} item${itemsToMove.length === 1 ? '' : 's'} moved to Shopping.`,
+      () => {
+        itemsToMove.forEach((item) => dispatch(addItemToCart(item)));
+      },
+    );
+  }, [dispatch, selectedInCartItems, showListActionToast]);
 
   const onMoveSelectedPreviouslyPurchasedToShoppingPress = useCallback(() => {
     dispatch(moveSelectedPreviouslyPurchasedItemsToShopping());
-  }, []);
+    showListActionToast('Selected items moved to Shopping.');
+  }, [dispatch, showListActionToast]);
 
   const onMoveAllCartPress = useCallback(() => {
+    const itemsToMove = [...shoppingListItems];
     dispatch(moveAllToInCart());
-  }, []);
+    showListActionToast(
+      `${itemsToMove.length} item${itemsToMove.length === 1 ? '' : 's'} moved to In Cart.`,
+      () => {
+        itemsToMove.forEach((item) => dispatch(moveItemToShoppingList(item)));
+      },
+    );
+  }, [dispatch, shoppingListItems, showListActionToast]);
 
   const onQuickAddPress = useCallback(() => {
     // @ts-ignore
@@ -490,8 +595,12 @@ export default function TabOneScreen() {
   }, []);
 
   const onRemoveSelectedPress = useCallback(() => {
+    const removedCount = selectedShoppingCartItems.length;
     dispatch(removeShoppingListItems(selectedShoppingCartItems));
-  }, [selectedShoppingCartItems]);
+    showListActionToast(
+      `${removedCount} item${removedCount === 1 ? '' : 's'} removed from Shopping.`,
+    );
+  }, [dispatch, selectedShoppingCartItems, showListActionToast]);
 
   const onResetPress = useCallback(() => {
     dispatch(resetListToDisplay({ listName }));

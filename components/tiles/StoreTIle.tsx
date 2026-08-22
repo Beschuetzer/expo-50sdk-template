@@ -62,6 +62,14 @@ export function StoreTile(props: StoreTileProps) {
     navigation.navigate(Routes.ShoppingListScreen);
   }, [navigation, dispatch, storeKeyToUse]);
 
+  const onCreateRoute = useCallback(() => {
+    // @ts-ignore
+    navigation.navigate(Routes.RouteSelectionScreen, {
+      storeId: storeKeyToUse,
+      storeName: store?.name,
+    });
+  }, [navigation, storeKeyToUse, store?.name]);
+
   return (
     <RectButton
       style={styles.rectButton}
@@ -138,6 +146,25 @@ export function StoreTile(props: StoreTileProps) {
                 </Row>
               </TouchableOpacity>
             )}
+            <TouchableOpacity
+              onPress={onCreateRoute}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Row
+                alignItems="center"
+                space={2}
+                borderRadius={4}
+                px={2}
+                mr={4}
+                py={1}
+              >
+                <FontAwesome
+                  name="map-signs"
+                  size={12}
+                  color={theme.colors.muted[600]}
+                />
+              </Row>
+            </TouchableOpacity>
             <TileIsSelectedBackground
               isMultiSelectMode
               isSelected={storeKeyToUse === currentStoreId}

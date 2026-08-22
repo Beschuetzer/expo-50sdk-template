@@ -32,6 +32,9 @@ const MOCK_STORE_SPECIFIC_VALUES = {
   [StoreSpecificValueKey.ItemId]: {
     [MOCK_STORES[0].name]: 'abc',
   },
+  [StoreSpecificValueKey.Location]: {
+    [MOCK_STORES[0].name]: 'Aisle 1',
+  },
   [StoreSpecificValueKey.Note]: {
     [MOCK_STORES[0].name]: 'abc',
   },

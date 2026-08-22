@@ -16,6 +16,8 @@ export function getItemWithStoreSpecificValues(
       storeSpecificValues?.[StoreSpecificValueKey.IsInCart] || {},
     [StoreSpecificValueKey.ItemId]:
       storeSpecificValues?.[StoreSpecificValueKey.ItemId] || {},
+    [StoreSpecificValueKey.Location]:
+      storeSpecificValues?.[StoreSpecificValueKey.Location] || {},
     [StoreSpecificValueKey.Note]:
       storeSpecificValues?.[StoreSpecificValueKey.Note] || {},
     [StoreSpecificValueKey.Price]:

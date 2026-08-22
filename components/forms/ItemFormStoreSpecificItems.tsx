@@ -1,9 +1,11 @@
+import { useNavigation } from 'expo-router';
 import _ from 'lodash';
-import { Stack, Input, useTheme, Row, TextArea } from 'native-base';
+import { Stack, Input, useTheme, Row, Text, TextArea } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TextProps } from 'react-native';
 
 import { InputText } from './InputText';
+import { LocationPickerField } from './LocationPickerField';
 import { FontAwesomeButton } from '../FontAwesomeButton';
 import { StoreManager } from '../StoreManager';
 import {
@@ -18,10 +20,12 @@ import {
   EMPTY_STRING,
   FORM_INTER_ITEM_SPACING,
 } from '@/constants/general';
+import { Routes } from '@/constants/navigation';
 import {
   currentStoreIdSelector,
   currentStoreSelector,
   itemsListWithStoreSpecificValuesSelector,
+  routesForStoreSelector,
   storeSpecificValuesMapSelector,
 } from '@/state/slices/listsSlice';
 import { useAppSelector } from '@/state/store';
@@ -67,8 +71,12 @@ export function ItemFormStoreSpecific(
     storeManagerProps,
   } = props;
   const theme = useTheme();
+  const navigation = useNavigation();
   const currentStore = useAppSelector(currentStoreSelector);
   const currentStoreId = useAppSelector(currentStoreIdSelector);
+  const routesForCurrentStore = useAppSelector(
+    routesForStoreSelector(currentStoreId),
+  );
   const keyToUse = useMemo(
     () =>
       getKeyToUse({
@@ -114,11 +122,26 @@ export function ItemFormStoreSpecific(
   );
   const [shouldDisplayStoreToUseModal, setShouldDisplayStoreToUseModal] =
     useState(false);
+  // Location is keyed by routeId (not storeId): the same item can be at a
+  // different location depending on which route through the store is
+  // active, so this holds one value per route for the current store.
+  const [locationsByRouteId, setLocationsByRouteId] = useState<
+    Record<string, string>
+  >(
+    () =>
+      ((storeSpecificValuesMap?.[keyToUse] as any)?.[
+        StoreSpecificValueKey.Location
+      ] || {}) as Record<string, string>,
+  );
   const lastSavedValueRef = useRef({} as StoreSpecificValues);
 
   const [itemSearchModalValues, setItemSearchModalValues] =
     useState<ItemSearchModalValues>({});
   const [copyModalKey, setcopyModalKey] = useState<string>(EMPTY_STRING);
+  // Location values are keyed by routeId (not storeId), so we need to track
+  // which route the copy modal was opened for separately from copyModalKey.
+  const [copyModalRouteId, setCopyModalRouteId] =
+    useState<string>(EMPTY_STRING);
   const inputTextTextProps = useMemo(
     () =>
       ({
@@ -128,7 +151,13 @@ export function ItemFormStoreSpecific(
   );
 
   const findItemsWithStoreSpecificValueKey = useCallback(
-    (storeSpecificValueKeyInput: StoreSpecificValueKey) => {
+    (
+      storeSpecificValueKeyInput: StoreSpecificValueKey,
+      // Most store specific values are keyed by storeId, but Location is
+      // keyed by routeId - pass it in here to look up the right value.
+      storeOrRouteKeyOverride?: string,
+    ) => {
+      const keyToUse = storeOrRouteKeyOverride ?? currentStoreId;
       const valuesToShow: ItemSearchModalValues = {};
       iterateStoreSpecificValuesMap({
         storeSpecificValuesMap,
@@ -136,8 +165,7 @@ export function ItemFormStoreSpecific(
           const { itemKey, storeSpecificValueKey, storeSpecificValueKeyValue } =
             input;
           if (storeSpecificValueKey === storeSpecificValueKeyInput) {
-            const currentStoreValue =
-              storeSpecificValueKeyValue?.[currentStoreId];
+            const currentStoreValue = storeSpecificValueKeyValue?.[keyToUse];
 
             if (currentStoreValue) {
               valuesToShow[itemKey] = currentStoreValue.toString();
@@ -171,9 +199,18 @@ export function ItemFormStoreSpecific(
       [StoreSpecificValueKey.IsInCart]: {
         [currentStoreId]: false,
       },
+      [StoreSpecificValueKey.Location]: { ...locationsByRouteId },
     };
     return currentValues;
-  }, [currentStoreId, aisleNumber, itemId, note, price, quantity]);
+  }, [
+    currentStoreId,
+    aisleNumber,
+    itemId,
+    locationsByRouteId,
+    note,
+    price,
+    quantity,
+  ]);
 
   useEffect(() => {
     const aisleNumberToShow = (storeSpecificValuesMap[keyToUse] as any)?.[
@@ -197,6 +234,11 @@ export function ItemFormStoreSpecific(
     setNote(noteToShow);
     setPrice(priceToShow);
     setQuantity(quantityToShow);
+    setLocationsByRouteId(
+      ((storeSpecificValuesMap[keyToUse] as any)?.[
+        StoreSpecificValueKey.Location
+      ] || {}) as Record<string, string>,
+    );
   }, [storeSpecificValuesMap[keyToUse]]);
 
   useEffect(() => {
@@ -242,6 +284,12 @@ export function ItemFormStoreSpecific(
     setNote(noteToShow);
     setPrice(priceToShow);
     setQuantity(quantityToShow);
+    setLocationsByRouteId(
+      ((lastSavedValueRef.current?.[StoreSpecificValueKey.Location] as any) ||
+        (item?.[StoreSpecificValueKey.Location] as any) ||
+        (itemInList?.[StoreSpecificValueKey.Location] as any) ||
+        {}) as Record<string, string>,
+    );
     //NOTE: adding itemInList to deps array causes infinite loop (works without it though since the item doesn't change here)
   }, [currentStoreId, lastSavedValueRef]);
 
@@ -363,6 +411,78 @@ export function ItemFormStoreSpecific(
       </Stack>
       <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
         <InputText textProps={inputTextTextProps}>
+          Location at '{storeNameWithLocation}'
+        </InputText>
+        {routesForCurrentStore.length > 0 ? (
+          <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
+            {routesForCurrentStore.map((routeForStore) => (
+              <Stack key={routeForStore.id}>
+                <InputText textProps={inputTextTextProps}>
+                  {routeForStore.name}
+                </InputText>
+                <Row
+                  alignItems="center"
+                  space={theme.space[FORM_INTER_ITEM_SPACING]}
+                >
+                  <LocationPickerField
+                    flex={1}
+                    locations={routeForStore.locations}
+                    value={locationsByRouteId[routeForStore.id] || EMPTY_STRING}
+                    onChange={(val) =>
+                      setLocationsByRouteId((current) => ({
+                        ...current,
+                        [routeForStore.id]: val,
+                      }))
+                    }
+                    placeholder="Select location"
+                    title={`Select Location for '${routeForStore.name}'`}
+                    extraOptions={[{ label: '(none)', value: EMPTY_STRING }]}
+                  />
+                  <FontAwesomeButton
+                    name="copy"
+                    style={{
+                      marginHorizontal:
+                        theme.space[FORM_INTER_ITEM_SPACING] * 4,
+                    }}
+                    onPress={() => {
+                      const values = findItemsWithStoreSpecificValueKey(
+                        StoreSpecificValueKey.Location,
+                        routeForStore.id,
+                      );
+                      setItemSearchModalValues(values);
+                      setcopyModalKey(StoreSpecificValueKey.Location);
+                      setCopyModalRouteId(routeForStore.id);
+                    }}
+                  />
+                </Row>
+              </Stack>
+            ))}
+          </Stack>
+        ) : (
+          <Row>
+            <Text color={theme.colors.muted[500]} fontSize="xs">
+              No locations yet.{' '}
+              <Text
+                accessibilityRole="button"
+                color={theme.colors.primary[600]}
+                underline
+                onPress={() => {
+                  // @ts-ignore
+                  navigation.navigate(Routes.RouteCreationScreen, {
+                    storeId: currentStoreId,
+                    storeName: storeNameWithLocation,
+                  });
+                }}
+              >
+                Create
+              </Text>{' '}
+              {`a route for '${storeNameWithLocation}' and add locations to it first.`}
+            </Text>
+          </Row>
+        )}
+      </Stack>
+      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        <InputText textProps={inputTextTextProps}>
           Note for '{storeNameWithLocation}'
         </InputText>
         <TextArea
@@ -379,17 +499,29 @@ export function ItemFormStoreSpecific(
       <ItemSearchModal<ItemSearchModalValue>
         title={`Item ${camelCaseToSpacedCapitalized(copyModalKey)}s`}
         isVisible={Object.keys(itemSearchModalValues || {}).length > 0}
-        onCancel={() => setItemSearchModalValues({})}
+        onCancel={() => {
+          setItemSearchModalValues({});
+          setCopyModalRouteId(EMPTY_STRING);
+        }}
         onConfirm={(selectedValue) => {
           const valueToUse = selectedValue?.[1];
           setItemSearchModalValues({});
-          if (copyModalKey === StoreSpecificValueKey.AisleNumber) {
-            setAisleNumber(valueToUse || EMPTY_STRING);
-          } else if (copyModalKey === StoreSpecificValueKey.ItemId) {
+          if (copyModalKey === StoreSpecificValueKey.ItemId) {
             setItemId(valueToUse || EMPTY_STRING);
           } else if (copyModalKey === StoreSpecificValueKey.Price) {
             setPrice(valueToUse || EMPTY_STRING);
+          } else if (copyModalKey === StoreSpecificValueKey.AisleNumber) {
+            setAisleNumber(valueToUse || EMPTY_STRING);
+          } else if (
+            copyModalKey === StoreSpecificValueKey.Location &&
+            copyModalRouteId
+          ) {
+            setLocationsByRouteId((current) => ({
+              ...current,
+              [copyModalRouteId]: valueToUse || EMPTY_STRING,
+            }));
           }
+          setCopyModalRouteId(EMPTY_STRING);
         }}
         onGetFilteredValues={(items, filterValue) => {
           const isNumbersOnly = filterValue.match(/^\s*\d+\s*$/);
@@ -446,7 +578,7 @@ export function ItemFormStoreSpecific(
           setShouldDisplayStoreToUseModal(false);
 
           if (aisleNumber) {
-            setAisleNumber(aisleNumber || EMPTY_STRING);
+            setAisleNumber(aisleNumber);
           }
           if (itemId) {
             setItemId(itemId);

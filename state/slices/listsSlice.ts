@@ -23,7 +23,7 @@ import {
   StoreSpecificValues,
   StoreSpecificValuesMap,
 } from '@/types/Item';
-import { GpsCoordinate, Store } from '@/types/Store';
+import { GpsCoordinate, Route, Store } from '@/types/Store';
 import { LoadAllResponse } from '@/types/bffService';
 import { CurrentLocation, OriginalKeyProp, State } from '@/types/general';
 import {
@@ -54,6 +54,9 @@ import {
   AddReturnItemPayload,
   RemoveReturnItemPayload,
   ReturnItemsMap,
+  AddRoutePayload,
+  UpdateRoutePayload,
+  DeleteRoutePayload,
   CompletePurchasePayload,
   HandleSaveAllResponsePayload,
   MutuallyExclusiveGroup,
@@ -80,6 +83,7 @@ import {
   getEmptyList,
   getEmptyObject,
   getFilteredList,
+  getId,
   getIsPreviouslyPurchasedItemRecommended,
   getItemFromList,
   getKeyToUse,
@@ -121,6 +125,7 @@ export type ListsState = {
   storeSpecificValuesMap: StoreSpecificValuesMap;
   mutuallyExclusiveGroups: MutuallyExclusiveGroup[];
   returnItems: ReturnItemsMap;
+  activeRouteIds: Record<string, string | null>;
 };
 
 const initialState: ListsState = {
@@ -150,6 +155,7 @@ const initialState: ListsState = {
   [ListName.StoresList]: getEmptyList(ListName.StoresList),
   mutuallyExclusiveGroups: getEmptyArray(),
   returnItems: getEmptyObject(),
+  activeRouteIds: {},
   selectedItemsFromPreviouslyPurchased: getEmptyArray(),
   selectedItemsFromShoppingCart: getEmptyArray(),
   selectedItemsFromInCart: getEmptyArray(),
@@ -380,6 +386,17 @@ export const listsSlice = createSlice({
         state.returnItems[storeId].push(itemKey);
       }
     },
+    addRoute: (state: ListsState, action: PayloadAction<AddRoutePayload>) => {
+      const store = state.storesList.data.find(
+        (s) => getKeyToUse(s) === action.payload.storeId,
+      );
+      if (!store) return;
+      if (!store.routes) store.routes = [];
+      store.routes.push({
+        ...action.payload,
+        id: action.payload.id ?? getId(),
+      });
+    },
     addStoresListItem: (
       state: ListsState,
       action: PayloadAction<AddStoresListItemPayload>,
@@ -560,6 +577,21 @@ export const listsSlice = createSlice({
           }
         }
         state.lastPurchasedMap = lastPurchasedMapCopy;
+      }
+    },
+    deleteRoute: (
+      state: ListsState,
+      action: PayloadAction<DeleteRoutePayload>,
+    ) => {
+      const store = state.storesList.data.find(
+        (s) => getKeyToUse(s) === action.payload.storeId,
+      );
+      if (!store?.routes) return;
+      store.routes = store.routes.filter((r) => r.id !== action.payload.id);
+      if (
+        state.activeRouteIds?.[action.payload.storeId] === action.payload.id
+      ) {
+        state.activeRouteIds[action.payload.storeId] = null;
       }
     },
     handleLoadAllResponse: (
@@ -1173,6 +1205,13 @@ export const listsSlice = createSlice({
     resetCurrentStoreId: (state: ListsState) => {
       state.currentStoreId = EMPTY_STRING;
     },
+    setActiveRouteId: (
+      state: ListsState,
+      action: PayloadAction<{ storeId: string; routeId: string | null }>,
+    ) => {
+      if (!state.activeRouteIds) state.activeRouteIds = {};
+      state.activeRouteIds[action.payload.storeId] = action.payload.routeId;
+    },
     setCurrentInventoryLocationId: (
       state: ListsState,
       action: PayloadAction<InventoryLocation['_id'] | undefined | null>,
@@ -1422,6 +1461,17 @@ export const listsSlice = createSlice({
           entry[StoreSpecificValueKey.IsInCart][storeId] = false;
         }
       }
+    },
+    updateRoute: (
+      state: ListsState,
+      action: PayloadAction<UpdateRoutePayload>,
+    ) => {
+      const store = state.storesList.data.find(
+        (s) => getKeyToUse(s) === action.payload.storeId,
+      );
+      if (!store?.routes) return;
+      const idx = store.routes.findIndex((r) => r.id === action.payload.id);
+      if (idx !== -1) store.routes[idx] = action.payload;
     },
     updateSelectedItemsFromInCart: (
       state: ListsState,
@@ -1862,6 +1912,26 @@ export const storeSpecificValuesSelector = (
     },
   );
 
+/**
+ *Like {@link storeSpecificValuesSelector}, but reads the value keyed by an
+ *arbitrary id instead of always using `currentStoreId`. Used for
+ *{@link StoreSpecificValueKey.Location}, which is keyed by `routeId` (not
+ *`storeId`) since the same item can be at a different location depending
+ *on which route through the store is active.
+ **/
+export const storeSpecificValueForIdSelector = (
+  key: Key,
+  fieldName: StoreSpecificValueKey,
+  id: string | null | undefined,
+) =>
+  createSelector(
+    [(state: RootState) => state[listsSlice.name].storeSpecificValuesMap],
+    (storeSpecificValuesMap) =>
+      id
+        ? storeSpecificValuesMap?.[getKeyToUse(key)]?.[fieldName]?.[id]
+        : undefined,
+  );
+
 export const {
   acceptMutuallyExclusiveGroupSide,
   addAllToShoppingCart,
@@ -1937,10 +2007,39 @@ export const {
   updateStoreSpecificValues,
   addReturnItem,
   removeReturnItem,
+  addRoute,
+  updateRoute,
+  deleteRoute,
+  setActiveRouteId,
 } = listsSlice.actions;
 
 export const returnItemsSelector = (state: RootState) =>
   (state[listsSlice.name].returnItems ?? {}) as ReturnItemsMap;
+
+export const routesForStoreSelector = (storeId: string) =>
+  createSelector(
+    [(state: RootState) => state[listsSlice.name].storesList.data],
+    (storesListData) => {
+      const store = storesListData.find((s) => getKeyToUse(s) === storeId);
+      return (store?.routes ?? []) as Route[];
+    },
+  );
+
+export const activeRouteIdSelector = (storeId: string) => (state: RootState) =>
+  state[listsSlice.name].activeRouteIds?.[storeId] ?? null;
+
+export const activeRouteSelector = (storeId: string) =>
+  createSelector(
+    [routesForStoreSelector(storeId), activeRouteIdSelector(storeId)],
+    (routes, id) => (id ? routes.find((r) => r.id === id) ?? null : null),
+  );
+
+export const locationsForStoreSelector = (storeId: string) =>
+  createSelector([routesForStoreSelector(storeId)], (routes) => {
+    const locationSet = new Set<string>();
+    routes.forEach((r) => r.locations.forEach((l) => locationSet.add(l)));
+    return Array.from(locationSet);
+  });
 
 export default listsSlice.reducer;
 

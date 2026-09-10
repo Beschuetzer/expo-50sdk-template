@@ -1,7 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
-import { loadAll, loadTasks } from '../thunks';
 
 import { SortOrderValue } from '@/components/lists/sorters';
 import { SORT_ORDER_VALUE_DEFAULT } from '@/constants/general';
@@ -80,14 +79,22 @@ export const tasksSlice = createSlice({
     resetTasksSlice: () => initialState,
   },
   extraReducers: (builder) => {
-    builder.addCase(loadTasks.fulfilled, (state, action) => {
-      state.data = action.payload || [];
-    });
-    builder.addCase(loadAll.fulfilled, (state, action) => {
-      if (action.payload && 'tasks' in action.payload) {
-        state.data = action.payload.tasks || state.data;
-      }
-    });
+    builder.addMatcher(
+      (action): action is PayloadAction<Task[]> =>
+        action.type === 'loadTasks/fulfilled',
+      (state, action) => {
+        state.data = action.payload || [];
+      },
+    );
+    builder.addMatcher(
+      (action): action is PayloadAction<{ tasks: Task[] }> =>
+        action.type === 'loadAll/fulfilled',
+      (state, action) => {
+        if (action.payload && 'tasks' in action.payload) {
+          state.data = action.payload.tasks || state.data;
+        }
+      },
+    );
   },
 });
 

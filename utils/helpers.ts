@@ -9,6 +9,7 @@ import { Insets } from 'react-native';
 import 'react-native-get-random-values';
 import { v4 as uuidV4 } from 'uuid';
 
+import { getIsDevelopmentMode as isDevelopmentMode } from './environment';
 import { logWhenDevelopmentMode } from './logging';
 
 import { ListFilterFilters } from '@/components/FilterListInput';
@@ -216,7 +217,7 @@ export function getId() {
 }
 
 export function getIsDevelopmentMode() {
-  return !!process.env.EXPO_PUBLIC_ENV?.match(/dev/);
+  return isDevelopmentMode();
 }
 
 export function getTaskValidation(task?: Key) {

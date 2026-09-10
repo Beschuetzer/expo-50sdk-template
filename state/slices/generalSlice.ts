@@ -1,7 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
-import { deleteTasks, loadAll, saveAll, saveTask, saveTasks } from '../thunks';
 
 import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
 import { UserAccount } from '@/types/bffService';
@@ -119,26 +118,30 @@ export const generalSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(deleteTasks.rejected, (state) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(loadAll.fulfilled, (state) => {
-      state.isUpToDate = true;
-      state.lastSyncTime = Date.now();
-    });
-    builder.addCase(saveAll.fulfilled, (state) => {
-      state.isUpToDate = true;
-      state.lastSyncTime = Date.now();
-    });
-    builder.addCase(saveAll.rejected, (state) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(saveTask.rejected, (state) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(saveTasks.rejected, (state) => {
-      state.isUpToDate = false;
-    });
+    builder.addMatcher(
+      (action) => action.type === 'deleteTasks/rejected',
+      (state) => {
+        state.isUpToDate = false;
+      },
+    );
+    builder.addMatcher(
+      (action) =>
+        action.type === 'loadAll/fulfilled' ||
+        action.type === 'saveAll/fulfilled',
+      (state) => {
+        state.isUpToDate = true;
+        state.lastSyncTime = Date.now();
+      },
+    );
+    builder.addMatcher(
+      (action) =>
+        action.type === 'saveAll/rejected' ||
+        action.type === 'saveTask/rejected' ||
+        action.type === 'saveTasks/rejected',
+      (state) => {
+        state.isUpToDate = false;
+      },
+    );
   },
 });
 

@@ -1,4 +1,4 @@
-import { getIsDevelopmentMode } from './helpers';
+import { getIsDevelopmentMode } from './environment';
 
 export function logWhenDevelopmentMode(
   ...args: Parameters<typeof console.log>

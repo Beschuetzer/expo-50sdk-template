@@ -22,12 +22,22 @@ const rootReducer = combineReducers({
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+const REDUX_PERSIST_IGNORE_ACTIONS = [
+  'persist/FLUSH',
+  'persist/PAUSE',
+  'persist/PERSIST',
+  'persist/PURGE',
+  'persist/REGISTER',
+  'persist/REHYDRATE',
+];
+
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) => {
     return getDefaultMiddleware({
-      serializableCheck: false,
-      immutableCheck: false,
+      serializableCheck: {
+        ignoredActions: REDUX_PERSIST_IGNORE_ACTIONS,
+      },
     });
   },
 });

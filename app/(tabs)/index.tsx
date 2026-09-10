@@ -1,4 +1,12 @@
-import { Box, Heading, HStack, Text, VStack } from '@gluestack-ui/themed';
+import {
+  Box,
+  Button,
+  ButtonText,
+  Heading,
+  HStack,
+  Text,
+  VStack,
+} from '@gluestack-ui/themed';
 import { useNavigation } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
@@ -14,6 +22,7 @@ import { useNotificationsPermissions } from '@/components/hooks/useNotifications
 import { ListItemSeparator } from '@/components/lists/ListItemSeparator';
 import { TaskTile } from '@/components/tiles/TaskTile';
 import { Routes } from '@/constants/navigation';
+import { resetErrors, setError } from '@/state/slices/generalSlice';
 import { toggleTaskCompleted, tasksSelector } from '@/state/slices/tasksSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { logWhenDevelopmentMode } from '@/utils/logging';
@@ -128,9 +137,43 @@ export default function DashboardScreen() {
     ),
   });
 
+  const onTriggerErrorPress = useCallback(() => {
+    try {
+      throw new Error('Dashboard test error');
+    } catch (error) {
+      dispatch(
+        setError({
+          message: 'Test error triggered from the dashboard',
+          statusCode: 500,
+          error:
+            error instanceof Error
+              ? {
+                  message: error.message,
+                  stack: error.stack,
+                  name: error.name,
+                }
+              : { message: 'Unknown error' },
+          stack: error instanceof Error ? error.stack : undefined,
+        }),
+      );
+    }
+  }, [dispatch]);
+
+  const onClearErrorsPress = useCallback(() => {
+    dispatch(resetErrors());
+  }, [dispatch]);
+
   return (
     <VStack flex={1}>
       <TaskCountSummary />
+      <HStack mt="$3" mx="$4" space="md">
+        <Button flex={1} onPress={onTriggerErrorPress}>
+          <ButtonText>Trigger Test Error</ButtonText>
+        </Button>
+        <Button flex={1} variant="outline" onPress={onClearErrorsPress}>
+          <ButtonText>Clear Errors</ButtonText>
+        </Button>
+      </HStack>
       <ListItemSeparator />
       <TabView
         navigationState={{ index, routes }}

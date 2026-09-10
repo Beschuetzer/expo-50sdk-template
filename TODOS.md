@@ -3,8 +3,7 @@
 ## High priority
 
 - Add a real `.env.example` and centralized environment validation for required values such as `EXPO_PUBLIC_IP_ADDRESS`, `EXPO_PUBLIC_PORT_NUMBER`, and `EXPO_PUBLIC_ENV`.
-- Replace the current broad `serializableCheck: false` and `immutableCheck: false` settings with safer Redux configuration or targeted whitelist/blacklist rules to avoid hidden state bugs.
-- Remove or gate runtime `alert(...)` usage in shared utilities so the template can be used cleanly in production or QA without intrusive pop-ups.
+
 
 ## Medium priority
 

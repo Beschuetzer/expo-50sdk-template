@@ -5,74 +5,45 @@ import { StorageAccessFramework } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
-import _ from 'lodash';
-import React from 'react';
 import { Insets } from 'react-native';
 import 'react-native-get-random-values';
 import { v4 as uuidV4 } from 'uuid';
 
-import { handleLastPurchasedMapImport } from './handleLastPurchasedMapImport';
-import { handleStoreSpecificValuesImport } from './handleStoreSpecificValuesImport';
 import { logWhenDevelopmentMode } from './logging';
-import { getUpcProduct } from './model-mappings';
 
-import { ListFilterFilters } from '@/components/lists/ListFilter';
+import { ListFilterFilters } from '@/components/FilterListInput';
 import { ConfirmModalProps } from '@/components/modals/ConfirmModal';
-import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
 import {
   DAY_IN_MS,
+  DURATION_INITIAL,
+  DURATION_INITIAL_NUMBER,
+  DURATION_INITIAL_TIME_SPAN,
   EMPTY_NUMBER,
   EMPTY_STRING,
   ERROR_MODAL_STATUS_CODE_DEFAULT,
-  FILE_NAMES,
-  DURATION_INITIAL,
-  GPS_COORDINATES_DEFAULT,
   HOUR_IN_MS,
   IMAGE_QUALITY,
-  SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT,
-  SORT_ORDER_VALUE_BY_NAME_DEFAULT,
-  US_COUNTRY_CODE,
-  WEEK_IN_MS,
-  TIME_SPAN_TO_MILLISECONDS_MAPPING,
-  DURATION_INITIAL_NUMBER,
-  DURATION_INITIAL_TIME_SPAN,
-  INVENTORY_MINIMUM_DEFAULT,
-  IS_FROZEN_DEFAULT,
   MONTH_IN_MS,
+  TASK_PRIORITY_INITIAL,
+  TIME_SPAN_TO_MILLISECONDS_MAPPING,
+  WEEK_IN_MS,
   YEAR_IN_MS,
 } from '@/constants/general';
-import {
-  AMAZON_S3_REGEX,
-  LOCAL_FILE_REGEX,
-  POSTAL_CODE_REGEX,
-  UPC_REGEX,
-  UPC_REQUIRED_CHAR_LENGTH,
-} from '@/constants/regexs';
+import { LOCAL_FILE_REGEX, AMAZON_S3_REGEX } from '@/constants/regexs';
 import { setError } from '@/state/slices/generalSlice';
-import {
-  setInventory,
-  setItemsList,
-  setLastPurchasedMap,
-  setMutuallyExclusiveGroups,
-  setReturnItems,
-  setStoresList,
-  setStoreSpecificValues,
-} from '@/state/slices/listsSlice';
-import { Item, ItemUnit, Key, List } from '@/types/Item';
-import { GpsCoordinate, Store } from '@/types/Store';
-import { UpcResponse } from '@/types/UpcResponse';
-import { UserAccount, CredentialsNeeded } from '@/types/bffService';
+import { setTasks } from '@/state/slices/tasksSlice';
+import { Key, Task, TaskTileViewingMode } from '@/types/Task';
+import { CredentialsNeeded, UserAccount } from '@/types/bffService';
 import {
   Address,
   CurrentLocation,
+  Duration,
   Error,
   FileNames,
-  Duration,
-  SetAppDataInput,
+  GpsCoordinate,
   State,
   TimeSpan,
 } from '@/types/general';
-import { ListName } from '@/types/listSlice';
 
 export async function wait(ms: number) {
   if (ms <= 0) return;
@@ -185,30 +156,10 @@ export function getAddressString(
   );
 }
 
-export function getAreStoresEqual(storeOne?: Store, storeTwo?: Store) {
-  if (!storeOne || !storeTwo) return false;
-  return _.isEqualWith(
-    storeOne,
-    storeTwo,
-    (storeOneLocal: Store, storeTwoLocal: Store) => {
-      if (
-        _.isEqual(
-          storeOneLocal?.gpsCoordinates,
-          storeTwoLocal?.gpsCoordinates,
-        ) &&
-        storeOneLocal.name === storeTwoLocal.name
-      ) {
-        return true;
-      }
-      return false;
-    },
-  );
-}
-
 export function getBackendUrl() {
   return getIsDevelopmentMode()
     ? `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:${process.env.EXPO_PUBLIC_PORT_NUMBER}`
-    : 'https://grocify-bff-ac27c2662495.herokuapp.com';
+    : 'https://your-production-api.example.com';
 }
 
 /**
@@ -227,60 +178,25 @@ export function getEmptyArray<T>() {
   return [] as T;
 }
 
-export function getEmptyList<T>(listName?: ListName) {
-  return {
-    data: getEmptyArray<T>(),
-    filters: getEmptyObject<T>(),
-    sortOrderValue: getSortOrderValues(listName || ListName.ItemsList),
-  } as List<T>;
-}
-
-export function getEmptyItem(): Item {
-  return {
-    _id: EMPTY_STRING,
-    addedDate: Date.now(),
-    frequency: EMPTY_NUMBER,
-    fullscreenImage: EMPTY_STRING,
-    hasBeenSaved: false,
-    images: [],
-    imageToUseIndex: 0,
-    inventoryMinimum: INVENTORY_MINIMUM_DEFAULT,
-    isFrozen: IS_FROZEN_DEFAULT,
-    lastUpdatedDate: Date.now(),
-    name: EMPTY_STRING,
-    needsSaving: true,
-    timeToExpiration: getDurationInMilliseconds({
-      number: 1,
-      timeSpan: TimeSpan.Week,
-    }),
-    unit: ItemUnit.Package,
-    upc: EMPTY_STRING,
-  };
-}
-
 export function getEmptyObject<T>() {
   return {} as T;
 }
 
-export function getEmptyStore(
-  store?: Store | null,
-  currentLocationState?: string,
-): Omit<Required<Store>, 'calculatedDistance'> {
+export function getEmptyTask(): Task {
   return {
-    hasBeenSaved: store?.hasBeenSaved != null ? store.hasBeenSaved : false,
-    needsSaving: store?.needsSaving != null ? store.needsSaving : true,
-    _id: store?._id || getId(),
-    addedDate: store?.addedDate || EMPTY_NUMBER,
-    addressLineOne: store?.addressLineOne || EMPTY_STRING,
-    addressLineTwo: store?.addressLineTwo || EMPTY_STRING,
-    city: store?.city || EMPTY_STRING,
-    state: store?.state || currentLocationState || State.None,
-    zipCode: store?.zipCode || EMPTY_STRING,
-    country: store?.country || US_COUNTRY_CODE,
-    name: store?.name || EMPTY_STRING,
-    gpsCoordinates: store?.gpsCoordinates || {
-      ...GPS_COORDINATES_DEFAULT,
-    },
+    _id: EMPTY_STRING,
+    addedDate: Date.now(),
+    code: EMPTY_STRING,
+    dueDate: EMPTY_NUMBER,
+    hasBeenSaved: false,
+    images: [],
+    imageToUseIndex: 0,
+    isCompleted: false,
+    lastUpdatedDate: Date.now(),
+    needsSaving: true,
+    notes: EMPTY_STRING,
+    priority: TASK_PRIORITY_INITIAL,
+    title: EMPTY_STRING,
   };
 }
 
@@ -288,7 +204,7 @@ export function getFilteredList<T>(list: T[], filters: ListFilterFilters<T>) {
   return (list || []).filter((item) => {
     for (const [key, regex] of Object.entries(filters || {})) {
       const fieldValue = item?.[key as keyof T] as string;
-      const isMatch = fieldValue.match(new RegExp(regex as string, 'i'));
+      const isMatch = fieldValue?.match(new RegExp(regex as string, 'i'));
       if (!isMatch) return false;
     }
     return true;
@@ -303,51 +219,30 @@ export function getIsDevelopmentMode() {
   return !!process.env.EXPO_PUBLIC_ENV?.match(/dev/);
 }
 
-export function getIsPreviouslyPurchasedItemRecommended(
-  item: Item,
-  lastPurchaseDate: number | undefined,
-) {
-  const now = Date.now();
-  return !!(
-    item.frequency &&
-    lastPurchaseDate &&
-    lastPurchaseDate + item.frequency <= now
-  );
-}
-
-export function getIsValidUpcValue(value: string) {
-  return !!UPC_REGEX.test(value);
-}
-
-export function getItemValidation(item?: Key) {
-  const isValid = !!item?.name;
+export function getTaskValidation(task?: Key) {
+  const isValid = !!task?.title;
   return {
     isValid,
-    message: isValid ? EMPTY_STRING : 'Please enter a name',
+    message: isValid ? EMPTY_STRING : 'Please enter a title',
   };
 }
 
-export function getKeyToUse(key: string | Key, displayAlert = false) {
+export function getKeyToUse(key: string | Key, displayAlertOnMissing = false) {
   if (typeof key === 'string') return key;
   const sanitizedKey = sanitizeKey(key);
   const toReturn =
     sanitizedKey?._id ||
-    sanitizedKey?.upc ||
-    sanitizedKey?.name ||
+    sanitizedKey?.code ||
+    sanitizedKey?.title ||
     EMPTY_STRING;
 
-  if (!toReturn && displayAlert) {
+  if (!toReturn && displayAlertOnMissing) {
     alert(
-      'No key given.  Please delete the item in question and ensure there is either a upc or name given.',
+      'No key given.  Please delete the task in question and ensure there is either a title or code given.',
     );
   }
 
   return toReturn;
-}
-
-export function getKeyToUseFieldName(key: Key) {
-  if (!key) return EMPTY_STRING;
-  return key.upc ? 'upc' : 'name';
 }
 
 export function getDurationInMilliseconds(duration?: Duration) {
@@ -390,26 +285,6 @@ export function getDurationValue(number?: number): Duration {
   };
 }
 
-export function getDurationFromFrequency(frequency?: Duration) {
-  if (!frequency || !frequency.number || !frequency.timeSpan) return 0;
-  let multiplier: number;
-  switch (frequency.timeSpan) {
-    case TimeSpan.Hour:
-      multiplier = HOUR_IN_MS;
-      break;
-    case TimeSpan.Day:
-      multiplier = DAY_IN_MS;
-      break;
-    case TimeSpan.Week:
-      multiplier = WEEK_IN_MS;
-      break;
-    default:
-      multiplier = 0;
-      break;
-  }
-  return multiplier * frequency.number;
-}
-
 export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   const { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== 'granted') {
@@ -437,13 +312,13 @@ export async function getGpsCoordinate(): Promise<GpsCoordinate> {
   };
 }
 
-export function getCustomImageInfo(item: Item): [string, number] {
+export function getCustomImageInfo(task: Task): [string, number] {
   const defaultReturn = [EMPTY_STRING, -1] as [string, number];
-  if (!item || !item.images || item.images.length === 0) return defaultReturn;
-  const customImageUrlIndex = item.images.findIndex((image) =>
+  if (!task || !task.images || task.images.length === 0) return defaultReturn;
+  const customImageUrlIndex = task.images.findIndex((image) =>
     image.match(LOCAL_FILE_REGEX),
   );
-  const customImageUrl = item.images?.[customImageUrlIndex];
+  const customImageUrl = task.images?.[customImageUrlIndex];
   if (!customImageUrl) return defaultReturn;
   return [customImageUrl, customImageUrlIndex];
 }
@@ -461,32 +336,28 @@ export function getImagePickerOptions(
   } as ImagePicker.ImagePickerOptions;
 }
 
-export function getItemForImport<T extends Key>(itemKey: string, items: T[]) {
-  if (!itemKey || !items || items.length === 0) return null;
-  return items.find((item) => {
-    if (item._id && itemKey === item._id) {
-      return true;
-    }
-    if (item.upc) {
-      return (item.upc || item.name) === itemKey;
-    }
-    return item.name === itemKey;
-  });
+export function getTaskForImport<T extends Key>(taskKey: string, tasks: T[]) {
+  if (!taskKey || !tasks || tasks.length === 0) return null;
+  return (
+    tasks.find((task) => {
+      if (task._id && taskKey === task._id) {
+        return true;
+      }
+      if (task.code) {
+        return (task.code || task.title) === taskKey;
+      }
+      return task.title === taskKey;
+    }) || null
+  );
 }
 
-export function getItemFromList<T extends Key>(list: T[], key: string | Key) {
+export function getTaskFromList<T extends Key>(list: T[], key: string | Key) {
   const keyToUse = getKeyToUse(key);
   const itemFound =
-    list.find((item) => {
-      if (typeof key === 'string') {
-        const fieldToUse = key.match(UPC_REGEX)
-          ? item.upc
-          : item._id || item.name;
-        return fieldToUse === keyToUse;
-      }
+    (list || []).find((item) => {
       if (item?._id) return item._id === keyToUse;
-      if (item?.name && item?.upc) return item.upc === keyToUse;
-      return item?.name === keyToUse;
+      if (item?.title && item?.code) return item.code === keyToUse;
+      return item?.title === keyToUse;
     }) || null;
   return itemFound ? (itemFound as T) : null;
 }
@@ -507,10 +378,10 @@ export function getIndexOfSmallestField<T>(arr: T[], key: keyof T) {
   return smallestIndex;
 }
 
-export function getNewViewingMode(viewingMode: ItemTileViewingMode) {
-  return viewingMode === ItemTileViewingMode.Basic
-    ? ItemTileViewingMode.Full
-    : ItemTileViewingMode.Basic;
+export function getNewViewingMode(viewingMode: TaskTileViewingMode) {
+  return viewingMode === TaskTileViewingMode.Basic
+    ? TaskTileViewingMode.Full
+    : TaskTileViewingMode.Basic;
 }
 
 export function getS3ObjectKey(url: string) {
@@ -533,53 +404,12 @@ export function getS3Images(images: string[]) {
   return images.filter((image) => image.match(AMAZON_S3_REGEX));
 }
 
-export function getSortOrderValues(listName: ListName) {
-  switch (listName) {
-    case ListName.InCartList:
-    case ListName.ShoppingList:
-      return SORT_ORDER_VALUE_BY_AISLE_NUMBER_DEFAULT;
-    case ListName.PreviouslyPurchased:
-    case ListName.StoresList:
-    case ListName.ItemsList:
-    case ListName.InventoryList:
-    default:
-      return SORT_ORDER_VALUE_BY_NAME_DEFAULT;
-  }
-}
-
-export function getStandardizedUpcValue(upc?: string) {
-  if (!upc || upc.length < UPC_REQUIRED_CHAR_LENGTH) return EMPTY_STRING;
-  return upc?.length === UPC_REQUIRED_CHAR_LENGTH + 1 ? upc.substring(1) : upc;
-}
-
 export function getStateFromString(stateStr?: string): State {
   if (!stateStr) return State.None;
   if (Object.values(State).includes(stateStr as State))
     return stateStr as State;
   const value = State[stateStr as keyof typeof State];
   return value ? value : State.None;
-}
-
-export function getStoreWithDistance(
-  store: Store,
-  currentLocation: CurrentLocation,
-) {
-  return {
-    ...store,
-    calculatedDistance: calculateDistance(
-      store.gpsCoordinates,
-      currentLocation,
-    ),
-  };
-}
-
-export function getStoreDescriptor(store: Store, maxLength = 40) {
-  return store.city || store.zipCode
-    ? ensureMaxLength(
-        `${store.name} (${store.city || store.zipCode || ''})`,
-        maxLength,
-      )
-    : `${store.name}`;
 }
 
 export function getUserCredentials(
@@ -608,8 +438,7 @@ export function handleError(
 export function isAddressValid(address: Address) {
   const { addressLineOne, city, state, zipCode } = address || {};
   const isAddressValid = !!addressLineOne;
-  const isLocationPresent =
-    !!city || state !== State.None || zipCode?.match(POSTAL_CODE_REGEX);
+  const isLocationPresent = !!city || state !== State.None || !!zipCode;
   return !!(isAddressValid && isLocationPresent);
 }
 
@@ -623,42 +452,6 @@ export function joinWithAnd(array: (string | undefined)[]) {
   } else {
     const lastItem = array.pop(); // Remove the last item from the array
     return array.join(', ') + ', and ' + lastItem;
-  }
-}
-
-export async function fetchUpcProduct(
-  upc?: string | number,
-  dispatch?: Dispatch,
-) {
-  try {
-    if (!upc) return null;
-    const url = `https://world.openfoodfacts.org/api/v0/product/${upc}`;
-    logWhenDevelopmentMode(`Fetching data from ${url}`);
-    const response = await fetch(url);
-
-    if (response.ok) {
-      const data = (await response.json()) as UpcResponse;
-      return (
-        data?.product ||
-        getUpcProduct(
-          {
-            name: EMPTY_STRING,
-            upc,
-          } as Item,
-          false,
-        )
-      );
-    } else {
-      throw new Error(
-        `Invalid response from service for '${upc}'.  Make sure you have a data connection and try again in a few seconds.`,
-      );
-    }
-  } catch (error) {
-    logWhenDevelopmentMode('Error fetching data from service', error);
-    if (dispatch) {
-      dispatch(setError(error as Error));
-    }
-    return null;
   }
 }
 
@@ -712,7 +505,7 @@ export async function importAppData(directory: string) {
         const fileName = file
           .slice(lastSlashIndex + toFind.length)
           .replace('.json', '');
-        toReturn[fileName as keyof typeof FILE_NAMES] = parsed;
+        toReturn[fileName as keyof FileNames] = parsed;
       }
     }
     return toReturn;
@@ -820,52 +613,17 @@ export async function saveAppStateToFile(
   await FileSystem.writeAsStringAsync(fileUri, content);
 }
 
-export function setAppData(input: SetAppDataInput) {
-  const {
-    dispatch,
-    items,
-    lastPurchasedMap,
-    storeSpecificValues,
-    stores,
-    inventory,
-    mutuallyExclusiveGroups,
-    returnItems,
-  } = input;
-  items.data.forEach((item) => {
-    if (!item._id) {
-      item._id = getId();
+export function setAppData(input: FileNames & { dispatch: Dispatch<any> }) {
+  const { dispatch, tasks } = input;
+  (tasks || []).forEach((task) => {
+    if (!task._id) {
+      task._id = getId();
     }
-    if (item.needsSaving == null) {
-      item.needsSaving = true;
+    if (task.needsSaving == null) {
+      task.needsSaving = true;
     }
   });
-  stores.data.forEach((store) => {
-    if (!store._id) {
-      store._id = getId();
-    }
-    if (store.needsSaving == null) {
-      store.needsSaving = true;
-    }
-  });
-  dispatch(
-    setStoreSpecificValues(
-      handleStoreSpecificValuesImport(
-        storeSpecificValues,
-        items.data,
-        stores.data,
-      ),
-    ),
-  );
-  dispatch(
-    setLastPurchasedMap(
-      handleLastPurchasedMapImport(lastPurchasedMap, items.data, stores.data),
-    ),
-  );
-  dispatch(setInventory(inventory));
-  dispatch(setItemsList(items));
-  dispatch(setStoresList(stores));
-  dispatch(setMutuallyExclusiveGroups(mutuallyExclusiveGroups ?? []));
-  dispatch(setReturnItems(returnItems ?? {}));
+  dispatch(setTasks(tasks || []));
 }
 
 export async function measureExecutionTime(
@@ -882,17 +640,17 @@ export async function measureExecutionTime(
 
 export function sanitizeKey<T extends Key>(key: T) {
   const copy = { ...key };
-  if (copy?.name) {
-    copy.name = sanitize(copy.name);
+  if (copy?.title) {
+    copy.title = sanitize(copy.title);
   }
-  if (copy?.upc) {
-    copy.upc = sanitize(copy.upc);
+  if (copy?.code) {
+    copy.code = sanitize(copy.code);
   }
   return copy;
 }
 
 /**
- *This is used to sanitize the keys used in documents with a values field (e.g. LastPurchasedMapSchema and StoreSpecificValuesSchema)
+ *This is used to sanitize keys used as AsyncStorage/document identifiers.
  **/
 export function sanitize(str?: string) {
   if (!str) return '';

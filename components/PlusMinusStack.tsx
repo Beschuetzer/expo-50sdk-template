@@ -1,4 +1,4 @@
-import { Stack, useTheme } from 'native-base';
+import { VStack } from '@gluestack-ui/themed';
 import React from 'react';
 
 import { FontAwesomeButton, FontAwesomeButtonProps } from './FontAwesomeButton';
@@ -24,10 +24,9 @@ export function PlusMinusStack(props: PlusMinusStackProps) {
     onPlusPress,
     plusButtonProps = {},
   } = props;
-  const theme = useTheme();
   return (
-    <Stack
-      p={theme.space[FORM_INTER_ITEM_SPACING]}
+    <VStack
+      p={FORM_INTER_ITEM_SPACING}
       justifyContent="space-around"
       alignContent="center"
     >
@@ -41,7 +40,7 @@ export function PlusMinusStack(props: PlusMinusStackProps) {
           ...plusButtonProps.buttonProps,
         }}
         fontAwesomeProps={{
-          color: theme.colors.primary[900],
+          color: '#0d47a1',
           ...plusButtonProps.fontAwesomeProps,
         }}
         {...plusButtonProps}
@@ -56,11 +55,11 @@ export function PlusMinusStack(props: PlusMinusStackProps) {
           ...minusButtonProps.buttonProps,
         }}
         fontAwesomeProps={{
-          color: theme.colors.primary[900],
+          color: '#0d47a1',
           ...minusButtonProps.fontAwesomeProps,
         }}
         {...minusButtonProps}
       />
-    </Stack>
+    </VStack>
   );
 }

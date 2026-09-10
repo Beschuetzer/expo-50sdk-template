@@ -1,4 +1,4 @@
-import { Row, useTheme } from 'native-base';
+import { HStack } from '@gluestack-ui/themed';
 import { useEffect, useState } from 'react';
 import { Switch, SwitchProps } from 'react-native';
 
@@ -8,7 +8,6 @@ type ToggleWithTextProps = {
   switchProps: SwitchProps;
 } & ChildrenProp;
 export function ToggleWithText(props: ToggleWithTextProps) {
-  const theme = useTheme();
   const { children, switchProps } = props;
   const [isEnabled, setIsEnabled] = useState(switchProps.value);
 
@@ -17,19 +16,14 @@ export function ToggleWithText(props: ToggleWithTextProps) {
   }, [switchProps.value]);
 
   return (
-    <Row alignItems="center" justifyContent="space-between">
-      <Row alignItems="center">{children}</Row>
+    <HStack alignItems="center" justifyContent="space-between">
+      <HStack alignItems="center">{children}</HStack>
       <Switch
-        trackColor={{
-          false: theme.colors.secondary[200],
-          true: theme.colors.primary[200],
-        }}
-        thumbColor={
-          isEnabled ? theme.colors.primary[900] : theme.colors.secondary[900]
-        }
-        ios_backgroundColor={theme.colors.black[400]}
+        trackColor={{ false: '#94a3b8', true: '#93c5fd' }}
+        thumbColor={isEnabled ? '#1e40af' : '#475569'}
+        ios_backgroundColor="#334155"
         {...switchProps}
       />
-    </Row>
+    </HStack>
   );
 }

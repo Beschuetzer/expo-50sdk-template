@@ -1,7 +1,7 @@
+import { Box, Input, InputField, Text, VStack } from '@gluestack-ui/themed';
 import { Picker } from '@react-native-picker/picker';
-import { Text, Input, useTheme, Column, Row } from 'native-base';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ColorValue, Dimensions } from 'react-native';
+import { Dimensions } from 'react-native';
 
 import { InputText } from './InputText';
 import FocusInput from '../FocusInput';
@@ -18,7 +18,7 @@ import { isAddressValid } from '@/utils/helpers';
 
 type AddressFormSuffix = {
   text: string;
-  color?: ColorValue;
+  color?: string;
 };
 
 type AddressFormOption<T> = {
@@ -57,13 +57,12 @@ function getAddressFromOptions(options: AddressFormProps['options']) {
 
 export function AddressForm(props: AddressFormProps) {
   const { options, onValueChange, onValueChangeTimeout } = props;
-  const theme = useTheme();
-  const debounceRef = useRef<any>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const [address, setAddress] = useState<Address>(
     getAddressFromOptions(options),
   );
 
-  const defaultSuffixColor = useMemo(() => theme.colors.red[900], [theme]);
+  const defaultSuffixColor = '$red900';
   const fieldOneName = useMemo(
     () => options?.addressLineOne?.name || 'Address Line 1',
     [options],
@@ -105,10 +104,12 @@ export function AddressForm(props: AddressFormProps) {
     debounceRef.current = setTimeout(() => {
       onValueChange(address, isAddressValid(address));
     }, onValueChangeTimeout || TYPING_DEBOUNCE_THRESHOLD);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
   useEffect(() => {
     setAddress(getAddressFromOptions(options));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     options?.addressLineOne?.value,
     options?.addressLineTwo?.value,
@@ -119,18 +120,15 @@ export function AddressForm(props: AddressFormProps) {
   ]);
 
   return (
-    <Column
-      space={theme.space[FORM_INTER_ITEM_SPACING]}
-      py={theme.space[FORM_INTER_ITEM_SPACING]}
-    >
+    <VStack space="sm" py={FORM_INTER_ITEM_SPACING}>
       {options?.addressLineOne?.isVisible === false ? null : (
         <>
           <InputText
             suffix={
               <Text
                 color={
-                  options?.addressLineOne?.suffix?.color?.toString() ||
-                  defaultSuffixColor
+                  (options?.addressLineOne?.suffix?.color?.toString() ||
+                    defaultSuffixColor) as any
                 }
               >
                 &nbsp;{options?.addressLineOne?.suffix?.text.trim()}
@@ -140,8 +138,6 @@ export function AddressForm(props: AddressFormProps) {
             {fieldOneName}
           </InputText>
           <FocusInput
-            variant="outline"
-            p={theme.space[1]}
             flex={1}
             placeholder={fieldOneName}
             value={address?.addressLineOne}
@@ -161,8 +157,8 @@ export function AddressForm(props: AddressFormProps) {
             suffix={
               <Text
                 color={
-                  options?.addressLineTwo?.suffix?.color?.toString() ||
-                  defaultSuffixColor
+                  (options?.addressLineTwo?.suffix?.color?.toString() ||
+                    defaultSuffixColor) as any
                 }
               >
                 &nbsp;{options?.addressLineTwo?.suffix?.text.trim()}
@@ -171,19 +167,18 @@ export function AddressForm(props: AddressFormProps) {
           >
             {fieldTwoName}
           </InputText>
-          <Input
-            variant="outline"
-            p={theme.space[1]}
-            flex={1}
-            placeholder={fieldTwoName}
-            value={address?.addressLineTwo}
-            onChangeText={(newValue) =>
-              setAddress((current) => ({
-                ...current,
-                addressLineTwo: newValue,
-              }))
-            }
-          />
+          <Input flex={1} variant="outline">
+            <InputField
+              placeholder={fieldTwoName}
+              value={address?.addressLineTwo}
+              onChangeText={(newValue) =>
+                setAddress((current) => ({
+                  ...current,
+                  addressLineTwo: newValue,
+                }))
+              }
+            />
+          </Input>
         </>
       )}
       {options?.city?.isVisible === false ? null : (
@@ -192,7 +187,8 @@ export function AddressForm(props: AddressFormProps) {
             suffix={
               <Text
                 color={
-                  options?.city?.suffix?.color?.toString() || defaultSuffixColor
+                  (options?.city?.suffix?.color?.toString() ||
+                    defaultSuffixColor) as any
                 }
               >
                 &nbsp;{options?.city?.suffix?.text.trim()}
@@ -201,19 +197,15 @@ export function AddressForm(props: AddressFormProps) {
           >
             {cityName}
           </InputText>
-          <Input
-            variant="outline"
-            p={theme.space[1]}
-            flex={1}
-            placeholder={cityName}
-            value={address.city}
-            onChangeText={(newValue) =>
-              setAddress((current) => ({
-                ...current,
-                city: newValue,
-              }))
-            }
-          />
+          <Input flex={1} variant="outline">
+            <InputField
+              placeholder={cityName}
+              value={address.city}
+              onChangeText={(newValue) =>
+                setAddress((current) => ({ ...current, city: newValue }))
+              }
+            />
+          </Input>
         </>
       )}
       {options?.state?.isVisible === false ? null : (
@@ -222,8 +214,8 @@ export function AddressForm(props: AddressFormProps) {
             suffix={
               <Text
                 color={
-                  options?.state?.suffix?.color?.toString() ||
-                  defaultSuffixColor
+                  (options?.state?.suffix?.color?.toString() ||
+                    defaultSuffixColor) as any
                 }
               >
                 &nbsp;{options?.state?.suffix?.text.trim()}
@@ -232,22 +224,19 @@ export function AddressForm(props: AddressFormProps) {
           >
             {stateName}
           </InputText>
-          <Row width={Dimensions.get('window').width * 0.5} maxWidth={200}>
+          <Box width={Dimensions.get('window').width * 0.5} maxWidth={200}>
             <Picker
               style={{ flex: 1 }}
               selectedValue={address.state}
               onValueChange={(newValue) =>
-                setAddress((current) => ({
-                  ...current,
-                  state: newValue,
-                }))
+                setAddress((current) => ({ ...current, state: newValue }))
               }
             >
               {Object.values(State).map((state) => (
                 <Picker.Item key={state} label={state} value={state} />
               ))}
             </Picker>
-          </Row>
+          </Box>
         </>
       )}
       {options?.zipCode?.isVisible === false ? null : (
@@ -256,8 +245,8 @@ export function AddressForm(props: AddressFormProps) {
             suffix={
               <Text
                 color={
-                  options?.zipCode?.suffix?.color?.toString() ||
-                  defaultSuffixColor
+                  (options?.zipCode?.suffix?.color?.toString() ||
+                    defaultSuffixColor) as any
                 }
               >
                 &nbsp;{options?.zipCode?.suffix?.text.trim()}
@@ -266,20 +255,16 @@ export function AddressForm(props: AddressFormProps) {
           >
             {zipName}
           </InputText>
-          <Input
-            variant="outline"
-            keyboardType="numeric"
-            p={theme.space[1]}
-            flex={1}
-            placeholder={zipName}
-            value={address.zipCode}
-            onChangeText={(newValue) =>
-              setAddress((current) => ({
-                ...current,
-                zipCode: newValue,
-              }))
-            }
-          />
+          <Input flex={1} variant="outline">
+            <InputField
+              keyboardType="numeric"
+              placeholder={zipName}
+              value={address.zipCode}
+              onChangeText={(newValue) =>
+                setAddress((current) => ({ ...current, zipCode: newValue }))
+              }
+            />
+          </Input>
         </>
       )}
       {options?.country?.isVisible === false ? null : (
@@ -288,8 +273,8 @@ export function AddressForm(props: AddressFormProps) {
             suffix={
               <Text
                 color={
-                  options?.country?.suffix?.color?.toString() ||
-                  defaultSuffixColor
+                  (options?.country?.suffix?.color?.toString() ||
+                    defaultSuffixColor) as any
                 }
               >
                 &nbsp;{options?.country?.suffix?.text.trim()}
@@ -299,21 +284,23 @@ export function AddressForm(props: AddressFormProps) {
             {countryName}
           </InputText>
           <Input
-            variant="outline"
-            p={theme.space[1]}
             flex={1}
-            placeholder="Two Letter Country Code"
-            value={countryValue}
+            variant="outline"
             isInvalid={!VALID_COUNTRY_CODES.includes(countryValue)}
-            onChangeText={(newValue) =>
-              setAddress((current) => ({
-                ...current,
-                country: newValue.trim().replace(/\d/g, '').substring(0, 2),
-              }))
-            }
-          />
+          >
+            <InputField
+              placeholder="Two Letter Country Code"
+              value={countryValue}
+              onChangeText={(newValue) =>
+                setAddress((current) => ({
+                  ...current,
+                  country: newValue.trim().replace(/\d/g, '').substring(0, 2),
+                }))
+              }
+            />
+          </Input>
         </>
       )}
-    </Column>
+    </VStack>
   );
 }

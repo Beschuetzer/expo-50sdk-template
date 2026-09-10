@@ -43,9 +43,7 @@ function renderHook(isDirty: boolean) {
   let renderer: ReactTestRenderer;
 
   act(() => {
-    renderer = create(
-      <TestComponent isDirty={isDirty} onResult={onResult} />,
-    );
+    renderer = create(<TestComponent isDirty={isDirty} onResult={onResult} />);
   });
 
   return {

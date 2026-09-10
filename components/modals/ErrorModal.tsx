@@ -1,4 +1,4 @@
-import { Row, Button, Stack } from 'native-base';
+import { Button, ButtonText, HStack, VStack } from '@gluestack-ui/themed';
 import { useCallback, useMemo } from 'react';
 
 import { ModalWithBlur } from './ModalWithBlur';
@@ -12,12 +12,9 @@ import { useAppDispatch, useAppSelector } from '@/state/store';
 import { Error } from '@/types/general';
 import { displayAlert } from '@/utils/helpers';
 
-export type ErrorModalProps = {
-  // onDismiss: () => void;
-};
+export type ErrorModalProps = object;
 
 export const ErrorModal = (props: ErrorModalProps) => {
-  // const { onDismiss } = props;
   const errors = useAppSelector(errorSelector);
   const dispatch = useAppDispatch();
 
@@ -48,18 +45,22 @@ export const ErrorModal = (props: ErrorModalProps) => {
       title="Errors Encountered (Press to View)"
       isVisible={uniqueErrors.some((error) => Boolean(error.message))}
     >
-      <Stack>
+      <VStack>
         {uniqueErrors.map((error, index) => {
           if (!error.message) return null;
           return (
-            <Row key={index} justifyContent="space-between" alignItems="center">
+            <HStack
+              key={index}
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <Button variant="link" onPress={() => onButtonPress(error)}>
-                {`${index + 1}). ${error.message}`}
+                <ButtonText>{`${index + 1}). ${error.message}`}</ButtonText>
               </Button>
-            </Row>
+            </HStack>
           );
         })}
-      </Stack>
+      </VStack>
     </ModalWithBlur>
   );
 };

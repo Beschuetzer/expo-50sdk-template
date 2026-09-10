@@ -4,7 +4,6 @@ import { BFF_SERVICE } from '../services/BffService';
 
 import { resetErrors } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
-import { getIsDevelopmentMode } from '@/utils/helpers';
 
 const MAX_TRY_COUNT = 3;
 
@@ -16,15 +15,17 @@ export const useAwakenBff = () => {
   const tryCountCurrentRef = useRef(0);
   const dispatch = useAppDispatch();
 
-  async function checkStatus() {
+  async function checkStatus(): Promise<boolean> {
     try {
       tryCountCurrentRef.current += 1;
       if (tryCountCurrentRef.current > MAX_TRY_COUNT) return false;
-      const response = await BFF_SERVICE.ping(dispatch, getIsDevelopmentMode());
-      if (response?.isAwake) {
+      const response = await BFF_SERVICE.ping({ dispatch });
+      if (response?.success) {
         return true;
       }
-    } catch (error) {}
+    } catch {
+      // fall through and retry below
+    }
     return checkStatus();
   }
 

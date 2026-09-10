@@ -1,4 +1,3 @@
-import { theme } from 'native-base';
 import { forwardRef } from 'react';
 import {
   Menu,
@@ -81,17 +80,18 @@ export const ListHeaderRight = forwardRef<Menu, ListHeaderRightProps>(
     );
   },
 );
+ListHeaderRight.displayName = 'ListHeaderRight';
 
 const customOptionStyles: MenuOptionCustomStyle = {
   optionText: {
-    color: theme.colors.white,
+    color: 'white',
     fontWeight: '300',
     fontSize: 20,
-    paddingVertical: theme.sizes[1],
+    paddingVertical: 4,
     textAlign: 'center',
   },
 };
 
 const customMenuOptionsStyle: MenuOptionsCustomStyle = {
-  optionsContainer: { backgroundColor: theme.colors.black },
+  optionsContainer: { backgroundColor: 'black' },
 };

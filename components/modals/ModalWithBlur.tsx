@@ -1,8 +1,7 @@
+import { Box, Button, ButtonText, HStack, Heading } from '@gluestack-ui/themed';
 import { BlurView } from 'expo-blur';
-import { View, useTheme, Button, Row, Heading } from 'native-base';
-import { IViewProps } from 'native-base/lib/typescript/components/basic/View/types';
 import React, { ReactNode, useCallback, useMemo } from 'react';
-import { Modal, ViewStyle } from 'react-native';
+import { Modal } from 'react-native';
 
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
@@ -12,7 +11,7 @@ import { ButtonOptions, ChildrenProp } from '@/types/general';
 export type ModalWithBlurProps = {
   cancelButton?: ButtonOptions;
   confirmButton?: ButtonOptions;
-  containerStyles?: IViewProps;
+  containerStyles?: Record<string, unknown>;
   isVisible: boolean;
   title: string | ReactNode | ReactNode[];
   onConfirm?: () => void;
@@ -32,12 +31,11 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
     onConfirm,
     onBlurPress,
   } = props;
-  const theme = useTheme();
 
   const cancelButtonToUse = useMemo(() => {
     return {
       text: 'Cancel',
-      colorScheme: 'red',
+      action: 'negative',
       isEnabled: true,
       isVisible: true,
       ...cancelButton,
@@ -46,7 +44,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
   const confirmButtonToUse = useMemo(() => {
     return {
       text: 'Confirm',
-      colorScheme: 'green',
+      action: 'positive',
       isEnabled: true,
       isVisible: true,
       ...confirmButton,
@@ -80,7 +78,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
           onBlurPress && onBlurPress();
         }}
       >
-        <View
+        <Box
           style={
             {
               padding: 20,
@@ -89,52 +87,48 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
               maxHeight: '90%',
               ...maxWidth,
               ...containerStyles,
-            } as ViewStyle
+            } as any
           }
-          onTouchEnd={(e) => {
+          onTouchEnd={(e: any) => {
             e.stopPropagation();
           }}
         >
           {typeof title === 'string' ? (
-            <Heading
-              textAlign="center"
-              size="sm"
-              pb={theme.space[FORM_INTER_ITEM_SPACING]}
-            >
+            <Heading textAlign="center" size="sm" pb={FORM_INTER_ITEM_SPACING}>
               {title}
             </Heading>
           ) : (
-            <View>{title}</View>
+            <Box>{title}</Box>
           )}
           {children}
-          <Row
-            space={theme.space[FORM_INTER_ITEM_SPACING]}
+          <HStack
+            space="sm"
             justifyContent="space-around"
-            mt={theme.space[FORM_INTER_ITEM_SPACING]}
-            mb={-theme.space[FORM_INTER_ITEM_SPACING]}
+            mt={FORM_INTER_ITEM_SPACING}
+            mb={-FORM_INTER_ITEM_SPACING}
           >
             {confirmButtonToUse.isVisible ? (
               <Button
-                variant="ghost"
+                variant="link"
                 isDisabled={!confirmButtonToUse.isEnabled}
                 onPress={onConfirmPress}
-                colorScheme={confirmButtonToUse.colorScheme}
+                action={confirmButtonToUse.action}
               >
-                {confirmButtonToUse.text}
+                <ButtonText>{confirmButtonToUse.text}</ButtonText>
               </Button>
             ) : null}
             {cancelButtonToUse.isVisible ? (
               <Button
-                variant="ghost"
+                variant="link"
                 isDisabled={!cancelButtonToUse.isEnabled}
                 onPress={onCancelPress}
-                colorScheme={cancelButtonToUse.colorScheme}
+                action={cancelButtonToUse.action}
               >
-                {cancelButtonToUse.text}
+                <ButtonText>{cancelButtonToUse.text}</ButtonText>
               </Button>
             ) : null}
-          </Row>
-        </View>
+          </HStack>
+        </Box>
       </BlurView>
     </Modal>
   );

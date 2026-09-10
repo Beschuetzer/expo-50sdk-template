@@ -1,14 +1,13 @@
+import { Box, Heading, HStack, VStack } from '@gluestack-ui/themed';
 import { Picker } from '@react-native-picker/picker';
-import { theme, View, Stack, Heading, Text, Row } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { NumberInput, NumberInputProps } from './NumberInput';
 
 import {
-  EMPTY_NUMBER,
   DURATION_INITIAL,
   TIME_SPAN_TO_MILLISECONDS_MAPPING,
-  EMPTY_STRING,
+  EMPTY_NUMBER,
 } from '@/constants/general';
 import { Duration, TimeSpan } from '@/types/general';
 
@@ -40,22 +39,11 @@ export function DurationInput(props: DurationInputProps) {
     [duration],
   );
 
-  const onChangeFrequencyTimespan = useCallback(
+  const onChangeTimespan = useCallback(
     (itemValue: TimeSpan) => {
       setDuration({ ...duration, timeSpan: itemValue });
     },
     [duration],
-  );
-
-  const onNumberInputValueChange = useCallback(
-    (number: number) => {
-      setDuration((current) => ({
-        ...current,
-        number,
-      }));
-      onValueChange && onValueChange(number);
-    },
-    [onValueChange],
   );
 
   useEffect(() => {
@@ -65,54 +53,45 @@ export function DurationInput(props: DurationInputProps) {
   }, [onValueChange, frequencyInMs]);
 
   return (
-    <Stack my={spacing}>
-      <Tag>{title}</Tag>
-      <Row>
-        <View flex={3}>
+    <VStack my={spacing as number}>
+      {title ? <Tag>{title}</Tag> : null}
+      {subTitle ? <Tag>{subTitle}</Tag> : null}
+      <HStack>
+        <Box flex={3}>
           <NumberInput
             onPlusPress={() =>
               setDuration((current) => ({
                 ...current,
-                number: parseInt(current.number as unknown as string, 10) + 1,
+                number: Number(current.number) + 1,
               }))
             }
             onMinusPress={() =>
               setDuration((current) => ({
                 ...current,
-                number: parseInt(current.number as unknown as string, 10) - 1,
+                number: Math.max(Number(current.number) - 1, 0),
               }))
             }
-            isMinusDisabled={duration.number <= 1}
             initialValue={duration.number}
-            {...props}
-            onValueChange={onNumberInputValueChange}
-            title={EMPTY_STRING}
+            onValueChange={(newNumber) =>
+              setDuration((current) => ({ ...current, number: newNumber }))
+            }
           />
-        </View>
-        <View flex={10}>
+        </Box>
+        <Box flex={4}>
           <Picker
             selectedValue={duration.timeSpan}
-            onValueChange={onChangeFrequencyTimespan}
+            onValueChange={onChangeTimespan}
           >
-            {Object.keys(TIME_SPAN_TO_MILLISECONDS_MAPPING).map((timespan) => (
+            {Object.values(TimeSpan).map((timeSpan) => (
               <Picker.Item
-                key={timespan}
-                label={`${timespan}${duration?.number > 1 ? 's' : ''}`}
-                value={timespan}
+                key={timeSpan}
+                label={`${timeSpan}(s)`}
+                value={timeSpan}
               />
             ))}
           </Picker>
-        </View>
-      </Row>
-
-      {frequencyInMs && subTitle ? (
-        <Text fontSize={theme.sizes[3]}>
-          {subTitle}&nbsp;
-          <Text fontWeight="bold">
-            {new Date(Date.now() + frequencyInMs).toLocaleString()}
-          </Text>
-        </Text>
-      ) : null}
-    </Stack>
+        </Box>
+      </HStack>
+    </VStack>
   );
 }

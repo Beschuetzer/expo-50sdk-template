@@ -1,4 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { config } from '@gluestack-ui/config';
+import { GluestackUIProvider } from '@gluestack-ui/themed';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import {
   DarkTheme,
@@ -10,7 +12,6 @@ import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { NativeBaseProvider } from 'native-base';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MenuProvider } from 'react-native-popup-menu';
@@ -23,7 +24,6 @@ import { CloseButton } from '@/components/header/CloseButton';
 import { useAppState } from '@/components/hooks/tanstack/useAppState';
 import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
-import { AutoSetStoreModal } from '@/components/modals/AutoSetStoreModal';
 import { ErrorModal } from '@/components/modals/ErrorModal';
 import { LoadingModal } from '@/components/modals/LoadingModal';
 import { IMAGE_RENDERER_TITLE_DEFAULT } from '@/constants/general';
@@ -94,12 +94,11 @@ function RootLayoutNav() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Provider store={store}>
           <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
-            <NativeBaseProvider>
+            <GluestackUIProvider config={config}>
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <MenuProvider>
                   <BottomSheetModalProvider>
                     <ShareIntentHandler />
-                    <AutoSetStoreModal />
                     <ErrorModal />
                     <LoadingModal />
                     <Stack>
@@ -120,28 +119,19 @@ function RootLayoutNav() {
                         }}
                       />
                       <Stack.Screen
-                        name={Routes.ItemModal}
+                        name={Routes.TaskModal}
                         options={{
                           presentation: 'modal',
-                          title: 'Item Details',
+                          title: 'Task Details',
                           headerTitleAlign: 'center',
                           headerLeft: () => <CloseButton />,
                         }}
                       />
                       <Stack.Screen
-                        name={Routes.InventoryLocationModal}
+                        name={Routes.BulkAddTasksModal}
                         options={{
                           presentation: 'modal',
-                          title: 'Add Inventory Location',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.QuickAddModal}
-                        options={{
-                          presentation: 'modal',
-                          title: 'Quick Add',
+                          title: 'Bulk Add Tasks',
                           headerTitleAlign: 'center',
                           headerLeft: () => <CloseButton />,
                         }}
@@ -155,79 +145,10 @@ function RootLayoutNav() {
                         }}
                       />
                       <Stack.Screen
-                        name={Routes.StoreModal}
-                        options={{
-                          presentation: 'modal',
-                          title: 'Store Details',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.CookingInstructionsScreen}
-                        options={{
-                          presentation: 'modal',
-                          title: 'Cooking Instructions',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.MutuallyExclusiveCreatorScreen}
-                        options={{
-                          presentation: 'modal',
-                          title: 'New Mutually Exclusive Pair',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.RouteCreationScreen}
-                        options={{
-                          presentation: 'modal',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.RouteSelectionScreen}
-                        options={{
-                          presentation: 'modal',
-                          title: 'Select a Route',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.RouteConflictResolutionScreen}
-                        options={{
-                          presentation: 'modal',
-                          title: 'Resolve Route Conflicts',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.LocationItemAssignmentScreen}
-                        options={{
-                          presentation: 'modal',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
-                        name={Routes.RouteUnassignedItemsScreen}
-                        options={{
-                          presentation: 'modal',
-                          headerTitleAlign: 'center',
-                          headerLeft: () => <CloseButton />,
-                        }}
-                      />
-                      <Stack.Screen
                         name={Routes.ShareIntentScreen}
                         options={{
                           presentation: 'modal',
-                          title: 'Link URL to Item',
+                          title: 'Create Task from Shared Content',
                           headerTitleAlign: 'center',
                         }}
                       />
@@ -235,7 +156,7 @@ function RootLayoutNav() {
                   </BottomSheetModalProvider>
                 </MenuProvider>
               </GestureHandlerRootView>
-            </NativeBaseProvider>
+            </GluestackUIProvider>
           </PersistGate>
         </Provider>
       </ThemeProvider>

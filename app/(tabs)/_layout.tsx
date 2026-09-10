@@ -28,13 +28,22 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name={Routes.ShoppingListScreen}
+        name={Routes.DashboardScreen}
         options={{
-          title: 'Shopping',
+          title: 'Dashboard',
+          headerTitleAlign: 'center',
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name={Routes.TasksScreen}
+        options={{
+          title: 'Tasks',
           headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="shopping-bag" color={color} />
+            <TabBarIcon name="list-alt" color={color} />
           ),
+          lazy: true,
         }}
       />
       <Tabs.Screen
@@ -46,39 +55,6 @@ export default function TabLayout() {
             <TabBarIcon name="barcode" color={color} />
           ),
           lazy: true,
-        }}
-      />
-      <Tabs.Screen
-        name={Routes.StoreScreen}
-        options={{
-          title: 'Stores',
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="building" color={color} />
-          ),
-          lazy: true,
-        }}
-      />
-      <Tabs.Screen
-        name={Routes.ItemsScreen}
-        options={{
-          title: 'Items',
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="list-alt" color={color} />
-          ),
-          lazy: true,
-        }}
-      />
-      <Tabs.Screen
-        name={Routes.InventoryScreen}
-        options={{
-          lazy: true,
-          title: 'Inventory',
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="list-ul" color={color} />
-          ),
         }}
       />
       <Tabs.Screen

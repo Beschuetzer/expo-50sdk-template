@@ -1,22 +1,28 @@
-import { IInputProps, Input } from 'native-base';
-import React, { useEffect, useRef } from 'react';
+import { Input, InputField } from '@gluestack-ui/themed';
+import React, { ComponentProps, useEffect, useRef } from 'react';
 
-type FocusInputProps = IInputProps & {
+type FocusInputProps = ComponentProps<typeof InputField> & {
+  isInvalid?: boolean;
+  flex?: number;
   timeoutAmount?: number;
 };
 
 /**
- *This input focuses itself after the page has initially rendered
+ *This input focuses itself shortly after the page has initially rendered.
  **/
 export default function FocusInput(props: FocusInputProps) {
-  const { timeoutAmount = 250 } = props;
-  const nameRef = useRef<HTMLInputElement>(null);
+  const { flex, isInvalid, timeoutAmount = 250, ...inputFieldProps } = props;
+  const nameRef = useRef<any>(null);
 
   useEffect(() => {
     setTimeout(() => {
       nameRef.current?.focus();
     }, timeoutAmount);
-  }, [nameRef, timeoutAmount]);
+  }, [timeoutAmount]);
 
-  return <Input {...props} ref={nameRef} />;
+  return (
+    <Input variant="outline" flex={flex} isInvalid={isInvalid}>
+      <InputField {...inputFieldProps} ref={nameRef} />
+    </Input>
+  );
 }

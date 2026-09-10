@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { Center } from 'native-base';
+import { Center } from '@gluestack-ui/themed';
 import React, { useCallback } from 'react';
 
 import { ModalWithBlur } from './ModalWithBlur';

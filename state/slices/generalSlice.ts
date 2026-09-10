@@ -1,19 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
-import {
-  addInventoryItemsThunk,
-  addInventoryLocationsThunk,
-  deleteItems,
-  deleteStores,
-  loadAll,
-  moveInventoryItemExpirationDatesThunk,
-  moveInventoryItemsThunk,
-  saveAll,
-  saveItem,
-  savePurchase,
-  saveStore,
-} from '../thunks';
+import { deleteTasks, loadAll, saveAll, saveTask, saveTasks } from '../thunks';
 
 import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
 import { UserAccount } from '@/types/bffService';
@@ -28,7 +16,7 @@ export const ACCOUNT_INITIAL = Object.freeze({
 });
 export const ERRORS_INITIAL = (() => [] as Error[])();
 export const IS_UP_TO_DATE_INITIAL = false;
-export const SHOULD_MOCK_SCANNED_RESPONSES_INITIAL = false;
+export const SHOULD_MOCK_BFF_RESPONSES_INITIAL = false;
 export const SHOULD_SAVE_ON_LOGIN_INITIAL = false;
 //#endregion
 
@@ -47,7 +35,11 @@ export type GeneralState = {
    *LoadingModal listen for changes here and displays them
    **/
   loadingMessage: string;
-  shouldMockScannedResponses: boolean;
+  /**
+   *Dev-only: have `BffService` return canned data instead of hitting the network
+   *(see `MockResponseToggle`).
+   **/
+  shouldMockBffResponses: boolean;
   /**
    *This will call the {@link BffService.saveAllToDb} method on login if `true`.
    **/
@@ -60,7 +52,7 @@ const initialState: GeneralState = {
   isUpToDate: IS_UP_TO_DATE_INITIAL,
   lastSyncTime: EMPTY_NUMBER,
   loadingMessage: EMPTY_STRING,
-  shouldMockScannedResponses: SHOULD_MOCK_SCANNED_RESPONSES_INITIAL,
+  shouldMockBffResponses: SHOULD_MOCK_BFF_RESPONSES_INITIAL,
   shouldSaveOnLogin: SHOULD_SAVE_ON_LOGIN_INITIAL,
 };
 
@@ -122,50 +114,29 @@ export const generalSlice = createSlice({
         action.payload != null && state?.account._id ? action.payload : false;
       state.shouldSaveOnLogin = shouldSave;
     },
-    toggleShouldShouldMockScannedResponses: (state: GeneralState) => {
-      state.shouldMockScannedResponses = !state.shouldMockScannedResponses;
+    toggleShouldMockBffResponses: (state: GeneralState) => {
+      state.shouldMockBffResponses = !state.shouldMockBffResponses;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(addInventoryItemsThunk.rejected, (state, action) => {
+    builder.addCase(deleteTasks.rejected, (state) => {
       state.isUpToDate = false;
     });
-    builder.addCase(addInventoryLocationsThunk.rejected, (state, action) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(deleteItems.rejected, (state, action) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(deleteStores.rejected, (state, action) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(loadAll.fulfilled, (state, action) => {
+    builder.addCase(loadAll.fulfilled, (state) => {
       state.isUpToDate = true;
       state.lastSyncTime = Date.now();
     });
-    builder.addCase(moveInventoryItemsThunk.rejected, (state, action) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(
-      moveInventoryItemExpirationDatesThunk.rejected,
-      (state, action) => {
-        state.isUpToDate = false;
-      },
-    );
-    builder.addCase(saveAll.fulfilled, (state, action) => {
+    builder.addCase(saveAll.fulfilled, (state) => {
       state.isUpToDate = true;
       state.lastSyncTime = Date.now();
     });
-    builder.addCase(saveAll.rejected, (state, action) => {
+    builder.addCase(saveAll.rejected, (state) => {
       state.isUpToDate = false;
     });
-    builder.addCase(saveItem.rejected, (state, action) => {
+    builder.addCase(saveTask.rejected, (state) => {
       state.isUpToDate = false;
     });
-    builder.addCase(savePurchase.rejected, (state, action) => {
-      state.isUpToDate = false;
-    });
-    builder.addCase(saveStore.rejected, (state, action) => {
+    builder.addCase(saveTasks.rejected, (state) => {
       state.isUpToDate = false;
     });
   },
@@ -180,13 +151,13 @@ export const {
   setErrors,
   setLoading,
   setShouldSaveOnLogin,
-  toggleShouldShouldMockScannedResponses,
+  toggleShouldMockBffResponses,
 } = generalSlice.actions;
 
 export default generalSlice.reducer;
 
-export const shouldShouldMockScannedResponsesSelector = (state: RootState) =>
-  state[generalSlice.name].shouldMockScannedResponses;
+export const shouldMockBffResponsesSelector = (state: RootState) =>
+  state[generalSlice.name].shouldMockBffResponses;
 
 export const accountSelector = (state: RootState) =>
   state[generalSlice.name].account;

@@ -1,43 +1,33 @@
-import { Row, useTheme, Text } from 'native-base';
+import { Text } from '@gluestack-ui/themed';
 import { useCallback } from 'react';
 import { Switch } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
-  shouldShouldMockScannedResponsesSelector,
-  toggleShouldShouldMockScannedResponses,
+  shouldMockBffResponsesSelector,
+  toggleShouldMockBffResponses,
 } from '@/state/slices/generalSlice';
 
 type MockResponseToggleProps = object;
 
 export function MockResponseToggle(props: MockResponseToggleProps) {
-  const theme = useTheme();
-  const shouldMockResponse = useSelector(
-    shouldShouldMockScannedResponsesSelector,
-  );
+  const shouldMockResponse = useSelector(shouldMockBffResponsesSelector);
   const dispatch = useDispatch();
 
   const toggleSwitch = useCallback(() => {
-    dispatch(toggleShouldShouldMockScannedResponses());
-  }, []);
+    dispatch(toggleShouldMockBffResponses());
+  }, [dispatch]);
 
   return (
-    <Row alignItems="center">
-      <Text mr={theme.space[1]}>Mock Scanned Responses</Text>
+    <>
+      <Text mr="$1">Mock BFF Responses</Text>
       <Switch
-        trackColor={{
-          false: theme.colors.secondary[200],
-          true: theme.colors.primary[200],
-        }}
-        thumbColor={
-          shouldMockResponse
-            ? theme.colors.primary[900]
-            : theme.colors.secondary[900]
-        }
-        ios_backgroundColor={theme.colors.black[900]}
+        trackColor={{ false: '#94a3b8', true: '#93c5fd' }}
+        thumbColor={shouldMockResponse ? '#1e40af' : '#475569'}
+        ios_backgroundColor="#000"
         onValueChange={toggleSwitch}
         value={shouldMockResponse}
       />
-    </Row>
+    </>
   );
 }

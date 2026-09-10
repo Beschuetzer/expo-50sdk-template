@@ -1,26 +1,8 @@
-import { ColorSchemeType } from 'native-base/lib/typescript/components/types';
 import { ReactElement, ReactNode } from 'react';
 import { ViewStyle } from 'react-native';
 
-import {
-  Item,
-  ItemsList,
-  ItemWithStoreSpecificValues,
-  Key,
-  LastPurchasedMap,
-  StoreList,
-  StoreSpecificValuesMap,
-} from './Item';
-import { GpsCoordinate, Store } from './Store';
-import { UpcProduct } from './UpcResponse';
-import { CurrentStoreNeeded, DispatchNeeded } from './bffService';
-import { Inventory } from './inventory';
-import { ListName, MutuallyExclusiveGroup, ReturnItemsMap } from './listSlice';
-
-export enum ScanningMode {
-  AddToCart = 'Add to Cart',
-  ItemLookup = 'Item Lookup',
-}
+import { Key, Task } from './Task';
+import { DispatchNeeded } from './bffService';
 
 export enum TimeSpan {
   Hour = 'Hour',
@@ -105,11 +87,27 @@ export type AddressGeneric<T> = {
 
 export type Address = AddressGeneric<string>;
 
+/**
+ *Mirrors the `action` values supported by @gluestack-ui/themed's `Button` (Badge/Alert support a
+ *broader set, but this type is used for button-like options throughout the app).
+ **/
+export type GluestackAction =
+  | 'primary'
+  | 'secondary'
+  | 'positive'
+  | 'negative'
+  | 'default';
+
 export type ButtonOptions = {
-  colorScheme?: ColorSchemeType;
+  action?: GluestackAction;
   isEnabled?: boolean;
   isVisible?: boolean;
   text?: string;
+};
+
+export type GpsCoordinate = {
+  lat: string;
+  lon: string;
 };
 
 export type CurrentLocation = GpsCoordinate | null;
@@ -161,37 +159,12 @@ export type KeyProp = {
   key: Key;
 };
 
-export type ListNameProp = {
-  listName: ListName;
-};
-
 export type ItemProp<T> = {
   item: T;
 };
 
 export type ItemsProp<T> = {
   items: T[];
-};
-
-export type ItemOrItemWithStoreSpecificValuesProp = {
-  item: Item | ItemWithStoreSpecificValues;
-};
-
-export type ItemWithStoreSpecificValuesProp = {
-  itemWithStoreSpecificValues: ItemWithStoreSpecificValues;
-};
-export type UpcProducts = { [key: string]: UpcProduct & TimeStamp };
-
-export type UpcProp = {
-  upc: string;
-};
-
-export type StoreProp = {
-  store?: Store | null | undefined;
-};
-
-export type UpcProductProp = {
-  upcProduct: UpcProduct;
 };
 
 export type StyleProp = {
@@ -204,14 +177,12 @@ export type FlatListItem = {
   key: number | string;
 };
 
+/**
+ *Shape used when exporting/importing a local JSON backup of the app's data
+ *(see {@link SaveLoadState}) and when syncing with the backend (see `saveAll`/`loadAll` thunks).
+ **/
 export type FileNames = {
-  items: ItemsList;
-  stores: StoreList & CurrentStoreNeeded;
-  storeSpecificValues: StoreSpecificValuesMap;
-  lastPurchasedMap: LastPurchasedMap;
-  inventory: Inventory;
-  mutuallyExclusiveGroups: MutuallyExclusiveGroup[];
-  returnItems: ReturnItemsMap;
+  tasks: Task[];
 };
 export type ResolvedType<T> = T extends Promise<infer R> ? R : T;
 export type SetAppDataInput = FileNames & DispatchNeeded;

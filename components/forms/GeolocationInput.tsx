@@ -1,4 +1,4 @@
-import { theme, Row, Input, Stack } from 'native-base';
+import { HStack, Input, InputField, VStack } from '@gluestack-ui/themed';
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
 
@@ -8,7 +8,7 @@ import { FontAwesomeButton } from '../FontAwesomeButton';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { setLoading } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
-import { GpsCoordinate } from '@/types/Store';
+import { GpsCoordinate } from '@/types/general';
 import { displayAlert, getGpsCoordinate } from '@/utils/helpers';
 import { openMap } from '@/utils/openMap';
 
@@ -38,7 +38,9 @@ export default function GeolocationInput(props: GeolocationInputProps) {
     },
   );
   const [isLoadingGpscoords, setIsLoadingGpscoords] = useState(false);
-  const debounceTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const debounceTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const onGetCurrentCoordinatesPress = useCallback(async () => {
     try {
@@ -63,7 +65,7 @@ export default function GeolocationInput(props: GeolocationInputProps) {
   }, [coordinates, dispatch]);
 
   useEffect(() => {
-    clearTimeout(debounceTimeoutRef.current as NodeJS.Timeout);
+    clearTimeout(debounceTimeoutRef.current as ReturnType<typeof setTimeout>);
     if (
       onChange &&
       coordinates.lat !== EMPTY_STRING &&
@@ -79,64 +81,49 @@ export default function GeolocationInput(props: GeolocationInputProps) {
         }, debounceAmount);
       }
     }
-  }, [coordinates, debounceAmount, debounceTimeoutRef, onChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coordinates, debounceAmount, onChange]);
 
   useEffect(() => {
     setCoordinates((current) => initialCoordinates || current);
   }, [initialCoordinates]);
 
   return (
-    <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
-      <Row alignItems="center" space={theme.space[FORM_INTER_ITEM_SPACING]}>
+    <VStack mt={FORM_INTER_ITEM_SPACING}>
+      <HStack alignItems="center" space="sm">
         <InputText>Lat:&nbsp;</InputText>
-        <Input
-          variant="outline"
-          keyboardType="numeric"
-          p={theme.space[1]}
-          flex={1}
-          placeholder="Latitude"
-          value={coordinates?.lat.toString()}
-          onChangeText={(newLat) => {
-            setCoordinates(
-              (current) =>
-                ({
-                  ...current,
-                  lat: newLat,
-                }) as any,
-            );
-          }}
-        />
+        <Input flex={1} variant="outline">
+          <InputField
+            keyboardType="numeric"
+            placeholder="Latitude"
+            value={coordinates?.lat.toString()}
+            onChangeText={(newLat) => {
+              setCoordinates((current) => ({ ...current, lat: newLat }));
+            }}
+          />
+        </Input>
         <InputText>Lon:&nbsp;</InputText>
-        <Input
-          variant="outline"
-          keyboardType="numeric"
-          p={theme.space[1]}
-          flex={1}
-          placeholder="Longitude"
-          value={coordinates?.lon.toString()}
-          onChangeText={(newLon) => {
-            setCoordinates(
-              (current) =>
-                ({
-                  ...current,
-                  lon: newLon,
-                }) as any,
-            );
-          }}
-        />
+        <Input flex={1} variant="outline">
+          <InputField
+            keyboardType="numeric"
+            placeholder="Longitude"
+            value={coordinates?.lon.toString()}
+            onChangeText={(newLon) => {
+              setCoordinates((current) => ({ ...current, lon: newLon }));
+            }}
+          />
+        </Input>
         {!coordinates.lat || !coordinates.lon ? null : (
           <FontAwesomeButton
-            size={theme.sizes[8]}
-            style={{
-              paddingHorizontal: theme.space[FORM_INTER_ITEM_SPACING] * 2,
-            }}
+            size={32}
+            style={{ paddingHorizontal: FORM_INTER_ITEM_SPACING * 8 }}
             name="map-marker"
             onPress={onMapPress}
           />
         )}
-      </Row>
-      <Row
-        pt={theme.space[FORM_INTER_ITEM_SPACING]}
+      </HStack>
+      <HStack
+        pt={FORM_INTER_ITEM_SPACING}
         alignItems="center"
         justifyContent="space-between"
         style={childrenRowStyles}
@@ -147,7 +134,7 @@ export default function GeolocationInput(props: GeolocationInputProps) {
           onPress={onGetCurrentCoordinatesPress}
         />
         {children}
-      </Row>
-    </Stack>
+      </HStack>
+    </VStack>
   );
 }

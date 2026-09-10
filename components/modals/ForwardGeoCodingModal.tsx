@@ -1,33 +1,39 @@
-import { Button, ScrollView, useTheme } from 'native-base';
+import {
+  Button,
+  ButtonText,
+  HStack,
+  ScrollView,
+  Text,
+  VStack,
+} from '@gluestack-ui/themed';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
+import { useGpsCoordinate } from '../hooks/useGeoLocation';
 import { SortType, getSorter } from '../lists/sorters';
-import PlaceTile from '../tiles/PlaceTile';
 
 import {
   ForwardGeocodingResponse,
   ForwardGeocodingPlace,
 } from '@/components/services/GeoCodingService';
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { currentLocationSelector } from '@/state/slices/listsSlice';
-import { Store } from '@/types/Store';
 import { calculateDistance } from '@/utils/helpers';
 
 export type ForwardGeocodingPlaceWithDistance =
-  | (ForwardGeocodingPlace & Required<Pick<Store, 'calculatedDistance'>>)
+  | (ForwardGeocodingPlace & { calculatedDistance: number })
   | null;
 
-type FowardGeocodingModalProps = {
+type ForwardGeocodingModalProps = {
   places: ForwardGeocodingResponse;
   onConfirm: (place: ForwardGeocodingPlaceWithDistance) => void;
 } & Omit<ModalWithBlurProps, 'title' | 'onConfirm'>;
 
-export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
+/**
+ *Given a list of geocoded places (see `GeoCodingService.doForwardGeocoding`), lets the user pick
+ *one - sorted by distance from their current GPS location.
+ **/
+export function ForwardGeoCodingModal(props: ForwardGeocodingModalProps) {
   const { places, ...restProps } = props;
-  const currentLocation = useSelector(currentLocationSelector);
-  const theme = useTheme();
+  const { gpsCoordinates: currentLocation } = useGpsCoordinate();
   const sortedPlaces = useMemo(() => {
     if (!places) return [];
     return places
@@ -35,8 +41,8 @@ export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
         ...place,
         calculatedDistance: calculateDistance(currentLocation, place),
       }))
-      .sort(getSorter({ sortType: SortType.Distance }));
-  }, [places]) as ForwardGeocodingPlaceWithDistance[];
+      .sort(getSorter({ sortType: SortType.None }));
+  }, [places, currentLocation]) as ForwardGeocodingPlaceWithDistance[];
 
   const [currentlySelectedPlace, setCurrentlySelectedPlace] =
     useState<ForwardGeocodingPlaceWithDistance>(null);
@@ -44,36 +50,41 @@ export function ForwardGeoCodingModal(props: FowardGeocodingModalProps) {
   const onCancelPress = useCallback(() => {
     restProps.onCancel && restProps.onCancel();
     setCurrentlySelectedPlace(null);
-  }, [restProps.onCancel]);
+  }, [restProps]);
 
   const onConfirmPress = useCallback(() => {
     restProps.onConfirm && restProps.onConfirm(currentlySelectedPlace);
-  }, [restProps.onConfirm, currentlySelectedPlace]);
+  }, [restProps, currentlySelectedPlace]);
 
   return (
     <ModalWithBlur
       {...restProps}
       title="Select a Place"
-      confirmButton={{
-        isEnabled: !!currentlySelectedPlace,
-      }}
       onCancel={onCancelPress}
       onConfirm={onConfirmPress}
     >
       <ScrollView keyboardShouldPersistTaps="always">
-        {Array.from(sortedPlaces).map((place) => {
-          return (
-            <Button
-              key={place?.place_id}
-              mt={theme.space[FORM_INTER_ITEM_SPACING]}
-              variant="subtle"
-              isDisabled={currentlySelectedPlace?.place_id === place?.place_id}
-              onPress={() => setCurrentlySelectedPlace(place)}
-            >
-              <PlaceTile place={place} />
-            </Button>
-          );
-        })}
+        {sortedPlaces.map((place) => (
+          <Button
+            key={place?.place_id}
+            mt="$2"
+            variant="outline"
+            isDisabled={currentlySelectedPlace?.place_id === place?.place_id}
+            onPress={() => setCurrentlySelectedPlace(place)}
+          >
+            <VStack>
+              <ButtonText>{place?.display_name}</ButtonText>
+              {place?.calculatedDistance != null &&
+              place.calculatedDistance >= 0 ? (
+                <HStack>
+                  <Text size="xs">
+                    {place.calculatedDistance.toFixed(1)} km away
+                  </Text>
+                </HStack>
+              ) : null}
+            </VStack>
+          </Button>
+        ))}
       </ScrollView>
     </ModalWithBlur>
   );

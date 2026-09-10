@@ -1,4 +1,4 @@
-import { Heading, Stack, Text } from 'native-base';
+import { Heading, Text, VStack } from '@gluestack-ui/themed';
 
 import { accountSelector } from '@/state/slices/generalSlice';
 import { useAppSelector } from '@/state/store';
@@ -10,11 +10,11 @@ export function UserAccountRenderer(props: UserAccountRendererProps) {
 
   if (!userAccount._id || !getIsDevelopmentMode()) return null;
   return (
-    <Stack>
+    <VStack>
       <Heading size="md">User Account:</Heading>
       <Text>id: '{userAccount._id}'</Text>
       <Text>email: '{userAccount.email}'</Text>
       <Text>password: '{userAccount.password}'</Text>
-    </Stack>
+    </VStack>
   );
 }

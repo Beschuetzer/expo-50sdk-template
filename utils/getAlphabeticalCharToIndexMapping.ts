@@ -1,6 +1,6 @@
 import { getSorter, SortOrder, SortType } from '@/components/lists/sorters';
 import { EMPTY_STRING } from '@/constants/general';
-import { Key } from '@/types/Item';
+import { Key } from '@/types/Task';
 
 export function getAlphabeticalCharToIndexMapping<T extends Key>(
   itemsRendered: T[],
@@ -8,8 +8,8 @@ export function getAlphabeticalCharToIndexMapping<T extends Key>(
 ) {
   const letterStartToIndexMap: Record<string, number> = {};
   const sortedNames = [...itemsRendered]
-    .sort(getSorter({ sortType: SortType.Name, sortOrder }))
-    .map((item) => item.name?.toUpperCase() || EMPTY_STRING);
+    .sort(getSorter({ sortType: SortType.Title, sortOrder }))
+    .map((item) => item.title?.toUpperCase() || EMPTY_STRING);
 
   for (let index = 0; index < sortedNames.length; index++) {
     const name = sortedNames[index];

@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { Box } from '@gluestack-ui/themed';
 import { Image, ImageProps } from 'expo-image';
 import { useNavigation } from 'expo-router';
-import { View, useTheme } from 'native-base';
 import { useCallback, useMemo, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
@@ -12,7 +12,7 @@ import {
   IMAGE_RENDERER_WIDTH_DEFAULT,
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
-import { Item } from '@/types/Item';
+import { Task } from '@/types/Task';
 import { ItemProp } from '@/types/general';
 
 type ImageRendererProps = {
@@ -22,13 +22,12 @@ type ImageRendererProps = {
   title?: string;
   useMarginRight?: boolean;
 } & ImageProps &
-  Partial<ItemProp<Item>>;
+  Partial<ItemProp<Task>> & { task?: Task };
 
 export function ImageRenderer(props: ImageRendererProps) {
-  const theme = useTheme();
   const navigation = useNavigation();
   const {
-    item,
+    task,
     source,
     cachePolicy = 'disk',
     showFullscreenOnPress = IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT,
@@ -37,28 +36,30 @@ export function ImageRenderer(props: ImageRendererProps) {
     useMarginRight = false,
   } = props;
   const [isError, setIsError] = useState(false);
-  const itemImage = useMemo(() => item?.images[item?.imageToUseIndex], [item]);
+  const taskImage = useMemo(
+    () => task?.images?.[task?.imageToUseIndex],
+    [task],
+  );
 
   const onImagePress = useCallback(() => {
-    if (!showFullscreenOnPress || !item) return;
-    // @ts-ignore
-    navigation.navigate(Routes.FullscreenImageScreen, { item });
-  }, [navigation, source, showFullscreenOnPress, item]);
+    if (!showFullscreenOnPress || !task) return;
+    // @ts-ignore -- expo-router v3 typed params
+    navigation.navigate(Routes.FullscreenImageScreen, { task });
+  }, [navigation, source, showFullscreenOnPress, task]);
 
   return (
     <TouchableOpacity onPress={onImagePress}>
-      <View
-        height={height}
-        width={width}
-        backgroundColor={theme.colors.gray[200]}
-        display="flex"
+      <Box
+        height={height as number}
+        width={width as number}
+        bg="$backgroundLight200"
         overflow="hidden"
-        mt={1}
-        mr={useMarginRight ? 1.5 : 0}
+        mt="$1"
+        mr={useMarginRight ? FORM_INTER_ITEM_SPACING * 3 : 0}
         alignItems="center"
         justifyContent="center"
       >
-        {(!source && !itemImage) || isError ? (
+        {(!source && !taskImage) || isError ? (
           <FontAwesome
             name="image"
             size={
@@ -69,13 +70,13 @@ export function ImageRenderer(props: ImageRendererProps) {
           <Image
             cachePolicy={cachePolicy}
             {...props}
-            source={source || itemImage}
+            source={source || taskImage}
             contentFit="cover"
             style={{ width: '100%', height: '100%' }}
             onError={() => setIsError(true)}
           />
         )}
-      </View>
+      </Box>
     </TouchableOpacity>
   );
 }

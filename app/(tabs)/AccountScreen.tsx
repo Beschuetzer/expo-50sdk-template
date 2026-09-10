@@ -1,5 +1,12 @@
+import {
+  Button,
+  ButtonText,
+  HStack,
+  Input,
+  InputField,
+  VStack,
+} from '@gluestack-ui/themed';
 import { useNavigation } from 'expo-router';
-import { Button, Input, Row, Stack, useTheme } from 'native-base';
 import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -22,8 +29,15 @@ import {
   accountSelector,
   setAccount,
 } from '@/state/slices/generalSlice';
-import { useAppDispatch } from '@/state/store';
-import { createUser, deleteUser, login } from '@/state/thunks';
+import { tasksSelector } from '@/state/slices/tasksSlice';
+import { useAppDispatch, useAppSelector } from '@/state/store';
+import {
+  createUser,
+  deleteUser,
+  loadAll,
+  login,
+  saveAll,
+} from '@/state/thunks';
 import { UserAccount } from '@/types/bffService';
 import { resetConfirmModalProps } from '@/utils/helpers';
 
@@ -38,9 +52,9 @@ const USERNAME_AVAILABILITY_INITIAL = Object.freeze({
 
 export default function AccountScreen() {
   const navigation = useNavigation();
-  const theme = useTheme();
   const dispatch = useAppDispatch();
   const userAccount = useSelector(accountSelector);
+  const tasks = useAppSelector(tasksSelector);
 
   const [confirmModalProps, setConfirmModalProps] = useState<ConfirmModalProps>(
     { isVisible: false } as ConfirmModalProps,
@@ -60,12 +74,14 @@ export default function AccountScreen() {
     () => PASSWORD_SCHEMA.safeParse(password),
     [password],
   );
-  const isEmailValid = useMemo(() => {
-    return emailParseResult.success;
-  }, [emailParseResult]);
-  const isPasswordValid = useMemo(() => {
-    return passwordParseResult.success;
-  }, [passwordParseResult]);
+  const isEmailValid = useMemo(
+    () => emailParseResult.success,
+    [emailParseResult],
+  );
+  const isPasswordValid = useMemo(
+    () => passwordParseResult.success,
+    [passwordParseResult],
+  );
 
   const onCheckUsernameAvailability = useCallback(async () => {
     const isEmailAvailable = await BFF_SERVICE.checkIsEmailAvailable({
@@ -73,71 +89,56 @@ export default function AccountScreen() {
       dispatch,
     });
     setUsernameAvailability({ email, isAvailable: !!isEmailAvailable });
-    if (!isEmailAvailable) {
-      setConfirmModalProps({
-        title: `Email in Use`,
-        message: `'${email}' already has an account.  Try logging in instead.`,
-        isVisible: true,
-        cancelButton: {
-          isVisible: false,
-        },
-        confirmButton: {
-          text: 'Ok',
-        },
-        onConfirm: async () => {
-          resetConfirmModalProps(setConfirmModalProps);
-        },
-      });
-    } else {
-      setConfirmModalProps({
-        title: `Email in Free`,
-        message: `Click register to create an account`,
-        isVisible: true,
-        cancelButton: {
-          isVisible: false,
-        },
-        confirmButton: {
-          text: 'Ok',
-        },
-        onConfirm: async () => {
-          resetConfirmModalProps(setConfirmModalProps);
-        },
-      });
-    }
-  }, [email]);
+    setConfirmModalProps({
+      title: isEmailAvailable ? 'Email is Free' : 'Email in Use',
+      message: isEmailAvailable
+        ? 'Click register to create an account'
+        : `'${email}' already has an account. Try logging in instead.`,
+      isVisible: true,
+      cancelButton: { isVisible: false },
+      confirmButton: { text: 'Ok' },
+      onConfirm: async () => resetConfirmModalProps(setConfirmModalProps),
+    });
+  }, [email, dispatch]);
 
   const onDeletePress = useCallback(async () => {
     setUsernameAvailability(USERNAME_AVAILABILITY_INITIAL);
     setConfirmModalProps({
-      title: `Are You Sure?`,
+      title: 'Are You Sure?',
       message: `Deleting the account for '${userAccount.email}' cannot be undone and will delete all data associated with this account.`,
       isVisible: true,
-      onCancel: () => {
-        resetConfirmModalProps(setConfirmModalProps);
-      },
+      onCancel: () => resetConfirmModalProps(setConfirmModalProps),
       onConfirm: async () => {
         dispatch(deleteUser());
         resetConfirmModalProps(setConfirmModalProps);
       },
     });
-  }, [userAccount]);
+  }, [userAccount, dispatch]);
 
   const onLoginPress = useCallback(() => {
     dispatch(login({ email, password }));
-  }, [email, password]);
+  }, [email, password, dispatch]);
 
   const onLogoutPress = useCallback(() => {
     dispatch(setAccount(ACCOUNT_INITIAL));
-  }, []);
+  }, [dispatch]);
 
   const onChangePassword = useCallback(() => {
-    // @ts-ignore
+    // @ts-ignore -- expo-router v3 typed params
     navigation.navigate(Routes.PasswordResetScreen);
   }, [navigation]);
 
   const onRegisterPress = useCallback(async () => {
     dispatch(createUser({ email, password }));
-  }, [email, password]);
+  }, [email, password, dispatch]);
+
+  const onSyncNowPress = useCallback(() => {
+    dispatch(saveAll({ tasks }));
+  }, [tasks, dispatch]);
+
+  const onLoadFromDbPress = useCallback(() => {
+    dispatch(loadAll());
+  }, [dispatch]);
 
   useMenu({
     navigationOptionsGetter: (menuRef) => ({
@@ -147,42 +148,34 @@ export default function AccountScreen() {
           options={
             userAccount._id
               ? [
-                  {
-                    text: 'Delete',
-                    onPress: onDeletePress,
-                  },
-                  {
-                    text: 'Reset Password',
-                    onPress: onChangePassword,
-                  },
+                  { text: 'Sync Now', onPress: onSyncNowPress },
+                  { text: 'Load from Db', onPress: onLoadFromDbPress },
+                  { text: 'Delete', onPress: onDeletePress },
+                  { text: 'Reset Password', onPress: onChangePassword },
                 ]
               : []
           }
         />
       ),
-      headerTitle: userAccount._id ? 'Account Page' : `Create an Account`,
+      headerTitle: userAccount._id ? 'Account Page' : 'Create an Account',
     }),
   });
 
   return (
     <AbsolutePositionedScreen>
-      <Stack p={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+      <VStack p={FORM_INTER_ITEM_SPACING}>
+        <VStack mt={FORM_INTER_ITEM_SPACING}>
           <InputText>Email</InputText>
-          <Row>
-            <Input
-              flex={1}
-              variant="outline"
-              p={theme.space[1]}
+          <Input flex={1} variant="outline" isInvalid={!isEmailValid}>
+            <InputField
               placeholder="myemail@domain.com"
               value={email}
               onChangeText={(newText) => {
                 setEmail(newText.trim());
                 setUsernameAvailability(USERNAME_AVAILABILITY_INITIAL);
               }}
-              isInvalid={!isEmailValid}
             />
-          </Row>
+          </Input>
           <InputValidationMessage
             isValid={isEmailValid}
             message={
@@ -191,68 +184,60 @@ export default function AccountScreen() {
               ].message || 'Invalid Email Format'
             }
           />
-        </Stack>
-        <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        </VStack>
+        <VStack mt={FORM_INTER_ITEM_SPACING}>
           <InputText>Password</InputText>
-          <Row>
-            <Input
-              flex={1}
+          <Input flex={1} variant="outline" isInvalid={!isPasswordValid}>
+            <InputField
               type="password"
-              variant="outline"
-              p={theme.space[1]}
               placeholder="SuperSecretPassword!@#4"
               value={password}
-              onChangeText={(newText) => {
-                setPassword(newText.trim());
-              }}
-              isInvalid={!isPasswordValid}
+              onChangeText={(newText) => setPassword(newText.trim())}
             />
-          </Row>
+          </Input>
           {userAccount._id ? (
-            <Row
-              space={theme.space[FORM_INTER_ITEM_SPACING]}
+            <HStack
+              space="sm"
               justifyContent="space-between"
-              mt={theme.space[FORM_INTER_ITEM_SPACING]}
+              mt={FORM_INTER_ITEM_SPACING}
             >
               <Button
                 flex={1}
                 isDisabled={!userAccount._id}
                 onPress={onLogoutPress}
               >
-                Logout
+                <ButtonText>Logout</ButtonText>
               </Button>
-            </Row>
+            </HStack>
           ) : (
-            <>
-              <Row
-                space={theme.space[FORM_INTER_ITEM_SPACING]}
-                justifyContent="space-between"
-                mt={theme.space[FORM_INTER_ITEM_SPACING]}
+            <HStack
+              space="sm"
+              justifyContent="space-between"
+              mt={FORM_INTER_ITEM_SPACING}
+            >
+              <Button
+                flex={1}
+                isDisabled={
+                  !!userAccount._id || !isEmailValid || !isPasswordValid
+                }
+                onPress={onLoginPress}
               >
+                <ButtonText>Login</ButtonText>
+              </Button>
+              {usernameAvailability.isAvailable ? (
                 <Button
                   flex={1}
-                  isDisabled={
-                    !!userAccount._id || !isEmailValid || !isPasswordValid
-                  }
-                  onPress={onLoginPress}
+                  isDisabled={!isEmailValid || !isPasswordValid}
+                  onPress={onRegisterPress}
                 >
-                  Login
+                  <ButtonText>Register</ButtonText>
                 </Button>
-                {usernameAvailability.isAvailable ? (
-                  <Button
-                    flex={1}
-                    isDisabled={!isEmailValid || !isPasswordValid}
-                    onPress={onRegisterPress}
-                  >
-                    Register
-                  </Button>
-                ) : (
-                  <Button flex={1} onPress={onCheckUsernameAvailability}>
-                    Check Availability
-                  </Button>
-                )}
-              </Row>
-            </>
+              ) : (
+                <Button flex={1} onPress={onCheckUsernameAvailability}>
+                  <ButtonText>Check Availability</ButtonText>
+                </Button>
+              )}
+            </HStack>
           )}
           <InputValidationMessage
             isValid={isPasswordValid}
@@ -262,9 +247,9 @@ export default function AccountScreen() {
               ].message || 'Invalid password'
             }
           />
-        </Stack>
+        </VStack>
         <UserAccountRenderer />
-      </Stack>
+      </VStack>
       <ConfirmModal {...confirmModalProps} />
     </AbsolutePositionedScreen>
   );

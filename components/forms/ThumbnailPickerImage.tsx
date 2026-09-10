@@ -1,4 +1,3 @@
-import { useTheme } from 'native-base';
 import { useCallback } from 'react';
 import { Animated, TouchableOpacity } from 'react-native';
 import { TapGestureHandler, State } from 'react-native-gesture-handler';
@@ -25,7 +24,6 @@ export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
     onLongPress,
     onPress,
   } = props;
-  const theme = useTheme();
 
   const handleDoubleTap = useCallback(
     (event: any) => {
@@ -40,7 +38,7 @@ export function ThumbnailPickerImage(props: ThumbnailPickerImageProps) {
     <TapGestureHandler numberOfTaps={2} onHandlerStateChange={handleDoubleTap}>
       <Animated.View
         style={{
-          marginLeft: index > 0 ? theme.space[FORM_INTER_ITEM_SPACING] / 4 : 0,
+          marginLeft: index > 0 ? FORM_INTER_ITEM_SPACING / 4 : 0,
           borderWidth: 2,
           borderColor,
         }}

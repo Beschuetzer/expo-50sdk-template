@@ -1,13 +1,6 @@
-import { View, useTheme } from 'native-base';
+import { Box } from '@gluestack-ui/themed';
 import { StyleSheet } from 'react-native';
 
 export function ListItemSeparator() {
-  const theme = useTheme();
-
-  return (
-    <View
-      height={StyleSheet.hairlineWidth}
-      backgroundColor={theme.colors.gray[500]}
-    />
-  );
+  return <Box height={StyleSheet.hairlineWidth} bg="$backgroundLight500" />;
 }

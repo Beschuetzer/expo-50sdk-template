@@ -1,34 +1,25 @@
 import { FontAwesome6 } from '@expo/vector-icons';
-import { Camera, CameraType } from 'expo-camera';
+import { Center, Text } from '@gluestack-ui/themed';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useFocusEffect } from 'expo-router';
-import { Center, Text } from 'native-base';
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
-import { useSelector } from 'react-redux';
 
 import { useKeyboard } from './hooks/useKeyboard';
 
 import { EMPTY_NUMBER, EMPTY_STRING, LIST_HAPTICS } from '@/constants/general';
-import { listToDisplaySelector } from '@/state/slices/listsSlice';
-import { scanningModeSelector } from '@/state/slices/optionsSlice';
-import { Item } from '@/types/Item';
-import { ScanningMode } from '@/types/general';
-import { ListName } from '@/types/listSlice';
-import { getItemFromList } from '@/utils/helpers';
-
-// CameraType re-exported for consumers
-export type CameraFacing = CameraType;
 
 type ScannedObj = { data: string };
 export type BarcodeScannerProps = {
-  cameraType?: CameraType;
   isEnabled?: boolean;
   onButtonPress?: () => void;
-  onScanned?: (
-    upc: string,
-    scanningMode: ScanningMode,
-    isItemInList: boolean,
-  ) => void;
+  onScanned?: (code: string) => void;
 
   /**
    *   * The time in milliseconds to wait before allowing another scan after a successful scan.
@@ -40,13 +31,9 @@ export type BarcodeScannerProps = {
 
 export function BarcodeScanner(props: BarcodeScannerProps) {
   const isKeyboardVisible = useKeyboard();
-  const itemsList = useSelector(
-    listToDisplaySelector(ListName.ItemsList),
-  ) as Item[];
-  const scanningMode = useSelector(scanningModeSelector);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const {
     isEnabled = true,
-    cameraType = CameraType.back,
     onButtonPress,
     onScanned,
     resetPeriod = 1000,
@@ -55,10 +42,16 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
   const [shouldRenderCamera, setShouldRenderCamera] = useState(true);
   const lastScanTimeRef = useRef(EMPTY_NUMBER);
 
+  useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
   const handleBarCodeScanned = useCallback(
     (scannedObj: ScannedObj) => {
-      const upc = scannedObj.data;
-      const isItemInList = !!getItemFromList(itemsList, upc);
+      const code = scannedObj.data;
 
       if (
         lastScanTimeRef.current &&
@@ -66,11 +59,11 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
       ) {
         return;
       }
-      onScanned && onScanned(upc || EMPTY_STRING, scanningMode, isItemInList);
+      onScanned && onScanned(code || EMPTY_STRING);
       lastScanTimeRef.current = Date.now();
       LIST_HAPTICS.handleSelection();
     },
-    [scanningMode, itemsList, resetPeriod, onScanned, lastScanTimeRef],
+    [resetPeriod, onScanned],
   );
 
   useFocusEffect(
@@ -104,11 +97,24 @@ export function BarcodeScanner(props: BarcodeScannerProps) {
     );
   }
 
+  if (hasPermission === null) {
+    return null;
+  }
+
+  if (!hasPermission) {
+    return (
+      <Center flex={1}>
+        <Text textAlign="center" mb="$2">
+          We need your permission to use the camera to scan codes.
+        </Text>
+      </Center>
+    );
+  }
+
   return shouldRenderCamera ? (
     <>
-      <Camera
+      <BarCodeScanner
         style={styles.camera}
-        type={cameraType}
         onBarCodeScanned={handleBarCodeScanned}
       />
       {isEnabled ? (
@@ -127,16 +133,15 @@ const styles = StyleSheet.create({
   },
   scanAgainButton: {
     position: 'absolute',
-    bottom: '0%',
-    left: '0%',
-    padding: 15,
-    width: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 10,
+    bottom: 32,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   scanAgainText: {
     color: 'white',
-    fontSize: 18,
-    textAlign: 'center',
+    fontWeight: '600',
   },
 });

@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { Row, Text, useTheme } from 'native-base';
+import { HStack, Text } from '@gluestack-ui/themed';
 
 import { StyleProp } from '@/types/general';
 
@@ -9,29 +9,19 @@ export type InputValidationMessageProps = {
 } & StyleProp;
 export function InputValidationMessage(props: InputValidationMessageProps) {
   const { isValid, message, style } = props;
-  const theme = useTheme();
 
   if (isValid == null) return null;
   return (
-    <Row
-      display={!isValid ? 'block' : 'none'}
+    <HStack
+      display={!isValid ? 'flex' : 'none'}
       justifyContent="flex-start"
       style={style}
       alignItems="center"
     >
-      <FontAwesome
-        size={10}
-        pb={0}
-        name="warning"
-        color={theme.colors.red[900]}
-      />
-      <Text
-        fontSize={theme.fontSizes.xs}
-        pl={3}
-        color={isValid ? 'black' : 'red.900'}
-      >
+      <FontAwesome size={10} name="warning" color="#991b1b" />
+      <Text size="xs" pl="$1" color={isValid ? '$black' : '$red900'}>
         {message}
       </Text>
-    </Row>
+    </HStack>
   );
 }

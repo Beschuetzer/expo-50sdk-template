@@ -1,7 +1,8 @@
 // Example: Scheduling a local notification
-import { displayAlert } from '@/utils/helpers';
 import * as Notifications from 'expo-notifications';
 import { useEffect } from 'react';
+
+import { displayAlert } from '@/utils/helpers';
 
 export const useNotificationsPermissions = () => {
   // Request permissions on app startup

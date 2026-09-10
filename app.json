@@ -1,12 +1,12 @@
 {
   "icon": "./assets/images/icon.png",
   "expo": {
-    "name": "grocify",
-    "slug": "grocify",
+    "name": "Expo SDK 50 Template",
+    "slug": "expo-50sdk-template",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "expo50sdktemplate",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -18,6 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.example.expo50sdktemplate",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -36,7 +37,7 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_EXTERNAL_STORAGE"
       ],
-      "package": "com.beschuetzer.grocify",
+      "package": "com.example.expo50sdktemplate",
       "intentFilters": [
         {
           "action": "android.intent.action.SEND",
@@ -71,7 +72,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to pick an image for an item"
+          "photosPermission": "The app accesses your photos to let you attach an image."
         }
       ],
       [
@@ -98,8 +99,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "6914f581-20f3-47fa-a4c5-1b93ae208114"
+        "projectId": "REPLACE_WITH_YOUR_EAS_PROJECT_ID"
       }
     }
   }
 }
+

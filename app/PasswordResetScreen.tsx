@@ -1,4 +1,11 @@
-import { Button, Input, Row, Stack, theme } from 'native-base';
+import {
+  Button,
+  ButtonText,
+  HStack,
+  Input,
+  InputField,
+  VStack,
+} from '@gluestack-ui/themed';
 import { useCallback, useMemo, useState } from 'react';
 
 import { AbsolutePositionedScreen } from '@/components/AbsolutelyPositionedScreen';
@@ -23,37 +30,33 @@ export default function PasswordResetScreen() {
     () => PASSWORD_SCHEMA.safeParse(newPassword),
     [newPassword],
   );
-  const isCurrentPasswordValid = useMemo(() => {
-    return currentPasswordParseResult.success;
-  }, [currentPasswordParseResult]);
-  const isNewPasswordValid = useMemo(() => {
-    return newPasswordParseResult.success;
-  }, [newPasswordParseResult]);
+  const isCurrentPasswordValid = useMemo(
+    () => currentPasswordParseResult.success,
+    [currentPasswordParseResult],
+  );
+  const isNewPasswordValid = useMemo(
+    () => newPasswordParseResult.success,
+    [newPasswordParseResult],
+  );
 
   const onChangePasswordPress = useCallback(() => {
     dispatch(changePassword(newPassword));
     setCurrentPassword(EMPTY_STRING);
-  }, [newPassword]);
+  }, [newPassword, dispatch]);
 
   return (
     <AbsolutePositionedScreen>
-      <Stack p={theme.space[FORM_INTER_ITEM_SPACING]}>
-        <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+      <VStack p={FORM_INTER_ITEM_SPACING}>
+        <VStack mt={FORM_INTER_ITEM_SPACING}>
           <InputText>Current Password</InputText>
-          <Row>
-            <Input
-              flex={1}
-              variant="outline"
+          <Input flex={1} variant="outline" isInvalid={!isCurrentPasswordValid}>
+            <InputField
               type="password"
-              p={theme.space[1]}
               placeholder="the current password"
               value={currentPassword}
-              onChangeText={(newText) => {
-                setCurrentPassword(newText.trim());
-              }}
-              isInvalid={!isCurrentPasswordValid}
+              onChangeText={(newText) => setCurrentPassword(newText.trim())}
             />
-          </Row>
+          </Input>
           <InputValidationMessage
             isValid={account.password === currentPassword}
             message={
@@ -62,22 +65,16 @@ export default function PasswordResetScreen() {
               ].message || 'The current password is incorrect.'
             }
           />
-        </Stack>
-        <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+        </VStack>
+        <VStack mt={FORM_INTER_ITEM_SPACING}>
           <InputText>Password</InputText>
-          <Row>
-            <Input
-              flex={1}
-              variant="outline"
-              p={theme.space[1]}
+          <Input flex={1} variant="outline" isInvalid={!isNewPasswordValid}>
+            <InputField
               placeholder="the new password"
               value={newPassword}
-              onChangeText={(newText) => {
-                setNewPassword(newText.trim());
-              }}
-              isInvalid={!isNewPasswordValid}
+              onChangeText={(newText) => setNewPassword(newText.trim())}
             />
-          </Row>
+          </Input>
           <InputValidationMessage
             isValid={isNewPasswordValid}
             message={
@@ -86,11 +83,13 @@ export default function PasswordResetScreen() {
               ].message || 'Invalid password.'
             }
           />
-        </Stack>
-      </Stack>
-      <Row>
-        <Button onPress={onChangePasswordPress}>Change Password</Button>
-      </Row>
+        </VStack>
+      </VStack>
+      <HStack>
+        <Button onPress={onChangePasswordPress}>
+          <ButtonText>Change Password</ButtonText>
+        </Button>
+      </HStack>
     </AbsolutePositionedScreen>
   );
 }

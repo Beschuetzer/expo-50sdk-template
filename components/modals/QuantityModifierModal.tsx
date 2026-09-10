@@ -1,11 +1,17 @@
-import { Row, theme, Heading, Input, Stack, IInputProps } from 'native-base';
+import {
+  Heading,
+  HStack,
+  Input,
+  InputField,
+  VStack,
+} from '@gluestack-ui/themed';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Dimensions } from 'react-native';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
 import { FontAwesomeButton } from '../FontAwesomeButton';
 
-import { EMPTY_NUMBER, FORM_INTER_ITEM_SPACING } from '@/constants/general';
+import { EMPTY_NUMBER } from '@/constants/general';
 
 type QuantityModifierModalProps = {
   initialQuantity?: number;
@@ -26,33 +32,17 @@ export default function QuantityModifierModal(
     ...restProps
   } = props;
   const [quantity, setQuantity] = useState(1);
-  const [cursorPosition, setCursorPosition] = useState<
-    IInputProps['selection']
-  >({
-    start: 0,
-    end: 0,
-  });
-
-  const updateCursorPosition = useCallback((quantity: number) => {
-    const cursorPositionToUse = String(quantity).length;
-    setCursorPosition({
-      start: cursorPositionToUse,
-      end: cursorPositionToUse,
-    });
-  }, []);
 
   const onChangeNumber = useCallback(
     (newValue: string) => {
       const parsedNumber = parseInt(newValue, 10);
       const isParsedNumberValid =
         !isNaN(parsedNumber) && parsedNumber >= minimumQuantity;
-
       const newQuantity = isParsedNumberValid ? parsedNumber : EMPTY_NUMBER;
       setQuantity(newQuantity);
       onQuantityChange && onQuantityChange(newQuantity.toString());
-      updateCursorPosition(newQuantity);
     },
-    [minimumQuantity, updateCursorPosition],
+    [minimumQuantity, onQuantityChange],
   );
 
   const onBlurPressLocal = useCallback(() => {
@@ -63,19 +53,15 @@ export default function QuantityModifierModal(
     onBlurPress && onBlurPress();
   }, [quantity, minimumQuantity, onBlurPress, onQuantityChange]);
 
-  const onCofirmPressLocal = useCallback(() => {
+  const onConfirmPressLocal = useCallback(() => {
     onConfirm && onConfirm(quantity.toString());
   }, [quantity, onConfirm]);
-
-  const onFocusNumberInput = useCallback(() => {
-    updateCursorPosition(quantity);
-  }, [updateCursorPosition, quantity]);
 
   const onMinusButtonPress = useCallback(() => {
     const newQuantity = Math.max(minimumQuantity, quantity - 1);
     setQuantity(newQuantity);
     onQuantityChange && onQuantityChange(newQuantity.toString());
-  }, [onQuantityChange, quantity]);
+  }, [onQuantityChange, quantity, minimumQuantity]);
 
   const onPlusButtonPress = useCallback(() => {
     setQuantity((current) => current + 1);
@@ -85,37 +71,32 @@ export default function QuantityModifierModal(
   useEffect(() => {
     if (!initialQuantity || initialQuantity < minimumQuantity) return;
     setQuantity(initialQuantity);
-  }, [initialQuantity]);
+  }, [initialQuantity, minimumQuantity]);
 
   return (
     <ModalWithBlur
       {...restProps}
       onBlurPress={onBlurPressLocal}
-      onConfirm={onCofirmPressLocal}
+      onConfirm={onConfirmPressLocal}
     >
-      <Stack>
-        <Row
-          space={theme.sizes[FORM_INTER_ITEM_SPACING] * 2}
-          justifyContent="space-between"
-          alignItems="center"
-        >
+      <VStack>
+        <HStack space="sm" justifyContent="space-between" alignItems="center">
           <Heading size="sm">Quantity:</Heading>
-          <Input
-            keyboardType="numeric"
-            onChangeText={onChangeNumber}
-            selection={cursorPosition}
-            value={String(quantity)}
-            maxW={Dimensions.get('window').width * 0.25}
-            onFocus={onFocusNumberInput}
-          />
+          <Input maxWidth={Dimensions.get('window').width * 0.25}>
+            <InputField
+              keyboardType="numeric"
+              onChangeText={onChangeNumber}
+              value={String(quantity)}
+            />
+          </Input>
           <FontAwesomeButton name="plus" onPress={onPlusButtonPress} />
           <FontAwesomeButton
             name="minus"
             onPress={onMinusButtonPress}
             disabled={quantity <= minimumQuantity}
           />
-        </Row>
-      </Stack>
+        </HStack>
+      </VStack>
     </ModalWithBlur>
   );
 }

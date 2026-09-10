@@ -1,9 +1,8 @@
-import { useTheme, Text } from 'native-base';
+import { Text } from '@gluestack-ui/themed';
 import { useCallback } from 'react';
 
 import { ToggleWithText } from './ToggleWithText';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import {
   setShouldSaveOnLogin,
   shouldSaveOnLoginSelector,
@@ -11,7 +10,6 @@ import {
 import { useAppDispatch, useAppSelector } from '@/state/store';
 
 export function ShouldSaveOnLoginToggle() {
-  const theme = useTheme();
   const shouldSaveOnLogin = useAppSelector(shouldSaveOnLoginSelector);
   const dispatch = useAppDispatch();
 
@@ -26,7 +24,7 @@ export function ShouldSaveOnLoginToggle() {
         value: shouldSaveOnLogin,
       }}
     >
-      <Text mr={theme.space[FORM_INTER_ITEM_SPACING]}>Save on Login</Text>
+      <Text mr="$1">Save on Login</Text>
     </ToggleWithText>
   );
 }

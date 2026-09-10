@@ -1,4 +1,4 @@
-import { Button, ScrollView, Text, useTheme } from 'native-base';
+import { Button, ButtonText, ScrollView, Text } from '@gluestack-ui/themed';
 import React, { ReactNode, useCallback, useState } from 'react';
 
 import { ModalWithBlur, ModalWithBlurProps } from './ModalWithBlur';
@@ -14,7 +14,6 @@ export type ConfirmModalProps = {
   Partial<Pick<ModalWithBlurProps, 'title'>>;
 
 export const ConfirmModal = (props: ConfirmModalProps) => {
-  const theme = useTheme();
   const {
     message = EMPTY_STRING,
     note = EMPTY_STRING,
@@ -60,12 +59,7 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
         )
       ) : null}
       {note ? (
-        <Text
-          italic
-          bold
-          fontSize="xs"
-          mt={theme.space[FORM_INTER_ITEM_SPACING]}
-        >
+        <Text italic bold size="xs" mt={FORM_INTER_ITEM_SPACING}>
           *{note}
         </Text>
       ) : null}
@@ -78,7 +72,7 @@ export const ConfirmModal = (props: ConfirmModalProps) => {
                 isDisabled={item === currentlySelectedItem}
                 onPress={() => onButtonPress(item)}
               >
-                {item}
+                <ButtonText>{item}</ButtonText>
               </Button>
             );
           })}

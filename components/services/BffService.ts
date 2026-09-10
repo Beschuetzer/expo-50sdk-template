@@ -1,107 +1,48 @@
 import { AbstractService } from './AbstractService';
 
-import { EMPTY_STRING, ITEM_UNIT_INITIAL } from '@/constants/general';
 import { setError } from '@/state/slices/generalSlice';
-import { AppDispatch } from '@/state/store';
-import { SaveAllThunkInput } from '@/state/thunks';
-import { Item } from '@/types/Item';
-import { Store } from '@/types/Store';
 import {
   ChangePasswordInput,
   ChangePasswordResponse,
   CreateUserResponse,
-  DeleteInventoryItemsInput,
-  DeleteInventoryItemsRequest,
-  DeleteInventoryItemsResponse,
-  DeleteInventoryLocationInput,
-  DeleteInventoryLocationsRequest,
-  DeleteInventoryLocationsResponse,
-  DeleteItemsInput,
   DeleteS3ObjectsInput,
-  DeleteStoresInput,
-  DeleteStoreRoutesInput,
-  DeleteStoreRoutesRequest,
-  DeleteStoreRoutesResponse,
+  DeleteTasksInput,
+  DeleteTasksRequest,
+  DeleteTasksResponse,
   DeleteUserInput,
   DeleteUserResponse,
-  DeletionResponse,
   DispatchNeeded,
   EmailNeeded,
   GetSignedUrlInput,
-  GetStoreRoutesInput,
-  GetStoreRoutesResponse,
-  GetUserItemsInput,
-  GetUserStoresInput,
-  IdNeeded,
+  GetUserTasksInput,
+  GetUserTasksResponse,
   LoadAllFromDbInput,
   LoadAllResponse,
   LoginResponse,
-  MoveInventoryItemExpirationDatesInput,
-  MoveInventoryItemExpirationDatesRequest,
-  MoveInventoryItemExpirationDatesResponse,
-  MoveInventoryItemsInput,
-  MoveInventoryItemsRequest,
-  MoveInventoryItemsResponse,
+  PingInput,
   PingResponse,
-  ProcessGroceryListInput,
-  ProcessGroceryListResponse,
   SaveAllResponse,
   SaveAllToDbInput,
-  SaveInventoryItemsInput,
-  SaveInventoryItemsRequest,
-  SaveInventoryItemsResponse,
-  SaveInventoryLocationsInput,
-  SaveInventoryLocationsRequest,
-  SaveInventoryLocationsResponse,
-  SaveItemInput,
-  SaveItemRequest,
-  SaveItemResponse,
-  SaveItemsInput,
-  SaveItemsRequest,
-  SavePurchaseInput,
-  SavePurchaseRequest,
-  SavePurchaseResponse,
-  SaveStoreInput,
-  SaveStoreRequest,
-  SaveStoreResponse,
-  SaveStoreRoutesInput,
-  SaveStoreRoutesRequest,
-  SaveStoreRoutesResponse,
-  SaveStoreSpecificValuesInput,
-  SaveStoreSpecificValuesRequest,
-  SaveStoreSpecificValuesResponse,
+  SaveTaskInput,
+  SaveTaskRequest,
+  SaveTaskResponse,
+  SaveTasksInput,
+  SaveTasksRequest,
+  SaveTasksResponse,
   SignedUrlResponse,
-  UpdateUserInput,
   UserAccountInput,
   UserNeeded,
 } from '@/types/bffService';
-import {
-  getBackendUrl,
-  getIsDevelopmentMode,
-  getKeyToUse,
-  handleError,
-} from '@/utils/helpers';
+import { getBackendUrl, getIsDevelopmentMode } from '@/utils/helpers';
 
 function displayAlert(object: object | null) {
   alert(object ? JSON.stringify(object, null, 2) : object);
 }
 
-/**
- *This is assuming that a phone is being used and not an emulator.
- *Use ipconfig to manually set this atm. (write node script to run when npm start is run?)
- **/
-export const INVENTORY_PATH = '/inventory';
-export const ITEM_PATH = '/item';
-export const LAST_PURCHASED_PATH = '/lastPurchasedMap';
-export const OPEN_AI_PATH = '/openAi';
-export const STORE_PATH = '/store';
+export const PING_PATH = '/ping';
 export const S3_PATH = '/s3';
+export const TASK_PATH = '/task';
 export const USER_PATH = '/user';
-
-export const DELETE_ITEMS_RESPONSE_DEFAULT: DeletionResponse = Object.freeze({
-  acknowledged: false,
-  deletedCount: 0,
-});
 
 class BffService extends AbstractService {
   constructor() {
@@ -114,28 +55,21 @@ class BffService extends AbstractService {
     }
   }
 
+  //#region Auth
   async changePassword(input: ChangePasswordInput) {
     const { userId, password, dispatch, newPassword } = input || {};
     if (!this.validateCredentials(userId, password, dispatch)) {
       return;
     }
-
-    const body = JSON.stringify({
-      _id: userId,
-      password,
-      newPassword,
-    });
-    const response = await this.makeCall<ChangePasswordResponse>({
+    const body = JSON.stringify({ _id: userId, password, newPassword });
+    return await this.makeCall<ChangePasswordResponse>({
       dispatch,
       body,
-      options: {
-        method: 'POST',
-      },
+      options: { method: 'POST' },
       path: `${USER_PATH}/changePassword`,
       errorMsg: `Unable to change password for user with id of '${userId}'`,
       loadingMsg: `Changing password for user with id of '${userId}'...`,
     });
-    return response;
   }
 
   async createUser(input: UserNeeded<UserAccountInput> & DispatchNeeded) {
@@ -150,17 +84,14 @@ class BffService extends AbstractService {
       return;
     }
     const body = JSON.stringify(user);
-    const response = await this.makeCall<CreateUserResponse>({
+    return await this.makeCall<CreateUserResponse>({
       dispatch,
       body,
-      options: {
-        method: 'POST',
-      },
+      options: { method: 'POST' },
       path: USER_PATH,
       errorMsg: `Unable to create user with email of '${user.email}'`,
       loadingMsg: `Creating user with email of '${user.email}'...`,
     });
-    return response;
   }
 
   async checkIsEmailAvailable(input: EmailNeeded & DispatchNeeded) {
@@ -174,859 +105,166 @@ class BffService extends AbstractService {
       );
       return;
     }
-    const isEmailAvailable = await this.makeCall<boolean>({
+    return await this.makeCall<boolean>({
       dispatch,
       path: `${USER_PATH}/isEmailAvailable/${email}`,
       errorMsg: `Unable to verify whether '${email}' is available.`,
       loadingMsg: `Checking if '${email}' is available...`,
     });
-    return isEmailAvailable;
-  }
-
-  async deleteS3Objects(input: DeleteS3ObjectsInput) {
-    const { dispatch, userId, password, objKeys } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-    if (!objKeys || objKeys.length === 0) return;
-    const body = JSON.stringify({
-      userId,
-      password,
-      objKeys,
-    });
-    const keysAsString = objKeys.join(', ');
-    const response = await this.makeCall<SignedUrlResponse>({
-      path: `${S3_PATH}`,
-      options: {
-        method: 'DELETE',
-      },
-      body,
-      dispatch,
-      errorMsg: `Unable to delete objects: '${keysAsString}'.`,
-      loadingMsg: `Delete '${keysAsString}'...`,
-    });
-    return response;
-  }
-
-  async deleteInventoryItems(input: DeleteInventoryItemsInput) {
-    const { dispatch, _id: userId, password, inventoryItems } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!inventoryItems || inventoryItems.length <= 0) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No inventoryItems given in deleteInventoryItems()',
-        }),
-      );
-      return null;
-    }
-
-    const body = JSON.stringify({
-      inventoryItems,
-      userId,
-      password,
-    } as DeleteInventoryItemsRequest);
-
-    return await this.makeCall<DeleteInventoryItemsResponse>({
-      dispatch,
-      body,
-      path: `${INVENTORY_PATH}/items`,
-      errorMsg: `Unable to delete inventory items.`,
-      loadingMsg: `Deleting...`,
-      options: {
-        method: 'DELETE',
-      },
-    });
-  }
-
-  async deleteInventoryLocations(input: DeleteInventoryLocationInput) {
-    const { dispatch, _id: userId, password, locations } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!locations || locations.length <= 0) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No locations given in deleteInventoryLocations()',
-        }),
-      );
-      return null;
-    }
-
-    const body = JSON.stringify({
-      locations,
-      userId,
-      password,
-    } as DeleteInventoryLocationsRequest);
-
-    return await this.makeCall<DeleteInventoryLocationsResponse>({
-      dispatch,
-      body,
-      path: `${INVENTORY_PATH}/locations`,
-      errorMsg: `Unable to delete inventory locations.`,
-      loadingMsg: `Deleting...`,
-      options: {
-        method: 'DELETE',
-      },
-    });
-  }
-
-  async deleteItems(input: DeleteItemsInput) {
-    const { items, dispatch, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) {
-      return DELETE_ITEMS_RESPONSE_DEFAULT;
-    }
-
-    const ids = items.map((item) => item?._id || EMPTY_STRING);
-    const idsString = ids.join(', ');
-    const keys = items.map((item) => getKeyToUse(item));
-    const response = await this.makeCall<DeletionResponse>({
-      path: `${ITEM_PATH}`,
-      body: JSON.stringify({
-        userId,
-        password,
-        ids,
-        keys,
-        imagePaths: this.getImagePathsToDelete(items),
-      }),
-      options: {
-        method: 'DELETE',
-      },
-      dispatch,
-      errorMsg: `Unable to delete ${idsString}`,
-      loadingMsg: `Deleting ${idsString}...`,
-    });
-    return response;
-  }
-
-  async deleteStores(input: DeleteStoresInput) {
-    const { ids, dispatch, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) {
-      return DELETE_ITEMS_RESPONSE_DEFAULT;
-    }
-
-    const idsString = ids.join(', ');
-    const response = await this.makeCall<DeletionResponse>({
-      path: `${STORE_PATH}`,
-      body: JSON.stringify({ userId, password, ids }),
-      options: {
-        method: 'DELETE',
-      },
-      dispatch,
-      errorMsg: `Unable to delete ${idsString}`,
-      loadingMsg: `Deleting ${idsString}...`,
-    });
-    return response;
-  }
-
-  async deleteStoreRoutes(input: DeleteStoreRoutesInput) {
-    const { dispatch, storeId, ids, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!storeId) {
-      handleError(dispatch, {
-        statusCode: 500,
-        message: 'No storeId given in deleteStoreRoutes()',
-      });
-      return null;
-    }
-
-    if (!ids || ids.length <= 0) {
-      handleError(dispatch, {
-        statusCode: 500,
-        message: 'No ids given in deleteStoreRoutes()',
-      });
-      return null;
-    }
-
-    const body = JSON.stringify({
-      storeId,
-      ids,
-      userId,
-      password,
-    } as DeleteStoreRoutesRequest);
-
-    const response = await this.makeCall<DeleteStoreRoutesResponse>({
-      dispatch,
-      body,
-      options: {
-        method: 'DELETE',
-      },
-      path: `${STORE_PATH}/routes`,
-      errorMsg: `Unable to delete routes for store '${storeId}'.`,
-      loadingMsg: `Deleting routes...`,
-    });
-    return response;
   }
 
   async deleteUser(input: DeleteUserInput) {
-    const { dispatch, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-    const body = JSON.stringify({ userId, password });
-    const response = await this.makeCall<DeleteUserResponse>({
-      body,
-      options: {
-        method: 'DELETE',
-      },
-      path: `${USER_PATH}`,
+    const { userId, password, dispatch } = input || {};
+    if (!this.validateCredentials(userId, password, dispatch)) {
+      return;
+    }
+    return await this.makeCall<DeleteUserResponse>({
       dispatch,
+      body: JSON.stringify({ _id: userId, password }),
+      options: { method: 'DELETE' },
+      path: USER_PATH,
       errorMsg: `Unable to delete user with id of '${userId}'`,
-      loadingMsg: `Deleting user with id of '${userId}'...`,
+      loadingMsg: 'Deleting user...',
     });
-    return response;
-  }
-
-  async getSignedUrlForUpload(input: GetSignedUrlInput) {
-    const { dispatch, userId, password, filename } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-    const body = JSON.stringify({
-      userId,
-      password,
-      filename,
-    });
-    const response = await this.makeCall<SignedUrlResponse>({
-      path: `${S3_PATH}/signedUrl`,
-      options: {
-        method: 'POST',
-      },
-      body,
-      dispatch,
-      errorMsg: `Unable to get signed url for uploading`,
-      loadingMsg: `Getting signed url for uploading...`,
-    });
-    return response;
-  }
-
-  async getStore(input: IdNeeded & DispatchNeeded) {
-    const { _id, dispatch } = input || {};
-    if (!_id) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No user account given in getStore()',
-        }),
-      );
-      return;
-    }
-    const response = await this.makeCall({
-      path: `${STORE_PATH}/${_id}`,
-      dispatch,
-      errorMsg: `Unable to get store with id of '${_id}'`,
-      loadingMsg: `Getting store with id of '${_id}'...`,
-    });
-    return response;
-  }
-
-  async getStoreRoutes(input: GetStoreRoutesInput) {
-    const { storeId, dispatch } = input || {};
-    if (!storeId) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No storeId given in getStoreRoutes()',
-        }),
-      );
-      return;
-    }
-    const response = await this.makeCall<GetStoreRoutesResponse>({
-      path: `${STORE_PATH}/routes/${storeId}`,
-      dispatch,
-      errorMsg: `Unable to get routes for store with id of '${storeId}'`,
-      loadingMsg: `Downloading routes...`,
-    });
-    return response;
-  }
-
-  async getUser(input: IdNeeded & DispatchNeeded) {
-    const { _id, dispatch } = input || {};
-    if (!_id) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No user account given in getUser()',
-        }),
-      );
-      return;
-    }
-    const response = await this.makeCall({
-      path: `${USER_PATH}/${_id}`,
-      dispatch,
-      errorMsg: `Unable to get user with id of '${_id}'`,
-      loadingMsg: `Getting user with id of '${_id}'...`,
-    });
-    return response;
-  }
-
-  async getUserItems(input: GetUserItemsInput) {
-    const { dispatch, userId } = input || {};
-    const response = await this.makeCall<Item[]>({
-      path: `${ITEM_PATH}${USER_PATH}/${userId}`,
-      dispatch,
-      errorMsg: `Unable to get items for user with id of '${userId}'`,
-      loadingMsg: `Getting items for user with id of '${userId}'...`,
-    });
-    return response;
-  }
-
-  async getUserStores(input: GetUserStoresInput) {
-    const { dispatch, userId } = input || {};
-
-    const response = await this.makeCall<Store[]>({
-      path: `${ITEM_PATH}${USER_PATH}/${userId}`,
-      dispatch,
-      errorMsg: `Unable to get stores for user with id of '${userId}'`,
-      loadingMsg: `Getting stores for user with id of '${userId}'...`,
-    });
-    return response;
   }
 
   async login(input: UserNeeded<UserAccountInput> & DispatchNeeded) {
     const { user, dispatch } = input || {};
-    if (!user) {
+    if (!user?.email || !user?.password) {
       dispatch(
         setError({
           statusCode: 500,
-          message: 'No user given in checkIsPasswordCorrect',
+          message: 'No credentials given in login()',
         }),
       );
       return;
     }
-    const body = JSON.stringify({ ...user });
-    const userAccount = await this.makeCall<LoginResponse>({
+    return await this.makeCall<LoginResponse>({
       dispatch,
-      body,
-      options: {
-        method: 'POST',
-      },
+      body: JSON.stringify(user),
+      options: { method: 'POST' },
       path: `${USER_PATH}/login`,
-      errorMsg: `Unable to login.  Please check your password.`,
-      loadingMsg: `Logging in as '${user.email}'`,
-      useErrorMessage: true,
+      errorMsg: `Unable to login as '${user.email}'`,
+      loadingMsg: 'Logging in...',
     });
-    return userAccount;
+  }
+  //#endregion
+
+  //#region Tasks
+  async getUserTasks(input: GetUserTasksInput) {
+    const { userId, dispatch } = input || {};
+    return await this.makeCall<GetUserTasksResponse>({
+      path: `${TASK_PATH}/user/${userId}`,
+      errorMsg: 'Unable to fetch tasks',
+      loadingMsg: 'Fetching tasks...',
+      dispatch,
+    });
+  }
+
+  async saveTask(input: SaveTaskInput) {
+    const { dispatch, task, userId, password } = input;
+    const request: SaveTaskRequest = { task, userId, password };
+    return await this.makeCall<SaveTaskResponse>({
+      path: TASK_PATH,
+      body: JSON.stringify(request),
+      options: { method: 'POST' },
+      errorMsg: 'Unable to save task',
+      loadingMsg: 'Saving task...',
+      dispatch,
+    });
+  }
+
+  async saveTasks(input: SaveTasksInput) {
+    const { dispatch, tasks, userId, password } = input;
+    const request: SaveTasksRequest = { tasks, userId, password };
+    return await this.makeCall<SaveTasksResponse>({
+      path: `${TASK_PATH}/bulk`,
+      body: JSON.stringify(request),
+      options: { method: 'POST' },
+      errorMsg: 'Unable to save tasks',
+      loadingMsg: 'Saving tasks...',
+      dispatch,
+    });
+  }
+
+  async deleteTasks(input: DeleteTasksInput) {
+    const { dispatch, ids, userId, password } = input;
+    const request: DeleteTasksRequest = { ids, userId, password };
+    return await this.makeCall<DeleteTasksResponse>({
+      path: TASK_PATH,
+      body: JSON.stringify(request),
+      options: { method: 'DELETE' },
+      errorMsg: 'Unable to delete tasks',
+      loadingMsg: 'Deleting tasks...',
+      dispatch,
+    });
+  }
+  //#endregion
+
+  //#region Sync
+  async saveAllToDb(input: SaveAllToDbInput) {
+    const { dispatch, tasks, userId, password } = input;
+    return await this.makeCall<SaveAllResponse>({
+      path: `${USER_PATH}/saveAll`,
+      body: JSON.stringify({ tasks, userId, password }),
+      options: { method: 'POST' },
+      errorMsg: 'Unable to save app data',
+      loadingMsg: 'Saving app data...',
+      dispatch,
+    });
   }
 
   async loadAllFromDb(input: LoadAllFromDbInput) {
     const { dispatch, userId, password } = input;
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-    const body = JSON.stringify({
-      userId,
-      password,
-    });
-
-    const response = await this.makeCall<LoadAllResponse>({
-      options: {
-        method: 'POST',
-      },
+    return await this.makeCall<LoadAllResponse>({
+      path: `${USER_PATH}/loadAll/${userId}`,
+      body: JSON.stringify({ password }),
+      errorMsg: 'Unable to load app data',
+      loadingMsg: 'Loading app data...',
       dispatch,
-      body,
-      path: `${USER_PATH}/loadAll`,
-      errorMsg: `Unable to load data from the cloud.`,
-      loadingMsg: `Loading data from the cloud...`,
-    });
-    return response;
-  }
-
-  async moveInventoryItems(input: MoveInventoryItemsInput) {
-    const { dispatch, _id: userId, password, itemsToMove } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!itemsToMove || itemsToMove.length <= 0) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No inventory items to move given in moveInventoryItems()',
-        }),
-      );
-      return null;
-    }
-
-    const body = JSON.stringify({
-      itemsToMove,
-      userId,
-      password,
-    } as MoveInventoryItemsRequest);
-
-    return await this.makeCall<MoveInventoryItemsResponse>({
-      dispatch,
-      body,
-      path: `${INVENTORY_PATH}/items/move`,
-      errorMsg: `Unable to move inventory items.`,
-      loadingMsg: `Moving inventory items...`,
-      options: {
-        method: 'POST',
-      },
     });
   }
 
-  async moveInventoryItemExpirationDates(
-    input: MoveInventoryItemExpirationDatesInput,
-  ) {
-    const { dispatch, _id: userId, password, itemsToMove } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!itemsToMove || itemsToMove.length <= 0) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message:
-            'No inventory items to move given in moveInventoryItemExpirationDates()',
-        }),
-      );
-      return null;
-    }
-    console.log('itemsToMove', itemsToMove);
-
-    const body = JSON.stringify({
-      itemsToMove,
-      userId,
-      password,
-    } as MoveInventoryItemExpirationDatesRequest);
-
-    return await this.makeCall<MoveInventoryItemExpirationDatesResponse>({
+  async ping(input: PingInput) {
+    const { dispatch } = input;
+    return await this.makeCall<PingResponse>({
+      path: PING_PATH,
+      errorMsg: 'Unable to reach the backend',
+      loadingMsg: EMPTY_LOADING_MSG,
+      showLoadingMsg: false,
+      showErrorMsg: false,
       dispatch,
-      body,
-      path: `${INVENTORY_PATH}/items/move/expiration`,
-      errorMsg: `Unable to move inventory item expiration date.`,
-      loadingMsg: `Moving inventory item expiration date...`,
-      options: {
-        method: 'POST',
-      },
+    });
+  }
+  //#endregion
+
+  //#region Files
+  async getSignedUrl(input: GetSignedUrlInput) {
+    const { dispatch, filename, userId, password } = input;
+    return await this.makeCall<SignedUrlResponse>({
+      path: `${S3_PATH}/signedUrl`,
+      body: JSON.stringify({ filename, userId, password }),
+      options: { method: 'POST' },
+      errorMsg: 'Unable to get a signed upload url',
+      loadingMsg: 'Preparing upload...',
+      dispatch,
     });
   }
 
-  async ping(dispatch: AppDispatch, showLoadingMsg = true) {
-    const response = await this.makeCall<PingResponse>({
+  async deleteS3Objects(input: DeleteS3ObjectsInput) {
+    const { dispatch, objKeys, userId, password } = input;
+    return await this.makeCall<boolean>({
+      path: S3_PATH,
+      body: JSON.stringify({ objKeys, userId, password }),
+      options: { method: 'DELETE' },
+      errorMsg: 'Unable to delete uploaded file(s)',
+      loadingMsg: 'Deleting file(s)...',
       dispatch,
-      path: `/ping`,
-      errorMsg: `The server is not running yet.`,
-      loadingMsg: `Waking the server...`,
-      showLoadingMsg,
-    });
-    return response;
-  }
-
-  /**
-   *Uses AI to process image into a list
-   **/
-  async processGroceryList(
-    input: ProcessGroceryListInput,
-  ): Promise<ProcessGroceryListResponse> {
-    const { image, dispatch, userId, password } = input || {};
-
-    if (!this.validateCredentials(userId, password, dispatch)) {
-      return {
-        store: EMPTY_STRING,
-        items: [],
-      };
-    }
-
-    const imageConcatanation = `${image.substring(0, 5)}...${image.substring(image.length - 5)}`;
-    const response = await this.makeCall<ProcessGroceryListResponse>({
-      path: `${OPEN_AI_PATH}/processGroceryList`,
-      body: JSON.stringify({
-        userId,
-        password,
-        image,
-      }),
-      options: {
-        method: 'POST',
-      },
-      dispatch,
-      errorMsg: `Unable to process the image ${imageConcatanation}`,
-      loadingMsg: `Converting image to grocery list...`,
-    });
-    return response;
-  }
-
-  async saveAllToDb(input: SaveAllToDbInput) {
-    const { dispatch, _id: userId, password, email, ...rest } = input;
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!rest.items) {
-      handleError(dispatch, {
-        statusCode: 500,
-        message: 'No items given in saveAllToDb()',
-      });
-      return null;
-    }
-
-    const standardizedItems = rest.items.data.map((item) =>
-      this.getStandardizedItem(item),
-    );
-
-    const standardizedStores = rest.stores.data.map((store) =>
-      this.getStandardizedStore(store),
-    );
-
-    const body = JSON.stringify({
-      ...rest,
-      items: {
-        ...rest.items,
-        data: standardizedItems,
-      },
-      stores: {
-        ...rest.stores,
-        data: standardizedStores,
-      },
-      userId,
-      password,
-    } as SaveAllThunkInput);
-
-    const response = await this.makeCall<SaveAllResponse>({
-      options: {
-        method: 'POST',
-      },
-      dispatch,
-      body,
-      path: `${USER_PATH}/saveAll`,
-      errorMsg: `Unable to save data to the cloud.`,
-      loadingMsg: `Backing up data to the cloud...`,
-    });
-    return response;
-  }
-
-  async saveInventoryItems(input: SaveInventoryItemsInput) {
-    const { dispatch, _id: userId, password, inventoryItems } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!inventoryItems || inventoryItems.length <= 0) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No inventory items given in saveInventoryItems()',
-        }),
-      );
-      return null;
-    }
-
-    const body = JSON.stringify({
-      inventoryItems,
-      userId,
-      password,
-    } as SaveInventoryItemsRequest);
-
-    return await this.makeCall<SaveInventoryItemsResponse>({
-      dispatch,
-      body,
-      path: `${INVENTORY_PATH}/items`,
-      errorMsg: `Unable to save inventory items.`,
-      loadingMsg: `Saving...`,
-      options: {
-        method: 'POST',
-      },
     });
   }
-
-  async saveInventoryLocations(input: SaveInventoryLocationsInput) {
-    const { dispatch, _id: userId, password, locations } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!locations || locations.length <= 0) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No locations given in saveInventoryLocations()',
-        }),
-      );
-      return null;
-    }
-
-    const body = JSON.stringify({
-      locations,
-      userId,
-      password,
-    } as SaveInventoryLocationsRequest);
-
-    return await this.makeCall<SaveInventoryLocationsResponse>({
-      dispatch,
-      body,
-      path: `${INVENTORY_PATH}/locations`,
-      errorMsg: `Unable to save inventory locations.`,
-      loadingMsg: `Saving...`,
-      options: {
-        method: 'POST',
-      },
-    });
-  }
-
-  async saveItem(input: SaveItemInput) {
-    const {
-      dispatch,
-      storeSpecificValues,
-      _id: userId,
-      item,
-      hasKeyChanged,
-      originalKey,
-      password,
-    } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!item) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No item given in saveItem()',
-        }),
-      );
-      return null;
-    }
-
-    const body = JSON.stringify({
-      item: this.getStandardizedItem(item),
-      storeSpecificValuesMap: {
-        [getKeyToUse(item)]: storeSpecificValues,
-      },
-      userId,
-      password,
-      originalKey: hasKeyChanged ? originalKey : undefined,
-    } as SaveItemRequest);
-
-    return await this.makeCall<SaveItemResponse>({
-      dispatch,
-      body,
-      path: ITEM_PATH,
-      errorMsg: `Unable to create item`,
-      loadingMsg: `Saving item...`,
-      options: {
-        method: 'POST',
-      },
-    });
-  }
-
-  async saveItems(input: SaveItemsInput) {
-    const {
-      dispatch,
-      storeSpecificValuesMap,
-      items,
-      _id: userId,
-      password,
-    } = input;
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!items || items.length <= 0) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No items given in saveItems()',
-        }),
-      );
-      return;
-    }
-
-    items.map((item) => this.getStandardizedItem(item));
-
-    const body = JSON.stringify({
-      items,
-      storeSpecificValuesMap,
-      userId,
-      password,
-    } as SaveItemsRequest);
-
-    const response = await this.makeCall<Item>({
-      options: {
-        method: 'POST',
-      },
-      dispatch,
-      body,
-      path: `${ITEM_PATH}/many`,
-      errorMsg: `Unable to create items`,
-      loadingMsg: `Saving items...`,
-    });
-    return response;
-  }
-
-  async savePurchase(input: SavePurchaseInput) {
-    const { dispatch, lastPurchasedMap, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!lastPurchasedMap) {
-      dispatch(
-        setError({
-          statusCode: 500,
-          message: 'No lastPurchasedMap given in savePurchase()',
-        }),
-      );
-      return null;
-    }
-
-    const body = JSON.stringify({
-      lastPurchasedMap,
-      userId,
-      password,
-    } as SavePurchaseRequest);
-
-    const response = await this.makeCall<SavePurchaseResponse>({
-      dispatch,
-      body,
-      options: {
-        method: 'POST',
-      },
-      path: LAST_PURCHASED_PATH,
-      errorMsg: `Unable to save purchase.`,
-      loadingMsg: `Saving purchase...`,
-    });
-    return response;
-  }
-
-  async saveStore(input: SaveStoreInput) {
-    const { dispatch, store, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!store) {
-      handleError(dispatch, {
-        statusCode: 500,
-        message: 'No store given in saveStore()',
-      });
-      return null;
-    }
-
-    const body = JSON.stringify({
-      store,
-      userId,
-      password,
-    } as SaveStoreRequest);
-
-    const response = await this.makeCall<SaveStoreResponse>({
-      dispatch,
-      body,
-      options: {
-        method: 'POST',
-      },
-      path: STORE_PATH,
-      errorMsg: `Unable to save '${store.name}'.`,
-      loadingMsg: `Saving store '${store.name}'...`,
-    });
-    return response;
-  }
-
-  /**
-   *Persists just the `routes` field for a store instead of resaving the
-   *entire store document.
-   **/
-  async saveStoreRoutes(input: SaveStoreRoutesInput) {
-    const { dispatch, storeId, routes, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!storeId) {
-      handleError(dispatch, {
-        statusCode: 500,
-        message: 'No storeId given in saveStoreRoutes()',
-      });
-      return null;
-    }
-
-    const body = JSON.stringify({
-      storeId,
-      routes,
-      userId,
-      password,
-    } as SaveStoreRoutesRequest);
-
-    const response = await this.makeCall<SaveStoreRoutesResponse>({
-      dispatch,
-      body,
-      options: {
-        method: 'POST',
-      },
-      path: `${STORE_PATH}/routes`,
-      errorMsg: `Unable to save routes for store '${storeId}'.`,
-      loadingMsg: `Saving routes...`,
-    });
-    return response;
-  }
-
-  /**
-   *Persists just the `storeSpecificValuesMap` document for the user instead
-   *of saving/updating any items.
-   **/
-  async saveStoreSpecificValues(input: SaveStoreSpecificValuesInput) {
-    const {
-      dispatch,
-      _id: userId,
-      password,
-      storeSpecificValuesMap,
-    } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    if (!storeSpecificValuesMap) {
-      handleError(dispatch, {
-        statusCode: 500,
-        message: 'No storeSpecificValuesMap given in saveStoreSpecificValues()',
-      });
-      return null;
-    }
-
-    const body = JSON.stringify({
-      storeSpecificValuesMap,
-      userId,
-      password,
-    } as SaveStoreSpecificValuesRequest);
-
-    const response = await this.makeCall<SaveStoreSpecificValuesResponse>({
-      dispatch,
-      body,
-      options: {
-        method: 'POST',
-      },
-      path: `${ITEM_PATH}/storeSpecificValues`,
-      errorMsg: `Unable to save store specific values.`,
-      loadingMsg: `Saving...`,
-    });
-    return response;
-  }
-
-  async updateUser(input: UpdateUserInput) {
-    const { dispatch, userId, password } = input || {};
-    if (!this.validateCredentials(userId, password, dispatch)) return;
-
-    const body = JSON.stringify({ userId, password });
-    const response = await this.makeCall({
-      dispatch,
-      body,
-      options: {
-        method: 'PUT',
-      },
-      path: USER_PATH,
-      errorMsg: `Unable to update user with id of '${userId}'`,
-      loadingMsg: `Updating user with id of '${userId}'...`,
-    });
-    return response;
-  }
-
-  //#region Private Methods
-  private getImagePathsToDelete(items: Item[]): string[] {
-    const toReturn = [] as string[];
-    if (!items || items.length === 0) return toReturn;
-    for (const item of items) {
-      for (const imageUrl of item.images) {
-        if (!imageUrl) continue;
-        const match = imageUrl
-          ?.trim()
-          ?.match(/https:\/\/.*\.s3\..*\.amazonaws\.com\/(.*)/);
-        if (match) {
-          toReturn.push(match[1]);
-        }
-      }
-    }
-    return toReturn;
-  }
-
-  private getStandardizedItem(item: Item) {
-    const toReturn = {
-      ...item,
-      needsSaving: item?.needsSaving !== undefined ? item.needsSaving : true,
-      unit: item?.unit || ITEM_UNIT_INITIAL,
-    } as Item;
-    return toReturn;
-  }
-
-  private getStandardizedStore(store: Store) {
-    const toReturn = {
-      ...store,
-      needsSaving: store?.needsSaving !== undefined ? store.needsSaving : true,
-    } as Store;
-    return toReturn;
-  }
+  //#endregion
 }
+
+const EMPTY_LOADING_MSG = '';
 
 export const BFF_SERVICE = new BffService();

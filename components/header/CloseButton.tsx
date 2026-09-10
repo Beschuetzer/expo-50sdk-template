@@ -1,6 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { useTheme } from 'native-base';
 import React from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
@@ -11,8 +10,7 @@ type CloseButtonProps = {
 };
 export function CloseButton(props: CloseButtonProps) {
   const navigation = useNavigation();
-  const theme = useTheme();
-  const { size = theme.sizes[HEADER_BUTTON_SIZE_DEFAULT] } = props;
+  const { size = HEADER_BUTTON_SIZE_DEFAULT } = props;
 
   return (
     <TouchableOpacity

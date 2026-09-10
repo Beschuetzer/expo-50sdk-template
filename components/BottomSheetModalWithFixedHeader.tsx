@@ -1,4 +1,12 @@
 import {
+  Box,
+  Button,
+  ButtonText,
+  Heading,
+  HStack,
+  VStack,
+} from '@gluestack-ui/themed';
+import {
   BottomSheetModal,
   BottomSheetModalProps,
   BottomSheetScrollView,
@@ -7,7 +15,6 @@ import {
   BottomSheetMethods,
   BottomSheetModalMethods,
 } from '@gorhom/bottom-sheet/lib/typescript/types';
-import { Stack, useTheme, Heading, Row, Button, Column } from 'native-base';
 import React, {
   forwardRef,
   useCallback,
@@ -62,7 +69,6 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
     useFullscreen = false,
     ...rest
   } = props;
-  const theme = useTheme();
   const innerRef = useRef<BottomSheetModalMethods>(null);
   useImperativeHandle(ref, () => innerRef.current as BottomSheetModalMethods);
 
@@ -81,7 +87,7 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
             : true,
         message: submitButton?.validation?.message || EMPTY_STRING,
       },
-      colorScheme: submitButton?.colorScheme || 'success',
+      action: submitButton?.action || 'positive',
       isEnabled:
         submitButton?.isEnabled != null ? submitButton.isEnabled : true,
       text: submitButton?.text || 'Submit',
@@ -90,7 +96,7 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
 
   const closeButtonToUse = useMemo(() => {
     return {
-      colorScheme: closeButton?.colorScheme || 'secondary',
+      action: closeButton?.action || 'secondary',
       isEnabled: closeButton?.isEnabled != null ? closeButton.isEnabled : true,
       text: closeButton?.text || 'Close',
     } as ButtonOptions;
@@ -116,7 +122,7 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
     ],
   );
 
-  const onGetCoordinatesPress = useCallback(() => {
+  const onSubmitPress = useCallback(() => {
     onSubmit && onSubmit();
   }, [onSubmit]);
 
@@ -125,19 +131,20 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
     onCancel && onCancel();
   }, [onCancel]);
 
-  const onButtonsLayout = useCallback((event: LayoutChangeEvent) => {
-    const height = event?.nativeEvent?.layout?.height;
-    setButtonsHeight(hideButtons ? EMPTY_NUMBER : height);
-  }, []);
+  const onButtonsLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const height = event?.nativeEvent?.layout?.height;
+      setButtonsHeight(hideButtons ? EMPTY_NUMBER : height);
+    },
+    [hideButtons],
+  );
 
   const onContentLayout = useCallback((event: LayoutChangeEvent) => {
-    const height = event?.nativeEvent?.layout?.height;
-    setContentHeight(height);
+    setContentHeight(event?.nativeEvent?.layout?.height);
   }, []);
 
   const onHeadingLayout = useCallback((event: LayoutChangeEvent) => {
-    const height = event?.nativeEvent?.layout?.height;
-    setHeadingHeight(height);
+    setHeadingHeight(event?.nativeEvent?.layout?.height);
   }, []);
 
   return (
@@ -150,54 +157,48 @@ export const BottomSheetModalWithFixedHeader = forwardRef<
       <Heading
         size="md"
         textAlign="center"
-        p={theme.space[FORM_INTER_ITEM_SPACING]}
+        p={FORM_INTER_ITEM_SPACING}
         onLayout={onHeadingLayout}
       >
         {title}
       </Heading>
       <BottomSheetScrollView keyboardShouldPersistTaps="always">
-        <Stack
-          px={theme.space[FORM_INTER_ITEM_SPACING] * 2}
-          space={theme.space[FORM_INTER_ITEM_SPACING]}
+        <VStack
+          px={FORM_INTER_ITEM_SPACING * 2}
+          space="sm"
           onLayout={onContentLayout}
         >
           {children}
-        </Stack>
+        </VStack>
       </BottomSheetScrollView>
-      <Column
-        p={theme.space[1]}
-        pt={theme.space[FORM_INTER_ITEM_SPACING]}
-        onLayout={onButtonsLayout}
-      >
+      <Box p="$1" pt={FORM_INTER_ITEM_SPACING} onLayout={onButtonsLayout}>
         <InputValidationMessage {...submitButtonToUse.validation} />
         {!hideButtons ? (
-          <Row
-            space={theme.space[FORM_INTER_ITEM_SPACING]}
-            justifyContent="space-between"
-          >
+          <HStack space="sm" justifyContent="space-between">
             {onSubmit ? (
               <Button
-                {...maxWidth}
+                style={maxWidth as any}
                 flex={1}
-                onPress={onGetCoordinatesPress}
-                colorScheme={submitButtonToUse.colorScheme}
+                onPress={onSubmitPress}
+                action={submitButtonToUse.action}
                 isDisabled={!submitButtonToUse.isEnabled}
               >
-                {submitButtonToUse.text}
+                <ButtonText>{submitButtonToUse.text}</ButtonText>
               </Button>
             ) : null}
             <Button
-              {...maxWidth}
+              style={maxWidth as any}
               flex={1}
               onPress={onClosePress}
-              colorScheme={closeButtonToUse.colorScheme}
+              action={closeButtonToUse.action}
               isDisabled={!closeButtonToUse.isEnabled}
             >
-              {closeButtonToUse.text}
+              <ButtonText>{closeButtonToUse.text}</ButtonText>
             </Button>
-          </Row>
+          </HStack>
         ) : null}
-      </Column>
+      </Box>
     </BottomSheetModal>
   );
 });
+BottomSheetModalWithFixedHeader.displayName = 'BottomSheetModalWithFixedHeader';

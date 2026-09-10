@@ -4,9 +4,9 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { persistStore, persistReducer } from 'redux-persist';
 
 import generalReducer, { generalSlice } from '@/state/slices/generalSlice';
-import listsReducer, { listsSlice } from '@/state/slices/listsSlice';
 import optionsReducer, { optionsSlice } from '@/state/slices/optionsSlice';
 import quickAddReducer, { quickAddSlice } from '@/state/slices/quickAddSlice';
+import tasksReducer, { tasksSlice } from '@/state/slices/tasksSlice';
 
 const persistConfig = {
   key: 'root',
@@ -15,9 +15,9 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   [generalSlice.name]: generalReducer,
-  [listsSlice.name]: listsReducer,
   [optionsSlice.name]: optionsReducer,
   [quickAddSlice.name]: quickAddReducer,
+  [tasksSlice.name]: tasksReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

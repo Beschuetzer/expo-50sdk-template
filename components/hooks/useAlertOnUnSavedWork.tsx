@@ -84,8 +84,8 @@ export function useAlertOnUnSavedWork(
         isVisible: true,
         title,
         message: messageRef.current,
-        cancelButton: { text: cancelButtonText, colorScheme: 'muted' },
-        confirmButton: { text: confirmButtonText, colorScheme: 'red' },
+        cancelButton: { text: cancelButtonText, action: 'secondary' },
+        confirmButton: { text: confirmButtonText, action: 'negative' },
         containerStyles,
         onCancel: () => {
           pendingNavigationAction.current = null;

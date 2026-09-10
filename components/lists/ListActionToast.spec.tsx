@@ -2,7 +2,7 @@ import renderer, { act } from 'react-test-renderer';
 
 import { ListActionToast } from './ListActionToast';
 
-jest.mock('native-base', () => {
+jest.mock('@gluestack-ui/themed', () => {
   const React = require('react');
   const component =
     (name: string) =>
@@ -11,16 +11,10 @@ jest.mock('native-base', () => {
 
   return {
     Button: component('Button'),
+    ButtonText: component('ButtonText'),
     Divider: component('Divider'),
-    Stack: component('Stack'),
+    VStack: component('VStack'),
     Text: component('Text'),
-    useTheme: () => ({
-      colors: {
-        coolGray: { 700: '#374151', 800: '#1f2937', 900: '#111827' },
-        success: { 400: '#34d399' },
-        white: '#fff',
-      },
-    }),
   };
 });
 
@@ -43,7 +37,8 @@ describe('ListActionToast', () => {
     const button = tree.root.findByType('Button' as any);
     act(() => button.props.onPress());
 
-    expect(button.props.children).toBe('UNDO');
+    const buttonText = tree.root.findByType('ButtonText' as any);
+    expect(buttonText.props.children).toBe('UNDO');
     expect(onUndo).toHaveBeenCalledTimes(1);
   });
 });

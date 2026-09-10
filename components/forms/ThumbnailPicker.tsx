@@ -1,8 +1,8 @@
+import { Box, Center, HStack, VStack } from '@gluestack-ui/themed';
 import { ImagePickerAsset } from 'expo-image-picker';
 import { useNavigation } from 'expo-router';
-import { Center, Column, Row, theme } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
 import { ThumbnailPickerImage } from './ThumbnailPickerImage';
@@ -17,7 +17,6 @@ import {
 } from '@/constants/general';
 import { Routes } from '@/constants/navigation';
 import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
-import { Item } from '@/types/Item';
 import { SpacingProp, StyleProp } from '@/types/general';
 import { logWhenDevelopmentMode } from '@/utils/logging';
 
@@ -45,8 +44,8 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   const [currentIndex, setCurrentIndex] = useState(selectedIndex);
   const isDarkMode = useIsDarkMode();
   const modeColor = useMemo(
-    () => (isDarkMode ? theme.colors.black : theme.colors.white),
-    [theme],
+    () => (isDarkMode ? '$black' : '$white'),
+    [isDarkMode],
   );
   const [images, setImages] = useState(initialImages);
   const [isImageDeletionModalVisible, setIsImageDeletionModalVisible] =
@@ -81,15 +80,12 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     );
   }, [maxCustomImages]);
 
-  const handleLongPress = useCallback(
-    (index: number, imageUrl?: string) => {
-      if (!imageUrl) return;
-      lastLongPressImageUrlRef.current = imageUrl;
-      lastLongPressImageIndexRef.current = index;
-      setIsImageDeletionModalVisible(true);
-    },
-    [lastLongPressImageUrlRef, lastLongPressImageIndexRef],
-  );
+  const handleLongPress = useCallback((index: number, imageUrl?: string) => {
+    if (!imageUrl) return;
+    lastLongPressImageUrlRef.current = imageUrl;
+    lastLongPressImageIndexRef.current = index;
+    setIsImageDeletionModalVisible(true);
+  }, []);
 
   const handleSelect = useCallback(
     (index: number, imageUrl?: string, isCustomImage?: boolean) => {
@@ -97,7 +93,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
       setCurrentIndex(index);
       onSelectImage && onSelectImage(imageUrl, isCustomImage || false);
     },
-    [onSelectImage, images],
+    [onSelectImage],
   );
 
   const onImageReturned = useCallback(
@@ -111,9 +107,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
         customImagesCount,
         maxCustomImages,
         slotsRemaining,
-        MAX_CUSTOM_IMAGES,
       });
-      logWhenDevelopmentMode('adding custom image');
       setImages((current) => [...current, urlToUse]);
       handleSelect(images.length, urlToUse, true);
       lastAddedImageUrlRef.current = urlToUse;
@@ -121,10 +115,10 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     [
       atLimit,
       customImagesCount,
+      maxCustomImages,
       slotsRemaining,
       handleSelect,
       images,
-      lastAddedImageUrlRef,
       showLimitAlert,
     ],
   );
@@ -132,10 +126,11 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
   useEffect(() => {
     const imageSetArray = Array.from(images);
     onChange && onChange(Array.from(new Set(imageSetArray)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [images]);
 
   return (
-    <Column mt={spacing}>
+    <VStack mt={spacing as number}>
       <FlatList
         horizontal
         keyboardShouldPersistTaps="always"
@@ -145,24 +140,19 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
           if (!imageUrl) return null;
 
           const isSelected = index === currentIndex;
-          const borderColor = isSelected
-            ? theme.colors.tertiary[900]
-            : modeColor;
+          const borderColor = isSelected ? '$tertiary900' : modeColor;
 
           return (
             <ThumbnailPickerImage
               key={imageUrl}
               borderColor={borderColor}
               imageUrl={imageUrl}
-              onPress={(imageUrl) => handleSelect(index, imageUrl, false)}
-              onLongPress={(imageUrl) => handleLongPress(index, imageUrl)}
-              onDoubleTap={(imageUrl) => {
-                // @ts-ignore
+              onPress={(url) => handleSelect(index, url, false)}
+              onLongPress={(url) => handleLongPress(index, url)}
+              onDoubleTap={() => {
+                // @ts-ignore -- expo-router v3 typed params
                 navigation.navigate(Routes.FullscreenImageScreen, {
-                  item: {
-                    images: [imageUrl],
-                    imageToUseIndex: 0,
-                  } as unknown as Item,
+                  task: { images: [imageUrl], imageToUseIndex: 0 },
                 });
               }}
               index={index}
@@ -170,8 +160,8 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
           );
         }}
       />
-      <Row space={spacing} mt={spacing}>
-        <View style={styles.imageCaptureWrapper}>
+      <HStack space="sm" mt={spacing as number}>
+        <Box style={styles.imageCaptureWrapper}>
           <ImageCapturer
             onImageChange={onImageReturned}
             borderColor={modeColor}
@@ -182,8 +172,8 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
               onPress={showLimitAlert}
             />
           )}
-        </View>
-      </Row>
+        </Box>
+      </HStack>
       <ModalWithBlur
         title="Delete Image"
         isVisible={isImageDeletionModalVisible}
@@ -194,12 +184,12 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
               (image) => image !== lastLongPressImageUrlRef.current,
             ),
           );
-          setCurrentIndex((currentIndex) => {
-            if (currentIndex === lastLongPressImageIndexRef.current)
+          setCurrentIndex((currentIndexLocal) => {
+            if (currentIndexLocal === lastLongPressImageIndexRef.current)
               return EMPTY_NUMBER;
-            if (lastLongPressImageIndexRef.current < currentIndex)
-              return currentIndex - 1;
-            return currentIndex;
+            if (lastLongPressImageIndexRef.current < currentIndexLocal)
+              return currentIndexLocal - 1;
+            return currentIndexLocal;
           });
           setIsImageDeletionModalVisible(false);
         }}
@@ -209,7 +199,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
           <ThumbnailPickerImage imageUrl={lastLongPressImageUrlRef.current} />
         </Center>
       </ModalWithBlur>
-    </Column>
+    </VStack>
   );
 }
 

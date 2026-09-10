@@ -1,16 +1,15 @@
+import { HStack, Text } from '@gluestack-ui/themed';
 import Checkbox from 'expo-checkbox';
-import { Row, Text, useTheme } from 'native-base';
 import React, { ComponentProps, useCallback, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 
-import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { getButtonHitSlop } from '@/utils/helpers';
 
 type CheckboxInputProps = {
   initialValue?: boolean;
   label?: string;
   onValueChange?: (value: boolean) => void;
-  rowProps?: ComponentProps<typeof Row>;
+  rowProps?: ComponentProps<typeof HStack>;
   buttonProps?: ComponentProps<typeof TouchableOpacity>;
   checkboxProps?: ComponentProps<typeof Checkbox>;
   textProps?: ComponentProps<typeof Text>;
@@ -26,21 +25,16 @@ export default function CheckboxInput(props: CheckboxInputProps) {
     rowProps,
     textProps,
   } = props;
-  const theme = useTheme();
   const [value, setValue] = useState(initialValue);
 
   const onValueChangeLocal = useCallback(() => {
     const newValue = !value;
     setValue(newValue);
     onValueChange && onValueChange(newValue);
-  }, [value]);
+  }, [value, onValueChange]);
 
   return (
-    <Row
-      space={theme.space[FORM_INTER_ITEM_SPACING]}
-      alignItems="center"
-      {...rowProps}
-    >
+    <HStack space="sm" alignItems="center" {...rowProps}>
       <TouchableOpacity
         hitSlop={getButtonHitSlop()}
         {...buttonProps}
@@ -58,11 +52,11 @@ export default function CheckboxInput(props: CheckboxInputProps) {
           {...checkboxProps}
         />
         {label ? (
-          <Text ml={theme.space[FORM_INTER_ITEM_SPACING]} {...textProps}>
+          <Text ml="$2" {...textProps}>
             {label}
           </Text>
         ) : null}
       </TouchableOpacity>
-    </Row>
+    </HStack>
   );
 }

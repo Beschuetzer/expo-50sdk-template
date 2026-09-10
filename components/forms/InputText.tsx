@@ -1,6 +1,6 @@
-import { Row } from 'native-base';
+import { HStack, Text } from '@gluestack-ui/themed';
 import { ReactNode } from 'react';
-import { Text, TextProps, ViewStyle } from 'react-native';
+import { TextProps, ViewStyle } from 'react-native';
 
 type InputTextProps = {
   children: string | string[];
@@ -9,19 +9,16 @@ type InputTextProps = {
   textProps?: TextProps;
 };
 
+/**
+ *A simple bold label used above form inputs throughout the app. Also usable as a generic
+ *`headingTag` swap-in wherever a component accepts one (see `NumberInput`/`DurationInput`).
+ **/
 export function InputText(props: InputTextProps) {
-  const { children, style, suffix, textProps } = props;
+  const { children, style, suffix } = props;
   return (
-    <Row alignItems="center" style={style}>
-      <Text
-        {...textProps}
-        style={{
-          fontWeight: '900',
-        }}
-      >
-        {children}
-      </Text>
+    <HStack alignItems="center" style={style}>
+      <Text bold>{children}</Text>
       {suffix}
-    </Row>
+    </HStack>
   );
 }

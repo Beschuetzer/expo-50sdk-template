@@ -1,4 +1,4 @@
-import { View, Text, theme } from 'native-base';
+import { Box, Text } from '@gluestack-ui/themed';
 import React, { ReactNode, useEffect, useRef } from 'react';
 import { Animated, StyleSheet, I18nManager, Dimensions } from 'react-native';
 import {
@@ -41,7 +41,9 @@ export function SwipeableRow(props: SwipeableRowProps) {
     rightSwipe,
     swipeableProps,
   } = props;
-  const openThreshhold = useSelector(swipeableRowOpenThresholdSelector);
+  // The swipe-open threshold is user-configurable (see OptionsScreen) so it's read from redux
+  // here instead of being hardcoded, even though this component doesn't otherwise touch redux.
+  const openThreshold = useSelector(swipeableRowOpenThresholdSelector);
   const swipeableRef = useRef<Swipeable>(null);
 
   function resetRow() {
@@ -52,53 +54,51 @@ export function SwipeableRow(props: SwipeableRowProps) {
     resetRow();
   }, []);
 
-  function renderLeftActions(
-    progress: Animated.AnimatedInterpolation<string | number>,
-  ) {
+  function renderLeftActions() {
     if (rightSwipe)
       return renderAction(
         {
-          backgroundColor:
-            rightSwipe?.backgroundColor || theme.colors.primary[900],
+          backgroundColor: rightSwipe?.backgroundColor || '$primary900',
           onPress: () => null,
           title: rightSwipe?.title || EMPTY_STRING,
         },
         'left',
       );
     return (
-      <View
-        width={width}
+      <Box
+        width={width as number}
         flexDirection={I18nManager.isRTL ? 'row-reverse' : 'row'}
       >
-        {leftActions?.map((action) => {
-          return renderAction(action, 'left');
-        })}
-      </View>
+        {leftActions?.map((action, index) => (
+          <React.Fragment key={index}>
+            {renderAction(action, 'left')}
+          </React.Fragment>
+        ))}
+      </Box>
     );
   }
 
-  function renderRightActions(
-    progress: Animated.AnimatedInterpolation<string | number>,
-  ) {
+  function renderRightActions() {
     if (leftSwipe)
       return renderAction(
         {
-          backgroundColor:
-            leftSwipe?.backgroundColor || theme.colors.primary[900],
+          backgroundColor: leftSwipe?.backgroundColor || '$primary900',
           onPress: () => null,
           title: leftSwipe?.title || EMPTY_STRING,
         },
         'right',
       );
     return (
-      <View
-        width={width}
+      <Box
+        width={width as number}
         flexDirection={I18nManager.isRTL ? 'row-reverse' : 'row'}
       >
-        {rightActions?.map((action) => {
-          return renderAction(action, 'right');
-        })}
-      </View>
+        {rightActions?.map((action, index) => (
+          <React.Fragment key={index}>
+            {renderAction(action, 'right')}
+          </React.Fragment>
+        ))}
+      </Box>
     );
   }
 
@@ -112,11 +112,7 @@ export function SwipeableRow(props: SwipeableRowProps) {
       <Animated.View
         style={{
           flex: 1,
-          transform: [
-            {
-              translateX: 0,
-            },
-          ],
+          transform: [{ translateX: 0 }],
           width: '100%',
         }}
       >
@@ -126,7 +122,6 @@ export function SwipeableRow(props: SwipeableRowProps) {
             {
               backgroundColor,
               alignItems: direction === 'left' ? 'flex-start' : 'flex-end',
-              // width: ,
             },
           ]}
           onPress={onPress}
@@ -148,18 +143,10 @@ export function SwipeableRow(props: SwipeableRowProps) {
       ref={swipeableRef}
       containerStyle={{ position: 'relative' }}
       friction={2}
-      leftThreshold={openThreshhold}
-      rightThreshold={openThreshhold}
+      leftThreshold={openThreshold}
+      rightThreshold={openThreshold}
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
-      onSwipeableOpen={async (direction) => {
-        if (direction === 'left') {
-          rightSwipe?.onPress && rightSwipe.onPress();
-        } else {
-          leftSwipe?.onPress && leftSwipe.onPress();
-        }
-        resetRow();
-      }}
     >
       {children}
     </Swipeable>
@@ -167,15 +154,13 @@ export function SwipeableRow(props: SwipeableRowProps) {
 }
 
 const styles = StyleSheet.create({
-  actionText: {
-    color: 'white',
-    fontSize: 16,
-    backgroundColor: 'transparent',
-    padding: 10,
-  },
   action: {
     flex: 1,
     justifyContent: 'center',
-    textAlign: 'center',
+    paddingHorizontal: 16,
+  },
+  actionText: {
+    color: 'white',
+    fontWeight: '600',
   },
 });

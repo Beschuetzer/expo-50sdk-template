@@ -1,45 +1,24 @@
-import { Item, ItemsList, StoreSpecificValuesMap } from './Item';
-import { Store } from './Store';
-import { ProcessedGroceryList } from './bffService';
-import { ArrayElement } from './helpers';
-import { ItemFormOnSave } from './itemForm';
+import { Task } from './Task';
 
-import { ItemSearchModalSelectedItem } from '@/components/modals/ItemSearchModal';
+export type BulkAddMode = 'append' | 'replace';
 
-export type ProcessedGroceryListWithGuesses = {
-  guesses: QuickAddGuesses;
-} & ProcessedGroceryList;
+/**
+ *A single draft line parsed out of the pasted text in {@link BulkAddTasksModal}, before
+ *the user has confirmed/edited it into a real {@link Task}.
+ **/
+export type TaskDraft = Pick<Task, 'title'> & Partial<Omit<Task, 'title'>>;
 
-export type QuickAddGuesses = Record<string, [Item, number][]>;
-export type QuickAddMode = 'append' | 'replace';
-export type QuickAddNewItems = { [key: string]: ItemFormOnSave | undefined };
-export type QuickAddRowProps = {
-  currentStore: Store;
-  guesses: QuickAddGuesses[string];
-  item: ArrayElement<ProcessedGroceryList['items']>;
-  itemsList: ItemsList;
-  storeSpecificValuesMap: StoreSpecificValuesMap;
-  index: number;
-  newItemInitial?: ItemFormOnSave;
-  previouslySelectedIndex?: number;
-  onAddNewItem?: (parsedName: string, newItemPayload?: ItemFormOnSave) => void;
-  onQuantityChange: (parsedName: string, quantity: number) => void;
-  onSearchModalSelect: (
-    parsedName: string,
-    item: ItemSearchModalSelectedItem<Item>,
-  ) => void;
-  onSearchPress?: (item: QuickAddRowProps['item']) => void;
-  onSelectItem: (parsedName: string, selectedIndex: number, item: Item) => void;
+/**
+ *Map of draft title -> existing tasks that look similar (fuzzy-matched via `fuzzball`), so the
+ *user can link a pasted line to an existing task instead of creating a duplicate.
+ **/
+export type BulkAddGuesses = Record<string, [Task, number][]>;
+
+export type BulkAddList = {
+  drafts: TaskDraft[];
 };
 
-export type QuickAddState = {
-  quickAddList: ProcessedGroceryList;
-  mode: QuickAddMode;
-};
-
-export type SelectedItemIdsAndQuantities = {
-  [key: string]: {
-    quantity: number;
-    id: string;
-  };
+export type BulkAddState = {
+  bulkAddList: BulkAddList;
+  mode: BulkAddMode;
 };

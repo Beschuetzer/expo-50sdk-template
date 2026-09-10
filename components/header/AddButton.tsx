@@ -1,5 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { View, useTheme } from 'native-base';
+import { Box } from '@gluestack-ui/themed';
 import React from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
@@ -11,26 +11,21 @@ type AddButtonProps = {
   size?: number;
 };
 export function AddButton(props: AddButtonProps) {
-  const theme = useTheme();
   const {
     isEnabled = true,
-    size = theme.sizes[HEADER_BUTTON_SIZE_DEFAULT],
+    size = HEADER_BUTTON_SIZE_DEFAULT,
     onPress,
   } = props;
 
   return (
-    <View ml={theme.space[1]}>
+    <Box ml="$1">
       <TouchableOpacity
         onPress={onPress}
         disabled={!isEnabled}
         style={{ opacity: isEnabled ? 1 : 0.5 }}
       >
-        <FontAwesome
-          name="plus-square-o"
-          size={size}
-          color={theme.colors.black}
-        />
+        <FontAwesome name="plus-square-o" size={size} color="black" />
       </TouchableOpacity>
-    </View>
+    </Box>
   );
 }

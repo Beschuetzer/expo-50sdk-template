@@ -2,9 +2,8 @@ import {
   AbstractService,
   GenericResponse,
 } from '@/components/services/AbstractService';
-import { GpsCoordinate } from '@/types/Store';
 import { DispatchNeeded, MakeCallInput } from '@/types/bffService';
-import { Address } from '@/types/general';
+import { Address, GpsCoordinate } from '@/types/general';
 
 const GEO_CODING_SERVICE_BASE_URL = 'https://geocode.maps.co';
 

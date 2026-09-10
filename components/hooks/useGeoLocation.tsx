@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import { EMPTY_STRING } from '@/constants/general';
-import { GpsCoordinate } from '@/types/Store';
+import { GpsCoordinate } from '@/types/general';
 import { getGpsCoordinate } from '@/utils/helpers';
 
 type UseGpsCoordinatesProps = {

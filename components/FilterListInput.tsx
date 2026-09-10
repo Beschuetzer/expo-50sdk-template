@@ -1,33 +1,36 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { capitalize } from 'lodash';
-import { Input, theme, Button, Row, Menu, Text } from 'native-base';
+import { HStack, Input, InputField } from '@gluestack-ui/themed';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 
 import { getSorter, SortOrder, SortType } from './lists/sorters';
 
 import {
   EMPTY_NUMBER,
   EMPTY_STRING,
-  FORM_INTER_ITEM_SPACING,
-  SORT_ORDER_VALUE_BY_NAME_DEFAULT,
+  SORT_ORDER_VALUE_DEFAULT,
 } from '@/constants/general';
-import { currentStoreIdSelector } from '@/state/slices/listsSlice';
-import { useAppSelector } from '@/state/store';
-import { Key } from '@/types/Item';
+import { Key } from '@/types/Task';
 import { ChildrenProp } from '@/types/general';
-import { SortOrderValue } from '@/types/listSlice';
 import { getHash } from '@/utils/getHash';
+
+export type ListFilterFilters<T> = Partial<Record<keyof T, string>>;
 
 type FilterInputProps<T extends Key> = {
   debounceTimeout?: number;
   onFilterChange: (
     list: T[],
     filterValue: string,
-    sortOrderValue: SortOrderValue,
+    sortOrderValue: { sortOrder: SortOrder; sortBy: SortType },
   ) => void;
   list: T[];
   sortTypes?: SortType[];
-  startingSortOrderValue?: SortOrderValue;
+  startingSortOrderValue?: { sortOrder: SortOrder; sortBy: SortType };
   swapElementOrder?: boolean;
   swapButtonOrder?: boolean;
 } & ChildrenProp;
@@ -42,21 +45,17 @@ export default function FilterListInput<T extends Key>({
   ),
   swapElementOrder = false,
   swapButtonOrder = false,
-  startingSortOrderValue = SORT_ORDER_VALUE_BY_NAME_DEFAULT,
+  startingSortOrderValue = SORT_ORDER_VALUE_DEFAULT,
 }: FilterInputProps<T>) {
-  const currentStoreId = useAppSelector(currentStoreIdSelector);
   const [filterValue, setFilterValue] = useState(EMPTY_STRING);
   const [valueToDisplay, setValueToDisplay] = useState(EMPTY_STRING);
-  const [sortMenuVisible, setSortMenuVisible] = useState<string>(EMPTY_STRING);
-  const [sortOrderValue, setSortOrderValue] = useState<SortOrderValue>(
-    startingSortOrderValue,
-  );
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [sortOrderValue, setSortOrderValue] = useState(startingSortOrderValue);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastRenderRef = useRef<{
     listHash: number;
     listLength: number;
     filterValue: string;
-    sortOrderValue: SortOrderValue;
+    sortOrderValue: { sortBy: SortType; sortOrder: SortOrder };
   }>({
     listHash: EMPTY_NUMBER,
     listLength: EMPTY_NUMBER,
@@ -77,18 +76,18 @@ export default function FilterListInput<T extends Key>({
     [debounceTimeout],
   );
 
-  const onSortTypePress = useCallback(
-    (sortBy: SortType, sortOrder: SortOrder) => {
-      setSortOrderValue({ sortBy, sortOrder });
-      setSortMenuVisible(EMPTY_STRING);
-    },
-    [],
-  );
+  const onSortTypePress = useCallback((sortBy: SortType) => {
+    setSortOrderValue((current) => ({ ...current, sortBy }));
+  }, []);
 
-  const reset = useCallback(() => {
-    setFilterValue(EMPTY_STRING);
-    setValueToDisplay(EMPTY_STRING);
-    setSortOrderValue(SORT_ORDER_VALUE_BY_NAME_DEFAULT);
+  const onToggleSortOrder = useCallback(() => {
+    setSortOrderValue((current) => ({
+      ...current,
+      sortOrder:
+        current.sortOrder === SortOrder.Ascending
+          ? SortOrder.Descending
+          : SortOrder.Ascending,
+    }));
   }, []);
 
   useEffect(() => {
@@ -110,125 +109,70 @@ export default function FilterListInput<T extends Key>({
       filterValue,
       sortOrderValue,
     };
-    clearTimeout(debounceRef.current as NodeJS.Timeout);
-    const newArray = list
+    clearTimeout(debounceRef.current as ReturnType<typeof setTimeout>);
+    const newArray = [...list]
       .filter((item) => {
-        if (!item.name) return true;
-        return item.name?.match(new RegExp(filterValue, 'ig'));
+        if (!item.title) return true;
+        return item.title?.match(new RegExp(filterValue, 'ig'));
       })
       .sort(
         getSorter({
           sortType: sortOrderValue.sortBy,
-          currentStoreId,
           sortOrder: sortOrderValue.sortOrder,
         }),
       );
     onFilterChange(newArray, filterValue, sortOrderValue);
-  }, [
-    currentStoreId,
-    list,
-    lastRenderRef.current,
-    filterValue,
-    sortOrderValue.sortOrder,
-    sortOrderValue.sortBy,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [list, filterValue, sortOrderValue.sortOrder, sortOrderValue.sortBy]);
 
-  function renderElements() {
-    return (
-      <Row
-        space={FORM_INTER_ITEM_SPACING}
-        alignItems="center"
-        justifyContent="center"
-        flexDirection={swapButtonOrder ? 'row-reverse' : 'row'}
-      >
-        {children}
-        {Object.values(SortOrder).map((sortOrder) => (
-          <Menu
-            key={sortOrder}
-            isOpen={sortMenuVisible === sortOrder}
-            onClose={() => setSortMenuVisible(EMPTY_STRING)}
-            placement="bottom right"
-            trigger={(triggerProps) => {
-              return (
-                <Button
-                  {...triggerProps}
-                  variant="ghost"
-                  onPress={() => {
-                    setSortMenuVisible(sortOrder);
-                  }}
-                >
-                  <FontAwesome
-                    name={`sort-${sortOrder === SortOrder.Ascending ? 'asc' : 'desc'}`}
-                    size={theme.fontSizes.lg}
-                  />
-                </Button>
-              );
-            }}
-          >
-            <Row p={theme.space[1]} justifyContent="center">
-              <Text bold>Sort {capitalize(sortOrder)} By:</Text>
-            </Row>
-            {sortTypes.map((sortType) => (
-              <Menu.Item
-                key={sortType}
-                onPress={() => onSortTypePress(sortType as SortType, sortOrder)}
-                onLongPress={() => {
-                  setSortMenuVisible(EMPTY_STRING);
-                }}
-                isDisabled={
-                  sortOrderValue.sortBy === sortType &&
-                  sortOrderValue.sortOrder === sortOrder
-                }
-              >
-                {sortType}
-              </Menu.Item>
-            ))}
-          </Menu>
-        ))}
-
-        <Button
-          variant="ghost"
-          isDisabled={!filterValue}
-          onPress={() => {
-            reset();
-          }}
-        >
-          <FontAwesome name="times-circle" size={theme.fontSizes.lg} />
-        </Button>
-      </Row>
-    );
-  }
-
-  const inputJSX = (
-    <Input
-      flex={1}
-      value={valueToDisplay}
-      onChangeText={onChangeText}
-      placeholder="Filter"
-      variant="unstyled"
-    />
+  const elements = (
+    <HStack
+      space="sm"
+      alignItems="center"
+      justifyContent="center"
+      flexDirection={swapButtonOrder ? 'row-reverse' : 'row'}
+    >
+      {children}
+      <Menu>
+        <MenuTrigger>
+          <FontAwesome name="sort" size={20} />
+        </MenuTrigger>
+        <MenuOptions>
+          {sortTypes.map((sortType) => (
+            <MenuOption
+              key={sortType}
+              onSelect={() => onSortTypePress(sortType)}
+              text={sortType}
+            />
+          ))}
+        </MenuOptions>
+      </Menu>
+      <FontAwesome
+        name={
+          sortOrderValue.sortOrder === SortOrder.Ascending
+            ? 'sort-asc'
+            : 'sort-desc'
+        }
+        size={20}
+        onPress={onToggleSortOrder}
+      />
+    </HStack>
   );
 
   return (
-    <Row
-      flex={0}
+    <HStack
+      space="sm"
       alignItems="center"
-      justifyContent="flex-start"
-      backgroundColor={theme.colors.gray[100]}
-      borderBottomColor={theme.colors.gray[400]}
-      borderBottomWidth={1}
+      flexDirection={swapElementOrder ? 'row-reverse' : 'row'}
     >
-      {swapElementOrder ? (
-        <>
-          {renderElements()}
-          {inputJSX}
-        </>
-      ) : (
-        <>
-          {inputJSX}
-          {renderElements()}
-        </>
-      )}
-    </Row>
+      <Input flex={1} variant="outline">
+        <InputField
+          placeholder="Filter"
+          value={valueToDisplay}
+          onChangeText={onChangeText}
+        />
+      </Input>
+      {elements}
+    </HStack>
   );
 }

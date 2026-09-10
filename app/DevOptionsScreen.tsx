@@ -1,11 +1,10 @@
-import { Button, ScrollView, Text } from 'native-base';
+import { Button, ButtonText, ScrollView, Text } from '@gluestack-ui/themed';
 import { useCallback } from 'react';
 
-import { StoreManager } from '@/components/StoreManager';
 import { ReduxViewer } from '@/components/mocks/ReduxViewer';
 import { MockResponseToggle } from '@/components/options/MockResponseToggle';
 import { ServiceTester } from '@/components/services/manual-testing/ServiceTester';
-import { resetListSlice } from '@/state/slices/listsSlice';
+import { resetTasksSlice } from '@/state/slices/tasksSlice';
 import { persistor, useAppDispatch } from '@/state/store';
 import { getBackendUrl, getIsDevelopmentMode } from '@/utils/helpers';
 
@@ -15,8 +14,8 @@ export default function DevOptionsScreen() {
   const onFlushPress = useCallback(() => {
     persistor.flush();
     persistor.purge();
-    dispatch(resetListSlice());
-  }, [persistor]);
+    dispatch(resetTasksSlice());
+  }, [dispatch]);
 
   if (!getIsDevelopmentMode()) return null;
   return (
@@ -25,8 +24,9 @@ export default function DevOptionsScreen() {
       <Text>Using backend at: {getBackendUrl()}</Text>
       <MockResponseToggle />
       <ReduxViewer />
-      <StoreManager showAddStore showStoreList />
-      <Button onPress={onFlushPress}>Flush Redux Store</Button>
+      <Button onPress={onFlushPress}>
+        <ButtonText>Flush Redux Store</ButtonText>
+      </Button>
     </ScrollView>
   );
 }

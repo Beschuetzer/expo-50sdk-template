@@ -1,41 +1,45 @@
+import {
+  Button,
+  ButtonText,
+  Heading,
+  HStack,
+  VStack,
+} from '@gluestack-ui/themed';
 import { Picker } from '@react-native-picker/picker';
-import { Button, FormControl, Row, Stack, useTheme, Column } from 'native-base';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Dialog from 'react-native-dialog';
-import { useDispatch } from 'react-redux';
 
 import { SORT_TYPE_DESCRIPTIONS, SortOrder, SortType } from './sorters';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { setSortOrder } from '@/state/slices/listsSlice';
 import { HeadingTagProp } from '@/types/general';
-import { SortOrderValue, SetSortOrderPayload } from '@/types/listSlice';
-import { camelCaseToSpacedCapitalized } from '@/utils/helpers';
 
 export type ListSortViewSize = 'large' | 'small';
 type ListSorterProps = {
   isVisible: boolean;
   onMount?: () => void;
   onUnmount?: () => void;
-  onValueChange: (SortType: SortType) => void;
+  onSortOrderChange?: (sortOrder: SortOrder) => void;
+  onValueChange: (sortType: SortType) => void;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  sortOrderValue: SortOrderValue;
+  sortOrderValue: { sortBy: SortType; sortOrder: SortOrder };
   sortTypes: SortType[];
+  title?: string;
   viewSize?: ListSortViewSize;
-} & HeadingTagProp &
-  Pick<SetSortOrderPayload, 'listName'>;
+} & HeadingTagProp;
 
 export function ListSorter(props: ListSorterProps) {
   const {
-    headingTag: Tag = FormControl.Label,
+    headingTag: Tag = Heading,
     isVisible,
-    listName,
     onMount,
+    onSortOrderChange,
     onUnmount,
     onValueChange,
     setIsVisible,
     sortOrderValue,
     sortTypes,
+    title = 'List',
     viewSize = 'large',
   } = props;
   const ref = useRef<Picker<SortType>>(null);
@@ -44,8 +48,6 @@ export function ListSorter(props: ListSorterProps) {
     [sortTypes],
   );
   const [selectedSortType, setSelectedSortType] = useState(defaultSortType);
-  const theme = useTheme();
-  const dispatch = useDispatch();
 
   const onCloseModal = useCallback(() => {
     setIsVisible && setIsVisible(false);
@@ -64,75 +66,68 @@ export function ListSorter(props: ListSorterProps) {
     return () => {
       onUnmount && onUnmount();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Dialog.Container visible={isVisible} onBackdropPress={onCloseModal}>
       <Dialog.Title style={{ textAlign: 'center' }}>
-        {camelCaseToSpacedCapitalized(listName)} Sorting
+        {title} Sorting
       </Dialog.Title>
-      <Stack mt={theme.space[FORM_INTER_ITEM_SPACING]}>
+      <VStack mt={FORM_INTER_ITEM_SPACING}>
         {viewSize === 'large' ? (
           <>
-            <Row pl={theme.space[1]}>
+            <HStack pl="$1">
               <Tag>Sort By: </Tag>
-            </Row>
+            </HStack>
             <Picker
               ref={ref}
               selectedValue={selectedSortType}
               onValueChange={onSortTypePress}
             >
               {sortTypes.map((sortType) => (
-                <Picker.Item key={sortType} label={sortType} value={sortType} />
+                <Picker.Item
+                  key={sortType}
+                  label={SORT_TYPE_DESCRIPTIONS[sortType] || sortType}
+                  value={sortType}
+                />
               ))}
             </Picker>
           </>
         ) : (
           <>
-            <Row justifyContent="space-between" alignItems="center">
+            <HStack justifyContent="space-between" alignItems="center">
               <Button
                 isDisabled={sortOrderValue.sortOrder === SortOrder.Ascending}
-                variant="subtle"
-                onPress={() =>
-                  dispatch(
-                    setSortOrder({ listName, sortOrder: SortOrder.Ascending }),
-                  )
-                }
+                variant="outline"
+                onPress={() => onSortOrderChange?.(SortOrder.Ascending)}
               >
-                Ascending
+                <ButtonText>Ascending</ButtonText>
               </Button>
               <Button
                 isDisabled={sortOrderValue.sortOrder === SortOrder.Descending}
-                variant="subtle"
-                onPress={() =>
-                  dispatch(
-                    setSortOrder({ listName, sortOrder: SortOrder.Descending }),
-                  )
-                }
+                variant="outline"
+                onPress={() => onSortOrderChange?.(SortOrder.Descending)}
               >
-                Descending
+                <ButtonText>Descending</ButtonText>
               </Button>
-            </Row>
-            <Column>
+            </HStack>
+            <VStack>
               {sortTypes.map((sortType) => (
                 <Button
                   isDisabled={sortType === sortOrderValue.sortBy}
-                  variant="ghost"
+                  variant="link"
                   key={sortType}
                   onPress={() => onSortTypePress(sortType)}
                 >
-                  {SORT_TYPE_DESCRIPTIONS[sortType]}
+                  <ButtonText>{SORT_TYPE_DESCRIPTIONS[sortType]}</ButtonText>
                 </Button>
               ))}
-            </Column>
+            </VStack>
           </>
         )}
-      </Stack>
-      <Dialog.Button
-        color={theme.colors.primary[900]}
-        label="Close"
-        onPress={onCloseModal}
-      />
+      </VStack>
+      <Dialog.Button label="Close" onPress={onCloseModal} />
     </Dialog.Container>
   );
 }

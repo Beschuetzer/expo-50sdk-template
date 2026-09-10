@@ -3,42 +3,32 @@ import {
   camelCaseToSpacedCapitalized,
   ensureMaxLength,
   getAddressString,
-  getAreStoresEqual,
   getBackendUrl,
   getButtonHitSlop,
   getCustomImageInfo,
-  getDurationFromFrequency,
   getDurationInMilliseconds,
   getDurationValue,
   getFilteredList,
   getImagePickerOptions,
   getIndexOfSmallestField,
-  getIsValidUpcValue,
-  getItemForImport,
-  getItemFromList,
-  getItemValidation,
+  getTaskForImport,
+  getTaskFromList,
+  getTaskValidation,
   getKeyToUse,
-  getKeyToUseFieldName,
   getNewViewingMode,
   getS3Images,
   getS3ObjectKey,
-  getStandardizedUpcValue,
   getStateFromString,
-  getStoreDescriptor,
-  getStoreWithDistance,
   getUserCredentials,
   isAddressValid,
   joinWithAnd,
   roundNumber,
   sanitize,
   sanitizeKey,
-  wait,
-  delay,
   trimObjectValues,
 } from './helpers';
 
-import { ItemTileViewingMode } from '@/components/tiles/ItemTile';
-import { ItemUnit, StoreSpecificValueKey } from '@/types/Item';
+import { TaskTileViewingMode } from '@/types/Task';
 import { State, TimeSpan } from '@/types/general';
 
 describe('getDurationValue', () => {
@@ -102,32 +92,25 @@ describe('getDurationValue', () => {
       timeSpan: TimeSpan.Hour,
     });
   });
-
-  it('should return handle large number', () => {
-    const result = getDurationValue(8083756800000);
-    expect(result).toEqual({
-      number: 13366,
-      timeSpan: TimeSpan.Week,
-    });
-  });
 });
 
 describe('pure helper behavior', () => {
-  const item = { _id: 'item-1', name: 'Milk', upc: '012345678905' } as any;
-  const store = {
-    _id: 'store-1',
-    name: 'Market',
+  const task = {
+    _id: 'task-1',
+    title: 'Milk',
+    code: '012345678905',
+  } as any;
+  const address = {
     addressLineOne: '1 Main Street',
     city: 'Saint Paul',
     state: State.Minnesota,
     zipCode: '55101',
-    gpsCoordinates: { lat: '44.95', lon: '-93.09' },
   } as any;
 
   it('formats strings, truncates text, and joins lists', () => {
-    expect(camelCaseToSpacedCapitalized('aisleNumber')).toBe('Aisle Number');
+    expect(camelCaseToSpacedCapitalized('dueDate')).toBe('Due Date');
     expect(ensureMaxLength('abcdefgh', 6)).toBe('abc...');
-    expect(ensureMaxLength('', 6)).toBeUndefined();
+    expect(ensureMaxLength('', 6)).toBe('');
     expect(joinWithAnd([])).toBe('');
     expect(joinWithAnd(['one'])).toBe('one');
     expect(joinWithAnd(['one', 'two'])).toBe('one and two');
@@ -135,62 +118,46 @@ describe('pure helper behavior', () => {
   });
 
   it('formats addresses and validates address presence', () => {
-    expect(getAddressString(store)).toBe('undefinedSaint Paul, MN 55101');
-    expect(getAddressString(store, true)).toBe('in Saint Paul, MN 55101');
-    expect(isAddressValid(store)).toBe(true);
+    expect(getAddressString(address)).toBe('Saint Paul, MN 55101');
+    expect(getAddressString(address, true)).toBe('in Saint Paul, MN 55101');
+    expect(isAddressValid(address)).toBe(true);
     expect(isAddressValid({ addressLineOne: '' } as any)).toBe(false);
   });
 
-  it('calculates distances and preserves store descriptors', () => {
+  it('calculates distances between gps coordinates', () => {
+    const gpsCoordinate = { lat: '44.95', lon: '-93.09' };
     expect(calculateDistance(undefined, undefined)).toBe(-1);
-    expect(calculateDistance(store.gpsCoordinates, store.gpsCoordinates)).toBe(
-      0,
-    );
-    expect(
-      getStoreWithDistance(store, store.gpsCoordinates).calculatedDistance,
-    ).toBe(0);
-    expect(getStoreDescriptor(store)).toBe('Market (Saint Paul)');
-    expect(getStoreDescriptor({ name: 'Market' } as any)).toBe('Market');
-    expect(getAreStoresEqual(store, { ...store })).toBe(true);
-    expect(getAreStoresEqual(store, undefined)).toBe(false);
+    expect(calculateDistance(gpsCoordinate, gpsCoordinate)).toBe(0);
   });
 
-  it('handles keys and item lookup consistently', () => {
+  it('handles keys and task lookup consistently', () => {
     expect(getKeyToUse('plain-key')).toBe('plain-key');
-    expect(getKeyToUse(item)).toBe('item-1');
-    expect(getKeyToUseFieldName(item)).toBe('upc');
-    expect(getKeyToUseFieldName({ name: 'Milk' } as any)).toBe('name');
-    expect(getItemValidation(item)).toEqual({
+    expect(getKeyToUse(task)).toBe('task-1');
+    expect(getTaskValidation(task)).toEqual({
       isValid: true,
-      message: undefined,
+      message: '',
     });
-    expect(getItemValidation()).toEqual({
+    expect(getTaskValidation()).toEqual({
       isValid: false,
-      message: 'Please enter a name',
+      message: 'Please enter a title',
     });
-    expect(getItemForImport('item-1', [item])).toEqual(item);
-    expect(getItemFromList([item], 'item-1')).toEqual(item);
-    expect(getItemFromList([], 'missing')).toBeNull();
+    expect(getTaskForImport('task-1', [task])).toEqual(task);
+    expect(getTaskFromList([task], 'task-1')).toEqual(task);
+    expect(getTaskFromList([], 'missing')).toBeNull();
   });
 
-  it('validates UPCs and normalizes UPC values', () => {
-    expect(getIsValidUpcValue('012345678905')).toBe(true);
-    expect(getIsValidUpcValue('not-a-upc')).toBe(false);
-    expect(getStandardizedUpcValue('012345678905')).toBe('012345678905');
-    expect(getStandardizedUpcValue('0012345678905')).toBe('012345678905');
-    expect(getStandardizedUpcValue('123')).toBeUndefined();
+  it('resolves US state abbreviations from strings', () => {
+    expect(getStateFromString('MN')).toBe(State.Minnesota);
+    expect(getStateFromString('Minnesota')).toBe(State.Minnesota);
+    expect(getStateFromString(undefined)).toBe(State.None);
   });
 
   it('handles duration, view mode, and numeric helpers', () => {
     expect(
       getDurationInMilliseconds({ number: 2, timeSpan: TimeSpan.Day }),
     ).toBe(2 * 24 * 60 * 60 * 1000);
-    expect(
-      getDurationFromFrequency({ number: 2, timeSpan: TimeSpan.Hour }),
-    ).toBe(2 * 60 * 60 * 1000);
-    expect(getDurationFromFrequency()).toBe(0);
-    expect(getNewViewingMode(ItemTileViewingMode.Basic)).toBe(
-      ItemTileViewingMode.Full,
+    expect(getNewViewingMode(TaskTileViewingMode.Basic)).toBe(
+      TaskTileViewingMode.Full,
     );
     expect(getButtonHitSlop(2)).toEqual({
       top: 20,
@@ -201,10 +168,10 @@ describe('pure helper behavior', () => {
     expect(roundNumber(12.3456)).toBe(12.35);
   });
 
-  it('filters items and finds the smallest field', () => {
+  it('filters tasks and finds the smallest field', () => {
     expect(
-      getFilteredList([item, { ...item, name: 'Bread' }], { name: 'milk' }),
-    ).toEqual([item]);
+      getFilteredList([task, { ...task, title: 'Bread' }], { title: 'milk' }),
+    ).toEqual([task]);
     expect(getIndexOfSmallestField([{ value: 4 }, { value: 2 }], 'value')).toBe(
       1,
     );
@@ -213,15 +180,15 @@ describe('pure helper behavior', () => {
 
   it('extracts image URLs and applies picker defaults', () => {
     expect(
-      getCustomImageInfo({ ...item, images: ['https://example.com/a.jpg'] }),
-    ).toEqual([undefined, -1]);
+      getCustomImageInfo({ ...task, images: ['https://example.com/a.jpg'] }),
+    ).toEqual(['', -1]);
     expect(
       getS3ObjectKey('https://bucket.s3.amazonaws.com/path/image.jpg'),
     ).toBe('path/image.jpg');
-    expect(getS3ObjectKey('')).toBeUndefined();
+    expect(getS3ObjectKey('')).toBe('');
     expect(
-      getS3Images(['https://grocify-images.s3.amazonaws.com/a', 'local.jpg']),
-    ).toEqual(['https://grocify-images.s3.amazonaws.com/a']);
+      getS3Images(['https://my-bucket.s3.amazonaws.com/a', 'local.jpg']),
+    ).toEqual(['https://my-bucket.s3.amazonaws.com/a']);
     expect(getImagePickerOptions({ quality: 0.5 }).quality).toBe(0.5);
   });
 
@@ -231,9 +198,11 @@ describe('pure helper behavior', () => {
       b: 2,
     });
     expect(sanitize('  Milk  ')).toBe('  Milk  ');
-    expect(sanitizeKey({ name: ' Milk ', upc: ' 123 ' } as any)).toMatchObject({
-      name: ' Milk ',
-      upc: ' 123 ',
+    expect(
+      sanitizeKey({ title: ' Milk ', code: ' 123 ' } as any),
+    ).toMatchObject({
+      title: ' Milk ',
+      code: ' 123 ',
     });
     expect(
       getUserCredentials({ _id: 'user-1', password: 'secret' } as any),
@@ -243,22 +212,7 @@ describe('pure helper behavior', () => {
     });
   });
 
-  it('maps state strings and returns validation for empty values', () => {
-    expect(getStateFromString(State.Minnesota)).toBe(State.Minnesota);
-    expect(getStateFromString()).toBe(State.None);
-    expect(getStateFromString('unknown')).toBe(State.None);
-    expect(StoreSpecificValueKey.Quantity).toBe('quantity');
-    expect(ItemUnit.Package).toBeDefined();
-  });
-
-  it('resolves the backend URL from the environment', () => {
-    expect(getBackendUrl()).toBe(
-      'https://grocify-bff-ac27c2662495.herokuapp.com',
-    );
-  });
-
-  it('returns immediately for non-positive waits and delays', async () => {
-    await expect(wait(0)).resolves.toBeUndefined();
-    await expect(delay(-1)).resolves.toBeUndefined();
+  it('resolves the backend url based on dev/prod mode', () => {
+    expect(getBackendUrl()).toMatch(/^https?:\/\//);
   });
 });

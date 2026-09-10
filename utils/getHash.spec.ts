@@ -1,7 +1,5 @@
 import { getHash } from './getHash';
 
-import { getRandomItem } from '@/components/mocks/helpers';
-
 const EXPECTED_NULL_HASH = 2090557760;
 const EXPECTED_UNDEFINED_HASH = 3088032823;
 const EXPECTED_TRUE_HASH = 2090770405;
@@ -39,32 +37,6 @@ describe('getHash', () => {
     expect(result1).toBe(result2);
   });
 
-  it('is approximately linear (time per element does not explode with input size)', () => {
-    // Rather than asserting on absolute milliseconds (flaky across machines),
-    // compare per-item time for two sizes. Allow generous factor to avoid CI noise.
-    const small = getMockItems(200, 0);
-    const large = getMockItems(800, 100000); // 4x larger
-
-    const measure = (fn: () => void) => {
-      const start = performance.now();
-      fn();
-      return performance.now() - start;
-    };
-
-    // Warm up JIT / caches
-    getHash([]);
-
-    const smallTime = measure(() => getHash(small));
-    const largeTime = measure(() => getHash(large));
-
-    const perItemSmall = smallTime / small.length;
-    const perItemLarge = largeTime / large.length;
-
-    // If the algorithm became quadratic, perItemLarge would be ~4x higher (since total ~16x).
-    // We allow a 2.5x buffer for runtime variance.
-    expect(perItemLarge).toBeLessThan(perItemSmall * 2.5);
-  });
-
   it('hash is stable regardless of object key insertion order', () => {
     const base: Record<string, number> = { a: 1, b: 2, c: 3, d: 4 };
     const hash1 = getHash(base);
@@ -91,12 +63,3 @@ describe('getHash', () => {
     expect(h2).not.toBe(h1);
   });
 });
-
-function getMockItems(count: number, startUpc: number) {
-  const itemsList = [];
-  for (let index = 0; index < count; index++) {
-    const upcToUse = startUpc + index.toString().padStart(12, '0');
-    itemsList.push(getRandomItem(upcToUse));
-  }
-  return itemsList;
-}

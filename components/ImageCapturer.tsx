@@ -1,8 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
+import { Center, HStack } from '@gluestack-ui/themed';
 import { ImagePickerAsset, ImagePickerOptions } from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
-import { Center, Row, useTheme } from 'native-base';
-import { ColorType } from 'native-base/lib/typescript/components/types';
 import React, { useCallback } from 'react';
 import { TouchableOpacity, ViewStyle } from 'react-native';
 
@@ -13,7 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/state/store';
 import { pickImage, captureImage, handleError } from '@/utils/helpers';
 
 type ImageCapturerProps = {
-  borderColor?: ColorType;
+  borderColor?: string;
   height?: number;
   imageOptions?: ImagePickerOptions;
   onImageChange: (image: ImagePickerAsset) => void;
@@ -34,7 +33,6 @@ export function ImageCapturer(props: ImageCapturerProps) {
     showTakeImage = true,
     style,
   } = props;
-  const theme = useTheme();
   const dispatch = useAppDispatch();
   const shouldSaveImagesToGallery = useAppSelector(saveImagesToGallerySelector);
 
@@ -90,9 +88,7 @@ export function ImageCapturer(props: ImageCapturerProps) {
   }, [onImageChange]);
 
   return (
-    <Row
-      style={[{ marginLeft: -theme.space[FORM_INTER_ITEM_SPACING] * 4 }, style]}
-    >
+    <HStack style={[{ marginLeft: -FORM_INTER_ITEM_SPACING * 4 }, style]}>
       {showTakeImage ? (
         <TouchableOpacity onPress={onImageTakenPress}>
           <Center borderColor={borderColor} width={width} height={height}>
@@ -103,10 +99,10 @@ export function ImageCapturer(props: ImageCapturerProps) {
       {showSelectImage ? (
         <TouchableOpacity onPress={onImageSelectedPress}>
           <Center borderColor={borderColor} width={width} height={height}>
-            Select
+            <FontAwesome name="image" size={height} />
           </Center>
         </TouchableOpacity>
       ) : null}
-    </Row>
+    </HStack>
   );
 }

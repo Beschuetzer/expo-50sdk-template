@@ -13,4 +13,3 @@ export const useRequestCameraPermissions = () => {
 
   return hasPermission;
 };
-

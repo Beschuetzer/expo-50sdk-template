@@ -1,5 +1,5 @@
+import { Button, ButtonText } from '@gluestack-ui/themed';
 import { useNavigation } from 'expo-router';
-import { Button, Stack } from 'native-base';
 import React, { useCallback } from 'react';
 
 import { Routes } from '@/constants/navigation';
@@ -14,13 +14,13 @@ export const ServiceTesterButton = (props: BffServiceTesterProps) => {
   const navigation = useNavigation();
 
   const onBffServicePress = useCallback(() => {
-    // @ts-ignore
+    // @ts-ignore -- expo-router v3 typed params
     navigation.navigate(route);
-  }, [navigation]);
+  }, [navigation, route]);
 
   return (
-    <Stack>
-      <Button onPress={onBffServicePress}>{name || route}</Button>
-    </Stack>
+    <Button onPress={onBffServicePress}>
+      <ButtonText>{name || route}</ButtonText>
+    </Button>
   );
 };

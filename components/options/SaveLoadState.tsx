@@ -1,25 +1,14 @@
 import { FontAwesome } from '@expo/vector-icons';
-import { Row, useTheme, Stack, Text } from 'native-base';
-import React, { useCallback, useMemo } from 'react';
+import { HStack, Text, VStack } from '@gluestack-ui/themed';
+import React, { useCallback } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { FILE_NAMES, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { maxWidth } from '@/constants/styles';
-import {
-  currentStoreSelector,
-  inventorySelector,
-  itemsListSelector,
-  lastPurchasedMapSelector,
-  mutuallyExclusiveGroupsSelector,
-  returnItemsSelector,
-  storesListSelector,
-  storeSpecificValuesMapSelector,
-} from '@/state/slices/listsSlice';
+import { FILE_NAMES } from '@/constants/general';
+import { tasksSelector } from '@/state/slices/tasksSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import {
   displayAlert,
   getDirectory,
-  getKeyToUse,
   importAppData,
   makeNewDirectory,
   saveAppStateToFile,
@@ -28,22 +17,16 @@ import {
 
 type SaveLoadStateProps = object;
 
+/**
+ *Exports/imports a local JSON backup of the app's data to a user-chosen device directory (via
+ *`expo-file-system` + `expo-document-picker`'s Storage Access Framework) - independent of the
+ *backend, useful for local backups or moving data between devices manually.
+ **/
 export const SaveLoadState = (props: SaveLoadStateProps) => {
-  const theme = useTheme();
-  const itemsList = useAppSelector(itemsListSelector);
-  const storeSpecificValues = useAppSelector(storeSpecificValuesMapSelector);
-  const lastPurchasedMap = useAppSelector(lastPurchasedMapSelector);
-  const inventory = useAppSelector(inventorySelector);
-  const stores = useAppSelector(storesListSelector);
-  const currentStore = useAppSelector(currentStoreSelector);
-  const mutuallyExclusiveGroups = useAppSelector(
-    mutuallyExclusiveGroupsSelector,
-  );
-  const returnItems = useAppSelector(returnItemsSelector);
+  const tasks = useAppSelector(tasksSelector);
   const dispatch = useAppDispatch();
-  const iconSize = useMemo(() => theme.sizes[6], [theme]);
 
-  const onLoadItemsPress = useCallback(async () => {
+  const onLoadPress = useCallback(async () => {
     try {
       const dir = await getDirectory();
       const data = await importAppData(dir);
@@ -54,73 +37,30 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
         error: (error as Error).message,
       });
     }
-  }, []);
+  }, [dispatch]);
 
   const onBackupPress = useCallback(async () => {
     try {
       const dir = await getDirectory();
       const newFolderName = new Date().toISOString();
       const madeDirectory = await makeNewDirectory(dir, newFolderName);
-
-      await saveAppStateToFile(FILE_NAMES.items, madeDirectory, itemsList);
-      await saveAppStateToFile(
-        FILE_NAMES.storeSpecificValues,
-        madeDirectory,
-        storeSpecificValues,
-      );
-      await saveAppStateToFile(
-        FILE_NAMES.lastPurchasedMap,
-        madeDirectory,
-        lastPurchasedMap,
-      );
-      await saveAppStateToFile(FILE_NAMES.inventory, madeDirectory, inventory);
-      await saveAppStateToFile(FILE_NAMES.stores, madeDirectory, {
-        ...stores,
-        currentStoreId: getKeyToUse(currentStore),
-      });
-      await saveAppStateToFile(
-        FILE_NAMES.mutuallyExclusiveGroups,
-        madeDirectory,
-        mutuallyExclusiveGroups,
-      );
-      await saveAppStateToFile(
-        FILE_NAMES.returnItems,
-        madeDirectory,
-        returnItems,
-      );
+      await saveAppStateToFile(FILE_NAMES.tasks, madeDirectory, tasks);
     } catch (error) {
-      displayAlert({
-        msg: 'Unable to save app data.',
-        error,
-      });
+      displayAlert({ msg: 'Unable to save app data.', error });
     }
-  }, [
-    currentStore.name,
-    inventory,
-    itemsList,
-    lastPurchasedMap,
-    mutuallyExclusiveGroups,
-    returnItems,
-    stores,
-    storeSpecificValues,
-  ]);
+  }, [tasks]);
 
   return (
-    <Stack space={theme.space[FORM_INTER_ITEM_SPACING]}>
-      <Row
-        space={theme.space[2]}
-        justifyContent="space-between"
-        alignItems="center"
-        {...maxWidth}
-      >
-        <Text>Data (Restore/Backup):</Text>
-        <TouchableOpacity onPress={onLoadItemsPress}>
-          <FontAwesome name="download" size={iconSize} />
+    <VStack>
+      <HStack justifyContent="space-between" alignItems="center">
+        <Text>Local Backup (Restore/Backup):</Text>
+        <TouchableOpacity onPress={onLoadPress}>
+          <FontAwesome name="download" size={24} />
         </TouchableOpacity>
         <TouchableOpacity onPress={onBackupPress}>
-          <FontAwesome name="save" size={iconSize} />
+          <FontAwesome name="save" size={24} />
         </TouchableOpacity>
-      </Row>
-    </Stack>
+      </HStack>
+    </VStack>
   );
 };

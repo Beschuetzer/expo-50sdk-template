@@ -1,271 +1,68 @@
-import { AsyncThunk, createAsyncThunk, Dispatch } from '@reduxjs/toolkit';
-import {
-  AsyncThunkAction,
-  AsyncThunkConfig,
-} from '@reduxjs/toolkit/dist/createAsyncThunk';
-import _ from 'lodash';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 
-import { ACCOUNT_INITIAL, setAccount, setLoading } from './slices/generalSlice';
-import { getLastPurchasedFromStoreSpecificValues } from './slices/helpers/getLastPurchasedMapFromStoreSpecificValues';
-import {
-  listsSlice,
-  addItemsListItem,
-  addRoute,
-  addStoresListItem,
-  addStoreSpecificValues,
-  completePurchase,
-  handleSaveAllResponse,
-  removeItemsListItems,
-  removeStoresListItems,
-  handleLoadAllResponse,
-  setCurrentLocationState,
-  addInventoryLocations,
-  insertInventoryItems,
-  moveInventoryItemExpirationDates,
-  moveInventoryItems,
-  removeInventoryItems,
-  removeInventoryLocations,
-  removeMostRecentInventoryItem,
-  setInventory,
-  updateRoute,
-  deleteRoute,
-} from './slices/listsSlice';
+import { ACCOUNT_INITIAL, setAccount } from './slices/generalSlice';
+import { addTask, addTasks, removeTasks, setTasks } from './slices/tasksSlice';
 import { RootState } from './store';
 
-import { GenericResponse } from '@/components/services/AbstractService';
 import { BFF_SERVICE } from '@/components/services/BffService';
-import {
-  GEO_CODING_SERVICE,
-  ReverseGeocodingResponse,
-} from '@/components/services/GeoCodingService';
-import { EMPTY_NUMBER, EMPTY_STRING } from '@/constants/general';
-import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
-import {
-  Item,
-  LastPurchasedMap,
-  StoreSpecificValueKey,
-  StoreSpecificValuesMap,
-} from '@/types/Item';
-import { GpsCoordinate, Route, Store } from '@/types/Store';
+import { Task } from '@/types/Task';
 import {
   ChangePasswordResponse,
-  ProcessGroceryListResponse,
-  UserAccountInput,
   CreateUserResponse,
+  DeleteTasksResponse,
   DeleteUserResponse,
-  LoginResponse,
-  DeletionResponse,
   LoadAllResponse,
+  LoginResponse,
+  PingResponse,
   SaveAllResponse,
-  SaveItemResponse,
-  SavePurchaseResponse,
-  SaveStoreResponse,
-  SaveStoreRoutesResponse,
-  GetStoreRoutesResponse,
-  DeleteStoreRoutesResponse,
-  SaveStoreSpecificValuesResponse,
-  MakeCallInput,
-  UserAccount,
-  ProcessedGroceryListItem,
-  SaveInventoryLocationsResponse,
-  DeleteInventoryLocationsResponse,
-  DeleteInventoryItemsResponse,
-  MoveInventoryItemsResponse,
-  MoveInventoryItemExpirationDatesResponse,
+  SaveTaskResponse,
+  SaveTasksResponse,
+  UserAccountInput,
 } from '@/types/bffService';
-import { Error, SetAppDataInput, State } from '@/types/general';
-import { Inventory, MoveInventoryItemExpirationDates } from '@/types/inventory';
-import {
-  InsertInventoryItemPayload,
-  MoveInventoryItemPayload,
-  RemoveInventoryItemPayload,
-} from '@/types/inventorySlice';
-import { ItemFormOnSave } from '@/types/itemForm';
-import { AddStoresListItemPayload, AddRoutePayload } from '@/types/listSlice';
-import { getExpirationDates } from '@/utils/getExpirationDates';
-import { getMostRecentExpirationDates } from '@/utils/getMostRecentExpirationDates';
-import {
-  getKeyToUse,
-  handleError,
-  getUserCredentials,
-  deleteFile,
-  getCustomImageInfo,
-  getS3ObjectKey,
-  uriToBlob,
-} from '@/utils/helpers';
+import { Error } from '@/types/general';
+import { getUserCredentials } from '@/utils/helpers';
 import { logWhenDevelopmentMode } from '@/utils/logging';
 
-export type AddInventoryItemsInput = InsertInventoryItemPayload[];
-
-export type AddInventoryLocationInput = Pick<Inventory, 'locations'>;
-export type DeleteInventoryItemsThunkInput = RemoveInventoryItemPayload[];
-export type DeleteInventoryLocationInput = AddInventoryLocationInput;
-
-export type DeleteItemsThunkInput = {
-  items: Item[];
-};
-export type DeleteMostRecentInventoryItemThunkInput = Omit<
-  RemoveInventoryItemPayload,
-  'expirationDates'
->;
-export type DeleteStoresThunkInput = {
-  stores: Store[];
-};
-export type GetCurrentStoreInput = {
-  gpsCoordinate: GpsCoordinate;
-} & Pick<MakeCallInput, 'showLoadingMsg'>;
-export type MoveInventoryItemExpirationDatesThunkInput =
-  MoveInventoryItemExpirationDates[];
-export type MoveInventoryItemsThunkInput = MoveInventoryItemPayload[];
-export type SaveStoreRoutesThunkInput = {
-  storeId: string;
-  route?: AddRoutePayload;
-};
-export type GetStoreRoutesThunkInput = {
-  storeId: string;
-};
-export type DeleteStoreRoutesThunkInput = {
-  storeId: string;
+export type DeleteTasksThunkInput = {
   ids: string[];
 };
-export type RouteConflict = {
-  local: Route;
-  remote: Route;
+export type SaveAllThunkInput = {
+  tasks: Task[];
 };
-export type AssignLocationToItemsThunkInput = {
-  storeId: string;
-  /**
-   *Locations are assigned per-route (not per-store) so the same item can
-   *sit at a different location depending on which route through the store
-   *is active.
-   **/
-  routeId: string;
-  location: string;
-  itemKeysToAssign: string[];
-  itemKeysToUnassign: string[];
+
+type HandleErrorsWithRejectionInput = {
+  dispatch: any;
+  rejectWithValue: (value: unknown) => any;
+  error: Error;
+  response?: unknown;
+  baseMsg: string;
+  genericMsg?: string;
+  shouldDisplayError?: boolean;
 };
-export type UpdateItemsForRouteLocationChangeThunkInput = {
-  routeId: string;
-  oldLocationName: string;
-  /**
-   *When provided, items assigned to `oldLocationName` are renamed to this
-   *value. When omitted (or empty), items assigned to `oldLocationName` are
-   *simply unassigned (location cleared) — used when a location is deleted.
-   **/
-  newLocationName?: string;
-};
-export type AssignLocationsToItemsThunkInput = {
-  routeId: string;
-  /**
-   *Map of item key -> location name to assign that item to (for the given
-   *`routeId`). Unlike {@link assignLocationToItems}, which assigns a single
-   *location to a batch of items, this assigns a potentially different
-   *location to each item in one save.
-   **/
-  assignments: Record<string, string>;
-};
-export type SaveAllThunkInput = Omit<
-  SetAppDataInput,
-  'dispatch' | 'upcProducts'
->;
-export type SavePurchaseThunkInput = void;
 
-export const addInventoryItemsThunk = createAsyncThunk(
-  'addInventoryItemsThunk',
-  async (
-    inventoryItems: AddInventoryItemsInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    let response: SaveInventoryLocationsResponse;
-    let shouldDisplayError = true;
+/**
+ *Shared by every thunk below: logs + optionally surfaces the error (via the `general` slice,
+ *which `ErrorModal` listens to) and rejects the thunk's promise with a normalized payload.
+ **/
+function handleErrorsWithRejection(input: HandleErrorsWithRejectionInput) {
+  const {
+    rejectWithValue,
+    error,
+    response,
+    baseMsg,
+    genericMsg,
+    shouldDisplayError = true,
+  } = input;
+  logWhenDevelopmentMode(baseMsg, { error, response });
+  return rejectWithValue({
+    message: shouldDisplayError
+      ? `${baseMsg} ${genericMsg || error?.message || ''}`.trim()
+      : error?.message,
+    statusCode: error?.statusCode,
+  } as Error);
+}
 
-    try {
-      if (!inventoryItems || inventoryItems.length === 0)
-        throw new Error(
-          'Must provide a locationId, itemId and expirationDates in order to save a new inventory item.',
-        );
-      const state = getState() as RootState;
-      const account = state.general.account;
-
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const isSuccess = await BFF_SERVICE.saveInventoryItems({
-        dispatch,
-        ...account,
-        inventoryItems: inventoryItems.map((item) => ({
-          ...item,
-          locationId:
-            item.locationId ||
-            state.lists.inventory.currentLocationId ||
-            EMPTY_STRING,
-        })),
-      });
-      if (!isSuccess) {
-        shouldDisplayError = false;
-        throw new Error('Unable to save inventory items.');
-      }
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Error saving inventory items.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(insertInventoryItems(inventoryItems));
-    }
-  },
-);
-
-export const addInventoryLocationsThunk = createAsyncThunk(
-  'addInventoryLocations',
-  async (
-    input: AddInventoryLocationInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    let response: SaveInventoryLocationsResponse;
-    let shouldDisplayError = true;
-
-    try {
-      if (!input) throw new Error('Must provide locations to save.');
-      const state = getState() as RootState;
-      const account = state.general.account;
-
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const isSuccess = await BFF_SERVICE.saveInventoryLocations({
-        ...input,
-        dispatch,
-        ...account,
-        locations: input.locations,
-      });
-      if (!isSuccess) {
-        shouldDisplayError = false;
-        throw new Error('Unable to save locations.');
-      }
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Error saving Locations.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(addInventoryLocations(input.locations));
-    }
-  },
-);
-
+//#region Auth
 export const changePassword = createAsyncThunk(
   'changePassword',
   async (newPassword: string, { getState, dispatch, rejectWithValue }) => {
@@ -279,14 +76,9 @@ export const changePassword = createAsyncThunk(
         dispatch,
       });
       if (!response?.success) {
-        throw new Error('Error creating user account');
+        throw new Error('Error changing the user password');
       }
-      dispatch(
-        setAccount({
-          ...account,
-          password: newPassword,
-        }),
-      );
+      dispatch(setAccount({ ...account, password: newPassword }));
     } catch (error) {
       return handleErrorsWithRejection({
         dispatch,
@@ -294,47 +86,6 @@ export const changePassword = createAsyncThunk(
         error: error as Error,
         response,
         baseMsg: `Unable to change the user password for user account '${account._id}'.`,
-      });
-    }
-  },
-);
-
-export const convertImageToList = createAsyncThunk(
-  'convertImageToList',
-  async (image: string, { getState, dispatch, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const account = state.general?.account;
-    const { _id: userId, password } = account;
-    let response: ProcessGroceryListResponse;
-    let shouldDisplayError = true;
-    try {
-      if (!image) {
-        throw new Error('No image provided in convertImageToList');
-      }
-
-      if (!userId || !password) {
-        shouldDisplayError = false;
-        throw new Error('No user credentials given');
-      }
-
-      response = await BFF_SERVICE.processGroceryList({
-        userId,
-        password,
-        image,
-        dispatch,
-      });
-      if (!response?.items || response.items.length === 0) {
-        throw new Error('Error proccessing the image.');
-      }
-      return response;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to process the image.`,
-        shouldDisplayError,
       });
     }
   },
@@ -349,12 +100,7 @@ export const createUser = createAsyncThunk(
       if (!response?._id) {
         throw new Error('Error creating user account');
       }
-      dispatch(
-        setAccount({
-          ...response,
-          password: user?.password,
-        }),
-      );
+      dispatch(setAccount({ ...response, password: user?.password }));
     } catch (error) {
       return handleErrorsWithRejection({
         dispatch,
@@ -367,36 +113,35 @@ export const createUser = createAsyncThunk(
   },
 );
 
-export const deleteUser: AsyncThunk<void, void, AsyncThunkConfig> =
-  createAsyncThunk(
-    'deleteUser',
-    async (_, { getState, dispatch, rejectWithValue }) => {
-      const state = getState() as RootState;
-      const account = state.general?.account;
-      let response: DeleteUserResponse;
-      try {
-        if (!account) {
-          throw new Error('No user account found to delete.');
-        }
-        response = await BFF_SERVICE.deleteUser({
-          ...getUserCredentials(account),
-          dispatch,
-        });
-        if (!response?.deletedUser._id) {
-          throw new Error('No user account was deleted');
-        }
-        dispatch(setAccount(ACCOUNT_INITIAL));
-      } catch (error) {
-        return handleErrorsWithRejection({
-          dispatch,
-          rejectWithValue,
-          error: error as Error,
-          response,
-          baseMsg: `Unable to delete the user account for '${account._id}'.`,
-        });
+export const deleteUser = createAsyncThunk(
+  'deleteUser',
+  async (_: void, { getState, dispatch, rejectWithValue }) => {
+    const state = getState() as RootState;
+    const account = state.general?.account;
+    let response: DeleteUserResponse;
+    try {
+      if (!account) {
+        throw new Error('No user account found to delete.');
       }
-    },
-  );
+      response = await BFF_SERVICE.deleteUser({
+        ...getUserCredentials(account),
+        dispatch,
+      });
+      if (!response?.deletedUser?._id) {
+        throw new Error('No user account was deleted');
+      }
+      dispatch(setAccount(ACCOUNT_INITIAL));
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: `Unable to delete the user account for '${account._id}'.`,
+      });
+    }
+  },
+);
 
 export const login = createAsyncThunk(
   'login',
@@ -405,31 +150,13 @@ export const login = createAsyncThunk(
     try {
       response = await BFF_SERVICE.login({ user, dispatch });
       if (!response?._id) {
-        throw new Error('No user account was created.');
+        throw new Error('No user account was found.');
       }
-      dispatch(
-        setAccount({
-          ...response,
-          password: user.password,
-        }),
-      );
+      dispatch(setAccount({ ...response, password: user.password }));
 
       const state = getState() as RootState;
       if (state.general.shouldSaveOnLogin) {
-        dispatch(
-          saveAll({
-            inventory: state.lists.inventory,
-            items: state.lists.itemsList,
-            lastPurchasedMap: state.lists.lastPurchasedMap,
-            mutuallyExclusiveGroups: state.lists.mutuallyExclusiveGroups,
-            returnItems: (state.lists as any).returnItems ?? {},
-            stores: {
-              ...state.lists.storesList,
-              currentStoreId: state.lists.currentStoreId,
-            },
-            storeSpecificValues: state.lists.storeSpecificValuesMap,
-          }),
-        );
+        dispatch(saveAll({ tasks: state.tasks.data }));
       }
     } catch (error) {
       return handleErrorsWithRejection({
@@ -437,286 +164,94 @@ export const login = createAsyncThunk(
         rejectWithValue,
         error: error as Error,
         response,
-        baseMsg: `Unable to login to '${user.email}'.`,
+        baseMsg: `Unable to login as '${user.email}'.`,
         genericMsg: 'Please check your credentials.',
       });
     }
   },
 );
 
-export const deleteMostRecentInventoryItemThunk = createAsyncThunk(
-  'deleteMostRecentInventoryItemThunk',
-  async (
-    input: DeleteMostRecentInventoryItemThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    let response: DeleteInventoryItemsResponse;
-    let shouldDisplayError = true;
-
+export const pingBff = createAsyncThunk(
+  'pingBff',
+  async (_: void, { dispatch, rejectWithValue }) => {
+    let response: PingResponse;
     try {
-      if (!input) throw new Error('Must provide inventory item to delete.');
-      const state = getState() as RootState;
-      const account = state.general.account;
-
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
+      response = await BFF_SERVICE.ping({ dispatch });
+      if (!response?.success) {
+        throw new Error('The backend did not respond successfully.');
       }
-
-      const bulkResult = await BFF_SERVICE.deleteInventoryItems({
-        dispatch,
-        ...account,
-        inventoryItems: [
-          {
-            ...input,
-            locationId:
-              input.locationId ||
-              state.lists.inventory.currentLocationId ||
-              EMPTY_STRING,
-            expirationDates: getMostRecentExpirationDates(
-              state.lists.inventory.items[input?.locationId || EMPTY_STRING]?.[
-                input.itemId
-              ]?.expirationDates || {},
-              1,
-            ),
-          },
-        ],
-      });
-      if (!bulkResult) {
-        shouldDisplayError = false;
-        throw new Error('Unable to delete item.');
-      }
-      dispatch(removeMostRecentInventoryItem(input));
+      return response;
     } catch (error) {
       return handleErrorsWithRejection({
         dispatch,
         rejectWithValue,
         error: error as Error,
         response,
-        baseMsg: `Error deleting inventory item.  Please try again later.`,
-        shouldDisplayError,
+        baseMsg: 'Unable to reach the backend.',
+        shouldDisplayError: false,
       });
     }
   },
 );
+//#endregion
 
-export const deleteInventoryItemsThunk = createAsyncThunk(
-  'deleteInventoryItemsThunk',
-  async (
-    input: DeleteInventoryItemsThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    let response: DeleteInventoryItemsResponse;
-    let shouldDisplayError = true;
-
-    try {
-      if (!input || input.length === 0)
-        throw new Error('Must provide inventory items to delete.');
-      const state = getState() as RootState;
-      const account = state.general.account;
-
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const isSuccess = await BFF_SERVICE.deleteInventoryItems({
-        ...input,
-        dispatch,
-        ...account,
-        inventoryItems: input.map((item) => ({
-          ...item,
-          locationId:
-            item.locationId ||
-            state.lists.inventory.currentLocationId ||
-            EMPTY_STRING,
-        })),
-      });
-      if (!isSuccess) {
-        shouldDisplayError = false;
-        throw new Error('Unable to delete items.');
-      }
-      dispatch(removeInventoryItems(input));
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Error deleting inventory items.  Please try again later.`,
-        shouldDisplayError,
-      });
-    }
-  },
-);
-
-export const deleteInventoryLocationsThunk = createAsyncThunk(
-  'deleteInventoryLocationsThunk',
-  async (
-    input: DeleteInventoryLocationInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    let response: DeleteInventoryLocationsResponse;
-    let shouldDisplayError = true;
-
-    try {
-      if (!input) throw new Error('Must provide locations to delete.');
-      const state = getState() as RootState;
-      const account = state.general.account;
-
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const isSuccess = await BFF_SERVICE.deleteInventoryLocations({
-        ...input,
-        dispatch,
-        ...account,
-        locations: input.locations,
-      });
-      if (!isSuccess) {
-        shouldDisplayError = false;
-        throw new Error('Unable to save locations.');
-      }
-      dispatch(removeInventoryLocations(input.locations));
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Error saving Locations.  Please try again later.`,
-        shouldDisplayError,
-      });
-    }
-  },
-);
-
-export const deleteItems = createAsyncThunk(
-  'deleteItems',
-  async (
-    input: DeleteItemsThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
+//#region Tasks
+/**
+ *Every "save"/"delete" thunk below follows the same offline-friendly pattern used throughout
+ *this template: local redux state is updated in the `finally` block *regardless* of whether the
+ *network call succeeded, so the UI never blocks on connectivity. If the network call fails, the
+ *`general` slice's `isUpToDate` flag flips to `false` (see its `extraReducers`) so the rest of the
+ *app can surface a "needs sync" indicator and try again later (e.g. via `saveAll`).
+ **/
+export const loadTasks = createAsyncThunk(
+  'loadTasks',
+  async (_: void, { getState, dispatch, rejectWithValue }) => {
     const state = getState() as RootState;
     const account = state.general.account;
-    const { items } = input || {};
-    const itemsNotInDb = items?.filter((item) => !item.hasBeenSaved) || [];
-    const itemsInDb = items?.filter((item) => !!item.hasBeenSaved) || [];
-    let response: DeletionResponse;
-    let shouldDisplayError = true;
-
     try {
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        if (itemsInDb.length > 0) {
-          const message = `The following items were not deleted since they have been saved before and you are not logged in: ${itemsInDb.map((item) => `'${getKeyToUse(item)}'`).join(', ')}.  Please login an try again.`;
-          const error = { message } as Error;
-          handleError(dispatch, error, message);
-          throw new Error(message);
-        }
-        throw new Error('No user info found.');
+      if (!account._id) {
+        throw new Error('No account found.');
       }
-      if (!items || items.length === 0) {
-        shouldDisplayError = false;
-        throw new Error('No items given.');
-      }
-
-      dispatch(setLoading(`Deleting items...`));
-      response = await BFF_SERVICE.deleteItems({
-        items: itemsInDb,
+      const response = await BFF_SERVICE.getUserTasks({
+        userId: account._id,
         dispatch,
-        ...getUserCredentials(account),
       });
-
-      if (!response?.acknowledged) {
-        throw new Error('Unable to delete items.');
+      if (!Array.isArray(response)) {
+        throw new Error('Unable to load tasks.');
       }
-
-      // Remove S3-hosted images (item photos + cooking instruction photos)
-      const s3ObjKeys: string[] = [];
-      for (const item of itemsInDb) {
-        for (const url of item.images ?? []) {
-          if (url.match(AMAZON_S3_REGEX)) {
-            const key = getS3ObjectKey(url);
-            if (key) s3ObjKeys.push(key);
-          }
-        }
-        for (const url of item.cookingInstructions?.images ?? []) {
-          if (url.match(AMAZON_S3_REGEX)) {
-            const key = getS3ObjectKey(url);
-            if (key) s3ObjKeys.push(key);
-          }
-        }
-      }
-      if (s3ObjKeys.length > 0) {
-        await BFF_SERVICE.deleteS3Objects({
-          dispatch,
-          objKeys: s3ObjKeys,
-          ...getUserCredentials(account),
-        });
-      }
-
-      dispatch(removeItemsListItems(items));
+      dispatch(setTasks(response));
+      return response;
     } catch (error) {
-      dispatch(removeItemsListItems(itemsNotInDb));
       return handleErrorsWithRejection({
         dispatch,
         rejectWithValue,
         error: error as Error,
-        response,
-        baseMsg: `Unable to delete items.`,
-        shouldDisplayError,
+        baseMsg: 'Error loading tasks.',
       });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
     }
   },
 );
 
-export const deleteStores = createAsyncThunk(
-  'deleteStores',
-  async (
-    input: DeleteStoresThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
+export const saveTask = createAsyncThunk(
+  'saveTask',
+  async (task: Task, { getState, dispatch, rejectWithValue }) => {
+    let response: SaveTaskResponse;
     let shouldDisplayError = true;
-    const { stores } = input;
-    const storesInDb = stores?.filter((store) => !!store.hasBeenSaved) || [];
-    const storesNotInDb = stores?.filter((store) => !store.hasBeenSaved) || [];
-    let storesToDelete = stores;
-    let response: DeletionResponse;
-
     try {
+      const state = getState() as RootState;
+      const account = state.general.account;
       if (!account._id || !account.password) {
         shouldDisplayError = false;
-        storesToDelete = storesNotInDb;
-        if (storesInDb.length > 0) {
-          const message = `The following stores were not deleted since they have been saved before and you are not logged in: ${storesInDb.map((store) => `'${getKeyToUse(store)}'`).join(', ')}.  Please login an try again.`;
-          const error = { message } as Error;
-          handleError(dispatch, error, message);
-        }
-        throw new Error('No user info found.');
+        throw new Error('No account found.');
       }
-      if (!storesInDb || storesInDb.length === 0) {
-        shouldDisplayError = false;
-        storesToDelete = storesNotInDb;
-        throw new Error('No stores given.');
-      }
-      dispatch(setLoading(`Deleting stores in Database`));
-      response = await BFF_SERVICE.deleteStores({
-        ids: storesInDb
-          .map((store) => store._id || EMPTY_STRING)
-          .filter(Boolean),
-        dispatch,
+      response = await BFF_SERVICE.saveTask({
+        task,
         ...getUserCredentials(account),
+        dispatch,
       });
       if (!response) {
-        storesToDelete = storesNotInDb;
-        throw new Error('Unable to delete stores.');
+        shouldDisplayError = false;
+        throw new Error('Unable to save task.');
       }
     } catch (error) {
       return handleErrorsWithRejection({
@@ -724,46 +259,127 @@ export const deleteStores = createAsyncThunk(
         rejectWithValue,
         error: error as Error,
         response,
-        baseMsg: `Unable to delete stores ${storesToDelete.map((store) => `${store.name}`).join(', ')}`,
+        baseMsg: 'Error saving task.',
         shouldDisplayError,
       });
     } finally {
-      dispatch(setLoading(EMPTY_STRING));
-      if (storesToDelete.length > 0) {
-        dispatch(removeStoresListItems(storesToDelete));
-      }
+      dispatch(addTask(task));
     }
   },
 );
 
-export const getCurrentState = createAsyncThunk(
-  'getCurrentState',
-  async (input: GetCurrentStoreInput, { dispatch, rejectWithValue }) => {
-    const { gpsCoordinate, showLoadingMsg = true } = input;
-    const { lat, lon } = gpsCoordinate;
-    let response: ReverseGeocodingResponse | GenericResponse;
+export const saveTasks = createAsyncThunk(
+  'saveTasks',
+  async (tasks: Task[], { getState, dispatch, rejectWithValue }) => {
+    let response: SaveTasksResponse;
+    let shouldDisplayError = true;
     try {
-      response = await GEO_CODING_SERVICE.doReverseGeoCoding({
-        gpsCoordinate,
-        dispatch,
-        loadingMsg: `Finding the current state for lat: ${lat}, lon: ${lon}`,
-        showLoadingMsg,
-      });
-      if (!response?.address.state) {
-        throw new Error('Error getting state');
+      if (!tasks || tasks.length === 0) {
+        throw new Error('No tasks given to save.');
       }
-      dispatch(
-        setCurrentLocationState(
-          State[response.address.state as keyof typeof State],
-        ),
-      );
+      const state = getState() as RootState;
+      const account = state.general.account;
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+      response = await BFF_SERVICE.saveTasks({
+        tasks,
+        ...getUserCredentials(account),
+        dispatch,
+      });
+      if (!response) {
+        shouldDisplayError = false;
+        throw new Error('Unable to save tasks.');
+      }
     } catch (error) {
       return handleErrorsWithRejection({
         dispatch,
         rejectWithValue,
         error: error as Error,
         response,
-        baseMsg: `Unable to determine the state for the current location.`,
+        baseMsg: 'Error saving tasks.',
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(addTasks(tasks));
+    }
+  },
+);
+
+export const deleteTasks = createAsyncThunk(
+  'deleteTasks',
+  async (
+    input: DeleteTasksThunkInput,
+    { getState, dispatch, rejectWithValue },
+  ) => {
+    let response: DeleteTasksResponse;
+    let shouldDisplayError = true;
+    try {
+      const { ids } = input;
+      if (!ids || ids.length === 0) {
+        throw new Error('No task ids given to delete.');
+      }
+      const state = getState() as RootState;
+      const account = state.general.account;
+      if (!account._id || !account.password) {
+        shouldDisplayError = false;
+        throw new Error('No account found.');
+      }
+      response = await BFF_SERVICE.deleteTasks({
+        ids,
+        ...getUserCredentials(account),
+        dispatch,
+      });
+      if (!response) {
+        shouldDisplayError = false;
+        throw new Error('Unable to delete tasks.');
+      }
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: 'Error deleting tasks.',
+        shouldDisplayError,
+      });
+    } finally {
+      dispatch(removeTasks(input.ids));
+    }
+  },
+);
+
+/**
+ *Pushes the full local state to the backend - used by the "sync now" button in `AccountScreen`
+ *and automatically on login when the `shouldSaveOnLogin` option is enabled.
+ **/
+export const saveAll = createAsyncThunk(
+  'saveAll',
+  async (input: SaveAllThunkInput, { getState, dispatch, rejectWithValue }) => {
+    let response: SaveAllResponse;
+    try {
+      const state = getState() as RootState;
+      const account = state.general.account;
+      if (!account._id || !account.password) {
+        throw new Error('No account found.');
+      }
+      response = await BFF_SERVICE.saveAllToDb({
+        tasks: input.tasks,
+        ...getUserCredentials(account),
+        dispatch,
+      });
+      if (!response?.success) {
+        throw new Error('Unable to save app data to the database.');
+      }
+      return response;
+    } catch (error) {
+      return handleErrorsWithRejection({
+        dispatch,
+        rejectWithValue,
+        error: error as Error,
+        response,
+        baseMsg: 'Error saving app data.',
       });
     }
   },
@@ -771,702 +387,22 @@ export const getCurrentState = createAsyncThunk(
 
 export const loadAll = createAsyncThunk(
   'loadAll',
-  async (_, { getState, dispatch, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const { account } = state.general || {};
+  async (_: void, { getState, dispatch, rejectWithValue }) => {
     let response: LoadAllResponse;
-    let shouldDisplayError = true;
-
     try {
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No user info found.');
-      }
-      dispatch(setLoading(`Loading data from database`));
-      response = await BFF_SERVICE.loadAllFromDb({
-        userId: account._id,
-        password: account.password,
-        dispatch,
-      });
-      if (!response) {
-        throw new Error('Unable to backup data.');
-      }
-      dispatch(handleLoadAllResponse(response));
-      dispatch(setInventory(response.inventory || {}));
-      return response;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to load data from server.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-    }
-  },
-);
-
-export const saveAll = createAsyncThunk(
-  'saveAll',
-  async (input: SaveAllThunkInput, { getState, dispatch, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const { account } = state.general || {};
-    let response: SaveAllResponse;
-    let shouldDisplayError = true;
-
-    try {
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No user info found.');
-      }
-      const { items, stores } = input;
-      dispatch(setLoading(`Saving data to database`));
-
-      const itemsNeedingSaving = items.data.filter(
-        (item) => item.needsSaving && !getCustomImageInfo(item)?.[0],
-      );
-      const itemsWithCustomImage = items.data.filter(
-        (item) => !!getCustomImageInfo(item)?.[0],
-      );
-
-      const storesNeedingSaving = stores.data.filter(
-        (store) => store.needsSaving,
-      );
-
-      response = await BFF_SERVICE.saveAllToDb({
-        ...input,
-        items: {
-          ...input.items,
-          data: itemsNeedingSaving,
-        },
-        stores: {
-          ...input.stores,
-          data: storesNeedingSaving,
-        },
-        dispatch,
-        ...account,
-      });
-      if (!response) {
-        throw new Error('Unable to backup data.');
-      }
-      dispatch(
-        handleSaveAllResponse({
-          ...response,
-          itemsSaved: itemsNeedingSaving,
-          storesSaved: storesNeedingSaving,
-        }),
-      );
-
-      // Save all custom images
-      const actions = [] as AsyncThunkAction<
-        void,
-        ItemFormOnSave,
-        AsyncThunkConfig
-      >[];
-      itemsWithCustomImage.forEach((item) => {
-        actions.push(
-          saveItem({
-            hasKeyChanged: false,
-            originalKey: item,
-            item: {
-              ...item,
-              needsSaving: false,
-              hasBeenSaved: true,
-            },
-            storeSpecificValues: input.storeSpecificValues[getKeyToUse(item)],
-          }),
-        );
-      });
-      await Promise.all(actions.map((promise) => dispatch(promise)));
-
-      return response;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to backup data.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-    }
-  },
-);
-
-export const saveItem = createAsyncThunk(
-  'saveItem',
-  async (input: ItemFormOnSave, { getState, dispatch, rejectWithValue }) => {
-    if (!input) throw new Error('Must provide payload to save.');
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let response: SaveItemResponse;
-    let shouldDisplayError = true;
-    const newImages = [...input.item.images];
-
-    const itemToDispatch = {
-      ...input,
-      item: {
-        ...input.item,
-        needsSaving:
-          input.item.needsSaving != null ? input.item.needsSaving : true,
-        hasBeenSaved:
-          input.item.hasBeenSaved != null ? input.item.hasBeenSaved : false,
-      } as Item,
-    };
-
-    try {
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const savedImageResults = await saveCustomImageToS3(
-        itemToDispatch.item,
-        account,
-        dispatch,
-      );
-      const anySaved = savedImageResults.some(([url]) => !!url);
-
-      // Upload any local cooking instruction photos to S3
-      const cookingPhotos =
-        itemToDispatch.item.cookingInstructions?.images ?? [];
-      const savedCookingPhotoResults = await uploadLocalImages(
-        cookingPhotos,
-        account,
-        dispatch,
-      );
-      const anyCookingPhotosSaved = savedCookingPhotoResults.some(
-        ([url]) => !!url,
-      );
-
-      if (!input.item.needsSaving && !anySaved && !anyCookingPhotosSaved) {
-        shouldDisplayError = false;
-        throw new Error('No need to save item.');
-      }
-      if (anySaved) {
-        for (const [savedImageUrl, savedImageIndex] of savedImageResults) {
-          if (savedImageUrl) newImages[savedImageIndex] = savedImageUrl;
-        }
-        itemToDispatch.item.images = newImages;
-      }
-      if (anyCookingPhotosSaved && itemToDispatch.item.cookingInstructions) {
-        const newCookingPhotos = [...cookingPhotos];
-        for (const [
-          savedImageUrl,
-          savedImageIndex,
-        ] of savedCookingPhotoResults) {
-          if (savedImageUrl) newCookingPhotos[savedImageIndex] = savedImageUrl;
-        }
-        itemToDispatch.item.cookingInstructions = {
-          ...itemToDispatch.item.cookingInstructions,
-          images: newCookingPhotos,
-        };
-      }
-
-      dispatch(setLoading(`Saving '${getKeyToUse(input.item)}' in Database`));
-      response = await BFF_SERVICE.saveItem({
-        ...input,
-        dispatch,
-        ...account,
-        item: itemToDispatch.item,
-      });
-      if (!response?._id) {
-        if (!input.item.hasBeenSaved) {
-          // Roll back: restore local URLs and delete the uploaded S3 objects
-          const objKeys: string[] = [];
-          for (const [
-            savedImageUrl,
-            savedImageIndex,
-            customImageUrl,
-          ] of savedImageResults) {
-            if (savedImageUrl) {
-              newImages[savedImageIndex] = customImageUrl;
-              const objectKey = getS3ObjectKey(savedImageUrl);
-              if (objectKey) objKeys.push(objectKey);
-            }
-          }
-          itemToDispatch.item.images = newImages;
-          // Roll back cooking instruction photos
-          if (itemToDispatch.item.cookingInstructions) {
-            const rolledBackPhotos = [...cookingPhotos];
-            for (const [
-              savedImageUrl,
-              savedImageIndex,
-              customImageUrl,
-            ] of savedCookingPhotoResults) {
-              if (savedImageUrl) {
-                rolledBackPhotos[savedImageIndex] = customImageUrl;
-                const objectKey = getS3ObjectKey(savedImageUrl);
-                if (objectKey) objKeys.push(objectKey);
-              }
-            }
-            itemToDispatch.item.cookingInstructions = {
-              ...itemToDispatch.item.cookingInstructions,
-              images: rolledBackPhotos,
-            };
-          }
-          if (objKeys.length > 0) {
-            await BFF_SERVICE.deleteS3Objects({
-              dispatch,
-              objKeys,
-              ...getUserCredentials(account),
-            });
-          }
-        }
-
-        throw new Error(`Unable to save ${getKeyToUse(itemToDispatch.item)}`);
-      }
-      // Clean up local files after successful save
-      for (const [, , customImageUrl] of savedImageResults) {
-        deleteFile(customImageUrl);
-      }
-      for (const [, , customImageUrl] of savedCookingPhotoResults) {
-        deleteFile(customImageUrl);
-      }
-      // Delete S3 cooking instruction images that the user removed
-      const prevItem = state.lists.itemsList.data.find(
-        (i) => i._id === input.item._id,
-      );
-      await deleteRemovedCookingInstructionImages(
-        prevItem?.cookingInstructions?.images ?? [],
-        itemToDispatch.item.cookingInstructions?.images ?? [],
-        account,
-        dispatch,
-      );
-      itemToDispatch.item.needsSaving = false;
-      itemToDispatch.item.hasBeenSaved = true;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Error saving Item.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-      dispatch(addItemsListItem(itemToDispatch));
-    }
-  },
-);
-
-export const savePurchase = createAsyncThunk(
-  'savePurchase',
-  async (_, { getState, dispatch, rejectWithValue }) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let lastPurchasedMap: LastPurchasedMap = {};
-    let shouldDisplayError = true;
-    let response: SavePurchaseResponse;
-
-    try {
-      const { storeSpecificValuesMap, currentStoreId } = state[listsSlice.name];
-      if (!storeSpecificValuesMap)
-        throw new Error('Unable to find the storeSpecificValuesMap');
-
-      lastPurchasedMap = getLastPurchasedFromStoreSpecificValues(
-        storeSpecificValuesMap,
-        currentStoreId,
-      );
-
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No credentials found');
-      }
-
-      dispatch(setLoading(`Saving purchase...`));
-      response = await BFF_SERVICE.savePurchase({
-        lastPurchasedMap,
-        dispatch,
-        ...getUserCredentials(account),
-      });
-      if (!response?._id) {
-        shouldDisplayError = false;
-        throw new Error('Unable to save purchase to the database');
-      }
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Error saving purchase.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-      dispatch(completePurchase(lastPurchasedMap));
-    }
-  },
-);
-
-export const moveInventoryItemsThunk = createAsyncThunk(
-  'moveInventoryItems',
-  async (
-    input: MoveInventoryItemsThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let shouldDisplayError = true;
-    let response: MoveInventoryItemsResponse;
-
-    if (!input) {
-      handleError(dispatch, {
-        message: 'Must provide payload to transfer inventory items.',
-      });
-    }
-    try {
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No user account info given.');
-      }
-      const isSuccess = await BFF_SERVICE.moveInventoryItems({
-        ...input,
-        dispatch,
-        ...account,
-        itemsToMove: input.map((item) => ({
-          ...item,
-          originLocationId:
-            item.originLocationId ||
-            state.lists.inventory.currentLocationId ||
-            EMPTY_STRING,
-        })),
-      });
-      if (!isSuccess) {
-        shouldDisplayError = false;
-        throw new Error('Unable to move inventory items in database.');
-      }
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to save action of moving inventory items.  Try again later.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(moveInventoryItems(input));
-    }
-  },
-);
-
-export const moveInventoryItemExpirationDatesThunk = createAsyncThunk(
-  'moveInventoryItemExpirationDates',
-  async (
-    input: MoveInventoryItemExpirationDatesThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let shouldDisplayError = true;
-    let response: MoveInventoryItemExpirationDatesResponse;
-
-    if (!input) {
-      handleError(dispatch, {
-        message:
-          'Must provide payload to transfer inventory item expiration dates.',
-      });
-    }
-    try {
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No user account info given.');
-      }
-      const isSuccess = await BFF_SERVICE.moveInventoryItemExpirationDates({
-        ...input,
-        dispatch,
-        ...account,
-        itemsToMove: input.map((item) => ({
-          ...item,
-          originLocationId:
-            item.originLocationId ||
-            state.lists.inventory.currentLocationId ||
-            EMPTY_STRING,
-          expirationDates: getExpirationDates(item.expirationDates),
-        })),
-      });
-      if (!isSuccess) {
-        shouldDisplayError = false;
-        throw new Error(
-          'Unable to move inventory item expiration dates in database.',
-        );
-      }
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to save action of moving inventory item expiration dates.  Try again later.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(moveInventoryItemExpirationDates(input));
-    }
-  },
-);
-
-export const saveStore = createAsyncThunk(
-  'saveStore',
-  async (
-    input: AddStoresListItemPayload,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let shouldDisplayError = true;
-    let response: SaveStoreResponse;
-
-    if (!input) {
-      handleError(dispatch, {
-        message: 'Must provide payload to save a store.',
-      });
-    }
-
-    const storeToSave = {
-      ...input,
-      newStore: {
-        ...input.newStore,
-        needsSaving:
-          input.newStore.needsSaving != null
-            ? input.newStore.needsSaving
-            : true,
-        hasBeenSaved:
-          input.newStore.hasBeenSaved != null
-            ? input.newStore.hasBeenSaved
-            : false,
-      },
-    } as AddStoresListItemPayload;
-
-    try {
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No user account info given.');
-      }
-      if (!input.newStore.needsSaving) {
-        shouldDisplayError = false;
-        throw new Error('No need to save store.');
-      }
-
-      dispatch(
-        setLoading(`Saving '${getKeyToUse(input.newStore.name)}' in Database`),
-      );
-
-      response = await BFF_SERVICE.saveStore({
-        store: storeToSave.newStore,
-        dispatch,
-        ...getUserCredentials(account),
-      });
-      if (!response?._id) {
-        throw new Error('Unable to save store.');
-      }
-      storeToSave.newStore.needsSaving = false;
-      storeToSave.newStore.hasBeenSaved = true;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Error saving store.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-      dispatch(addStoresListItem(storeToSave));
-    }
-  },
-);
-
-export const saveStoreRoutes = createAsyncThunk(
-  'saveStoreRoutes',
-  async (
-    input: SaveStoreRoutesThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
-    const { storeId, route } = input || {};
-    let shouldDisplayError = true;
-    let response: SaveStoreRoutesResponse | undefined;
-
-    try {
-      if (!storeId) {
-        shouldDisplayError = false;
-        throw new Error('Must provide a storeId to save routes for.');
-      }
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No user account info given.');
-      }
-
-      const store = state.lists.storesList.data.find(
-        (s) => getKeyToUse(s) === storeId,
-      );
-      if (!store) {
-        shouldDisplayError = false;
-        throw new Error(`Unable to find store with id of '${storeId}'.`);
-      }
-
-      // If a route was provided, decide whether it's an add or an update and
-      // dispatch the appropriate local slice action before persisting.
-      if (route) {
-        const doesRouteExist = Boolean(
-          route.id && store.routes?.some((r) => r.id === route.id),
-        );
-        if (doesRouteExist) {
-          dispatch(updateRoute({ ...route, storeId, id: route.id as string }));
-        } else {
-          dispatch(addRoute({ ...route, storeId }));
-        }
-      }
-
-      dispatch(setLoading(`Saving routes in Database`));
-
-      // Re-read state since the local dispatch above already updated the
-      // store's routes array synchronously.
-      const updatedStore = (getState() as RootState).lists.storesList.data.find(
-        (s) => getKeyToUse(s) === storeId,
-      );
-
-      response = await BFF_SERVICE.saveStoreRoutes({
-        storeId,
-        routes: updatedStore?.routes ?? [],
-        dispatch,
-        ...getUserCredentials(account),
-      });
-
-      if (!response) {
-        throw new Error('Unable to save routes.');
-      }
-
-      return response;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to save routes.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-    }
-  },
-);
-
-export const getStoreRoutes = createAsyncThunk(
-  'getStoreRoutes',
-  async (
-    input: GetStoreRoutesThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const { storeId } = input || {};
-    let shouldDisplayError = true;
-    let response: GetStoreRoutesResponse | undefined;
-
-    try {
-      if (!storeId) {
-        shouldDisplayError = false;
-        throw new Error('Must provide a storeId to download routes for.');
-      }
-
-      response = await BFF_SERVICE.getStoreRoutes({ storeId, dispatch });
-
-      if (!response || !Array.isArray(response)) {
-        throw new Error('Unable to download routes.');
-      }
-
       const state = getState() as RootState;
-      const store = state.lists.storesList.data.find(
-        (s) => getKeyToUse(s) === storeId,
-      );
-      const localRoutes = store?.routes ?? [];
-      const localRoutesById = new Map(
-        localRoutes.map((route) => [route.id, route]),
-      );
-      const conflicts: RouteConflict[] = [];
-
-      // Additive merge: routes that only exist remotely are added locally;
-      // routes that exist in both but differ are flagged as conflicts for
-      // the caller to resolve with the user. Routes that only exist locally
-      // are left untouched.
-      for (const remoteRoute of response) {
-        const localRoute = localRoutesById.get(remoteRoute.id);
-        if (!localRoute) {
-          dispatch(addRoute({ ...remoteRoute, storeId }));
-        } else if (!_.isEqual(localRoute, remoteRoute)) {
-          conflicts.push({ local: localRoute, remote: remoteRoute });
-        }
-      }
-
-      return { routes: response, conflicts };
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to download routes.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
-    }
-  },
-);
-
-export const deleteStoreRoutes = createAsyncThunk(
-  'deleteStoreRoutes',
-  async (
-    input: DeleteStoreRoutesThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const state = getState() as RootState;
-    const account = state.general.account;
-    const { storeId, ids } = input || {};
-    let shouldDisplayError = true;
-    let response: DeleteStoreRoutesResponse | undefined;
-
-    try {
-      if (!storeId) {
-        shouldDisplayError = false;
-        throw new Error('Must provide a storeId to delete routes for.');
-      }
-      if (!ids || ids.length <= 0) {
-        shouldDisplayError = false;
-        throw new Error('Must provide at least one route id to delete.');
-      }
+      const account = state.general.account;
       if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No user account info given.');
+        throw new Error('No account found.');
       }
-
-      dispatch(setLoading(`Deleting routes in Database`));
-
-      response = await BFF_SERVICE.deleteStoreRoutes({
-        storeId,
-        ids,
-        dispatch,
+      response = await BFF_SERVICE.loadAllFromDb({
         ...getUserCredentials(account),
+        dispatch,
       });
-
-      if (!response) {
-        throw new Error('Unable to delete routes.');
+      if (!response?.tasks) {
+        throw new Error('Unable to load app data.');
       }
-
-      // Only remove the routes locally once the db deletion succeeds.
-      ids.forEach((id) => dispatch(deleteRoute({ id, storeId })));
-
+      dispatch(setTasks(response.tasks));
       return response;
     } catch (error) {
       return handleErrorsWithRejection({
@@ -1474,383 +410,9 @@ export const deleteStoreRoutes = createAsyncThunk(
         rejectWithValue,
         error: error as Error,
         response,
-        baseMsg: `Unable to delete routes.`,
-        shouldDisplayError,
+        baseMsg: 'Error loading app data.',
       });
-    } finally {
-      dispatch(setLoading(EMPTY_STRING));
     }
   },
 );
-
-/**
- *Assigns/unassigns `location` (for the given `routeId`) on every item in
- *`itemKeysToAssign`/`itemKeysToUnassign` by building a single
- *storeSpecificValues diff and persisting it in one call via
- *{@link BFF_SERVICE.saveStoreSpecificValues}. Large batches (350+ items)
- *previously dispatched a separate {@link saveItem} thunk per item -- each
- *with its own network round trip and several redux dispatches -- which
- *fired hundreds of near-simultaneous store updates and triggered a
- *"Maximum update depth exceeded" warning; batching avoids that entirely.
- **/
-export const assignLocationToItems = createAsyncThunk(
-  'assignLocationToItems',
-  async (
-    input: AssignLocationToItemsThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const { routeId, location, itemKeysToAssign, itemKeysToUnassign } =
-      input || {};
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let shouldDisplayError = true;
-    let response: SaveStoreSpecificValuesResponse | undefined;
-    const keysToUpdate = [
-      ...(itemKeysToAssign || []),
-      ...(itemKeysToUnassign || []),
-    ];
-    const updatedStoreSpecificValuesMap: StoreSpecificValuesMap = {};
-
-    try {
-      if (keysToUpdate.length === 0) {
-        shouldDisplayError = false;
-        throw new Error('No item changes to save.');
-      }
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const storeSpecificValuesMap = state.lists.storeSpecificValuesMap;
-
-      for (const key of keysToUpdate) {
-        const shouldAssign = itemKeysToAssign.includes(key);
-        const currentValues = storeSpecificValuesMap[key] || {};
-        updatedStoreSpecificValuesMap[key] = {
-          ...currentValues,
-          [StoreSpecificValueKey.Location]: {
-            ...currentValues?.[StoreSpecificValueKey.Location],
-            [routeId]: shouldAssign ? location : EMPTY_STRING,
-          },
-        };
-      }
-
-      response = await BFF_SERVICE.saveStoreSpecificValues({
-        storeSpecificValuesMap: updatedStoreSpecificValuesMap,
-        dispatch,
-        ...account,
-      });
-
-      if (!response) {
-        throw new Error('Unable to save location assignments.');
-      }
-
-      return response;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to save location assignments.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(addStoreSpecificValues(updatedStoreSpecificValuesMap));
-    }
-  },
-);
-
-/**
- *Assigns a (potentially different) location to each item in `assignments`
- *for the given `routeId`, building a single storeSpecificValues diff and
- *persisting it in one call via {@link BFF_SERVICE.saveStoreSpecificValues}
- *-- the same batching approach {@link assignLocationToItems} uses, just for
- *a per-item map of locations instead of one location applied to every item.
- **/
-export const assignLocationsToItems = createAsyncThunk(
-  'assignLocationsToItems',
-  async (
-    input: AssignLocationsToItemsThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const { routeId, assignments } = input || {};
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let shouldDisplayError = true;
-    let response: SaveStoreSpecificValuesResponse | undefined;
-    const updatedStoreSpecificValuesMap: StoreSpecificValuesMap = {};
-    const keysToUpdate = Object.keys(assignments || {});
-
-    try {
-      if (keysToUpdate.length === 0) {
-        shouldDisplayError = false;
-        throw new Error('No item changes to save.');
-      }
-      if (!routeId) {
-        shouldDisplayError = false;
-        throw new Error('Must provide a routeId to assign locations for.');
-      }
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const storeSpecificValuesMap = state.lists.storeSpecificValuesMap;
-
-      for (const key of keysToUpdate) {
-        const currentValues = storeSpecificValuesMap[key] || {};
-        updatedStoreSpecificValuesMap[key] = {
-          ...currentValues,
-          [StoreSpecificValueKey.Location]: {
-            ...currentValues?.[StoreSpecificValueKey.Location],
-            [routeId]: assignments[key],
-          },
-        };
-      }
-
-      response = await BFF_SERVICE.saveStoreSpecificValues({
-        storeSpecificValuesMap: updatedStoreSpecificValuesMap,
-        dispatch,
-        ...account,
-      });
-
-      if (!response) {
-        throw new Error('Unable to save location assignments.');
-      }
-
-      return response;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to save location assignments.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(addStoreSpecificValues(updatedStoreSpecificValuesMap));
-    }
-  },
-);
-
-/**
- *Keeps items in sync when a route's location is renamed or deleted:
- *finds every item currently assigned (for the given `routeId`) to
- *`oldLocationName` and either renames it to `newLocationName` (rename) or
- *clears it (delete, when `newLocationName` is omitted/empty), persisting the
- *change via {@link BFF_SERVICE.saveStoreSpecificValues}, which updates only
- *the storeSpecificValues document instead of saving/updating any items.
- **/
-export const updateItemsForRouteLocationChange = createAsyncThunk(
-  'updateItemsForRouteLocationChange',
-  async (
-    input: UpdateItemsForRouteLocationChangeThunkInput,
-    { getState, dispatch, rejectWithValue },
-  ) => {
-    const { routeId, oldLocationName, newLocationName } = input || {};
-    const state = getState() as RootState;
-    const account = state.general.account;
-    let shouldDisplayError = true;
-    let response: SaveStoreSpecificValuesResponse | undefined;
-    const updatedStoreSpecificValuesMap: StoreSpecificValuesMap = {};
-
-    try {
-      if (!routeId || !oldLocationName) {
-        shouldDisplayError = false;
-        throw new Error('Must provide a routeId and location to update.');
-      }
-      if (!account._id || !account.password) {
-        shouldDisplayError = false;
-        throw new Error('No account found.');
-      }
-
-      const storeSpecificValuesMap = state.lists.storeSpecificValuesMap;
-
-      const keysToUpdate = Object.keys(storeSpecificValuesMap || {}).filter(
-        (key) =>
-          storeSpecificValuesMap[key]?.[StoreSpecificValueKey.Location]?.[
-            routeId
-          ] === oldLocationName,
-      );
-
-      if (keysToUpdate.length === 0) {
-        shouldDisplayError = false;
-        throw new Error('No items are assigned to this location.');
-      }
-
-      for (const key of keysToUpdate) {
-        const currentValues = storeSpecificValuesMap[key] || {};
-        updatedStoreSpecificValuesMap[key] = {
-          ...currentValues,
-          [StoreSpecificValueKey.Location]: {
-            ...currentValues?.[StoreSpecificValueKey.Location],
-            [routeId]: newLocationName || EMPTY_STRING,
-          },
-        };
-      }
-
-      response = await BFF_SERVICE.saveStoreSpecificValues({
-        storeSpecificValuesMap: updatedStoreSpecificValuesMap,
-        dispatch,
-        ...account,
-      });
-
-      if (!response) {
-        throw new Error('Unable to save location changes.');
-      }
-
-      return response;
-    } catch (error) {
-      return handleErrorsWithRejection({
-        dispatch,
-        rejectWithValue,
-        error: error as Error,
-        response,
-        baseMsg: `Unable to update item locations.`,
-        shouldDisplayError,
-      });
-    } finally {
-      dispatch(addStoreSpecificValues(updatedStoreSpecificValuesMap));
-    }
-  },
-);
-
-type HandleErrorsWithRejectionInput<T> = {
-  dispatch: Dispatch;
-  rejectWithValue: (message: string) => void;
-  error: Error;
-  response: T | GenericResponse;
-  baseMsg: string;
-  genericMsg?: string;
-  shouldDisplayError?: boolean;
-};
-export function handleErrorsWithRejection<T>(
-  input: HandleErrorsWithRejectionInput<T>,
-) {
-  const {
-    dispatch,
-    rejectWithValue,
-    error,
-    response,
-    baseMsg,
-    genericMsg = 'Please try again.',
-    shouldDisplayError = true,
-  } = input;
-  const detailsMsg =
-    response === undefined ? 'The server cannot be reached.' : genericMsg;
-  const messageToUse = `${baseMsg}  ${detailsMsg}`;
-  if (shouldDisplayError) {
-    handleError(dispatch, error as Error, messageToUse);
-  }
-  return rejectWithValue(messageToUse);
-}
-
-async function uploadLocalImages(
-  images: string[],
-  account: UserAccount,
-  dispatch: Dispatch,
-): Promise<ProcessedGroceryListItem[]> {
-  const emptyResult: ProcessedGroceryListItem = [
-    EMPTY_STRING,
-    EMPTY_NUMBER,
-    EMPTY_STRING,
-  ];
-  try {
-    if (!account._id || !account.password) {
-      throw new Error('No credentials found');
-    }
-
-    const localImageEntries = images
-      .map((image, idx) => [idx, image] as [number, string])
-      .filter(([, image]) => !!image.match(LOCAL_FILE_REGEX));
-
-    if (localImageEntries.length === 0) return [];
-
-    const results = await Promise.all(
-      localImageEntries.map(async ([customImageUrlIndex, customImageUrl]) => {
-        try {
-          const split = customImageUrl.split('/');
-          const filename = split[split.length - 1];
-
-          logWhenDevelopmentMode({ filename, customImageUrl });
-          const signedUrlResponse = await BFF_SERVICE.getSignedUrlForUpload({
-            dispatch,
-            ...getUserCredentials(account),
-            filename,
-          });
-
-          logWhenDevelopmentMode({ signedUrlResponse });
-
-          if (!signedUrlResponse?.uploadUrl || !signedUrlResponse.downloadUrl) {
-            throw new Error('Unable to get signed url.');
-          }
-
-          const blob = await uriToBlob(customImageUrl);
-          if (!blob) return emptyResult;
-
-          const savedResponse = await fetch(signedUrlResponse.uploadUrl, {
-            body: blob,
-            method: 'PUT',
-          });
-
-          logWhenDevelopmentMode({ savedResponse });
-
-          if (!savedResponse.ok) {
-            throw new Error('Unable to save image.');
-          }
-
-          return [
-            signedUrlResponse.downloadUrl,
-            customImageUrlIndex,
-            customImageUrl,
-          ] as ProcessedGroceryListItem;
-        } catch (error) {
-          logWhenDevelopmentMode({ source: 'uploadLocalImages (item)', error });
-          return emptyResult;
-        }
-      }),
-    );
-
-    return results.filter(([url]) => !!url);
-  } catch (error) {
-    logWhenDevelopmentMode({ source: 'uploadLocalImages', error });
-    return [];
-  }
-}
-
-async function saveCustomImageToS3(
-  item: Item,
-  account: UserAccount,
-  dispatch: Dispatch,
-): Promise<ProcessedGroceryListItem[]> {
-  logWhenDevelopmentMode({ item, account });
-  return uploadLocalImages(item.images, account, dispatch);
-}
-
-/**
- * Compares the previous and new cooking instruction image arrays and deletes
- * from S3 any images that were present before but have since been removed.
- */
-async function deleteRemovedCookingInstructionImages(
-  prevImages: string[],
-  nextImages: string[],
-  account: UserAccount,
-  dispatch: Dispatch,
-): Promise<void> {
-  const removedS3Images = prevImages.filter(
-    (img) => img.match(AMAZON_S3_REGEX) && !nextImages.includes(img),
-  );
-  if (removedS3Images.length === 0) return;
-  const objKeys = removedS3Images
-    .map((url) => getS3ObjectKey(url))
-    .filter(Boolean) as string[];
-  if (objKeys.length > 0) {
-    await BFF_SERVICE.deleteS3Objects({
-      dispatch,
-      objKeys,
-      ...getUserCredentials(account),
-    });
-  }
-}
+//#endregion

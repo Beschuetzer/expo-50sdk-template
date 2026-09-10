@@ -1,6 +1,5 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { IconProps } from '@expo/vector-icons/build/createIconSet';
-import { useTheme } from 'native-base';
 import React from 'react';
 import { TouchableOpacity, ViewStyle } from 'react-native';
 import { TouchableOpacityProps } from 'react-native-gesture-handler';
@@ -18,13 +17,12 @@ export type FontAwesomeButtonProps = {
 };
 
 export function FontAwesomeButton(props: FontAwesomeButtonProps) {
-  const theme = useTheme();
   const {
     buttonProps,
     disabled,
     name,
     onPress,
-    size = theme.sizes[6],
+    size = 24,
     style,
     fontAwesomeProps,
   } = props;

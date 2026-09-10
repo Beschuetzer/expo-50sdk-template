@@ -1,4 +1,4 @@
-import { Row, Input, theme, Heading } from 'native-base';
+import { Heading, HStack, Input, InputField } from '@gluestack-ui/themed';
 import { useCallback, useState } from 'react';
 
 import { PlusMinusStack, PlusMinusStackProps } from '../PlusMinusStack';
@@ -10,7 +10,7 @@ export type NumberInputProps = {
   initialValue?: number;
   subTitle?: string;
   title?: string;
-  onValueChange: (frequencyInMs: number) => void;
+  onValueChange: (value: number) => void;
 } & SpacingProp &
   HeadingTagProp &
   PlusMinusStackProps;
@@ -36,24 +36,19 @@ export function NumberInput(props: NumberInputProps) {
   );
 
   const onMinusPressLocal = useCallback(() => {
-    setValue(
-      (current) => (parseInt(current as unknown as string, 10) || 1) - 1,
-    );
+    setValue((current) => (Number(current) || 1) - 1);
     onMinusPress && onMinusPress();
   }, [onMinusPress]);
 
   const onPlusPressLocal = useCallback(() => {
-    setValue(
-      (current) =>
-        (parseInt(current as unknown as string, 10) || EMPTY_NUMBER) + 1,
-    );
+    setValue((current) => (Number(current) || EMPTY_NUMBER) + 1);
     onPlusPress && onPlusPress();
   }, [onPlusPress]);
 
   return (
     <>
       {title ? <Tag>{title}</Tag> : null}
-      <Row>
+      <HStack>
         <PlusMinusStack
           isMinusDisabled={value <= 0}
           isPlusDisabled={false}
@@ -61,16 +56,15 @@ export function NumberInput(props: NumberInputProps) {
           onPlusPress={onPlusPressLocal}
           onMinusPress={onMinusPressLocal}
         />
-        <Input
-          keyboardType="numeric"
-          variant="outline"
-          p={theme.space[1]}
-          placeholder="Number"
-          value={value.toString()}
-          onChangeText={onChangeValue}
-          flex={1}
-        />
-      </Row>
+        <Input flex={1} variant="outline">
+          <InputField
+            keyboardType="numeric"
+            placeholder="Number"
+            value={value.toString()}
+            onChangeText={onChangeValue}
+          />
+        </Input>
+      </HStack>
     </>
   );
 }

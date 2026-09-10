@@ -1,62 +1,35 @@
 import { getAlphabeticalCharToIndexMapping } from './getAlphabeticalCharToIndexMapping';
 
 import { SortOrder } from '@/components/lists/sorters';
-import { MOCK_ITEMS_LIST } from '@/constants/testing';
+import { getRandomTask } from '@/components/mocks/helpers';
 
 describe('getAlphabeticalCharToIndexMapping', () => {
+  const tasks = ['Apple', 'Banana', 'Carrot', 'apricot', 'Blueberry'].map(
+    (title) => getRandomTask(title),
+  );
+
   test('it works ascending', async () => {
-    const actual = getAlphabeticalCharToIndexMapping(MOCK_ITEMS_LIST.data);
+    const actual = getAlphabeticalCharToIndexMapping(tasks);
     expect(actual).toStrictEqual({
       A: 0,
-      B: 7,
-      C: 24,
-      D: 34,
-      E: 36,
-      F: 41,
-      G: 44,
-      H: 53,
-      K: 57,
-      L: 59,
-      M: 62,
-      N: 68,
-      O: 69,
-      P: 73,
-      R: 90,
-      S: 92,
-      T: 109,
-      U: 120,
-      V: 122,
-      Y: 129,
-      Z: 130,
+      B: 2,
+      C: 4,
     });
   });
+
   test('it works descending', async () => {
     const actual = getAlphabeticalCharToIndexMapping(
-      MOCK_ITEMS_LIST.data,
+      tasks,
       SortOrder.Descending,
     );
     expect(actual).toStrictEqual({
-      A: 125,
-      B: 108,
-      C: 98,
-      D: 96,
-      E: 91,
-      F: 88,
-      G: 79,
-      H: 75,
-      K: 73,
-      L: 70,
-      M: 64,
-      N: 63,
-      O: 59,
-      P: 42,
-      R: 40,
-      S: 23,
-      T: 12,
-      U: 10,
-      V: 3,
-      Y: 2,
-      Z: 0,
+      A: 3,
+      B: 1,
+      C: 0,
     });
+  });
+
+  test('it returns an empty mapping for an empty list', async () => {
+    expect(getAlphabeticalCharToIndexMapping([])).toStrictEqual({});
   });
 });

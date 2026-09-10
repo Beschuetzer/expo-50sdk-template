@@ -1,4 +1,10 @@
-import { Button, Divider, Stack, Text, useTheme } from 'native-base';
+import {
+  Button,
+  ButtonText,
+  Divider,
+  VStack,
+  Text,
+} from '@gluestack-ui/themed';
 
 type ListActionToastProps = {
   message: string;
@@ -6,45 +12,39 @@ type ListActionToastProps = {
 };
 
 /**
- * A shared "snackbar"-style toast used to notify the user when items are
- * moved or removed from a shopping list, with an optional Undo action.
- */
+ *A shared "snackbar"-style toast used to notify the user when a task changes (added, completed,
+ *deleted, etc.), with an optional Undo action. Rendered via gluestack's `useToast()` (see
+ *`TasksList`).
+ **/
 export function ListActionToast({ message, onUndo }: ListActionToastProps) {
-  const theme = useTheme();
-
   return (
-    <Stack
-      bg={theme.colors.coolGray[900]}
-      borderRadius="lg"
-      p={4}
-      mb={4}
-      maxW="90%"
-      minW="64"
-      shadow={6}
+    <VStack
+      bg="$coolGray900"
+      borderRadius="$lg"
+      p="$4"
+      mb="$4"
+      maxWidth="90%"
+      minWidth="$64"
     >
-      <Text color={theme.colors.white} fontSize="sm">
+      <Text color="$white" size="sm">
         {message}
       </Text>
       {onUndo && (
         <>
-          <Divider my={2} bg={theme.colors.coolGray[700]} />
+          <Divider my="$2" bg="$coolGray700" />
           <Button
             alignSelf="flex-end"
             size="sm"
-            variant="ghost"
-            p={1}
-            _text={{
-              color: theme.colors.success[400],
-              fontWeight: 'bold',
-              fontSize: 'xs',
-            }}
-            _pressed={{ bg: theme.colors.coolGray[800] }}
+            variant="link"
+            p="$1"
             onPress={onUndo}
           >
-            UNDO
+            <ButtonText color="$success400" bold size="xs">
+              UNDO
+            </ButtonText>
           </Button>
         </>
       )}
-    </Stack>
+    </VStack>
   );
 }

@@ -2,7 +2,7 @@
 
 ## High priority
 
-- Split `utils/helpers.ts` into smaller modules (environment, storage, validation, platform helpers, task utilities) so it is not acting as a kitchen-sink utility layer.
+- 
 - Break up `state/thunks.ts` into feature-specific thunk files (auth, tasks, sync) to reduce one-file complexity and make the template easier to reuse.
 - Add a real `.env.example` and centralized environment validation for required values such as `EXPO_PUBLIC_IP_ADDRESS`, `EXPO_PUBLIC_PORT_NUMBER`, and `EXPO_PUBLIC_ENV`.
 - Replace the current broad `serializableCheck: false` and `immutableCheck: false` settings with safer Redux configuration or targeted whitelist/blacklist rules to avoid hidden state bugs.

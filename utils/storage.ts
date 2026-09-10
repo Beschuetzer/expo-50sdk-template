@@ -85,7 +85,9 @@ export async function importAppData(directory: string) {
     }
     return toReturn;
   } catch (error) {
-    alert(JSON.stringify({ message: 'Error loading app state:', error }, null, 2));
+    alert(
+      JSON.stringify({ message: 'Error loading app state:', error }, null, 2),
+    );
   }
   return toReturn;
 }

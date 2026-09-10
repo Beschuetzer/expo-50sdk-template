@@ -50,7 +50,10 @@ export function getKeyToUse(key: string | Key, displayAlertOnMissing = false) {
   if (typeof key === 'string') return key;
   const sanitizedKey = sanitizeKey(key);
   const toReturn =
-    sanitizedKey?._id || sanitizedKey?.code || sanitizedKey?.title || EMPTY_STRING;
+    sanitizedKey?._id ||
+    sanitizedKey?.code ||
+    sanitizedKey?.title ||
+    EMPTY_STRING;
 
   if (!toReturn && displayAlertOnMissing) {
     alert(

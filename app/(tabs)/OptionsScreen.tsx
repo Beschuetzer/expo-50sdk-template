@@ -26,11 +26,8 @@ import {
   swipeableRowOpenThresholdSelector,
 } from '@/state/slices/optionsSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
-import {
-  displayAlert,
-  getIsDevelopmentMode,
-  scheduleNotification,
-} from '@/utils/helpers';
+import { getIsDevelopmentMode, scheduleNotification } from '@/utils/helpers';
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 const MOCK_SHARE_TEXT = 'Pick up dry cleaning';
 
@@ -50,7 +47,7 @@ export default function OptionsScreen() {
       setIsPinging(true);
       const response = await BFF_SERVICE.ping({ dispatch });
       if (response?.success) {
-        displayAlert({ message: 'Bff service is running.' });
+        logWhenDevelopmentMode({ message: 'Bff service is running.' });
       } else {
         dispatch(setError({ message: 'Bff server is not running.' }));
       }
@@ -66,7 +63,9 @@ export default function OptionsScreen() {
   }, [navigation]);
 
   const onTestNotificationLocalPress = useCallback(async () => {
-    displayAlert({ message: 'Local notification scheduled for 3 seconds.' });
+    logWhenDevelopmentMode({
+      message: 'Local notification scheduled for 3 seconds.',
+    });
     await scheduleNotification({
       content: {
         title: 'Local Notification',

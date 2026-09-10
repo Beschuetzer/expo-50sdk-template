@@ -4,10 +4,10 @@ import React, { useCallback } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { FILE_NAMES } from '@/constants/general';
+import { setError } from '@/state/slices/generalSlice';
 import { tasksSelector } from '@/state/slices/tasksSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import {
-  displayAlert,
   getDirectory,
   importAppData,
   makeNewDirectory,
@@ -32,10 +32,16 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       const data = await importAppData(dir);
       setAppData({ ...data, dispatch });
     } catch (error) {
-      displayAlert({
-        msg: 'Unable to import app data.',
-        error: (error as Error).message,
-      });
+      dispatch(
+        setError({
+          message: 'Unable to import app data.',
+          error: {
+            message: (error as Error)?.message,
+            stack: (error as Error)?.stack,
+            name: (error as Error)?.name,
+          },
+        }),
+      );
     }
   }, [dispatch]);
 
@@ -46,7 +52,16 @@ export const SaveLoadState = (props: SaveLoadStateProps) => {
       const madeDirectory = await makeNewDirectory(dir, newFolderName);
       await saveAppStateToFile(FILE_NAMES.tasks, madeDirectory, tasks);
     } catch (error) {
-      displayAlert({ msg: 'Unable to save app data.', error });
+      dispatch(
+        setError({
+          message: 'Unable to save app data.',
+          error: {
+            message: (error as Error)?.message,
+            stack: (error as Error)?.stack,
+            name: (error as Error)?.name,
+          },
+        }),
+      );
     }
   }, [tasks]);
 

@@ -10,7 +10,6 @@ import {
 } from '@/state/slices/generalSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { Error } from '@/types/general';
-import { displayAlert } from '@/utils/helpers';
 
 export type ErrorModalProps = object;
 
@@ -27,9 +26,10 @@ export const ErrorModal = (props: ErrorModalProps) => {
   }, [errors]);
 
   const onButtonPress = useCallback((error: Error) => {
-    displayAlert({
+    console.info('Error details:', {
       message: error.error?.message,
       stackTrace: error.error?.stack,
+      statusCode: error.statusCode,
     });
   }, []);
 

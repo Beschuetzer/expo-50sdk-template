@@ -34,10 +34,7 @@ import {
   UserNeeded,
 } from '@/types/bffService';
 import { getBackendUrl, getIsDevelopmentMode } from '@/utils/helpers';
-
-function displayAlert(object: object | null) {
-  alert(object ? JSON.stringify(object, null, 2) : object);
-}
+import { logWhenDevelopmentMode } from '@/utils/logging';
 
 export const PING_PATH = '/ping';
 export const S3_PATH = '/s3';
@@ -48,7 +45,7 @@ class BffService extends AbstractService {
   constructor() {
     super(getBackendUrl());
     if (getIsDevelopmentMode()) {
-      displayAlert({
+      logWhenDevelopmentMode({
         bffServiceBaseUrl: this._baseUrl,
         EXPO_PUBLIC_ENV: process.env.EXPO_PUBLIC_ENV,
       });

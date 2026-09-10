@@ -2,7 +2,6 @@ import React, { ErrorInfo } from 'react';
 import { ScrollView, Text, View, StyleSheet } from 'react-native';
 
 import { ChildrenProp } from '@/types/general';
-import { displayAlert } from '@/utils/helpers';
 
 type ErrorBoundaryProps = object & ChildrenProp;
 
@@ -26,7 +25,6 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    displayAlert({ error, errorInfo });
   }
 
   render(): React.ReactNode {

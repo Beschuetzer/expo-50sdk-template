@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 
+import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
 import { login } from '@/state/thunks';
-import { displayAlert, getIsDevelopmentMode } from '@/utils/helpers';
+import { getIsDevelopmentMode } from '@/utils/helpers';
 import { logWhenDevelopmentMode } from '@/utils/logging';
 
 export const useAutoLogin = () => {
@@ -14,9 +15,11 @@ export const useAutoLogin = () => {
     const password = process.env.EXPO_PUBLIC_TEST_PASSWORD;
 
     if (!email || !password) {
-      displayAlert({
-        message: `Auto login failed.  Please provide test credentials in .env file.`,
-      });
+      dispatch(
+        setError({
+          message: 'Auto login failed. Please provide test credentials in .env file.',
+        }),
+      );
       return;
     }
     logWhenDevelopmentMode({ testEmail: email, testPassword: password });

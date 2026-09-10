@@ -8,7 +8,9 @@ import { logWhenDevelopmentMode } from './logging';
 import { CurrentLocation, GpsCoordinate } from '@/types/general';
 
 export function displayAlert(object: object | null) {
-  alert(object ? JSON.stringify(object, null, 2) : object);
+  logWhenDevelopmentMode(
+    object ? JSON.stringify(object, null, 2) : object ?? 'displayAlert called',
+  );
 }
 
 export function getBackendUrl() {

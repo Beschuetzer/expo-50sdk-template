@@ -6,10 +6,10 @@ import { InputText } from './InputText';
 import { FontAwesomeButton } from '../FontAwesomeButton';
 
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { setLoading } from '@/state/slices/generalSlice';
+import { setError, setLoading } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
 import { GpsCoordinate } from '@/types/general';
-import { displayAlert, getGpsCoordinate } from '@/utils/helpers';
+import { getGpsCoordinate } from '@/utils/helpers';
 import { openMap } from '@/utils/openMap';
 
 type GeolocationInputProps = {
@@ -49,7 +49,16 @@ export default function GeolocationInput(props: GeolocationInputProps) {
       const gpsCoordinate = await getGpsCoordinate();
       setCoordinates(gpsCoordinate);
     } catch (error: any) {
-      displayAlert(error);
+      dispatch(
+        setError({
+          message: 'Unable to fetch the current location.',
+          error: {
+            message: error?.message,
+            stack: error?.stack,
+            name: error?.name,
+          },
+        }),
+      );
     } finally {
       setIsLoadingGpscoords(false);
       dispatch(setLoading(EMPTY_STRING));

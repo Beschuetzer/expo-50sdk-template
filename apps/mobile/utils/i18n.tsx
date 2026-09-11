@@ -141,7 +141,7 @@ const messages = {
   },
 } as const;
 
-type TranslationKey =
+export type TranslationKey =
   | `actions.${keyof typeof messages.en.actions}`
   | `app.${keyof typeof messages.en.app}`
   | `checklist.${keyof typeof messages.en.checklist}`

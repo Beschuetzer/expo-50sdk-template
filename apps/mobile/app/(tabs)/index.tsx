@@ -15,7 +15,7 @@ import {
 } from '@/features/backend/hooks/useBackendHealthQuery';
 import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
-import { useI18n } from '@/utils/i18n';
+import { useI18n, type TranslationKey } from '@/utils/i18n';
 
 /*
  * The home screen intentionally uses FlashList even for this small starter
@@ -24,8 +24,9 @@ import { useI18n } from '@/utils/i18n';
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
-  const [connectionStatus, setConnectionStatus] = useState('');
-  const [cacheStatus, setCacheStatus] = useState('');
+  const [connectionStatus, setConnectionStatus] =
+    useState<TranslationKey | null>(null);
+  const [cacheStatus, setCacheStatus] = useState<TranslationKey | null>(null);
   const queryClient = useQueryClient();
   const { refetch: refetchBackendHealth } = useBackendHealthQuery();
   const checklistItems = [
@@ -47,7 +48,7 @@ export default function HomeScreen() {
   };
 
   const onPressTestBackendConnection = async () => {
-    setConnectionStatus(t('status.checkingBackend'));
+    setConnectionStatus('status.checkingBackend');
 
     try {
       const { data: result, error } = await refetchBackendHealth();
@@ -57,12 +58,12 @@ export default function HomeScreen() {
 
       setConnectionStatus(
         result?.status === 'ok'
-          ? t('status.backendSuccess')
-          : t('errors.unexpectedBackendStatus'),
+          ? 'status.backendSuccess'
+          : 'errors.unexpectedBackendStatus',
       );
-      setCacheStatus(t('status.backendCached'));
+      setCacheStatus('status.backendCached');
     } catch (error) {
-      setConnectionStatus(t('errors.backendUnavailable'));
+      setConnectionStatus('errors.backendUnavailable');
       dispatch(
         setError({
           message:
@@ -79,12 +80,12 @@ export default function HomeScreen() {
     const cachedHealth = queryClient.getQueryData<BackendHealth>(
       backendHealthQueryKey,
     );
-    setCacheStatus(cachedHealth ? t('status.cacheHit') : t('status.cacheMiss'));
+    setCacheStatus(cachedHealth ? 'status.cacheHit' : 'status.cacheMiss');
   };
 
   const onPressClearBackendCache = () => {
     queryClient.removeQueries({ queryKey: backendHealthQueryKey });
-    setCacheStatus(t('status.cacheCleared'));
+    setCacheStatus('status.cacheCleared');
   };
 
   return (
@@ -109,10 +110,10 @@ export default function HomeScreen() {
               <ButtonText>{t('actions.clearBackendCache')}</ButtonText>
             </Button>
             {connectionStatus ? (
-              <ThemeAwareText>{connectionStatus}</ThemeAwareText>
+              <ThemeAwareText>{t(connectionStatus)}</ThemeAwareText>
             ) : null}
             {cacheStatus ? (
-              <ThemeAwareText>{cacheStatus}</ThemeAwareText>
+              <ThemeAwareText>{t(cacheStatus)}</ThemeAwareText>
             ) : null}
           </VStack>
         }

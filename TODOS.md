@@ -10,8 +10,8 @@
 ## Nice-to-have / future upgrades
 
 - [x] Confirm the highest Expo SDK 50-compatible gluestack API is the v1 line and keep it pinned to the known-safe releases: `@gluestack-ui/themed@1.1.73`, `@gluestack-ui/config@1.1.20`, and `@gluestack-style/react@1.0.57`. Avoid the gluestack v2/v5 API until the project moves to an SDK version that supports that migration path.
-- Introduce a small developer tool or script to validate config, env, and missing package assumptions before local startup.
-- Consider a minimal app-shell example that is more generic than the current task-based implementation to make the template easier to repurpose.
+- [x] Introduce a small developer tool or script to validate config, env, and missing package assumptions before local startup.
+- [x] Consider a minimal app-shell example that is more generic than the current task-based implementation to make the template easier to repurpose.
 
 ## Observations
 

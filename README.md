@@ -16,6 +16,28 @@ If you are reusing this repo as a starter, keep the reusable architecture and re
 - shared hooks, constants, and utility helpers
 - testing and startup setup conventions
 
+## Minimal generic app-shell example
+If you want a simpler starter for a non-task app, keep the shell and replace the example domain with a single-screen or feature-first flow:
+
+- keep: `app/_layout.tsx`, `state/`, `constants/`, `components/`, and `utils/`
+- replace: task screens, task tiles, task forms, and scanner/share-intent flows with your own domain objects
+- rename the sample route names and update the app entry so the template reads as a blank shell instead of a task manager
+
+A good baseline pattern is:
+- root layout with the provider stack
+- one home screen + one modal screen
+- a single Redux slice for app state
+- one or two reusable shared components
+
+## Startup validation
+Before local startup, run:
+
+```bash
+npm run validate:startup
+```
+
+This checks for missing required packages, empty or invalid app config assumptions, and implied template-domain drift (for example, app-specific plugins that may need review before repurposing).
+
 ## Gotchas
 - When running `npm start` check to make sure that metro isn't using expo build.  Should be able to press `s` to switch.
 - The backend ip address is hard-coded and needs to match the value for the machine on which the local instance of the bff is running (use `ipconfig`)

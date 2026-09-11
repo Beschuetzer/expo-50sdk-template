@@ -3,14 +3,47 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { persistStore, persistReducer } from 'redux-persist';
 
-import generalReducer, { generalSlice } from '@/state/slices/generalSlice';
+import generalReducer, {
+  GeneralState,
+  generalSlice,
+} from '@/state/slices/generalSlice';
 import optionsReducer, { optionsSlice } from '@/state/slices/optionsSlice';
 import quickAddReducer, { quickAddSlice } from '@/state/slices/quickAddSlice';
 import tasksReducer, { tasksSlice } from '@/state/slices/tasksSlice';
 
+export const cleanPersistedGeneralState = (state?: Partial<GeneralState>) => ({
+  account: state?.account,
+  isUpToDate: state?.isUpToDate,
+  lastSyncTime: state?.lastSyncTime,
+  loadingMessage: state?.loadingMessage,
+  shouldMockBffResponses: state?.shouldMockBffResponses,
+  shouldSaveOnLogin: state?.shouldSaveOnLogin,
+});
+
+const generalPersistTransform = {
+  in: (state: Partial<GeneralState> | undefined) =>
+    cleanPersistedGeneralState(state),
+  out: (state: Partial<GeneralState> | undefined) =>
+    cleanPersistedGeneralState(state),
+};
+
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
+  version: 1,
+  whitelist: [
+    generalSlice.name,
+    optionsSlice.name,
+    quickAddSlice.name,
+    tasksSlice.name,
+  ],
+  transforms: [generalPersistTransform],
+  serialize: true,
+  writeFailHandler: (error: Error) => {
+    console.warn('Redux persist write failed:', error);
+  },
+  debug: false,
+  throttle: 200,
 };
 
 const rootReducer = combineReducers({

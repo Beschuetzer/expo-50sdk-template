@@ -103,5 +103,27 @@
     "react-test-renderer": "18.2.0",
     "typescript": "^5.1.3"
   },
-  "private": true
+  "private": true,
+  "template": {
+    "description": "Expo SDK 50 app shell with a task-domain example layered on top of reusable architecture patterns.",
+    "sampleDomain": [
+      "tasks",
+      "scanner",
+      "share-intent",
+      "image-based workflow",
+      "account sync"
+    ],
+    "reusableShell": [
+      "expo-router",
+      "redux-toolkit",
+      "persisted state",
+      "gluestack-ui",
+      "shared utilities and hooks"
+    ],
+    "appSpecificPackages": [
+      "expo-camera",
+      "expo-barcode-scanner",
+      "expo-share-intent"
+    ]
+  }
 }

@@ -1,3 +1,21 @@
+## Template focus
+This project is a sample Expo app shell with a task-management domain layered on top. It is intentionally not a blank canvas: it demonstrates Redux slices, Expo Router screens, forms, persistence, shared UI patterns, and a simple backend integration flow.
+
+If you are reusing this repo as a starter, keep the reusable architecture and replace the task domain pieces with your own domain model. The app-specific parts are the task-oriented screens, state, and sample data flows.
+
+## App-specific sample domain
+- task lists and task tiles
+- scanning and QR/barcode flows
+- a BFF sync pattern for account + task persistence
+- share-intent and image workflow examples tied to task data
+
+## Reusable shell patterns
+- Expo Router stack and modal scaffolding
+- Redux Toolkit slices + persisted state setup
+- gluestack UI component conventions
+- shared hooks, constants, and utility helpers
+- testing and startup setup conventions
+
 ## Gotchas
 - When running `npm start` check to make sure that metro isn't using expo build.  Should be able to press `s` to switch.
 - The backend ip address is hard-coded and needs to match the value for the machine on which the local instance of the bff is running (use `ipconfig`)

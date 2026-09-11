@@ -1,20 +1,3 @@
-# Template Review TODOs
+# TODOS
 
-## Medium priority
-
-- [x] Replace the `@ts-ignore` router parameter workarounds with properly typed route params to reduce TypeScript debt and keep the Expo Router pattern clean.
-- [x] Review the persisted Redux root state to ensure only serializable, app-safe data is saved. Large or non-serializable blobs should be excluded from persistence.
-- [x] Audit deps in `package.json` for unused or template-specific packages such as `expo-camera`, `expo-share-intent`, and other app-domain libraries that are not required by the generic shell.
-- [x] Add a simple template-level README section that clearly separates the app-specific sample domain from reusable architecture patterns.
-
-## Nice-to-have / future upgrades
-
-- [x] Confirm the highest Expo SDK 50-compatible gluestack API is the v1 line and keep it pinned to the known-safe releases: `@gluestack-ui/themed@1.1.73`, `@gluestack-ui/config@1.1.20`, and `@gluestack-style/react@1.0.57`. Avoid the gluestack v2/v5 API until the project moves to an SDK version that supports that migration path.
-- [x] Introduce a small developer tool or script to validate config, env, and missing package assumptions before local startup.
-- [x] Consider a minimal app-shell example that is more generic than the current task-based implementation to make the template easier to repurpose.
-
-## Observations
-
-- The repo is in good shape for an Expo SDK 50 template from a dependency and build perspective.
-- The main remaining risk is architectural debt: one large helper file, a large thunk file, and a lot of app-specific assumptions are still present.
-- The app still reads as a domain-specific task app more than a true blank starter template, which is fine for a sample app but worth separating clearly for future reuse.
+- I want you to turn this repo into an NX monorepo.  After that, I want you to add a backend node js app as well.  It should have basically and a button on the the expo app to press for testing the connectivity.  There should be an easy to way to start both apps together for local development.

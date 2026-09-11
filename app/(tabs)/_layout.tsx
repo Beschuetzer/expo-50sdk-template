@@ -7,7 +7,6 @@ import { useColorScheme } from '@/components/hooks/useColorScheme';
 import { COLORS } from '@/constants/colors';
 import { Routes } from '@/constants/navigation';
 
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
@@ -22,55 +21,23 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: COLORS[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
       }}
     >
       <Tabs.Screen
         name={Routes.DashboardScreen}
         options={{
-          title: 'Dashboard',
+          title: 'Home',
           headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
       <Tabs.Screen
-        name={Routes.TasksScreen}
-        options={{
-          title: 'Tasks',
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="list-alt" color={color} />
-          ),
-          lazy: true,
-        }}
-      />
-      <Tabs.Screen
-        name={Routes.ScannerScreen}
-        options={{
-          title: 'Scanner',
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="barcode" color={color} />
-          ),
-          lazy: true,
-        }}
-      />
-      <Tabs.Screen
         name={Routes.OptionsScreen}
         options={{
-          title: 'Options',
+          title: 'Settings',
           headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => <TabBarIcon name="adjust" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name={Routes.AccountScreen}
-        options={{
-          title: 'Account',
-          headerTitleAlign: 'center',
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
     </Tabs>

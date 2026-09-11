@@ -14,11 +14,15 @@ import { Error } from '@/types/general';
 export type ErrorModalProps = object;
 
 export const ErrorModal = (props: ErrorModalProps) => {
-  const errors = useAppSelector(errorSelector);
+  const errors = useAppSelector(errorSelector) ?? [];
   const dispatch = useAppDispatch();
 
   // Filter to unique errors by message using useMemo
   const uniqueErrors = useMemo(() => {
+    if (!Array.isArray(errors)) {
+      return [];
+    }
+
     return errors.filter(
       (error, index, self) =>
         index === self.findIndex((e) => e.message === error.message),
@@ -26,10 +30,16 @@ export const ErrorModal = (props: ErrorModalProps) => {
   }, [errors]);
 
   const onButtonPress = useCallback((error: Error) => {
+    const errorMessage = error.message ?? error.error?.message;
+    const stackTrace = error.stack ?? error.error?.stack;
+    const statusCode = error.statusCode ?? undefined;
+
     console.info('Error details:', {
-      message: error.error?.message,
-      stackTrace: error.error?.stack,
-      statusCode: error.statusCode,
+      message: errorMessage,
+      stackTrace,
+      statusCode,
+      name: error.name ?? error.error?.name,
+      code: error.code ?? error.error?.code,
     });
   }, []);
 

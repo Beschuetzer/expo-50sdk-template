@@ -106,13 +106,11 @@
   },
   "private": true,
   "template": {
-    "description": "Expo SDK 50 app shell with a task-domain example layered on top of reusable architecture patterns.",
+    "description": "Expo SDK 50 starter shell with reusable app architecture and a neutral landing/settings flow.",
     "sampleDomain": [
-      "tasks",
-      "scanner",
-      "share-intent",
-      "image-based workflow",
-      "account sync"
+      "starter home screen",
+      "starter settings screen",
+      "generic feature cards"
     ],
     "reusableShell": [
       "expo-router",
@@ -124,7 +122,8 @@
     "appSpecificPackages": [
       "expo-camera",
       "expo-barcode-scanner",
-      "expo-share-intent"
+      "expo-share-intent",
+      "sample task-domain modules"
     ]
   }
 }

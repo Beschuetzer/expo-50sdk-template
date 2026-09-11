@@ -134,12 +134,14 @@ export const generalSlice = createSlice({
       if (!error || !error.message) {
         return;
       }
-      state.errors = [...state.errors, error];
+      const currentErrors = Array.isArray(state.errors) ? state.errors : [];
+      state.errors = [...currentErrors, error];
     },
     setErrors: (
       state: GeneralState,
       action: PayloadAction<GeneralState['errors']>,
     ) => {
+      const currentErrors = Array.isArray(state.errors) ? state.errors : [];
       const errors = (action.payload || [])
         .map((error) => normalizeError(error))
         .filter(Boolean) as Error[];
@@ -147,7 +149,7 @@ export const generalSlice = createSlice({
         state.errors = ERRORS_INITIAL;
         return;
       }
-      state.errors = [...state.errors, ...errors];
+      state.errors = [...currentErrors, ...errors];
     },
     setLoading: (
       state: GeneralState,

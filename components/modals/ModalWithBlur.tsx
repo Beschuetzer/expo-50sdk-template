@@ -109,7 +109,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
           >
             {confirmButtonToUse.isVisible ? (
               <Button
-                variant="link"
+                variant="solid"
                 isDisabled={!confirmButtonToUse.isEnabled}
                 onPress={onConfirmPress}
                 action={confirmButtonToUse.action}
@@ -119,7 +119,7 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
             ) : null}
             {cancelButtonToUse.isVisible ? (
               <Button
-                variant="link"
+                variant="solid"
                 isDisabled={!cancelButtonToUse.isEnabled}
                 onPress={onCancelPress}
                 action={cancelButtonToUse.action}

@@ -1,20 +1,23 @@
 ## Template focus
-This project is a sample Expo app shell with a task-management domain layered on top. It is intentionally not a blank canvas: it demonstrates Redux slices, Expo Router screens, forms, persistence, shared UI patterns, and a simple backend integration flow.
+This project is a neutral Expo SDK 50 starter shell with a reusable app foundation and a few sample-domain examples layered on top. It is intentionally structured so you can keep the architecture and replace the example content with your own product flow.
 
-If you are reusing this repo as a starter, keep the reusable architecture and replace the task domain pieces with your own domain model. The app-specific parts are the task-oriented screens, state, and sample data flows.
+The app-specific pieces are not the default starting point anymore. The default screen is a generic home view and the default settings screen is a blank starter layout, so the repo reads more like a clean shell than a task manager.
 
-## App-specific sample domain
-- task lists and task tiles
-- scanning and QR/barcode flows
-- a BFF sync pattern for account + task persistence
-- share-intent and image workflow examples tied to task data
+## Sample domain still present
+The repo still contains a few app-specific examples that are useful as reference material:
+- task and list patterns
+- scanner and barcode examples
+- share-intent and image workflows
+- account sync and persistence patterns
+
+These should be treated as optional sample modules rather than the core template structure.
 
 ## Reusable shell patterns
 - Expo Router stack and modal scaffolding
 - Redux Toolkit slices + persisted state setup
 - gluestack UI component conventions
 - shared hooks, constants, and utility helpers
-- testing and startup setup conventions
+- testing and startup validation conventions
 
 ## Minimal generic app-shell example
 If you want a simpler starter for a non-task app, keep the shell and replace the example domain with a single-screen or feature-first flow:

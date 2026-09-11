@@ -1,7 +1,8 @@
-import { Button, ButtonText, VStack } from '@gluestack-ui/themed';
+import { VStack } from '@gluestack-ui/themed';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
 import { ThemeAwareScreen } from '@/components/ui/ThemeAwareScreen';
 import { ThemeAwareSurface } from '@/components/ui/ThemeAwareSurface';
 import {
@@ -108,18 +109,24 @@ export default function HomeScreen() {
       }}
       absolutelyPositionedJsx={
         <VStack space="md" p="$4">
-          <Button onPress={onPressTestErrorModal} variant="solid">
-            <ButtonText>{t('actions.testErrorModal')}</ButtonText>
-          </Button>
-          <Button onPress={onPressTestBackendConnection} variant="outline">
-            <ButtonText>{t('actions.testBackendConnection')}</ButtonText>
-          </Button>
-          <Button onPress={onPressReadBackendCache} variant="outline">
-            <ButtonText>{t('actions.readBackendCache')}</ButtonText>
-          </Button>
-          <Button onPress={onPressClearBackendCache} variant="outline">
-            <ButtonText>{t('actions.clearBackendCache')}</ButtonText>
-          </Button>
+          <ThemeAwareButton onPress={onPressTestErrorModal} variant="solid">
+            {t('actions.testErrorModal')}
+          </ThemeAwareButton>
+          <ThemeAwareButton
+            onPress={onPressTestBackendConnection}
+            variant="outline"
+          >
+            {t('actions.testBackendConnection')}
+          </ThemeAwareButton>
+          <ThemeAwareButton onPress={onPressReadBackendCache} variant="outline">
+            {t('actions.readBackendCache')}
+          </ThemeAwareButton>
+          <ThemeAwareButton
+            onPress={onPressClearBackendCache}
+            variant="outline"
+          >
+            {t('actions.clearBackendCache')}
+          </ThemeAwareButton>
           {connectionStatus ? (
             <ThemeAwareText>{t(connectionStatus)}</ThemeAwareText>
           ) : null}

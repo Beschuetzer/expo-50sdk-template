@@ -1,8 +1,9 @@
-import { Button, ButtonText, HStack, VStack } from '@gluestack-ui/themed';
+import { HStack, VStack } from '@gluestack-ui/themed';
 import { useCallback, useMemo } from 'react';
 
 import { ModalWithBlur } from './ModalWithBlur';
 
+import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
 import {
   ERRORS_INITIAL,
   errorSelector,
@@ -64,9 +65,12 @@ export const ErrorModal = (props: ErrorModalProps) => {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Button variant="link" onPress={() => onButtonPress(error)}>
-                <ButtonText>{`${index + 1}). ${error.message}`}</ButtonText>
-              </Button>
+              <ThemeAwareButton
+                variant="link"
+                onPress={() => onButtonPress(error)}
+              >
+                {`${index + 1}). ${error.message}`}
+              </ThemeAwareButton>
             </HStack>
           );
         })}

@@ -1,12 +1,6 @@
-import {
-  Button,
-  ButtonText,
-  Heading,
-  HStack,
-  Text,
-  VStack,
-} from '@gluestack-ui/themed';
+import { Heading, HStack, Text, VStack } from '@gluestack-ui/themed';
 
+import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
 import { useI18n } from '@/utils/i18n';
 import { useThemeMode } from '@/utils/theme';
 
@@ -24,29 +18,29 @@ export default function SettingsScreen() {
           <HStack space="sm">
             {(Object.keys(modes) as (keyof typeof modes)[]).map(
               (availableMode) => (
-                <Button
+                <ThemeAwareButton
                   key={availableMode}
                   variant={mode === availableMode ? 'solid' : 'outline'}
                   size="sm"
                   onPress={() => setMode(availableMode)}
                 >
-                  <ButtonText>{t(`theme.${availableMode}`)}</ButtonText>
-                </Button>
+                  {t(`theme.${availableMode}`)}
+                </ThemeAwareButton>
               ),
             )}
           </HStack>
         </HStack>
         <HStack justifyContent="space-between" alignItems="center">
           <Text>{t('settings.notifications')}</Text>
-          <Button variant="outline" size="sm">
-            <ButtonText>{t('settings.manage')}</ButtonText>
-          </Button>
+          <ThemeAwareButton variant="outline" size="sm">
+            {t('settings.manage')}
+          </ThemeAwareButton>
         </HStack>
         <HStack justifyContent="space-between" alignItems="center">
           <Text>{t('settings.privacy')}</Text>
-          <Button variant="outline" size="sm">
-            <ButtonText>{t('settings.review')}</ButtonText>
-          </Button>
+          <ThemeAwareButton variant="outline" size="sm">
+            {t('settings.review')}
+          </ThemeAwareButton>
         </HStack>
 
         <HStack justifyContent="space-between" alignItems="center">
@@ -54,23 +48,21 @@ export default function SettingsScreen() {
           <HStack space="sm">
             {(Object.keys(locales) as (keyof typeof locales)[]).map(
               (availableLocale) => (
-                <Button
+                <ThemeAwareButton
                   key={availableLocale}
                   variant={locale === availableLocale ? 'solid' : 'outline'}
                   size="sm"
                   onPress={() => setLocale(availableLocale)}
                 >
-                  <ButtonText>{locales[availableLocale]}</ButtonText>
-                </Button>
+                  {locales[availableLocale]}
+                </ThemeAwareButton>
               ),
             )}
           </HStack>
         </HStack>
       </VStack>
 
-      <Button>
-        <ButtonText>{t('actions.saveSettings')}</ButtonText>
-      </Button>
+      <ThemeAwareButton>{t('actions.saveSettings')}</ThemeAwareButton>
     </VStack>
   );
 }

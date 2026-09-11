@@ -1,8 +1,11 @@
-import { Box, Button, ButtonText, HStack, Heading } from '@gluestack-ui/themed';
+import { HStack } from '@gluestack-ui/themed';
 import { BlurView } from 'expo-blur';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { Modal } from 'react-native';
 
+import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
+import { ThemeAwareSurface } from '@/components/ui/ThemeAwareSurface';
+import { ThemeAwareHeading } from '@/components/ui/ThemeAwareText';
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
@@ -78,11 +81,10 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
           onBlurPress && onBlurPress();
         }}
       >
-        <Box
+        <ThemeAwareSurface
           style={
             {
               padding: 20,
-              backgroundColor: 'white',
               borderRadius: 10,
               maxHeight: '90%',
               ...maxWidth,
@@ -94,11 +96,15 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
           }}
         >
           {typeof title === 'string' ? (
-            <Heading textAlign="center" size="sm" pb={FORM_INTER_ITEM_SPACING}>
+            <ThemeAwareHeading
+              textAlign="center"
+              size="sm"
+              pb={FORM_INTER_ITEM_SPACING}
+            >
               {title}
-            </Heading>
+            </ThemeAwareHeading>
           ) : (
-            <Box>{title}</Box>
+            <ThemeAwareSurface>{title}</ThemeAwareSurface>
           )}
           {children}
           <HStack
@@ -108,27 +114,27 @@ export function ModalWithBlur(props: ModalWithBlurProps) {
             mb={-FORM_INTER_ITEM_SPACING}
           >
             {confirmButtonToUse.isVisible ? (
-              <Button
+              <ThemeAwareButton
                 variant="solid"
                 isDisabled={!confirmButtonToUse.isEnabled}
                 onPress={onConfirmPress}
                 action={confirmButtonToUse.action}
               >
-                <ButtonText>{confirmButtonToUse.text}</ButtonText>
-              </Button>
+                {confirmButtonToUse.text}
+              </ThemeAwareButton>
             ) : null}
             {cancelButtonToUse.isVisible ? (
-              <Button
+              <ThemeAwareButton
                 variant="solid"
                 isDisabled={!cancelButtonToUse.isEnabled}
                 onPress={onCancelPress}
                 action={cancelButtonToUse.action}
               >
-                <ButtonText>{cancelButtonToUse.text}</ButtonText>
-              </Button>
+                {cancelButtonToUse.text}
+              </ThemeAwareButton>
             ) : null}
           </HStack>
-        </Box>
+        </ThemeAwareSurface>
       </BlurView>
     </Modal>
   );

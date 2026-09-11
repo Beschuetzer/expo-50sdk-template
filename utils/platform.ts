@@ -2,7 +2,7 @@ import * as Location from 'expo-location';
 import { Insets } from 'react-native';
 import { v4 as uuidV4 } from 'uuid';
 
-import { getIsDevelopmentMode } from './environment';
+import { getEnvironmentOrDefault, getIsDevelopmentMode } from './environment';
 import { logWhenDevelopmentMode } from './logging';
 
 import { CurrentLocation, GpsCoordinate } from '@/types/general';
@@ -14,8 +14,10 @@ export function displayAlert(object: object | null) {
 }
 
 export function getBackendUrl() {
+  const config = getEnvironmentOrDefault();
+
   return getIsDevelopmentMode()
-    ? `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:${process.env.EXPO_PUBLIC_PORT_NUMBER}`
+    ? `http://${config.ipAddress}:${config.portNumber}`
     : 'https://your-production-api.example.com';
 }
 

@@ -1,10 +1,5 @@
 # Template Review TODOs
 
-## High priority
-
-- Add a real `.env.example` and centralized environment validation for required values such as `EXPO_PUBLIC_IP_ADDRESS`, `EXPO_PUBLIC_PORT_NUMBER`, and `EXPO_PUBLIC_ENV`.
-
-
 ## Medium priority
 
 - Replace the `@ts-ignore` router parameter workarounds with properly typed route params to reduce TypeScript debt and keep the Expo Router pattern clean.

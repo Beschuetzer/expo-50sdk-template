@@ -16,6 +16,8 @@ Mobile code is organized by responsibility:
 - `app`: Expo Router screens and navigation composition.
 - `features`: product capabilities with their API functions, query hooks, and feature tests.
 - `components`: reusable UI, domain-independent hooks, and shared services.
+- `components/ui`: theme-aware primitives such as `ThemeAwareSurface`,
+  `ThemeAwareText`, and `ThemeAwareHeading`.
 - `state`: Redux slices for client state and the shared TanStack Query client configuration.
 - `utils`: cross-cutting concerns such as internationalization, theme resolution, storage, and platform helpers.
 
@@ -43,6 +45,13 @@ Backend Connection` to fetch and cache the health response, `Read Cached
 Health` to inspect that response without a network request, and `Clear Backend
 Cache` to remove it. Reading the cache after clearing should report a cache
 miss.
+
+### Lists
+
+`@shopify/flash-list` is already installed and used by the home screen. Use it
+for data-driven lists, provide a stable `keyExtractor`, and set an
+`estimatedItemSize`. Prefer the shared theme-aware primitives for list rows so
+light and dark mode behavior stays consistent across screens.
 
 ## Local Development
 

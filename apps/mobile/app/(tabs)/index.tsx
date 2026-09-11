@@ -1,16 +1,13 @@
-import {
-  Box,
-  Button,
-  ButtonText,
-  Heading,
-  ScrollView,
-  Text,
-  VStack,
-} from '@gluestack-ui/themed';
+import { Button, ButtonText, VStack } from '@gluestack-ui/themed';
+import { FlashList } from '@shopify/flash-list';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { useColorScheme } from '@/components/hooks/useColorScheme';
+import { ThemeAwareSurface } from '@/components/ui/ThemeAwareSurface';
+import {
+  ThemeAwareHeading,
+  ThemeAwareText,
+} from '@/components/ui/ThemeAwareText';
 import type { BackendHealth } from '@/features/backend/api';
 import {
   backendHealthQueryKey,
@@ -20,15 +17,22 @@ import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
 import { useI18n } from '@/utils/i18n';
 
+/*
+ * The home screen intentionally uses FlashList even for this small starter
+ * dataset so new template screens have a clear list-performance example.
+ */
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   const [connectionStatus, setConnectionStatus] = useState('');
   const [cacheStatus, setCacheStatus] = useState('');
   const queryClient = useQueryClient();
   const { refetch: refetchBackendHealth } = useBackendHealthQuery();
+  const checklistItems = [
+    t('checklist.replaceContent'),
+    t('checklist.addRedux'),
+    t('checklist.addScreens'),
+  ];
 
   const onPressTestErrorModal = () => {
     dispatch(
@@ -84,53 +88,55 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView
-      flex={1}
-      p="$4"
-      bg={colorScheme === 'dark' ? '$backgroundDark950' : '$backgroundLight0'}
-    >
-      <Heading size="2xl">{t('app.title')}</Heading>
-      <Text size="md">{t('app.description')}</Text>
-
-      <Box
-        bg={isDark ? '$backgroundDark900' : '$coolGray50'}
-        borderRadius="$lg"
-        p="$4"
-      >
-        <Heading
-          size="sm"
-          mb="$2"
-          color={isDark ? '$textDark50' : '$textLight900'}
-        >
-          {t('checklist.title')}
-        </Heading>
-        <VStack space="sm">
-          <Text color={isDark ? '$textDark50' : '$textLight900'}>
-            • {t('checklist.replaceContent')}
-          </Text>
-          <Text color={isDark ? '$textDark50' : '$textLight900'}>
-            • {t('checklist.addRedux')}
-          </Text>
-          <Text color={isDark ? '$textDark50' : '$textLight900'}>
-            • {t('checklist.addScreens')}
-          </Text>
-        </VStack>
-      </Box>
-
-      <Button onPress={onPressTestErrorModal} variant="solid">
-        <ButtonText>{t('actions.testErrorModal')}</ButtonText>
-      </Button>
-      <Button onPress={onPressTestBackendConnection} variant="outline">
-        <ButtonText>{t('actions.testBackendConnection')}</ButtonText>
-      </Button>
-      <Button onPress={onPressReadBackendCache} variant="outline">
-        <ButtonText>{t('actions.readBackendCache')}</ButtonText>
-      </Button>
-      <Button onPress={onPressClearBackendCache} variant="outline">
-        <ButtonText>{t('actions.clearBackendCache')}</ButtonText>
-      </Button>
-      {connectionStatus ? <Text>{connectionStatus}</Text> : null}
-      {cacheStatus ? <Text>{cacheStatus}</Text> : null}
-    </ScrollView>
+    <ThemeAwareSurface flex={1}>
+      <FlashList
+        contentContainerStyle={{ padding: 16 }}
+        data={checklistItems}
+        estimatedItemSize={56}
+        keyExtractor={(item) => item}
+        ListFooterComponent={
+          <VStack space="md" pt="$4">
+            <Button onPress={onPressTestErrorModal} variant="solid">
+              <ButtonText>{t('actions.testErrorModal')}</ButtonText>
+            </Button>
+            <Button onPress={onPressTestBackendConnection} variant="outline">
+              <ButtonText>{t('actions.testBackendConnection')}</ButtonText>
+            </Button>
+            <Button onPress={onPressReadBackendCache} variant="outline">
+              <ButtonText>{t('actions.readBackendCache')}</ButtonText>
+            </Button>
+            <Button onPress={onPressClearBackendCache} variant="outline">
+              <ButtonText>{t('actions.clearBackendCache')}</ButtonText>
+            </Button>
+            {connectionStatus ? (
+              <ThemeAwareText>{connectionStatus}</ThemeAwareText>
+            ) : null}
+            {cacheStatus ? (
+              <ThemeAwareText>{cacheStatus}</ThemeAwareText>
+            ) : null}
+          </VStack>
+        }
+        ListHeaderComponent={
+          <VStack space="lg" pb="$2">
+            <ThemeAwareHeading size="2xl">{t('app.title')}</ThemeAwareHeading>
+            <ThemeAwareText size="md">{t('app.description')}</ThemeAwareText>
+            <ThemeAwareHeading size="sm">
+              {t('checklist.title')}
+            </ThemeAwareHeading>
+          </VStack>
+        }
+        renderItem={({ item }) => (
+          <ThemeAwareSurface
+            darkBackground="$backgroundDark900"
+            lightBackground="$coolGray50"
+            borderRadius="$lg"
+            mb="$2"
+            p="$4"
+          >
+            <ThemeAwareText>• {item}</ThemeAwareText>
+          </ThemeAwareSurface>
+        )}
+      />
+    </ThemeAwareSurface>
   );
 }

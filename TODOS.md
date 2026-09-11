@@ -1,3 +1,6 @@
-# TODOS
+# Completed
 
-- I want you to turn this repo into an NX monorepo.  After that, I want you to add a backend node js app as well.  It should have basically and a button on the the expo app to press for testing the connectivity.  There should be an easy to way to start both apps together for local development.
+- Converted the Expo SDK 50 app into the `mobile` project in an Nx 23.2.1 workspace.
+- Added the `api` Node.js project with a `GET /health` endpoint on port `4200`.
+- Added the Expo `Test Backend Connection` button.
+- Added `npm run dev` to start both projects together and `npm run mobile` / `npm run api` for individual projects.

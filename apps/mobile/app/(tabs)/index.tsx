@@ -6,12 +6,15 @@ import {
   Text,
   VStack,
 } from '@gluestack-ui/themed';
+import { useState } from 'react';
 
 import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
+import { getBackendUrl } from '@/utils/helpers';
 
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
+  const [connectionStatus, setConnectionStatus] = useState('');
 
   const onPressTestErrorModal = () => {
     dispatch(
@@ -23,6 +26,34 @@ export default function HomeScreen() {
         statusCode: 500,
       }),
     );
+  };
+
+  const onPressTestBackendConnection = async () => {
+    const healthUrl = `${getBackendUrl()}/health`;
+    setConnectionStatus('Checking backend...');
+
+    try {
+      const response = await fetch(healthUrl);
+      if (!response.ok) {
+        throw new Error(`Backend returned HTTP ${response.status}`);
+      }
+
+      const result = (await response.json()) as { status?: string };
+      setConnectionStatus(
+        result.status === 'ok'
+          ? 'Backend connection successful.'
+          : 'Backend responded with an unexpected status.',
+      );
+    } catch (error) {
+      setConnectionStatus('Backend connection failed. Is the API running?');
+      dispatch(
+        setError({
+          message:
+            error instanceof Error ? error.message : 'Backend request failed',
+          name: 'BackendConnectionError',
+        }),
+      );
+    }
   };
 
   return (
@@ -49,6 +80,10 @@ export default function HomeScreen() {
       <Button onPress={onPressTestErrorModal} variant="solid">
         <ButtonText>Test ErrorModal</ButtonText>
       </Button>
+      <Button onPress={onPressTestBackendConnection} variant="outline">
+        <ButtonText>Test Backend Connection</ButtonText>
+      </Button>
+      {connectionStatus ? <Text>{connectionStatus}</Text> : null}
     </VStack>
   );
 }

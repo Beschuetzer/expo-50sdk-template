@@ -5,8 +5,11 @@ import { fileURLToPath } from 'url';
 const currentFilePath = fileURLToPath(import.meta.url);
 const rootDir = path.resolve(path.dirname(currentFilePath), '..');
 const packageJsonPath = path.join(rootDir, 'package.json');
-const appJsonPath = path.join(rootDir, 'app.json');
-const envPath = path.join(rootDir, '.env');
+const mobileDir = path.join(rootDir, 'apps', 'mobile');
+const appJsonPath = path.join(mobileDir, 'app.json');
+const mobilePackageJsonPath = path.join(mobileDir, 'package.json');
+const apiProjectJsonPath = path.join(rootDir, 'apps', 'api', 'project.json');
+const envPath = path.join(mobileDir, '.env');
 
 const requiredPackages = [
   'expo',
@@ -50,6 +53,8 @@ function main() {
 
   ensureFileExists(packageJsonPath, 'package.json');
   ensureFileExists(appJsonPath, 'app.json');
+  ensureFileExists(mobilePackageJsonPath, 'apps/mobile/package.json');
+  ensureFileExists(apiProjectJsonPath, 'apps/api/project.json');
 
   const packageJson = readJson(packageJsonPath);
   const appJson = readJson(appJsonPath);

@@ -18,10 +18,10 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
 import { Text } from '@/components/Themed';
-import { ErrorModal } from '@/components/modals/ErrorModal';
 import { useAppState } from '@/components/hooks/tanstack/useAppState';
 import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
+import { ErrorModal } from '@/components/modals/ErrorModal';
 import { persistor, store } from '@/state/store';
 
 export { ErrorBoundary } from 'expo-router';

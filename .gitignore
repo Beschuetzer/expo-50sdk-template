@@ -1,15 +1,23 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+# dependencies and package-manager artifacts
 node_modules/
+.pnp.*
 
-# Expo
-.expo/
+# Nx
+.nx/
 dist/
-web-build/
+tmp/
+out-tsc/
 
-# Native
-/android
+# Expo and web builds
+.expo/
+web-build/
+.expo-shared/
+
+# Native build output from any workspace project
+**/android/
+**/ios/
 *.orig.*
 *.jks
 *.p8
@@ -29,8 +37,11 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local environment files; checked-in .env.example files remain allowed
 .env
+.env.*
+!.env.example
+!.env.*.example
 
 # typescript
 *.tsbuildinfo
@@ -42,4 +53,9 @@ expo-env.d.ts
 # @end expo-cli
 
 test.json
-coverage
+coverage/
+
+# local tooling and editor state
+.eslintcache
+.prettiercache
+.vscode/*.log

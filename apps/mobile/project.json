@@ -1,0 +1,82 @@
+{
+  "name": "mobile",
+  "projectType": "application",
+  "sourceRoot": "apps/mobile",
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node setup.mjs && npx expo start --clear",
+        "cwd": "apps/mobile",
+        "color": true
+      }
+    },
+    "android": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx expo start --android",
+        "cwd": "apps/mobile",
+        "color": true
+      }
+    },
+    "ios": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx expo start --ios",
+        "cwd": "apps/mobile",
+        "color": true
+      }
+    },
+    "web": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx expo start --web",
+        "cwd": "apps/mobile",
+        "color": true
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsc --noEmit",
+        "cwd": "apps/mobile"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx jest --config ../../package.json --watchAll",
+        "cwd": "apps/mobile"
+      }
+    },
+    "test-coverage": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx jest --config ../../package.json --coverage",
+        "cwd": "apps/mobile"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx eslint . --fix",
+        "cwd": "apps/mobile"
+      }
+    },
+    "doctor": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx expo-doctor",
+        "cwd": "apps/mobile"
+      }
+    },
+    "build-preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx eas build -p android --profile preview",
+        "cwd": "apps/mobile",
+        "color": true
+      }
+    }
+  }
+}

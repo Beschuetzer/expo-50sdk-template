@@ -23,6 +23,7 @@ import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
 import { ErrorModal } from '@/components/modals/ErrorModal';
 import { persistor, store } from '@/state/store';
+import { useI18n, I18nProvider } from '@/utils/i18n';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -52,11 +53,16 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <I18nProvider>
+      <RootLayoutNav />
+    </I18nProvider>
+  );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { t } = useI18n();
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: 3, retryDelay: 1000 } },
@@ -69,7 +75,10 @@ function RootLayoutNav() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Provider store={store}>
-          <PersistGate loading={<Text>Loading...</Text>} persistor={persistor}>
+          <PersistGate
+            loading={<Text>{t('common.loading')}</Text>}
+            persistor={persistor}
+          >
             <GluestackUIProvider config={config}>
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <MenuProvider>

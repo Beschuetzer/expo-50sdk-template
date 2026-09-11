@@ -41,6 +41,12 @@ npm --prefix apps/mobile run dev:clear
 
 The mobile app's `Test Backend Connection` button calls the API health endpoint. `apps/mobile/setup.mjs` refreshes the Expo public IP and backend port in `apps/mobile/.env` before Metro starts. For a physical device, the generated IP must be reachable from the device.
 
+The mobile template includes a typed i18n provider with English and Spanish
+starter translations. The device locale selects the initial language, and the
+language selector in the Settings tab persists the user's choice with
+AsyncStorage. Add new messages in `apps/mobile/utils/i18n.tsx` and reference
+them with `useI18n().t('section.key')` instead of hard-coding user-facing text.
+
 ## Nx Commands
 
 ```bash

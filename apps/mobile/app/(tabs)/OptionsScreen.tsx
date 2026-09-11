@@ -7,34 +7,56 @@ import {
   VStack,
 } from '@gluestack-ui/themed';
 
+import { useI18n } from '@/utils/i18n';
+
 export default function SettingsScreen() {
+  const { locale, locales, setLocale, t } = useI18n();
+
   return (
     <VStack flex={1} p="$4" space="lg">
-      <Heading size="lg">Settings</Heading>
+      <Heading size="lg">{t('settings.title')}</Heading>
 
       <VStack space="md">
         <HStack justifyContent="space-between" alignItems="center">
-          <Text>Dark mode</Text>
+          <Text>{t('settings.darkMode')}</Text>
           <Button variant="outline" size="sm">
-            <ButtonText>Toggle</ButtonText>
+            <ButtonText>{t('settings.toggle')}</ButtonText>
           </Button>
         </HStack>
         <HStack justifyContent="space-between" alignItems="center">
-          <Text>Notifications</Text>
+          <Text>{t('settings.notifications')}</Text>
           <Button variant="outline" size="sm">
-            <ButtonText>Manage</ButtonText>
+            <ButtonText>{t('settings.manage')}</ButtonText>
           </Button>
         </HStack>
         <HStack justifyContent="space-between" alignItems="center">
-          <Text>Privacy</Text>
+          <Text>{t('settings.privacy')}</Text>
           <Button variant="outline" size="sm">
-            <ButtonText>Review</ButtonText>
+            <ButtonText>{t('settings.review')}</ButtonText>
           </Button>
+        </HStack>
+
+        <HStack justifyContent="space-between" alignItems="center">
+          <Text>{t('language.label')}</Text>
+          <HStack space="sm">
+            {(Object.keys(locales) as (keyof typeof locales)[]).map(
+              (availableLocale) => (
+                <Button
+                  key={availableLocale}
+                  variant={locale === availableLocale ? 'solid' : 'outline'}
+                  size="sm"
+                  onPress={() => setLocale(availableLocale)}
+                >
+                  <ButtonText>{locales[availableLocale]}</ButtonText>
+                </Button>
+              ),
+            )}
+          </HStack>
         </HStack>
       </VStack>
 
       <Button>
-        <ButtonText>Save Settings</ButtonText>
+        <ButtonText>{t('actions.saveSettings')}</ButtonText>
       </Button>
     </VStack>
   );

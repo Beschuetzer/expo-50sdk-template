@@ -6,6 +6,7 @@ import { useClientOnlyValue } from '@/components/hooks/useClientOnlyValue';
 import { useColorScheme } from '@/components/hooks/useColorScheme';
 import { COLORS } from '@/constants/colors';
 import { Routes } from '@/constants/navigation';
+import { useI18n } from '@/utils/i18n';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -16,6 +17,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { t } = useI18n();
 
   return (
     <Tabs
@@ -27,7 +29,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name={Routes.DashboardScreen}
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
@@ -35,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name={Routes.OptionsScreen}
         options={{
-          title: 'Settings',
+          title: t('tabs.settings'),
           headerTitleAlign: 'center',
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}

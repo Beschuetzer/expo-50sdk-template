@@ -11,9 +11,11 @@ import { useState } from 'react';
 import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
 import { getBackendUrl } from '@/utils/helpers';
+import { useI18n } from '@/utils/i18n';
 
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
+  const { t } = useI18n();
   const [connectionStatus, setConnectionStatus] = useState('');
 
   const onPressTestErrorModal = () => {
@@ -30,7 +32,7 @@ export default function HomeScreen() {
 
   const onPressTestBackendConnection = async () => {
     const healthUrl = `${getBackendUrl()}/health`;
-    setConnectionStatus('Checking backend...');
+    setConnectionStatus(t('status.checkingBackend'));
 
     try {
       const response = await fetch(healthUrl);
@@ -41,15 +43,17 @@ export default function HomeScreen() {
       const result = (await response.json()) as { status?: string };
       setConnectionStatus(
         result.status === 'ok'
-          ? 'Backend connection successful.'
-          : 'Backend responded with an unexpected status.',
+          ? t('status.backendSuccess')
+          : t('errors.unexpectedBackendStatus'),
       );
     } catch (error) {
-      setConnectionStatus('Backend connection failed. Is the API running?');
+      setConnectionStatus(t('errors.backendUnavailable'));
       dispatch(
         setError({
           message:
-            error instanceof Error ? error.message : 'Backend request failed',
+            error instanceof Error
+              ? error.message
+              : t('errors.backendRequestFailed'),
           name: 'BackendConnectionError',
         }),
       );
@@ -58,30 +62,25 @@ export default function HomeScreen() {
 
   return (
     <VStack flex={1} p="$4" bg="$white" space="lg">
-      <Heading size="2xl">Blank Expo Starter</Heading>
-      <Text size="md">
-        This app is intentionally neutral so you can replace the sample domain
-        with your own product flow.
-      </Text>
+      <Heading size="2xl">{t('app.title')}</Heading>
+      <Text size="md">{t('app.description')}</Text>
 
       <Box bg="$coolGray50" borderRadius="$lg" p="$4">
         <Heading size="sm" mb="$2">
-          Starter checklist
+          {t('checklist.title')}
         </Heading>
         <VStack space="sm">
-          <Text>
-            • Replace the home screen content with your app landing view
-          </Text>
-          <Text>• Add your own Redux slices and state patterns</Text>
-          <Text>• Add screens, modals, and routes for your product domain</Text>
+          <Text>• {t('checklist.replaceContent')}</Text>
+          <Text>• {t('checklist.addRedux')}</Text>
+          <Text>• {t('checklist.addScreens')}</Text>
         </VStack>
       </Box>
 
       <Button onPress={onPressTestErrorModal} variant="solid">
-        <ButtonText>Test ErrorModal</ButtonText>
+        <ButtonText>{t('actions.testErrorModal')}</ButtonText>
       </Button>
       <Button onPress={onPressTestBackendConnection} variant="outline">
-        <ButtonText>Test Backend Connection</ButtonText>
+        <ButtonText>{t('actions.testBackendConnection')}</ButtonText>
       </Button>
       {connectionStatus ? <Text>{connectionStatus}</Text> : null}
     </VStack>

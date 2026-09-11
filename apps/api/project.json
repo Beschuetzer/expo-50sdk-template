@@ -14,7 +14,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx tsc -p tsconfig.json",
+        "command": "npx tsc -p tsconfig.build.json",
         "cwd": "apps/api"
       },
       "outputs": ["{workspaceRoot}/dist/apps/api"]
@@ -26,6 +26,13 @@
         "command": "node dist/apps/api/main.js",
         "cwd": ".",
         "color": true
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsx --test src/app.spec.ts",
+        "cwd": "apps/api"
       }
     },
     "typecheck": {

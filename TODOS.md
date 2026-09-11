@@ -1,6 +1,3 @@
-# Completed
+# TODOS
 
-- Converted the Expo SDK 50 app into the `mobile` project in an Nx 23.2.1 workspace.
-- Added the `api` Node.js project with a `GET /health` endpoint on port `4200`.
-- Added the Expo `Test Backend Connection` button.
-- Added `npm run dev` to start both projects together and `npm run mobile` / `npm run api` for individual projects.
+I want you analyze the project form the perspective of deployment.  How would I configure my api app, so that I can deploy it to Heroku?  Please add instructions in the README.md around this.  Ideally, it would be nice to have a npm script to run to configure everything for me.

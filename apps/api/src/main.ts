@@ -1,39 +1,18 @@
-import {
-  createServer,
-  type IncomingMessage,
-  type ServerResponse,
-} from 'node:http';
+import { loadConfig } from './config/env';
+import { createApiServer, startApiServer, stopApiServer } from './server';
 
-const port = Number(process.env.PORT ?? 4200);
-const host = process.env.HOST ?? '0.0.0.0';
+const config = loadConfig();
+const server = startApiServer(createApiServer(), config);
 
-function sendJson(response: ServerResponse, statusCode: number, body: object) {
-  response.writeHead(statusCode, {
-    'content-type': 'application/json; charset=utf-8',
-    'access-control-allow-origin': '*',
-  });
-  response.end(JSON.stringify(body));
-}
-
-function handleRequest(request: IncomingMessage, response: ServerResponse) {
-  console.log(`Incoming request: ${request.method} ${request.url}`);
-  if (request.method === 'GET' && request.url === '/health') {
-    sendJson(response, 200, {
-      status: 'ok',
-      service: 'api',
-      timestamp: new Date().toISOString(),
+function shutdown(signal: string) {
+  console.log(`Received ${signal}; shutting down API`);
+  stopApiServer(server)
+    .then(() => process.exit(0))
+    .catch((error: unknown) => {
+      console.error('Failed to shut down API cleanly', error);
+      process.exit(1);
     });
-    return;
-  }
-
-  sendJson(response, 404, {
-    status: 'not_found',
-    message: 'Try GET /health',
-  });
 }
 
-const server = createServer(handleRequest);
-
-server.listen(port, host, () => {
-  console.log(`API listening on http://${host}:${port}`);
-});
+process.once('SIGINT', () => shutdown('SIGINT'));
+process.once('SIGTERM', () => shutdown('SIGTERM'));

@@ -2,7 +2,7 @@
 
 ## Medium priority
 
-- Replace the `@ts-ignore` router parameter workarounds with properly typed route params to reduce TypeScript debt and keep the Expo Router pattern clean.
+- [x] Replace the `@ts-ignore` router parameter workarounds with properly typed route params to reduce TypeScript debt and keep the Expo Router pattern clean.
 - Review the persisted Redux root state to ensure only serializable, app-safe data is saved. Large or non-serializable blobs should be excluded from persistence.
 - Audit deps in `package.json` for unused or template-specific packages such as `expo-camera`, `expo-share-intent`, and other app-domain libraries that are not required by the generic shell.
 - Add a simple template-level README section that clearly separates the app-specific sample domain from reusable architecture patterns.

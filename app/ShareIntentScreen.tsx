@@ -6,14 +6,18 @@ import {
   Text,
   VStack,
 } from '@gluestack-ui/themed';
-import { useRoute } from '@react-navigation/native';
+import {
+  type NavigationProp,
+  type RouteProp,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import Constants from 'expo-constants';
-import { useNavigation } from 'expo-router';
 import React from 'react';
 
 import { CloseButton } from '@/components/header/CloseButton';
 import { useSharedUrl } from '@/components/hooks/useSharedUrl';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 
 // Conditional require — module factory never runs in Expo Go
 const { useShareIntentContext } =
@@ -30,9 +34,10 @@ const { useShareIntentContext } =
  **/
 export default function ShareIntentScreen() {
   const { shareIntent, resetShareIntent } = useShareIntentContext();
-  const navigation = useNavigation<any>();
-  const route = useRoute();
-  const { mockUrl } = (route.params || {}) as { mockUrl?: string };
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
+  const route =
+    useRoute<RouteProp<AppParamList, typeof Routes.ShareIntentScreen>>();
+  const { mockUrl } = route.params ?? {};
 
   const contextUrl = useSharedUrl(shareIntent);
   const sharedText = mockUrl || contextUrl;
@@ -47,7 +52,7 @@ export default function ShareIntentScreen() {
 
   function handleCreateTask() {
     tryReset();
-    navigation.push(Routes.TaskModal, {
+    navigation.navigate(Routes.TaskModal, {
       key: { _id: '', title: sharedText, notes: sharedText },
     });
   }

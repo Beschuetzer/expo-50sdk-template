@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Box, Center, HStack, Text, VStack } from '@gluestack-ui/themed';
-import { useNavigation } from 'expo-router';
+import { type NavigationProp, useNavigation } from '@react-navigation/native';
 import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
@@ -9,7 +9,7 @@ import { DeveloperInfo } from './DeveloperInfo';
 import { ImageRenderer } from '../ImageRenderer';
 
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { Task, TaskTileViewingMode } from '@/types/Task';
 import { ItemProp } from '@/types/general';
 
@@ -65,7 +65,7 @@ function TaskTileNameAndCodeColumn(props: {
 }
 
 export function TaskTile(props: TaskTileProps) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const {
     isSelected = false,
     isMultiSelectMode = false,
@@ -127,7 +127,6 @@ export function TaskTile(props: TaskTileProps) {
         if (isMultiSelectMode) {
           onSelect && onSelect(task);
         } else {
-          // @ts-ignore -- expo-router v3 typed params
           navigation.navigate(Routes.TaskModal, { key: task });
         }
       }}

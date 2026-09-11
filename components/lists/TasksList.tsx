@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Box, Text, useToast } from '@gluestack-ui/themed';
+import { type NavigationProp, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
-import { useNavigation } from 'expo-router';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { LayoutAnimation } from 'react-native';
 
@@ -23,7 +23,7 @@ import {
   LIST_HAPTICS,
   SORT_ORDER_VALUE_DEFAULT,
 } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { toggleTaskCompleted, tasksSelector } from '@/state/slices/tasksSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
 import { deleteTasks } from '@/state/thunks';
@@ -39,7 +39,7 @@ import {
 type TasksListProps = object;
 
 export function TasksList(props: TasksListProps) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const tasks = useAppSelector(tasksSelector);
   const toast = useToast();
   const dispatch = useAppDispatch();
@@ -87,7 +87,6 @@ export function TasksList(props: TasksListProps) {
 
   const onAddTaskPress = useCallback(() => {
     closeMenu();
-    // @ts-ignore -- expo-router v3 typed params
     navigation.navigate(Routes.TaskModal, { key: { _id: EMPTY_STRING } });
   }, [closeMenu, navigation]);
 

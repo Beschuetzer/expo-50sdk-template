@@ -7,13 +7,13 @@ import {
   Text,
   VStack,
 } from '@gluestack-ui/themed';
-import { useNavigation } from 'expo-router';
+import { type NavigationProp, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 
 import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { FullscreenSpinner } from '@/components/FullscreenSpinner';
 import { useRequestCameraPermissions } from '@/components/hooks/useRequestCameraPermissions';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { tasksSelector } from '@/state/slices/tasksSlice';
 import { useAppSelector } from '@/state/store';
 import { getTaskFromList } from '@/utils/helpers';
@@ -24,7 +24,7 @@ import { getTaskFromList } from '@/utils/helpers';
  **/
 export default function ScannerScreen() {
   const hasPermission = useRequestCameraPermissions();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const tasks = useAppSelector(tasksSelector);
   const [lastScannedCode, setLastScannedCode] = useState('');
   const [isScannerEnabled, setIsScannerEnabled] = useState(true);
@@ -38,12 +38,10 @@ export default function ScannerScreen() {
 
   const onOpenTaskPress = useCallback(() => {
     if (!matchingTask) return;
-    // @ts-ignore -- expo-router v3 typed params
     navigation.navigate(Routes.TaskModal, { key: matchingTask });
   }, [matchingTask, navigation]);
 
   const onCreateTaskPress = useCallback(() => {
-    // @ts-ignore -- expo-router v3 typed params
     navigation.navigate(Routes.TaskModal, {
       key: { _id: '', code: lastScannedCode },
     });

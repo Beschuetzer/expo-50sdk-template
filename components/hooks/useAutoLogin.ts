@@ -17,7 +17,8 @@ export const useAutoLogin = () => {
     if (!email || !password) {
       dispatch(
         setError({
-          message: 'Auto login failed. Please provide test credentials in .env file.',
+          message:
+            'Auto login failed. Please provide test credentials in .env file.',
         }),
       );
       return;

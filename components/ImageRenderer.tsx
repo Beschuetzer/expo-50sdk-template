@@ -1,5 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import { Box } from '@gluestack-ui/themed';
+import { type NavigationProp } from '@react-navigation/native';
 import { Image, ImageProps } from 'expo-image';
 import { useNavigation } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -11,7 +12,7 @@ import {
   IMAGE_RENDERER_SHOW_FULL_SCREEN_ON_PRESS_DEFAULT,
   IMAGE_RENDERER_WIDTH_DEFAULT,
 } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { Task } from '@/types/Task';
 import { ItemProp } from '@/types/general';
 
@@ -25,7 +26,7 @@ type ImageRendererProps = {
   Partial<ItemProp<Task>> & { task?: Task };
 
 export function ImageRenderer(props: ImageRendererProps) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const {
     task,
     source,
@@ -43,9 +44,8 @@ export function ImageRenderer(props: ImageRendererProps) {
 
   const onImagePress = useCallback(() => {
     if (!showFullscreenOnPress || !task) return;
-    // @ts-ignore -- expo-router v3 typed params
     navigation.navigate(Routes.FullscreenImageScreen, { task });
-  }, [navigation, source, showFullscreenOnPress, task]);
+  }, [navigation, showFullscreenOnPress, task]);
 
   return (
     <TouchableOpacity onPress={onImagePress}>

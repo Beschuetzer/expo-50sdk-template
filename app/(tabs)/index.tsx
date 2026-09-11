@@ -7,7 +7,7 @@ import {
   Text,
   VStack,
 } from '@gluestack-ui/themed';
-import { useNavigation } from 'expo-router';
+import { type NavigationProp, useNavigation } from '@react-navigation/native';
 import { useCallback, useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
@@ -21,7 +21,7 @@ import { useMenu } from '@/components/hooks/useMenu';
 import { useNotificationsPermissions } from '@/components/hooks/useNotificationsPermissions';
 import { ListItemSeparator } from '@/components/lists/ListItemSeparator';
 import { TaskTile } from '@/components/tiles/TaskTile';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { resetErrors, setError } from '@/state/slices/generalSlice';
 import { toggleTaskCompleted, tasksSelector } from '@/state/slices/tasksSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
@@ -58,7 +58,7 @@ function TaskCountSummary() {
  *dev builds, waking a sleeping backend, notification permission requests, geolocation).
  **/
 export default function DashboardScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const dispatch = useAppDispatch();
   const layout = useWindowDimensions();
   const tasks = useAppSelector(tasksSelector);
@@ -83,7 +83,6 @@ export default function DashboardScreen() {
         <AddButton
           onPress={() => {
             closeMenu();
-            // @ts-ignore -- expo-router v3 typed params
             navigation.navigate(Routes.TaskModal, { key: { _id: '' } });
           }}
         />

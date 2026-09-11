@@ -1,3 +1,5 @@
+import 'react-native-get-random-values';
+
 import * as Location from 'expo-location';
 import { Insets } from 'react-native';
 import { v4 as uuidV4 } from 'uuid';

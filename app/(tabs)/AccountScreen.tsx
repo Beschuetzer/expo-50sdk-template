@@ -6,7 +6,7 @@ import {
   InputField,
   VStack,
 } from '@gluestack-ui/themed';
-import { useNavigation } from 'expo-router';
+import { type NavigationProp, useNavigation } from '@react-navigation/native';
 import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -22,7 +22,7 @@ import {
 } from '@/components/modals/ConfirmModal';
 import { BFF_SERVICE } from '@/components/services/BffService';
 import { EMPTY_STRING, FORM_INTER_ITEM_SPACING } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { EMAIL_SCHEMA, PASSWORD_SCHEMA } from '@/constants/schema';
 import {
   ACCOUNT_INITIAL,
@@ -51,7 +51,7 @@ const USERNAME_AVAILABILITY_INITIAL = Object.freeze({
 });
 
 export default function AccountScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const dispatch = useAppDispatch();
   const userAccount = useSelector(accountSelector);
   const tasks = useAppSelector(tasksSelector);
@@ -124,7 +124,6 @@ export default function AccountScreen() {
   }, [dispatch]);
 
   const onChangePassword = useCallback(() => {
-    // @ts-ignore -- expo-router v3 typed params
     navigation.navigate(Routes.PasswordResetScreen);
   }, [navigation]);
 

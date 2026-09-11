@@ -6,8 +6,8 @@ import {
   VStack,
 } from '@gluestack-ui/themed';
 import Slider from '@react-native-community/slider';
+import { type NavigationProp, useNavigation } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
-import { useNavigation } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Dimensions } from 'react-native';
 
@@ -19,7 +19,7 @@ import { SaveLoadStateFromDb } from '@/components/options/SaveLoadStateFromDb';
 import { ShouldSaveOnLoginToggle } from '@/components/options/ShouldSaveOnLoginToggle';
 import { BFF_SERVICE } from '@/components/services/BffService';
 import { SWIPEABLE_ROW_OPEN_THRESHOLD_DEFAULT } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { setError } from '@/state/slices/generalSlice';
 import {
   setSwipeableRowOpenThreshold,
@@ -33,7 +33,7 @@ const MOCK_SHARE_TEXT = 'Pick up dry cleaning';
 
 export default function OptionsScreen() {
   const openThreshold = useAppSelector(swipeableRowOpenThresholdSelector);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const dispatch = useAppDispatch();
   const windowDimensions = Dimensions.get('window');
   const maxAllowableSwipeThreshold = Math.round(
@@ -114,7 +114,6 @@ export default function OptionsScreen() {
         {getIsDevelopmentMode() ? (
           <Button
             onPress={() => {
-              // @ts-ignore -- expo-router v3 typed params
               navigation.navigate(Routes.DevOptionsScreen);
             }}
           >
@@ -124,7 +123,6 @@ export default function OptionsScreen() {
         {getIsDevelopmentMode() ? (
           <Button
             onPress={() => {
-              // @ts-ignore -- expo-router v3 typed params
               navigation.navigate(Routes.ShareIntentScreen, {
                 mockUrl: MOCK_SHARE_TEXT,
               });

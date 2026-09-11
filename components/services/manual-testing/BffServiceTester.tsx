@@ -1,8 +1,9 @@
 import { Button, ButtonText } from '@gluestack-ui/themed';
+import { type NavigationProp } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import React, { useCallback } from 'react';
 
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 
 type BffServiceTesterProps = {
   route: Routes;
@@ -11,11 +12,10 @@ type BffServiceTesterProps = {
 
 export const ServiceTesterButton = (props: BffServiceTesterProps) => {
   const { name, route } = props;
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
 
   const onBffServicePress = useCallback(() => {
-    // @ts-ignore -- expo-router v3 typed params
-    navigation.navigate(route);
+    navigation.navigate(route as never);
   }, [navigation, route]);
 
   return (

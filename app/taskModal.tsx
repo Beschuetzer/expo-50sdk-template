@@ -1,8 +1,13 @@
-import { useRoute } from '@react-navigation/native';
-import { useNavigation } from 'expo-router';
+import {
+  type NavigationProp,
+  type RouteProp,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import { useMemo } from 'react';
 
 import { TaskForm } from '@/components/forms/TaskForm';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import {
   canOverrideTaskSelector,
   autoSaveSelector,
@@ -14,18 +19,23 @@ import { Key, Task } from '@/types/Task';
 import { getKeyToUse, getTaskFromList } from '@/utils/helpers';
 
 export default function TaskModal() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const dispatch = useAppDispatch();
-  const route = useRoute();
-  const { key } = (route.params || {}) as { key?: Key };
+  const route = useRoute<RouteProp<AppParamList, typeof Routes.TaskModal>>();
+  const { key } = route.params ?? {};
   const canOverrideTask = useAppSelector(canOverrideTaskSelector);
   const autoSave = useAppSelector(autoSaveSelector);
   const tasks = useAppSelector(tasksSelector);
 
-  const taskInList = useMemo(
-    () => (key ? getTaskFromList(tasks, getKeyToUse(key)) : null),
-    [key, tasks],
-  );
+  const taskInList = useMemo(() => {
+    if (!key) return null;
+    const normalizedKey = {
+      _id: key._id,
+      title: key.title || '',
+      code: key.code || '',
+    };
+    return getTaskFromList(tasks, getKeyToUse(normalizedKey));
+  }, [key, tasks]);
 
   function handleClose() {
     navigation.canGoBack() && navigation.goBack();

@@ -1,6 +1,6 @@
 import { Box, Center, HStack, VStack } from '@gluestack-ui/themed';
+import { type NavigationProp, useNavigation } from '@react-navigation/native';
 import { ImagePickerAsset } from 'expo-image-picker';
-import { useNavigation } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
@@ -15,7 +15,7 @@ import {
   EMPTY_STRING,
   MAX_CUSTOM_IMAGES,
 } from '@/constants/general';
-import { Routes } from '@/constants/navigation';
+import { type AppParamList, Routes } from '@/constants/navigation';
 import { AMAZON_S3_REGEX, LOCAL_FILE_REGEX } from '@/constants/regexs';
 import { SpacingProp, StyleProp } from '@/types/general';
 import { logWhenDevelopmentMode } from '@/utils/logging';
@@ -40,7 +40,7 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
     selectedIndex = EMPTY_NUMBER,
     spacing,
   } = props;
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppParamList>>();
   const [currentIndex, setCurrentIndex] = useState(selectedIndex);
   const isDarkMode = useIsDarkMode();
   const modeColor = useMemo(
@@ -150,7 +150,6 @@ export function ThumbnailPicker(props: ThumbnailPickerProps) {
               onPress={(url) => handleSelect(index, url, false)}
               onLongPress={(url) => handleLongPress(index, url)}
               onDoubleTap={() => {
-                // @ts-ignore -- expo-router v3 typed params
                 navigation.navigate(Routes.FullscreenImageScreen, {
                   task: { images: [imageUrl], imageToUseIndex: 0 },
                 });

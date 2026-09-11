@@ -1,8 +1,8 @@
 import { Button, ButtonText, VStack } from '@gluestack-ui/themed';
-import { FlashList } from '@shopify/flash-list';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { ThemeAwareScreen } from '@/components/ui/ThemeAwareScreen';
 import { ThemeAwareSurface } from '@/components/ui/ThemeAwareSurface';
 import {
   ThemeAwareHeading,
@@ -89,44 +89,12 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemeAwareSurface flex={1}>
-      <FlashList
-        contentContainerStyle={{ padding: 16 }}
-        data={checklistItems}
-        estimatedItemSize={56}
-        keyExtractor={(item) => item}
-        ListFooterComponent={
-          <VStack space="md" pt="$4">
-            <Button onPress={onPressTestErrorModal} variant="solid">
-              <ButtonText>{t('actions.testErrorModal')}</ButtonText>
-            </Button>
-            <Button onPress={onPressTestBackendConnection} variant="outline">
-              <ButtonText>{t('actions.testBackendConnection')}</ButtonText>
-            </Button>
-            <Button onPress={onPressReadBackendCache} variant="outline">
-              <ButtonText>{t('actions.readBackendCache')}</ButtonText>
-            </Button>
-            <Button onPress={onPressClearBackendCache} variant="outline">
-              <ButtonText>{t('actions.clearBackendCache')}</ButtonText>
-            </Button>
-            {connectionStatus ? (
-              <ThemeAwareText>{t(connectionStatus)}</ThemeAwareText>
-            ) : null}
-            {cacheStatus ? (
-              <ThemeAwareText>{t(cacheStatus)}</ThemeAwareText>
-            ) : null}
-          </VStack>
-        }
-        ListHeaderComponent={
-          <VStack space="lg" pb="$2">
-            <ThemeAwareHeading size="2xl">{t('app.title')}</ThemeAwareHeading>
-            <ThemeAwareText size="md">{t('app.description')}</ThemeAwareText>
-            <ThemeAwareHeading size="sm">
-              {t('checklist.title')}
-            </ThemeAwareHeading>
-          </VStack>
-        }
-        renderItem={({ item }) => (
+    <ThemeAwareScreen
+      flashListProps={{
+        data: checklistItems,
+        estimatedItemSize: 56,
+        keyExtractor: (item) => item,
+        renderItem: ({ item }) => (
           <ThemeAwareSurface
             darkBackground="$backgroundDark900"
             lightBackground="$coolGray50"
@@ -136,8 +104,36 @@ export default function HomeScreen() {
           >
             <ThemeAwareText>• {item}</ThemeAwareText>
           </ThemeAwareSurface>
-        )}
-      />
-    </ThemeAwareSurface>
+        ),
+      }}
+      absolutelyPositionedJsx={
+        <VStack space="md" p="$4">
+          <Button onPress={onPressTestErrorModal} variant="solid">
+            <ButtonText>{t('actions.testErrorModal')}</ButtonText>
+          </Button>
+          <Button onPress={onPressTestBackendConnection} variant="outline">
+            <ButtonText>{t('actions.testBackendConnection')}</ButtonText>
+          </Button>
+          <Button onPress={onPressReadBackendCache} variant="outline">
+            <ButtonText>{t('actions.readBackendCache')}</ButtonText>
+          </Button>
+          <Button onPress={onPressClearBackendCache} variant="outline">
+            <ButtonText>{t('actions.clearBackendCache')}</ButtonText>
+          </Button>
+          {connectionStatus ? (
+            <ThemeAwareText>{t(connectionStatus)}</ThemeAwareText>
+          ) : null}
+          {cacheStatus ? (
+            <ThemeAwareText>{t(cacheStatus)}</ThemeAwareText>
+          ) : null}
+        </VStack>
+      }
+    >
+      <VStack space="lg" p="$4">
+        <ThemeAwareHeading size="2xl">{t('app.title')}</ThemeAwareHeading>
+        <ThemeAwareText size="md">{t('app.description')}</ThemeAwareText>
+        <ThemeAwareHeading size="sm">{t('checklist.title')}</ThemeAwareHeading>
+      </VStack>
+    </ThemeAwareScreen>
   );
 }

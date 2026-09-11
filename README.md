@@ -67,6 +67,10 @@ Start Expo and the backend together:
 npm run dev
 ```
 
+On Windows, this opens separate PowerShell windows for Expo and the API so each
+process keeps its own logs and interactive output. Close either window to stop
+that process. On other platforms, both commands run in the current terminal.
+
 Start either project independently:
 
 ```bash

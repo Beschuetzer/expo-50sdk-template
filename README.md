@@ -47,6 +47,13 @@ language selector in the Settings tab persists the user's choice with
 AsyncStorage. Add new messages in `apps/mobile/utils/i18n.tsx` and reference
 them with `useI18n().t('section.key')` instead of hard-coding user-facing text.
 
+Theme support is provided by `apps/mobile/utils/theme.tsx`. The Settings tab
+allows users to choose System, Light, or Dark mode, and the choice is persisted
+with AsyncStorage. The selected mode is shared by React Navigation, Gluestack,
+the tab bar, and legacy themed components. Use `useColorScheme()` or
+`useThemeMode()` for theme-aware behavior, and avoid fixed light-only colors in
+new screens.
+
 ## Nx Commands
 
 ```bash

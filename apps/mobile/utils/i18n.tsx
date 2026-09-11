@@ -61,6 +61,12 @@ const messages = {
       backendSuccess: 'Backend connection successful.',
       checkingBackend: 'Checking backend...',
     },
+    theme: {
+      dark: 'Dark',
+      label: 'Theme',
+      light: 'Light',
+      system: 'System',
+    },
     tabs: {
       home: 'Home',
       settings: 'Settings',
@@ -110,6 +116,12 @@ const messages = {
       backendSuccess: 'Conexión con el backend exitosa.',
       checkingBackend: 'Comprobando el backend...',
     },
+    theme: {
+      dark: 'Oscuro',
+      label: 'Tema',
+      light: 'Claro',
+      system: 'Sistema',
+    },
     tabs: {
       home: 'Inicio',
       settings: 'Configuración',
@@ -126,6 +138,7 @@ type TranslationKey =
   | `language.${keyof typeof messages.en.language}`
   | `settings.${keyof typeof messages.en.settings}`
   | `status.${keyof typeof messages.en.status}`
+  | `theme.${keyof typeof messages.en.theme}`
   | `tabs.${keyof typeof messages.en.tabs}`;
 
 type I18nContextValue = {

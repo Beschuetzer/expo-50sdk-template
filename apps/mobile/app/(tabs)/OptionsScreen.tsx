@@ -8,9 +8,11 @@ import {
 } from '@gluestack-ui/themed';
 
 import { useI18n } from '@/utils/i18n';
+import { useThemeMode } from '@/utils/theme';
 
 export default function SettingsScreen() {
   const { locale, locales, setLocale, t } = useI18n();
+  const { mode, modes, setMode } = useThemeMode();
 
   return (
     <VStack flex={1} p="$4" space="lg">
@@ -18,10 +20,21 @@ export default function SettingsScreen() {
 
       <VStack space="md">
         <HStack justifyContent="space-between" alignItems="center">
-          <Text>{t('settings.darkMode')}</Text>
-          <Button variant="outline" size="sm">
-            <ButtonText>{t('settings.toggle')}</ButtonText>
-          </Button>
+          <Text>{t('theme.label')}</Text>
+          <HStack space="sm">
+            {(Object.keys(modes) as (keyof typeof modes)[]).map(
+              (availableMode) => (
+                <Button
+                  key={availableMode}
+                  variant={mode === availableMode ? 'solid' : 'outline'}
+                  size="sm"
+                  onPress={() => setMode(availableMode)}
+                >
+                  <ButtonText>{t(`theme.${availableMode}`)}</ButtonText>
+                </Button>
+              ),
+            )}
+          </HStack>
         </HStack>
         <HStack justifyContent="space-between" alignItems="center">
           <Text>{t('settings.notifications')}</Text>

@@ -20,10 +20,10 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { Text } from '@/components/Themed';
 import { useAppState } from '@/components/hooks/tanstack/useAppState';
 import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
-import { useColorScheme } from '@/components/hooks/useColorScheme';
 import { ErrorModal } from '@/components/modals/ErrorModal';
 import { persistor, store } from '@/state/store';
-import { useI18n, I18nProvider } from '@/utils/i18n';
+import { I18nProvider, useI18n } from '@/utils/i18n';
+import { ThemeModeProvider, useThemeMode } from '@/utils/theme';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -55,14 +55,16 @@ export default function RootLayout() {
 
   return (
     <I18nProvider>
-      <RootLayoutNav />
+      <ThemeModeProvider>
+        <RootLayoutNav />
+      </ThemeModeProvider>
     </I18nProvider>
   );
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
   const { t } = useI18n();
+  const { colorScheme: resolvedColorScheme } = useThemeMode();
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: 3, retryDelay: 1000 } },
@@ -73,13 +75,18 @@ function RootLayoutNav() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider
+        value={resolvedColorScheme === 'dark' ? DarkTheme : DefaultTheme}
+      >
         <Provider store={store}>
           <PersistGate
             loading={<Text>{t('common.loading')}</Text>}
             persistor={persistor}
           >
-            <GluestackUIProvider config={config}>
+            <GluestackUIProvider
+              config={config}
+              colorMode={resolvedColorScheme}
+            >
               <GestureHandlerRootView style={{ flex: 1 }}>
                 <MenuProvider>
                   <BottomSheetModalProvider>

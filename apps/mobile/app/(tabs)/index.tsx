@@ -8,6 +8,7 @@ import {
 } from '@gluestack-ui/themed';
 import { useState } from 'react';
 
+import { useColorScheme } from '@/components/hooks/useColorScheme';
 import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
 import { getBackendUrl } from '@/utils/helpers';
@@ -16,6 +17,8 @@ import { useI18n } from '@/utils/i18n';
 export default function HomeScreen() {
   const dispatch = useAppDispatch();
   const { t } = useI18n();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const [connectionStatus, setConnectionStatus] = useState('');
 
   const onPressTestErrorModal = () => {
@@ -61,18 +64,37 @@ export default function HomeScreen() {
   };
 
   return (
-    <VStack flex={1} p="$4" bg="$white" space="lg">
+    <VStack
+      flex={1}
+      p="$4"
+      bg={colorScheme === 'dark' ? '$backgroundDark950' : '$backgroundLight0'}
+      space="lg"
+    >
       <Heading size="2xl">{t('app.title')}</Heading>
       <Text size="md">{t('app.description')}</Text>
 
-      <Box bg="$coolGray50" borderRadius="$lg" p="$4">
-        <Heading size="sm" mb="$2">
+      <Box
+        bg={isDark ? '$backgroundDark900' : '$coolGray50'}
+        borderRadius="$lg"
+        p="$4"
+      >
+        <Heading
+          size="sm"
+          mb="$2"
+          color={isDark ? '$textDark50' : '$textLight900'}
+        >
           {t('checklist.title')}
         </Heading>
         <VStack space="sm">
-          <Text>• {t('checklist.replaceContent')}</Text>
-          <Text>• {t('checklist.addRedux')}</Text>
-          <Text>• {t('checklist.addScreens')}</Text>
+          <Text color={isDark ? '$textDark50' : '$textLight900'}>
+            • {t('checklist.replaceContent')}
+          </Text>
+          <Text color={isDark ? '$textDark50' : '$textLight900'}>
+            • {t('checklist.addRedux')}
+          </Text>
+          <Text color={isDark ? '$textDark50' : '$textLight900'}>
+            • {t('checklist.addScreens')}
+          </Text>
         </VStack>
       </Box>
 

@@ -30,6 +30,15 @@ npm run api
 npm run mobile
 ```
 
+The normal mobile command runs Expo directly via `npm --prefix apps/mobile`
+instead of Nx, so Expo Go's QR code and interactive keyboard shortcuts (`a`,
+`w`, `r`, `?`, etc.) work reliably on Windows terminals. To force a clean Metro
+rebuild when troubleshooting, run:
+
+```bash
+npm --prefix apps/mobile run dev:clear
+```
+
 The mobile app's `Test Backend Connection` button calls the API health endpoint. `apps/mobile/setup.mjs` refreshes the Expo public IP and backend port in `apps/mobile/.env` before Metro starts. For a physical device, the generated IP must be reachable from the device.
 
 ## Nx Commands

@@ -3,6 +3,7 @@ import os from 'os';
 
 //#region ENV Files setup
 export const BACKEND_PORT = 4200;
+export const EXPO_PUBLIC_ENV_STRING = 'EXPO_PUBLIC_ENV';
 export const EXPO_PUBLIC_IP_ADDRESS_STRING = 'EXPO_PUBLIC_IP_ADDRESS';
 export const EXPO_PUBLIC_PORT_NUMBER_STRING = 'EXPO_PUBLIC_PORT_NUMBER';
 //#endregion
@@ -12,15 +13,20 @@ const ENV_FILE_PATH = './.env';
 async function addIpAddressToEnvFile() {
   let lines;
   const toWrite = [
+    `${EXPO_PUBLIC_ENV_STRING}=development`,
     `${EXPO_PUBLIC_IP_ADDRESS_STRING}=${getIPAddress()}`,
     `${EXPO_PUBLIC_PORT_NUMBER_STRING}=${BACKEND_PORT}`,
   ];
+  const environmentRegex = new RegExp(
+    String.raw`\s*${EXPO_PUBLIC_ENV_STRING}\s*=`,
+    'i',
+  );
   const ipAddressRegex = new RegExp(
-    `\s*${EXPO_PUBLIC_IP_ADDRESS_STRING}\s*`,
+    String.raw`\s*${EXPO_PUBLIC_IP_ADDRESS_STRING}\s*`,
     'ig',
   );
   const portNumberRegex = new RegExp(
-    `\s*${EXPO_PUBLIC_PORT_NUMBER_STRING}\s*`,
+    String.raw`\s*${EXPO_PUBLIC_PORT_NUMBER_STRING}\s*`,
     'ig',
   );
 
@@ -34,12 +40,13 @@ async function addIpAddressToEnvFile() {
           (data) =>
             !data.match(ipAddressRegex) &&
             !data.match(portNumberRegex) &&
+            !data.match(environmentRegex) &&
             Boolean(data),
         ) || [];
-  } catch (error) {
+  } catch {
     await fs.promises.writeFile(
       ENV_FILE_PATH,
-      `\n${toWrite[0]}\n${toWrite[1]}`,
+      `${toWrite.join('\n')}`,
       'utf-8',
     );
     return;

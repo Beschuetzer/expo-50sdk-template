@@ -16,6 +16,7 @@ function sendJson(response: ServerResponse, statusCode: number, body: object) {
 }
 
 function handleRequest(request: IncomingMessage, response: ServerResponse) {
+  console.log(`Incoming request: ${request.method} ${request.url}`);
   if (request.method === 'GET' && request.url === '/health') {
     sendJson(response, 200, {
       status: 'ok',

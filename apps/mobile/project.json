@@ -6,33 +6,37 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node setup.mjs && npx expo start --clear",
+        "command": "npm run dev",
         "cwd": "apps/mobile",
-        "color": true
+        "color": true,
+        "usePty": false
       }
     },
     "android": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx expo start --android",
+        "command": "npm run android",
         "cwd": "apps/mobile",
-        "color": true
+        "color": true,
+        "usePty": false
       }
     },
     "ios": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx expo start --ios",
+        "command": "npm run ios",
         "cwd": "apps/mobile",
-        "color": true
+        "color": true,
+        "usePty": false
       }
     },
     "web": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx expo start --web",
+        "command": "npm run web",
         "cwd": "apps/mobile",
-        "color": true
+        "color": true,
+        "usePty": false
       }
     },
     "typecheck": {

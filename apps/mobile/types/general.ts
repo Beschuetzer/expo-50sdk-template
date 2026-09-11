@@ -1,9 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 import { ViewStyle } from 'react-native';
 
-import { Key, Task } from './Task';
-import { DispatchNeeded } from './bffService';
-
 export enum TimeSpan {
   Hour = 'Hour',
   Day = 'Day',
@@ -156,14 +153,6 @@ export type HeadingTagProp = {
   headingTag?: any; //todo: figure out type here
 };
 
-export type OriginalKeyProp = {
-  originalKey: Key;
-};
-
-export type KeyProp = {
-  key: Key;
-};
-
 export type ItemProp<T> = {
   item: T;
 };
@@ -182,12 +171,4 @@ export type FlatListItem = {
   key: number | string;
 };
 
-/**
- *Shape used when exporting/importing a local JSON backup of the app's data
- *(see {@link SaveLoadState}) and when syncing with the backend (see `saveAll`/`loadAll` thunks).
- **/
-export type FileNames = {
-  tasks: Task[];
-};
 export type ResolvedType<T> = T extends Promise<infer R> ? R : T;
-export type SetAppDataInput = FileNames & DispatchNeeded;

@@ -3,13 +3,19 @@ import {
   Button,
   ButtonText,
   Heading,
+  ScrollView,
   Text,
   VStack,
 } from '@gluestack-ui/themed';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { useColorScheme } from '@/components/hooks/useColorScheme';
-import { useBackendHealthQuery } from '@/features/backend/hooks/useBackendHealthQuery';
+import type { BackendHealth } from '@/features/backend/api';
+import {
+  backendHealthQueryKey,
+  useBackendHealthQuery,
+} from '@/features/backend/hooks/useBackendHealthQuery';
 import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
 import { useI18n } from '@/utils/i18n';
@@ -20,6 +26,8 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [connectionStatus, setConnectionStatus] = useState('');
+  const [cacheStatus, setCacheStatus] = useState('');
+  const queryClient = useQueryClient();
   const { refetch: refetchBackendHealth } = useBackendHealthQuery();
 
   const onPressTestErrorModal = () => {
@@ -48,6 +56,7 @@ export default function HomeScreen() {
           ? t('status.backendSuccess')
           : t('errors.unexpectedBackendStatus'),
       );
+      setCacheStatus(t('status.backendCached'));
     } catch (error) {
       setConnectionStatus(t('errors.backendUnavailable'));
       dispatch(
@@ -62,12 +71,23 @@ export default function HomeScreen() {
     }
   };
 
+  const onPressReadBackendCache = () => {
+    const cachedHealth = queryClient.getQueryData<BackendHealth>(
+      backendHealthQueryKey,
+    );
+    setCacheStatus(cachedHealth ? t('status.cacheHit') : t('status.cacheMiss'));
+  };
+
+  const onPressClearBackendCache = () => {
+    queryClient.removeQueries({ queryKey: backendHealthQueryKey });
+    setCacheStatus(t('status.cacheCleared'));
+  };
+
   return (
-    <VStack
+    <ScrollView
       flex={1}
       p="$4"
       bg={colorScheme === 'dark' ? '$backgroundDark950' : '$backgroundLight0'}
-      space="lg"
     >
       <Heading size="2xl">{t('app.title')}</Heading>
       <Text size="md">{t('app.description')}</Text>
@@ -103,7 +123,14 @@ export default function HomeScreen() {
       <Button onPress={onPressTestBackendConnection} variant="outline">
         <ButtonText>{t('actions.testBackendConnection')}</ButtonText>
       </Button>
+      <Button onPress={onPressReadBackendCache} variant="outline">
+        <ButtonText>{t('actions.readBackendCache')}</ButtonText>
+      </Button>
+      <Button onPress={onPressClearBackendCache} variant="outline">
+        <ButtonText>{t('actions.clearBackendCache')}</ButtonText>
+      </Button>
       {connectionStatus ? <Text>{connectionStatus}</Text> : null}
-    </VStack>
+      {cacheStatus ? <Text>{cacheStatus}</Text> : null}
+    </ScrollView>
   );
 }

@@ -38,6 +38,12 @@ the root layout. Redux Persist uses the same storage mechanism for client
 state, but the two persisted stores remain separate and independently
 versioned.
 
+The starter home screen includes cache verification controls. Press `Test
+Backend Connection` to fetch and cache the health response, `Read Cached
+Health` to inspect that response without a network request, and `Clear Backend
+Cache` to remove it. Reading the cache after clearing should report a cache
+miss.
+
 ## Local Development
 
 Install dependencies once:

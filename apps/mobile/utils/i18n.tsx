@@ -21,6 +21,8 @@ export type Locale = keyof typeof locales;
 const messages = {
   en: {
     actions: {
+      clearBackendCache: 'Clear Backend Cache',
+      readBackendCache: 'Read Cached Health',
       saveSettings: 'Save Settings',
       testBackendConnection: 'Test Backend Connection',
       testErrorModal: 'Test ErrorModal',
@@ -58,7 +60,11 @@ const messages = {
       toggle: 'Toggle',
     },
     status: {
+      backendCached: 'Backend response cached.',
       backendSuccess: 'Backend connection successful.',
+      cacheCleared: 'Backend cache cleared.',
+      cacheHit: 'Cache hit: no network request was made.',
+      cacheMiss: 'Cache miss: fetch the backend first.',
       checkingBackend: 'Checking backend...',
     },
     theme: {
@@ -74,6 +80,8 @@ const messages = {
   },
   es: {
     actions: {
+      clearBackendCache: 'Limpiar caché del backend',
+      readBackendCache: 'Leer salud en caché',
       saveSettings: 'Guardar configuración',
       testBackendConnection: 'Probar conexión con el backend',
       testErrorModal: 'Probar ErrorModal',
@@ -113,7 +121,11 @@ const messages = {
       toggle: 'Cambiar',
     },
     status: {
+      backendCached: 'Respuesta del backend guardada en caché.',
       backendSuccess: 'Conexión con el backend exitosa.',
+      cacheCleared: 'Caché del backend limpiada.',
+      cacheHit: 'Caché encontrada: no se realizó ninguna solicitud de red.',
+      cacheMiss: 'Caché vacía: primero consulta el backend.',
       checkingBackend: 'Comprobando el backend...',
     },
     theme: {

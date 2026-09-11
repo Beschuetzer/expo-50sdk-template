@@ -7,7 +7,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -21,6 +21,7 @@ import { Text } from '@/components/Themed';
 import { useAppState } from '@/components/hooks/tanstack/useAppState';
 import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
 import { ErrorModal } from '@/components/modals/ErrorModal';
+import { queryClient, queryPersistOptions } from '@/state/queryClient';
 import { persistor, store } from '@/state/store';
 import { I18nProvider, useI18n } from '@/utils/i18n';
 import { ThemeModeProvider, useThemeMode } from '@/utils/theme';
@@ -66,15 +67,14 @@ function RootLayoutNav() {
   const { t } = useI18n();
   const { colorScheme: resolvedColorScheme } = useThemeMode();
 
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: 3, retryDelay: 1000 } },
-  });
-
   useOnlineManager();
   useAppState();
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={queryPersistOptions}
+    >
       <ThemeProvider
         value={resolvedColorScheme === 'dark' ? DarkTheme : DefaultTheme}
       >
@@ -107,6 +107,6 @@ function RootLayoutNav() {
           </PersistGate>
         </Provider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

@@ -9,6 +9,35 @@ A neutral Expo SDK 50 starter shell managed by Nx, with a minimal Node.js backen
 
 The API currently exposes `GET /health` on port `4200` and returns a JSON health response.
 
+## Mobile Architecture
+
+Mobile code is organized by responsibility:
+
+- `app`: Expo Router screens and navigation composition.
+- `features`: product capabilities with their API functions, query hooks, and feature tests.
+- `components`: reusable UI, domain-independent hooks, and shared services.
+- `state`: Redux slices for client state and the shared TanStack Query client configuration.
+- `utils`: cross-cutting concerns such as internationalization, theme resolution, storage, and platform helpers.
+
+For a server-backed feature, keep the request function in
+`apps/mobile/features/<feature>/api.ts`, the cache hook in
+`apps/mobile/features/<feature>/hooks`, and consume the hook from a screen or
+feature component. This keeps screens focused on rendering and user actions.
+
+### Redux and TanStack Query boundaries
+
+Redux is for client state that the application owns, such as form values,
+preferences, authentication state, and UI flags. TanStack Query is for remote
+server state, including request status, stale data, retries, invalidation, and
+cache lifetimes. Do not copy query results into Redux; doing so creates two
+sources of truth and removes much of TanStack Query's value.
+
+The singleton QueryClient in `apps/mobile/state/queryClient.ts` persists its
+cache through AsyncStorage and is mounted by `PersistQueryClientProvider` in
+the root layout. Redux Persist uses the same storage mechanism for client
+state, but the two persisted stores remain separate and independently
+versioned.
+
 ## Local Development
 
 Install dependencies once:

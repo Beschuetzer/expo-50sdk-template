@@ -6,6 +6,7 @@ export function healthRoute(
   _request: IncomingMessage,
   response: ServerResponse,
 ) {
+    console.log('Health check requested');
   sendJson(response, 200, {
     service: 'api',
     status: 'ok',

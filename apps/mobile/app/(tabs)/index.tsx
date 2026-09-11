@@ -9,9 +9,9 @@ import {
 import { useState } from 'react';
 
 import { useColorScheme } from '@/components/hooks/useColorScheme';
+import { useBackendHealthQuery } from '@/features/backend/hooks/useBackendHealthQuery';
 import { setError } from '@/state/slices/generalSlice';
 import { useAppDispatch } from '@/state/store';
-import { getBackendUrl } from '@/utils/helpers';
 import { useI18n } from '@/utils/i18n';
 
 export default function HomeScreen() {
@@ -20,6 +20,7 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const [connectionStatus, setConnectionStatus] = useState('');
+  const { refetch: refetchBackendHealth } = useBackendHealthQuery();
 
   const onPressTestErrorModal = () => {
     dispatch(
@@ -34,18 +35,16 @@ export default function HomeScreen() {
   };
 
   const onPressTestBackendConnection = async () => {
-    const healthUrl = `${getBackendUrl()}/health`;
     setConnectionStatus(t('status.checkingBackend'));
 
     try {
-      const response = await fetch(healthUrl);
-      if (!response.ok) {
-        throw new Error(`Backend returned HTTP ${response.status}`);
+      const { data: result, error } = await refetchBackendHealth();
+      if (error) {
+        throw error;
       }
 
-      const result = (await response.json()) as { status?: string };
       setConnectionStatus(
-        result.status === 'ok'
+        result?.status === 'ok'
           ? t('status.backendSuccess')
           : t('errors.unexpectedBackendStatus'),
       );

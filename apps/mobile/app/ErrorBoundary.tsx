@@ -1,9 +1,7 @@
-import React, { ErrorInfo } from 'react';
+import React, { ErrorInfo, PropsWithChildren } from 'react';
 import { ScrollView, Text, View, StyleSheet } from 'react-native';
 
-import { ChildrenProp } from '@/types/general';
-
-type ErrorBoundaryProps = object & ChildrenProp;
+type ErrorBoundaryProps = PropsWithChildren;
 
 type ErrorBoundaryState = {
   error: Error | null;

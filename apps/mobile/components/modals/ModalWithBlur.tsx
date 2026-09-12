@@ -1,6 +1,6 @@
 import { HStack } from '@gluestack-ui/themed';
 import { BlurView } from 'expo-blur';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import React, { PropsWithChildren, ReactNode, useCallback, useMemo } from 'react';
 import { Modal } from 'react-native';
 
 import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
@@ -9,9 +9,15 @@ import { ThemeAwareHeading } from '@/components/ui/ThemeAwareText';
 import { MODAL_BLUR_VIEW_COLOR } from '@/constants/colors';
 import { FORM_INTER_ITEM_SPACING } from '@/constants/general';
 import { maxWidth } from '@/constants/styles';
-import { ButtonOptions, ChildrenProp } from '@/types/general';
 
-export type ModalWithBlurProps = {
+type ButtonOptions = {
+  action?: 'primary' | 'secondary' | 'positive' | 'negative' | 'default';
+  isEnabled?: boolean;
+  isVisible?: boolean;
+  text?: string;
+};
+
+export type ModalWithBlurProps = PropsWithChildren<{
   cancelButton?: ButtonOptions;
   confirmButton?: ButtonOptions;
   containerStyles?: Record<string, unknown>;
@@ -20,7 +26,7 @@ export type ModalWithBlurProps = {
   onConfirm?: () => void;
   onCancel?: () => void;
   onBlurPress?: () => void;
-} & ChildrenProp;
+}>;
 
 export function ModalWithBlur(props: ModalWithBlurProps) {
   const {

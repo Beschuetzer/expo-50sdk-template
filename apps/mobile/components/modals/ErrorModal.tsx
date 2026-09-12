@@ -10,7 +10,7 @@ import {
   setErrors,
 } from '@/state/slices/generalSlice';
 import { useAppDispatch, useAppSelector } from '@/state/store';
-import { Error } from '@/types/general';
+import { Error } from '@/types/errors';
 
 export type ErrorModalProps = object;
 

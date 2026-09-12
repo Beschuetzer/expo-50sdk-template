@@ -2,8 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 import { RootState } from '../store';
 
-import { Error } from '@/types/general';
-import { ArrayElement } from '@/types/helpers';
+import { Error } from '@/types/errors';
 
 export const ERRORS_INITIAL = (() => [] as Error[])();
 
@@ -72,7 +71,7 @@ export const generalSlice = createSlice({
     },
     setError: (
       state: GeneralState,
-      action: PayloadAction<ArrayElement<GeneralState['errors']>>,
+      action: PayloadAction<GeneralState['errors'][number]>,
     ) => {
       const error = normalizeError(action.payload);
       if (!error || !error.message) {

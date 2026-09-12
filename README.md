@@ -5,10 +5,11 @@ A neutral Expo SDK 50 starter shell managed by Nx, with a minimal Node.js backen
 ## Projects
 
 - `mobile`: Expo Router app in `apps/mobile`, preserving the existing Expo SDK 50 and gluestack UI v1 setup.
-- `api`: dependency-free Node HTTP service in `apps/api`.
+- `api`: Express-based OAuth2 resource server in `apps/api`.
 - `shared-types`: source-only TypeScript contracts in `libs/shared-types`, consumed by both apps.
 
-The API currently exposes `GET /health` on port `4200` and returns a JSON health response.
+The API currently exposes public `GET /health` and protected `GET /api/v1/me`
+on port `4200`.
 
 ## Shared Types
 

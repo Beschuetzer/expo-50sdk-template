@@ -5,9 +5,9 @@ Node.js HTTP API for local development and production-oriented extension.
 ## Structure
 
 - `src/config`: environment parsing and validated runtime configuration.
-- `src/http`: transport-level response helpers.
+- `src/auth`: OAuth2 bearer-token middleware and the injectable auth boundary.
 - `src/routes`: individual HTTP route handlers.
-- `src/app.ts`: request routing, independent of the listening socket.
+- `src/app.ts`: Express middleware and versioned route composition, independent of the listening socket.
 - `src/server.ts`: server creation, startup, and shutdown lifecycle.
 - `src/main.ts`: process entrypoint and signal handling.
 - `src/app.spec.ts`: API contract tests using Node's built-in test runner.
@@ -17,15 +17,38 @@ Node.js HTTP API for local development and production-oriented extension.
 - `HOST`: bind address, default `0.0.0.0`.
 - `PORT`: TCP port from `1` to `65535`, default `4200`.
 - `NODE_ENV`: runtime environment label, default `development`.
+- `AUTH_ISSUER_BASE_URL`: OAuth2/OIDC issuer base URL. Required for protected routes.
+- `AUTH_AUDIENCE`: expected OAuth2 access-token audience. Required for protected routes.
+- `AUTH_REQUIRED_SCOPES`: optional space- or comma-separated scopes required by all protected routes.
 
 ## Commands
 
-- `GET /health` returns a JSON health response.
+- `GET /health` returns a public JSON health response for deployment probes.
+- `GET /api/v1/me` is a protected example resource and requires a valid OAuth2 bearer token.
 - `npm run api` starts the API through Nx.
 - `npx nx run api:test` runs the API contract tests.
 - `npx nx run api:typecheck` validates TypeScript without emitting files.
 - `npx nx run api:build` emits the compiled API to `dist/apps/api`.
 - `npm run dev` starts the mobile app and API together.
+
+### OAuth2 architecture
+
+The API is an OAuth2 resource server, not an identity provider. An external
+OAuth2/OIDC provider issues access tokens; the API validates those tokens using
+issuer discovery, audience validation, and cached JWKS keys through
+`express-oauth2-jwt-bearer`. It does not store client secrets or passwords.
+
+Protected routes are mounted under `/api/v1` and receive the validated claims
+on `request.auth`. Keep provider-specific behavior inside
+`src/auth/middleware.ts`; route handlers should consume claims and remain
+independent of Auth0, Entra, Okta, or another provider. Tests can inject an
+`AuthMiddleware` through `createApp` without contacting a real identity
+provider.
+
+For local development, leave the OAuth2 variables unset while working on
+public routes. Protected routes fail closed with `503 auth_not_configured`
+until the provider settings are supplied. Never replace that behavior with a
+development token bypass in shared or production code.
 
 ## Deploy to Heroku
 

@@ -1,18 +1,13 @@
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import type { Request, Response } from 'express';
 
 import type { HealthResponse } from '@expo-50sdk-template/shared-types';
 
-import { sendJson } from '../http/response';
-
-export function healthRoute(
-  _request: IncomingMessage,
-  response: ServerResponse,
-) {
+export function healthRoute(_request: Request, response: Response) {
   console.log('Health check requested');
   const healthResponse: HealthResponse = {
     service: 'api',
     status: 'ok',
     timestamp: new Date().toISOString(),
   };
-  sendJson(response, 200, healthResponse);
+  response.status(200).json(healthResponse);
 }

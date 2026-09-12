@@ -2,6 +2,11 @@ export interface ApiConfig {
   environment: string;
   host: string;
   port: number;
+  oauth2: {
+    issuerBaseUrl?: string;
+    audience?: string;
+    requiredScopes: string[];
+  };
 }
 
 const DEFAULT_HOST = '0.0.0.0';
@@ -23,9 +28,19 @@ function parsePort(value: string | undefined) {
 export function loadConfig(
   environment: NodeJS.ProcessEnv = process.env,
 ): ApiConfig {
+  const requiredScopes = (environment.AUTH_REQUIRED_SCOPES ?? '')
+    .split(/[ ,]+/)
+    .map((scope) => scope.trim())
+    .filter(Boolean);
+
   return {
     environment: environment.NODE_ENV ?? 'development',
     host: environment.HOST?.trim() || DEFAULT_HOST,
     port: parsePort(environment.PORT),
+    oauth2: {
+      issuerBaseUrl: environment.AUTH_ISSUER_BASE_URL?.trim() || undefined,
+      audience: environment.AUTH_AUDIENCE?.trim() || undefined,
+      requiredScopes,
+    },
   };
 }

@@ -1,6 +1,7 @@
 import {
   createIdentityProviderDiscovery,
   exchangeAuthorizationCode,
+  exchangeAuthorizationCodeForCurrentPlatform,
   getAuthenticatedUser,
   verifyAuthenticatedEndpointRejectsAnonymousRequest,
 } from './client';
@@ -46,6 +47,24 @@ describe('auth client', () => {
     });
     expect(fetch).toHaveBeenCalledWith('http://localhost:4200/api/v1/me', {
       headers: { Authorization: 'Bearer access-token' },
+    });
+  });
+
+  it('uses the BFF cookie for web authenticated requests', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      makeResponse({ claims: { sub: 'web-user' }, subject: 'web-user' }, 200),
+    );
+
+    await expect(getAuthenticatedUser('unused')).resolves.toEqual({
+      claims: { sub: 'web-user' },
+      subject: 'web-user',
+    });
+    expect(fetch).toHaveBeenCalledWith('http://localhost:4200/api/v1/me', {
+      credentials: 'include',
     });
   });
 
@@ -128,6 +147,53 @@ describe('auth client', () => {
         redirectUri: 'exp://localhost:19000',
       }),
     ).rejects.toThrow('The code is expired.');
+  });
+
+  it('uses the BFF for web authorization-code exchange', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      makeResponse({ expires_in: 3600, scope: 'openid api:read' }, 200),
+    );
+
+    await expect(
+      exchangeAuthorizationCodeForCurrentPlatform({
+        code: 'auth-code',
+        codeVerifier: 'challenge',
+        discovery: { authorizationEndpoint: 'http://localhost:4300/authorize' },
+        redirectUri: 'http://localhost:8081/oauth/callback',
+      }),
+    ).resolves.toEqual({
+      accessToken: '',
+      expiresAt: expect.any(Number),
+      scope: 'openid api:read',
+      tokenType: 'Bearer',
+    });
+    expect(fetch).toHaveBeenCalledWith('http://localhost:4200/auth/token', {
+      body: expect.any(URLSearchParams),
+      credentials: 'include',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      method: 'POST',
+    });
+  });
+
+  it('reports BFF exchange failures without an upstream description', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+    jest.spyOn(global, 'fetch').mockResolvedValue(makeResponse({}, 502));
+
+    await expect(
+      exchangeAuthorizationCodeForCurrentPlatform({
+        code: 'auth-code',
+        codeVerifier: 'challenge',
+        discovery: { authorizationEndpoint: 'http://localhost:4300/authorize' },
+        redirectUri: 'http://localhost:8081/oauth/callback',
+      }),
+    ).rejects.toThrow('Token exchange failed with HTTP 502');
   });
 
   it('requires a token endpoint before exchanging codes', async () => {

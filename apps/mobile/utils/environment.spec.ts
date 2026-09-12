@@ -39,4 +39,17 @@ describe('environment helpers', () => {
       getEnvironmentOrDefault({ EXPO_PUBLIC_ENV: 'production' }),
     ).toThrow('Missing required Expo env values');
   });
+
+  it('uses supplied development values when the configuration is incomplete', () => {
+    expect(
+      getEnvironmentOrDefault({
+        EXPO_PUBLIC_ENV: 'development',
+        EXPO_PUBLIC_IP_ADDRESS: '192.168.1.10',
+      }),
+    ).toEqual({
+      env: 'development',
+      ipAddress: '192.168.1.10',
+      portNumber: '4200',
+    });
+  });
 });

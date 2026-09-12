@@ -39,6 +39,12 @@ function parsePositiveInteger(
 export function loadConfig(
   environment: NodeJS.ProcessEnv = process.env,
 ): IdentityProviderConfig {
+  if (environment.NODE_ENV === 'production') {
+    throw new Error(
+      'The local identity provider is development-only. Configure a production OAuth2/OIDC provider instead.',
+    );
+  }
+
   const issuer = environment.IDP_ISSUER?.trim() || DEFAULT_ISSUER;
   return {
     environment: environment.NODE_ENV ?? 'development',

@@ -62,6 +62,13 @@ function form(values: Record<string, string>) {
   return new URLSearchParams(values).toString();
 }
 
+test('refuses production mode', () => {
+  assert.throws(
+    () => loadConfig({ NODE_ENV: 'production' }),
+    /identity provider is development-only/i,
+  );
+});
+
 async function createTestServer(
   stores: IdentityProviderStores = createDevelopmentStores(),
 ) {

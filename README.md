@@ -28,6 +28,15 @@ JWKS metadata, issues RSA-signed access tokens, and keeps development clients,
 users, and authorization codes in memory. Replace those stores before using it
 for production; it is a provider scaffold, not a production account system.
 
+### Security posture
+
+The local identity provider is development-only. It uses in-memory users,
+clients, and authorization codes, demo credentials, and an ephemeral signing
+key. It rejects `NODE_ENV=production` at startup. Production deployments must
+use a managed OAuth2/OIDC provider or replace the stores and signing-key
+lifecycle with durable, rotated, audited infrastructure before exposing an
+account or token endpoint.
+
 Run `npm run dev` to start the mobile app, API, and identity provider with one
 LAN issuer. The home screen's authenticated-endpoint button opens the provider's
 PKCE sign-in form on first use, stores the resulting access token in native
@@ -203,6 +212,14 @@ writes reports to `apps/mobile/coverage`. The HTML report is available at
 `apps/mobile/coverage/lcov-report/index.html`; the machine-readable summary is
 at `apps/mobile/coverage/coverage-summary.json`. The command fails when global
 statements, branches, functions, or lines coverage falls below 90%.
+
+### API and identity-provider testing
+
+The API and identity-provider suites exercise real local HTTP servers and
+request/response flows. Test doubles are limited to explicit external
+boundaries, such as an unavailable database or an injected authentication
+adapter, so tests remain deterministic without mocking internal route or OAuth
+logic.
 
 ## Production API Configuration
 

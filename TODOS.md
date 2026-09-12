@@ -58,10 +58,11 @@ suite.
 	for mobile builds.
 - Expand identity-provider tests for malformed PKCE, replayed codes, invalid
 	redirects, invalid scopes, bad client authentication, and expiration.
-- Keep API and identity-provider tests focused on real behavior rather than
-	implementation mocks.
-- Document the development-only security posture prominently in deployment
-	documentation and require explicit production configuration at startup.
+- **Resolved:** API and identity-provider tests use real local HTTP flows and
+	limit doubles to explicit external boundaries.
+- **Resolved:** The development-only identity-provider posture is documented
+	prominently, and `NODE_ENV=production` now fails at startup with an explicit
+	configuration error.
 
 ## Strengths to preserve
 

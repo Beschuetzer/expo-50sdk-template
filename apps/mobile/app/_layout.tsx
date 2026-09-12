@@ -17,11 +17,11 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 
+import { DiagnosticErrorBoundary } from '@/app/ErrorBoundary';
 import { Text } from '@/components/Themed';
 import { useAppState } from '@/components/hooks/tanstack/useAppState';
 import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
 import { ErrorModal } from '@/components/modals/ErrorModal';
-import { ErrorBoundary as DiagnosticErrorBoundary } from '@/app/ErrorBoundary';
 import { queryClient, queryPersistOptions } from '@/state/queryClient';
 import { persistor, store } from '@/state/store';
 import { I18nProvider, useI18n } from '@/utils/i18n';

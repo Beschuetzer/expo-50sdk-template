@@ -35,7 +35,9 @@ describe('diagnostics', () => {
       throw new Error('reporter failure');
     });
 
-    expect(() => reportDiagnostic(new Error('original failure'), {})).not.toThrow();
+    expect(() =>
+      reportDiagnostic(new Error('original failure'), {}),
+    ).not.toThrow();
     expect(consoleError).toHaveBeenCalledWith(
       'Crash reporter failed:',
       expect.any(Error),

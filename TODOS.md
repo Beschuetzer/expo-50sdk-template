@@ -50,32 +50,6 @@ suite.
 - Add dependency review, Dependabot, and an explicit vulnerability triage
 	policy to CI.
 
-## API recommendations
-
-- **Resolved:** The health route now uses the loaded `ApiConfig` and an
-	injectable database health dependency instead of reading
-	`process.env.DATABASE_URL` directly.
-- **Resolved:** API tests now cover invalid and expired JWT-shaped failures,
-	missing scopes, malformed JSON, database degradation, and response contracts.
-- **Resolved:** The API now generates or preserves safe request IDs, returns
-	them in `X-Request-ID`, and emits structured request/error logs.
-- **Resolved:** API error responses are generic and include a correlation ID;
-	detailed authentication, parsing, and database failures remain server-side.
-
-## Mobile recommendations
-
-- **Resolved:** TanStack Query persistence now allowlists successful backend
-	health data, and authentication invalidation clears in-memory and persisted
-	query cache data.
-- **Resolved:** `apps/mobile/app.json` now uses automatic native interface
-	style selection, preserving system theme support alongside the runtime's
-	light and dark mode settings.
-- **Resolved:** Mobile error boundaries and TanStack Query persistence now
-	report structured diagnostics through an injectable crash reporter hook, with
-	development and production-safe console diagnostics as the default.
-- Continue routing all visible text through `apps/mobile/utils/i18n.tsx` and
-	all new styling through theme-aware values.
-
 ## CI and maintainability recommendations
 
 - Add check-only linting and Expo validation to CI. The current lint command

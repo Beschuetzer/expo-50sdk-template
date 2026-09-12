@@ -55,9 +55,11 @@ describe('auth client', () => {
       configurable: true,
       value: { OS: 'web' },
     });
-    jest.spyOn(global, 'fetch').mockResolvedValue(
-      makeResponse({ claims: { sub: 'web-user' }, subject: 'web-user' }, 200),
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        makeResponse({ claims: { sub: 'web-user' }, subject: 'web-user' }, 200),
+      );
 
     await expect(getAuthenticatedUser('unused')).resolves.toEqual({
       claims: { sub: 'web-user' },
@@ -154,9 +156,11 @@ describe('auth client', () => {
       configurable: true,
       value: { OS: 'web' },
     });
-    jest.spyOn(global, 'fetch').mockResolvedValue(
-      makeResponse({ expires_in: 3600, scope: 'openid api:read' }, 200),
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        makeResponse({ expires_in: 3600, scope: 'openid api:read' }, 200),
+      );
 
     await expect(
       exchangeAuthorizationCodeForCurrentPlatform({

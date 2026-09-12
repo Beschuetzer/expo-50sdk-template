@@ -67,8 +67,9 @@ suite.
 - **Resolved:** TanStack Query persistence now allowlists successful backend
 	health data, and authentication invalidation clears in-memory and persisted
 	query cache data.
-- Verify that `app.json` does not force light-only native behavior while the
-	runtime supports system, light, and dark modes.
+- **Resolved:** `apps/mobile/app.json` now uses automatic native interface
+	style selection, preserving system theme support alongside the runtime's
+	light and dark mode settings.
 - Add crash reporting and production diagnostics around error boundaries and
 	persistence failures.
 - Continue routing all visible text through `apps/mobile/utils/i18n.tsx` and

@@ -50,6 +50,13 @@ describe('access-token storage', () => {
     );
   });
 
+  it('returns null when no native token is stored', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockResolvedValue(null);
+
+    await expect(loadAccessToken()).resolves.toBeNull();
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
+  });
+
   it('clears expired tokens', async () => {
     jest
       .mocked(SecureStore.getItemAsync)
@@ -68,6 +75,23 @@ describe('access-token storage', () => {
 
     await expect(loadAccessToken()).resolves.toBeNull();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalled();
+  });
+
+  it('retains an expired access token when a refresh token is available', async () => {
+    jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
+      JSON.stringify({
+        ...token,
+        expiresAt: Date.now() - 1,
+        refreshToken: 'refresh-token',
+      }),
+    );
+
+    await expect(loadAccessToken()).resolves.toEqual({
+      ...token,
+      expiresAt: expect.any(Number),
+      refreshToken: 'refresh-token',
+    });
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
   });
 
   it('returns null for expired web tokens and clears them', async () => {

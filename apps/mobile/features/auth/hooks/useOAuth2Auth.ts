@@ -8,6 +8,7 @@ import {
   getAuthenticatedUser,
   MOBILE_OAUTH_CLIENT_ID,
   MOBILE_OAUTH_SCOPES,
+  refreshAccessToken,
   type AuthenticatedUser,
 } from '../client';
 import {
@@ -110,8 +111,21 @@ export function useOAuth2Auth() {
         setUser(authenticatedUser);
         setState('success');
       } catch (error) {
-        await clearAuthenticatedSession();
-        throw error;
+        try {
+          const refreshedToken = await refreshAccessToken(
+            storedToken,
+            discovery,
+          );
+          await saveAccessToken(refreshedToken);
+          const authenticatedUser = await getAuthenticatedUser(
+            refreshedToken.accessToken,
+          );
+          setUser(authenticatedUser);
+          setState('success');
+        } catch {
+          await clearAuthenticatedSession();
+          throw error;
+        }
       }
     } catch {
       setState('error');

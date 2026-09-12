@@ -7,6 +7,7 @@ import { getBackendUrl } from '@/utils/helpers';
 export type StoredAccessToken = {
   accessToken: string;
   expiresAt: number;
+  refreshToken?: string;
   scope: string;
   tokenType: 'Bearer';
 };
@@ -56,7 +57,11 @@ export async function loadAccessToken() {
 
   try {
     const parsedToken: unknown = JSON.parse(serializedToken);
-    if (!isStoredAccessToken(parsedToken) || isExpired(parsedToken)) {
+    if (!isStoredAccessToken(parsedToken)) {
+      await clearAccessToken();
+      return null;
+    }
+    if (isExpired(parsedToken) && !parsedToken.refreshToken) {
       await clearAccessToken();
       return null;
     }

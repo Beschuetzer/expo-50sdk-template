@@ -42,6 +42,11 @@ LAN issuer. The home screen's authenticated-endpoint button opens the provider's
 PKCE sign-in form on first use, stores the resulting access token in native
 SecureStore, and calls `GET /api/v1/me` with the Bearer token.
 
+Native access tokens are refreshed with rotating refresh tokens stored in
+SecureStore. Web builds keep both tokens behind HttpOnly cookies managed by the
+API BFF, so browser JavaScript does not access token values. Refresh failure
+clears the session and requires a new PKCE sign-in.
+
 ## Shared Types
 
 Cross-application request and response contracts belong in

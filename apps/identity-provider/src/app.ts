@@ -5,6 +5,7 @@ import type {
   AuthorizationCodeStore,
   ClientStore,
   OAuthClient,
+  RefreshTokenStore,
   UserStore,
 } from './domain/types';
 import {
@@ -17,6 +18,7 @@ export type IdentityProviderStores = {
   clientStore: ClientStore;
   userStore: UserStore;
   authorizationCodeStore: AuthorizationCodeStore;
+  refreshTokenStore: RefreshTokenStore;
 };
 
 function oauthError(
@@ -87,7 +89,11 @@ export function createApp(
       token_endpoint: `${config.issuer}/token`,
       jwks_uri: `${config.issuer}/.well-known/jwks.json`,
       response_types_supported: ['code'],
-      grant_types_supported: ['authorization_code', 'client_credentials'],
+      grant_types_supported: [
+        'authorization_code',
+        'client_credentials',
+        'refresh_token',
+      ],
       code_challenge_methods_supported: ['S256'],
       token_endpoint_auth_methods_supported: [
         'client_secret_basic',
@@ -263,6 +269,61 @@ export function createApp(
           scope: scope.join(' '),
         });
       }
+      if (grantType === 'refresh_token') {
+        if (!client.allowedGrantTypes.includes('refresh_token')) {
+          return oauthError(
+            response,
+            'unauthorized_client',
+            'Refresh tokens are not allowed for this client.',
+            401,
+          );
+        }
+        const previousToken = stores.refreshTokenStore.consume(
+          String(request.body.refresh_token),
+        );
+        if (!previousToken || previousToken.expiresAt <= Date.now()) {
+          return oauthError(
+            response,
+            'invalid_grant',
+            'The refresh token is invalid or expired.',
+          );
+        }
+        if (previousToken.clientId !== client.clientId) {
+          return oauthError(
+            response,
+            'invalid_grant',
+            'The refresh token was not issued to this client.',
+          );
+        }
+        const user = stores.userStore.findById(previousToken.userId);
+        if (!user) {
+          return oauthError(
+            response,
+            'invalid_grant',
+            'The authorization subject no longer exists.',
+          );
+        }
+        const accessToken = await tokenService.createAccessToken(
+          user,
+          client.clientId,
+          previousToken.scope,
+        );
+        const refreshToken = createOpaqueValue();
+        stores.refreshTokenStore.save({
+          token: refreshToken,
+          clientId: client.clientId,
+          userId: user.id,
+          scope: previousToken.scope,
+          expiresAt: Date.now() + config.refreshTokenLifetimeSeconds * 1000,
+        });
+        return response.json({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          token_type: 'Bearer',
+          expires_in: config.accessTokenLifetimeSeconds,
+          scope: previousToken.scope,
+        });
+      }
       if (
         grantType !== 'authorization_code' ||
         !client.allowedGrantTypes.includes('authorization_code')
@@ -300,8 +361,17 @@ export function createApp(
         client.clientId,
         code.scope,
       );
+      const refreshToken = createOpaqueValue();
+      stores.refreshTokenStore.save({
+        token: refreshToken,
+        clientId: client.clientId,
+        userId: user.id,
+        scope: code.scope,
+        expiresAt: Date.now() + config.refreshTokenLifetimeSeconds * 1000,
+      });
       return response.json({
         access_token: accessToken,
+        refresh_token: refreshToken,
         token_type: 'Bearer',
         expires_in: config.accessTokenLifetimeSeconds,
         scope: code.scope,

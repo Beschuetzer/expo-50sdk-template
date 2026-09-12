@@ -3,6 +3,7 @@ import {
   exchangeAuthorizationCode,
   exchangeAuthorizationCodeForCurrentPlatform,
   getAuthenticatedUser,
+  refreshAccessToken,
   verifyAuthenticatedEndpointRejectsAnonymousRequest,
 } from './client';
 
@@ -127,6 +128,39 @@ describe('auth client', () => {
     });
   });
 
+  it('uses the identity provider for native authorization-code exchange', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'android' },
+    });
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      makeResponse(
+        {
+          access_token: 'native-access-token',
+          expires_in: 900,
+          refresh_token: 'native-refresh-token',
+        },
+        200,
+      ),
+    );
+
+    await expect(
+      exchangeAuthorizationCodeForCurrentPlatform({
+        code: 'auth-code',
+        codeVerifier: 'challenge',
+        discovery: {
+          authorizationEndpoint: 'http://localhost:4300/authorize',
+          tokenEndpoint: 'http://localhost:4300/token',
+        },
+        redirectUri: 'exp://localhost:19000',
+      }),
+    ).resolves.toMatchObject({
+      accessToken: 'native-access-token',
+      refreshToken: 'native-refresh-token',
+      tokenType: 'Bearer',
+    });
+  });
+
   it('rejects token exchange failures with the identity-provider error message', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
       makeResponse(
@@ -198,6 +232,165 @@ describe('auth client', () => {
         redirectUri: 'http://localhost:8081/oauth/callback',
       }),
     ).rejects.toThrow('Token exchange failed with HTTP 502');
+  });
+
+  it('refreshes a native token and rotates its refresh token', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'android' },
+    });
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      makeResponse(
+        {
+          access_token: 'refreshed-access-token',
+          expires_in: 900,
+          refresh_token: 'rotated-refresh-token',
+          scope: 'openid api:read',
+          token_type: 'Bearer',
+        },
+        200,
+      ),
+    );
+
+    await expect(
+      refreshAccessToken(
+        {
+          accessToken: 'expired-access-token',
+          expiresAt: Date.now() - 1,
+          refreshToken: 'refresh-token',
+          scope: 'openid api:read',
+          tokenType: 'Bearer',
+        },
+        {
+          authorizationEndpoint: 'http://localhost:4300/authorize',
+          tokenEndpoint: 'http://localhost:4300/token',
+        },
+      ),
+    ).resolves.toEqual({
+      accessToken: 'refreshed-access-token',
+      expiresAt: expect.any(Number),
+      refreshToken: 'rotated-refresh-token',
+      scope: 'openid api:read',
+      tokenType: 'Bearer',
+    });
+    expect(fetch).toHaveBeenCalledWith('http://localhost:4300/token', {
+      body: expect.stringContaining('grant_type=refresh_token'),
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      method: 'POST',
+    });
+  });
+
+  it('refreshes a web session through the BFF', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(makeResponse({ expires_in: 900 }, 200));
+
+    await expect(
+      refreshAccessToken(
+        {
+          accessToken: '',
+          expiresAt: Number.MAX_SAFE_INTEGER,
+          scope: 'openid api:read',
+          tokenType: 'Bearer',
+        },
+        { authorizationEndpoint: 'http://localhost:4300/authorize' },
+      ),
+    ).resolves.toEqual({
+      accessToken: '',
+      expiresAt: expect.any(Number),
+      scope: 'openid api:read',
+      tokenType: 'Bearer',
+    });
+    expect(fetch).toHaveBeenCalledWith('http://localhost:4200/auth/refresh', {
+      credentials: 'include',
+      method: 'POST',
+    });
+  });
+
+  it('preserves the previous web scope when refresh omits scope', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(makeResponse({ expires_in: 900 }, 200));
+
+    await expect(
+      refreshAccessToken(
+        {
+          accessToken: '',
+          expiresAt: Number.MAX_SAFE_INTEGER,
+          scope: 'api:read',
+          tokenType: 'Bearer',
+        },
+        { authorizationEndpoint: 'http://localhost:4300/authorize' },
+      ),
+    ).resolves.toMatchObject({ scope: 'api:read' });
+  });
+
+  it('reports a BFF refresh error description', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        makeResponse({ error_description: 'Refresh session expired.' }, 401),
+      );
+
+    await expect(
+      refreshAccessToken(
+        {
+          accessToken: '',
+          expiresAt: Number.MAX_SAFE_INTEGER,
+          scope: 'api:read',
+          tokenType: 'Bearer',
+        },
+        { authorizationEndpoint: 'http://localhost:4300/authorize' },
+      ),
+    ).rejects.toThrow('Refresh session expired.');
+  });
+
+  it('requires a native refresh token and token endpoint', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'android' },
+    });
+
+    await expect(
+      refreshAccessToken(
+        {
+          accessToken: 'expired-access-token',
+          expiresAt: Date.now() - 1,
+          scope: 'api:read',
+          tokenType: 'Bearer',
+        },
+        { authorizationEndpoint: 'http://localhost:4300/authorize' },
+      ),
+    ).rejects.toThrow('No refresh token is available.');
+  });
+
+  it('rejects native refresh when the provider returns an incomplete token', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(makeResponse({}, 200));
+
+    await expect(
+      refreshAccessToken(
+        {
+          accessToken: 'expired-access-token',
+          expiresAt: Date.now() - 1,
+          refreshToken: 'refresh-token',
+          scope: 'api:read',
+          tokenType: 'Bearer',
+        },
+        { tokenEndpoint: 'http://localhost:4300/token' },
+      ),
+    ).rejects.toThrow('Token refresh failed with HTTP 200');
   });
 
   it('requires a token endpoint before exchanging codes', async () => {

@@ -6,7 +6,11 @@ export type OAuthClient = {
   clientType: ClientType;
   redirectUris: string[];
   allowedScopes: string[];
-  allowedGrantTypes: ('authorization_code' | 'client_credentials')[];
+  allowedGrantTypes: (
+    | 'authorization_code'
+    | 'client_credentials'
+    | 'refresh_token'
+  )[];
 };
 
 export type User = {
@@ -27,6 +31,14 @@ export type AuthorizationCode = {
   expiresAt: number;
 };
 
+export type RefreshToken = {
+  token: string;
+  clientId: string;
+  userId: string;
+  scope: string;
+  expiresAt: number;
+};
+
 export interface ClientStore {
   findById(clientId: string): OAuthClient | undefined;
 }
@@ -39,4 +51,9 @@ export interface UserStore {
 export interface AuthorizationCodeStore {
   save(code: AuthorizationCode): void;
   consume(code: string): AuthorizationCode | undefined;
+}
+
+export interface RefreshTokenStore {
+  save(token: RefreshToken): void;
+  consume(token: string): RefreshToken | undefined;
 }

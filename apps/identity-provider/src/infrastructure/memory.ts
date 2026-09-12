@@ -3,6 +3,8 @@ import type {
   AuthorizationCodeStore,
   ClientStore,
   OAuthClient,
+  RefreshToken,
+  RefreshTokenStore,
   User,
   UserStore,
 } from '../domain/types';
@@ -43,6 +45,20 @@ export class InMemoryAuthorizationCodeStore implements AuthorizationCodeStore {
   }
 }
 
+export class InMemoryRefreshTokenStore implements RefreshTokenStore {
+  private readonly tokens = new Map<string, RefreshToken>();
+
+  save(token: RefreshToken) {
+    this.tokens.set(token.token, token);
+  }
+
+  consume(token: string) {
+    const refreshToken = this.tokens.get(token);
+    this.tokens.delete(token);
+    return refreshToken;
+  }
+}
+
 export function createDevelopmentStores() {
   const expoGoRedirectUri = process.env.IDP_MOBILE_REDIRECT_URI?.trim();
 
@@ -57,7 +73,7 @@ export function createDevelopmentStores() {
           ...(expoGoRedirectUri ? [expoGoRedirectUri] : []),
         ],
         allowedScopes: ['openid', 'profile', 'api:read'],
-        allowedGrantTypes: ['authorization_code'],
+        allowedGrantTypes: ['authorization_code', 'refresh_token'],
       },
       {
         clientId: 'api-development-client',
@@ -77,5 +93,6 @@ export function createDevelopmentStores() {
       },
     ]),
     authorizationCodeStore: new InMemoryAuthorizationCodeStore(),
+    refreshTokenStore: new InMemoryRefreshTokenStore(),
   };
 }

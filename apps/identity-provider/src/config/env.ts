@@ -6,6 +6,7 @@ export interface IdentityProviderConfig {
   signingKeySecret: string;
   accessTokenLifetimeSeconds: number;
   authorizationCodeLifetimeSeconds: number;
+  refreshTokenLifetimeSeconds: number;
 }
 
 const DEFAULT_HOST = '0.0.0.0';
@@ -13,6 +14,7 @@ const DEFAULT_PORT = 4300;
 const DEFAULT_ISSUER = 'http://localhost:4300';
 const DEFAULT_ACCESS_TOKEN_LIFETIME = 900;
 const DEFAULT_AUTHORIZATION_CODE_LIFETIME = 300;
+const DEFAULT_REFRESH_TOKEN_LIFETIME = 60 * 60 * 24 * 30;
 
 function parsePort(value: string | undefined) {
   if (!value?.trim()) return DEFAULT_PORT;
@@ -63,6 +65,11 @@ export function loadConfig(
       environment.IDP_AUTHORIZATION_CODE_LIFETIME,
       'IDP_AUTHORIZATION_CODE_LIFETIME',
       DEFAULT_AUTHORIZATION_CODE_LIFETIME,
+    ),
+    refreshTokenLifetimeSeconds: parsePositiveInteger(
+      environment.IDP_REFRESH_TOKEN_LIFETIME,
+      'IDP_REFRESH_TOKEN_LIFETIME',
+      DEFAULT_REFRESH_TOKEN_LIFETIME,
     ),
   };
 }

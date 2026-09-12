@@ -4,7 +4,11 @@ import { randomUUID } from 'node:crypto';
 import { createOAuth2Middleware, type AuthMiddleware } from './auth/middleware';
 import { loadConfig, type ApiConfig } from './config/env';
 import { logError, logInfo } from './logging';
-import { clearBffSession, exchangeBffCode } from './routes/bffAuth';
+import {
+  clearBffSession,
+  exchangeBffCode,
+  refreshBffSession,
+} from './routes/bffAuth';
 import { createHealthRoute, type DatabaseHealth } from './routes/health';
 import { meRoute } from './routes/me';
 
@@ -62,6 +66,9 @@ export function createApp(
   app.get('/health', createHealthRoute(config, options.databaseHealth));
   app.post('/auth/token', (request, response, next) => {
     exchangeBffCode(request, response, config).catch(next);
+  });
+  app.post('/auth/refresh', (request, response, next) => {
+    refreshBffSession(request, response, config).catch(next);
   });
   app.post('/auth/logout', (request, response) => {
     clearBffSession(request, response, config);

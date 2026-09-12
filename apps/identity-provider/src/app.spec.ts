@@ -93,6 +93,7 @@ test('publishes OAuth2 discovery and JWKS metadata', async (t) => {
   assert.deepEqual(discovery.body.grant_types_supported, [
     'authorization_code',
     'client_credentials',
+    'refresh_token',
   ]);
   assert.equal(jwks.statusCode, 200);
   assert.equal(jwks.body.keys[0].alg, 'RS256');
@@ -141,6 +142,34 @@ test('supports authorization code with PKCE S256', async (t) => {
   });
   assert.equal(token.statusCode, 200);
   assert.equal(token.body.token_type, 'Bearer');
+  assert.equal(typeof token.body.refresh_token, 'string');
+
+  const refreshed = await call(server, {
+    method: 'POST',
+    path: '/token',
+    body: form({
+      grant_type: 'refresh_token',
+      client_id: 'mobile-development-client',
+      refresh_token: token.body.refresh_token,
+    }),
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  });
+  assert.equal(refreshed.statusCode, 200);
+  assert.equal(refreshed.body.token_type, 'Bearer');
+  assert.notEqual(refreshed.body.refresh_token, token.body.refresh_token);
+
+  const replay = await call(server, {
+    method: 'POST',
+    path: '/token',
+    body: form({
+      grant_type: 'refresh_token',
+      client_id: 'mobile-development-client',
+      refresh_token: token.body.refresh_token,
+    }),
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  });
+  assert.equal(replay.statusCode, 400);
+  assert.equal(replay.body.error, 'invalid_grant');
 });
 
 test('supports client credentials with confidential client authentication', async (t) => {

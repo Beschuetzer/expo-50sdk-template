@@ -16,6 +16,7 @@ export type AuthenticatedUser = {
 
 type TokenResponse = {
   access_token?: unknown;
+  refresh_token?: unknown;
   expires_in?: unknown;
   scope?: unknown;
   token_type?: unknown;
@@ -78,6 +79,10 @@ export async function exchangeAuthorizationCode({
   return {
     accessToken: result.access_token,
     expiresAt: Date.now() + result.expires_in * 1000,
+    refreshToken:
+      typeof result.refresh_token === 'string'
+        ? result.refresh_token
+        : undefined,
     scope: typeof result.scope === 'string' ? result.scope : '',
     tokenType: 'Bearer',
   };
@@ -115,7 +120,67 @@ export async function exchangeAuthorizationCodeForCurrentPlatform(input: {
   return {
     accessToken: '',
     expiresAt: Date.now() + result.expires_in * 1000,
+    refreshToken: undefined,
     scope: typeof result.scope === 'string' ? result.scope : '',
+    tokenType: 'Bearer',
+  };
+}
+
+export async function refreshAccessToken(
+  token: StoredAccessToken,
+  discovery: DiscoveryDocument,
+): Promise<StoredAccessToken> {
+  if (Platform.OS === 'web') {
+    const response = await fetch(`${getBackendUrl()}/auth/refresh`, {
+      credentials: 'include',
+      method: 'POST',
+    });
+    const result = (await response.json()) as TokenResponse;
+    if (!response.ok || typeof result.expires_in !== 'number') {
+      throw new Error(
+        typeof result.error_description === 'string'
+          ? result.error_description
+          : `Token refresh failed with HTTP ${response.status}`,
+      );
+    }
+    return {
+      accessToken: '',
+      expiresAt: Date.now() + result.expires_in * 1000,
+      scope: typeof result.scope === 'string' ? result.scope : token.scope,
+      tokenType: 'Bearer',
+    };
+  }
+
+  if (!token.refreshToken || !discovery.tokenEndpoint) {
+    throw new Error('No refresh token is available.');
+  }
+  const response = await fetch(discovery.tokenEndpoint, {
+    body: new URLSearchParams({
+      client_id: MOBILE_OAUTH_CLIENT_ID,
+      grant_type: 'refresh_token',
+      refresh_token: token.refreshToken,
+    }).toString(),
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    method: 'POST',
+  });
+  const result = (await response.json()) as TokenResponse;
+  if (
+    !response.ok ||
+    typeof result.access_token !== 'string' ||
+    typeof result.expires_in !== 'number' ||
+    typeof result.refresh_token !== 'string'
+  ) {
+    throw new Error(
+      typeof result.error_description === 'string'
+        ? result.error_description
+        : `Token refresh failed with HTTP ${response.status}`,
+    );
+  }
+  return {
+    accessToken: result.access_token,
+    expiresAt: Date.now() + result.expires_in * 1000,
+    refreshToken: result.refresh_token,
+    scope: typeof result.scope === 'string' ? result.scope : token.scope,
     tokenType: 'Bearer',
   };
 }

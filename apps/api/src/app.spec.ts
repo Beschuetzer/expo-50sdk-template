@@ -67,7 +67,7 @@ test('unknown routes return a not found response', async (t) => {
 });
 
 test('protected routes require OAuth2 configuration by default', async (t) => {
-  const server = createServer(createApp());
+  const server = createServer(createApp(loadConfig({})));
   await listen(server);
   t.after(() => server.close());
 

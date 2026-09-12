@@ -2,6 +2,17 @@
 
 A neutral Expo SDK 50 starter shell managed by Nx, with a minimal Node.js backend for local development.
 
+## AI / LLM onboarding
+
+This repository is intentionally structured for AI-assisted development and extension. The most important repo rules are:
+
+- The mobile app must remain internationalized. All visible user text goes through the translation map in `apps/mobile/utils/i18n.tsx`.
+- The mobile app supports system, light, and dark themes. New UI should be theme-aware and should not assume a single fixed color scheme.
+- Shared contracts live in `libs/shared-types/src` and should be reused across apps instead of duplicated.
+- The API, identity provider, and mobile app each have separate responsibilities and should stay decoupled.
+
+For detailed repo instructions, see [AGENTS.md](AGENTS.md).
+
 ## Projects
 
 - `mobile`: Expo Router app in `apps/mobile`, preserving the existing Expo SDK 50 and gluestack UI v1 setup.

@@ -1,10 +1,10 @@
 import { createServer, type Server } from 'node:http';
 
 import { createApp } from './app';
-import type { ApiConfig } from './config/env';
+import { loadConfig, type ApiConfig } from './config/env';
 
-export function createApiServer() {
-  const server = createServer(createApp());
+export function createApiServer(config: ApiConfig = loadConfig()) {
+  const server = createServer(createApp(config));
 
   server.on('error', (error) => {
     console.error('API server error', error);

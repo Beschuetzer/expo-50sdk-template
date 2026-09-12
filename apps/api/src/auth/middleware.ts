@@ -24,6 +24,19 @@ export function createOAuth2Middleware(config: ApiConfig): AuthMiddleware {
     : undefined;
 
   return (request, response, next) => {
+    const hasQueryToken = typeof request.query.access_token === 'string';
+    const hasBodyToken =
+      typeof request.body?.access_token === 'string' &&
+      request.is('application/x-www-form-urlencoded');
+
+    if (!request.headers.authorization && !hasQueryToken && !hasBodyToken) {
+      response.status(401).json({
+        message: 'Authentication is required.',
+        status: 'unauthorized',
+      });
+      return;
+    }
+
     verifier(request, response, (error) => {
       if (error) {
         next(error);

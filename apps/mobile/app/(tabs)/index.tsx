@@ -10,6 +10,8 @@ import {
   ThemeAwareHeading,
   ThemeAwareText,
 } from '@/components/ui/ThemeAwareText';
+import { verifyAuthenticatedEndpointRejectsAnonymousRequest } from '@/features/auth/client';
+import { useOAuth2Auth } from '@/features/auth/hooks/useOAuth2Auth';
 import {
   backendHealthQueryKey,
   useBackendHealthQuery,
@@ -28,8 +30,17 @@ export default function HomeScreen() {
   const [connectionStatus, setConnectionStatus] =
     useState<TranslationKey | null>(null);
   const [cacheStatus, setCacheStatus] = useState<TranslationKey | null>(null);
+  const [securityStatus, setSecurityStatus] = useState<TranslationKey | null>(
+    null,
+  );
   const queryClient = useQueryClient();
   const { refetch: refetchBackendHealth } = useBackendHealthQuery();
+  const {
+    callAuthenticatedEndpoint,
+    isReady: isAuthReady,
+    state: authState,
+    user: authenticatedUser,
+  } = useOAuth2Auth();
   const checklistItems = [
     t('checklist.replaceContent'),
     t('checklist.addRedux'),
@@ -84,6 +95,43 @@ export default function HomeScreen() {
     setCacheStatus(cachedHealth ? 'status.cacheHit' : 'status.cacheMiss');
   };
 
+  const onPressTestAuthenticatedEndpoint = async () => {
+    await callAuthenticatedEndpoint();
+  };
+
+  const onPressTestAnonymousEndpoint = async () => {
+    setSecurityStatus('status.checkingAnonymousAccess');
+
+    try {
+      await verifyAuthenticatedEndpointRejectsAnonymousRequest();
+      setSecurityStatus('status.anonymousRequestRejected');
+    } catch (error) {
+      setSecurityStatus('errors.anonymousRequestAccepted');
+      dispatch(
+        setError({
+          message:
+            error instanceof Error
+              ? error.message
+              : t('errors.anonymousRequestFailed'),
+          name: 'AnonymousEndpointSecurityError',
+        }),
+      );
+    }
+  };
+
+  const authenticatedStatus =
+    authState === 'authenticating'
+      ? 'status.authenticating'
+      : authState === 'loading'
+        ? 'status.loadingAuthenticatedRequest'
+        : authState === 'cancelled'
+          ? 'status.authenticationCancelled'
+          : authState === 'success'
+            ? 'status.authenticatedRequestSuccess'
+            : authState === 'error'
+              ? 'errors.authenticationFailed'
+              : null;
+
   const onPressClearBackendCache = () => {
     queryClient.removeQueries({ queryKey: backendHealthQueryKey });
     setCacheStatus('status.cacheCleared');
@@ -118,6 +166,24 @@ export default function HomeScreen() {
           >
             {t('actions.testBackendConnection')}
           </ThemeAwareButton>
+          <ThemeAwareButton
+            disabled={authState === 'authenticating' || authState === 'loading'}
+            onPress={onPressTestAuthenticatedEndpoint}
+            variant="outline"
+          >
+            {t('actions.testAuthenticatedEndpoint')}
+          </ThemeAwareButton>
+          {!isAuthReady && authState === 'idle' ? (
+            <ThemeAwareText>
+              {t('status.preparingAuthentication')}
+            </ThemeAwareText>
+          ) : null}
+          <ThemeAwareButton
+            onPress={onPressTestAnonymousEndpoint}
+            variant="outline"
+          >
+            {t('actions.testAnonymousEndpoint')}
+          </ThemeAwareButton>
           <ThemeAwareButton onPress={onPressReadBackendCache} variant="outline">
             {t('actions.readBackendCache')}
           </ThemeAwareButton>
@@ -132,6 +198,17 @@ export default function HomeScreen() {
           ) : null}
           {cacheStatus ? (
             <ThemeAwareText>{t(cacheStatus)}</ThemeAwareText>
+          ) : null}
+          {authenticatedStatus ? (
+            <ThemeAwareText>{t(authenticatedStatus)}</ThemeAwareText>
+          ) : null}
+          {securityStatus ? (
+            <ThemeAwareText>{t(securityStatus)}</ThemeAwareText>
+          ) : null}
+          {authenticatedUser ? (
+            <ThemeAwareText>
+              {authenticatedUser.subject ?? 'Authenticated user'}
+            </ThemeAwareText>
           ) : null}
         </VStack>
       }

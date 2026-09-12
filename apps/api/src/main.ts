@@ -1,8 +1,19 @@
 import { loadConfig } from './config/env';
 import { createApiServer, startApiServer, stopApiServer } from './server';
 
-const config = loadConfig();
-const server = startApiServer(createApiServer(), config);
+const localDevelopmentDefaults =
+  process.env.NODE_ENV === 'production'
+    ? {}
+    : {
+        AUTH_AUDIENCE: process.env.AUTH_AUDIENCE || 'api',
+        AUTH_ISSUER_BASE_URL:
+          process.env.AUTH_ISSUER_BASE_URL || 'http://localhost:4300',
+      };
+const config = loadConfig({
+  ...process.env,
+  ...localDevelopmentDefaults,
+});
+const server = startApiServer(createApiServer(config), config);
 
 function shutdown(signal: string) {
   console.log(`Received ${signal}; shutting down API`);

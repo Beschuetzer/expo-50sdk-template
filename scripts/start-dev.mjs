@@ -1,9 +1,21 @@
 import { spawn } from 'child_process';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const currentFilePath = fileURLToPath(import.meta.url);
 const rootDir = path.resolve(path.dirname(currentFilePath), '..');
+const localNetworkAddress = Object.values(os.networkInterfaces())
+  .flatMap((networkInterface) => networkInterface ?? [])
+  .find((address) => address.family === 'IPv4' && !address.internal)?.address;
+const authIssuer = `http://${localNetworkAddress ?? '127.0.0.1'}:4300`;
+const expoGoRedirectUri = `exp://${localNetworkAddress ?? '127.0.0.1'}:8081/--/oauth/callback`;
+const sharedEnvironment = {
+  AUTH_AUDIENCE: 'api',
+  AUTH_ISSUER_BASE_URL: authIssuer,
+  IDP_ISSUER: authIssuer,
+  IDP_MOBILE_REDIRECT_URI: expoGoRedirectUri,
+};
 const commands = [
   { title: 'Expo mobile', script: 'mobile' },
   { title: 'Node API', script: 'api' },
@@ -12,8 +24,12 @@ const commands = [
 
 function startWindowsTerminal({ title, script }) {
   const escapedRootDir = rootDir.replaceAll("'", "''");
+  const environmentCommands = Object.entries(sharedEnvironment).map(
+    ([key, value]) => `$env:${key} = '${value}'`,
+  );
   const command = [
     `$host.UI.RawUI.WindowTitle = '${title}'`,
+    ...environmentCommands,
     `Set-Location -LiteralPath '${escapedRootDir}'`,
     `npm run ${script}`,
   ].join('; ');
@@ -45,6 +61,7 @@ function startWindowsTerminal({ title, script }) {
 function startSharedTerminal({ script }) {
   const child = spawn('npm', ['run', script], {
     cwd: rootDir,
+    env: { ...process.env, ...sharedEnvironment },
     stdio: 'inherit',
     shell: true,
   });
@@ -55,7 +72,7 @@ function startSharedTerminal({ script }) {
 if (process.platform === 'win32') {
   commands.forEach(startWindowsTerminal);
   console.log(
-    'Started Expo mobile, Node API, and OAuth2 identity provider in separate PowerShell windows.',
+    `Started Expo mobile, Node API, and OAuth2 identity provider. OAuth2 issuer: ${authIssuer}`,
   );
 } else {
   const children = commands.map(startSharedTerminal);

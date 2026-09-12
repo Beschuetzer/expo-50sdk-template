@@ -44,12 +44,18 @@ export class InMemoryAuthorizationCodeStore implements AuthorizationCodeStore {
 }
 
 export function createDevelopmentStores() {
+  const expoGoRedirectUri = process.env.IDP_MOBILE_REDIRECT_URI?.trim();
+
   return {
     clientStore: new InMemoryClientStore([
       {
         clientId: 'mobile-development-client',
         clientType: 'public',
-        redirectUris: ['http://localhost:8081/oauth/callback'],
+        redirectUris: [
+          'http://localhost:8081/oauth/callback',
+          'expo50sdktemplate://oauth/callback',
+          ...(expoGoRedirectUri ? [expoGoRedirectUri] : []),
+        ],
         allowedScopes: ['openid', 'profile', 'api:read'],
         allowedGrantTypes: ['authorization_code'],
       },

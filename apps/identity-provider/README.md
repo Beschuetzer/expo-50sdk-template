@@ -30,6 +30,11 @@ Development fixtures:
 - Confidential secret: `api-development-secret`
 - Demo user: `demo@example.com` / `demo-password`
 
+The mobile client uses `expo50sdktemplate://oauth/callback` as its native
+redirect URI. The development store also retains the browser callback at
+`http://localhost:8081/oauth/callback`. `npm run dev` additionally registers
+the current LAN Expo Go callback through `IDP_MOBILE_REDIRECT_URI`.
+
 These fixtures and in-memory stores are intentionally replaceable. Implement
 `ClientStore`, `UserStore`, and `AuthorizationCodeStore` against a database or
 external identity system before deployment. Replace the signing-key lifecycle

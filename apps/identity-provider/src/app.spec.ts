@@ -153,3 +153,23 @@ test('supports client credentials with confidential client authentication', asyn
   assert.equal(token.statusCode, 200);
   assert.equal(token.body.token_type, 'Bearer');
 });
+
+test('requires confidential clients to authenticate authorization-code exchanges', async (t) => {
+  const server = await createTestServer();
+  t.after(() => server.close());
+
+  const response = await call(server, {
+    method: 'POST',
+    path: '/token',
+    body: form({
+      grant_type: 'authorization_code',
+      client_id: 'api-development-client',
+      code: 'not-a-real-code',
+      code_verifier: 'a'.repeat(43),
+    }),
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  });
+
+  assert.equal(response.statusCode, 401);
+  assert.equal(response.body.error, 'invalid_client');
+});

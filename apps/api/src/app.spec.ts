@@ -77,6 +77,24 @@ test('protected routes require OAuth2 configuration by default', async (t) => {
   assert.equal(response.body.status, 'auth_not_configured');
 });
 
+test('protected routes reject an anonymous request with HTTP 401', async (t) => {
+  const server = createServer(
+    createApp(
+      loadConfig({
+        AUTH_AUDIENCE: 'api',
+        AUTH_ISSUER_BASE_URL: 'http://127.0.0.1:4300',
+      }),
+    ),
+  );
+  await listen(server);
+  t.after(() => server.close());
+
+  const response = await get(server, '/api/v1/me');
+
+  assert.equal(response.statusCode, 401);
+  assert.equal(response.body.status, 'unauthorized');
+});
+
 test('protected routes can use an injected authentication adapter', async (t) => {
   const authenticated: RequestHandler = (request, _response, next) => {
     request.auth = {

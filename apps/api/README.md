@@ -27,6 +27,9 @@ For the local identity-provider app, use:
 $env:AUTH_ISSUER_BASE_URL='http://localhost:4300'; $env:AUTH_AUDIENCE='api'; npm run api
 ```
 
+The API process also defaults to these local development values when they are
+not provided explicitly.
+
 Start the provider separately with `npm run idp`. Its development client
 credentials and demo user are documented in
 `apps/identity-provider/README.md`.

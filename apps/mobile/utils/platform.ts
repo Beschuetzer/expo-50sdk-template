@@ -15,6 +15,17 @@ export function getBackendUrl() {
     : 'https://your-production-api.example.com';
 }
 
+export function getIdentityProviderUrl() {
+  const configuredUrl = process.env.EXPO_PUBLIC_IDP_URL?.trim();
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, '');
+  }
+
+  const config = getEnvironmentOrDefault();
+  const port = process.env.EXPO_PUBLIC_IDP_PORT_NUMBER?.trim() || '4300';
+  return `http://${config.ipAddress}:${port}`;
+}
+
 export async function measureExecutionTime(
   func: () => Promise<void>,
   key = 'Func',

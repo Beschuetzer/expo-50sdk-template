@@ -17,6 +17,11 @@ JWKS metadata, issues RSA-signed access tokens, and keeps development clients,
 users, and authorization codes in memory. Replace those stores before using it
 for production; it is a provider scaffold, not a production account system.
 
+Run `npm run dev` to start the mobile app, API, and identity provider with one
+LAN issuer. The home screen's authenticated-endpoint button opens the provider's
+PKCE sign-in form on first use, stores the resulting access token in native
+SecureStore, and calls `GET /api/v1/me` with the Bearer token.
+
 ## Shared Types
 
 Cross-application request and response contracts belong in

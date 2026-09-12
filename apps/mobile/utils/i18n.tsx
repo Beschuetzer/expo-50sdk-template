@@ -24,6 +24,8 @@ const messages = {
       clearBackendCache: 'Clear Backend Cache',
       readBackendCache: 'Read Cached Health',
       saveSettings: 'Save Settings',
+      testAnonymousEndpoint: 'Verify Anonymous Access Is Rejected',
+      testAuthenticatedEndpoint: 'Call Authenticated Endpoint',
       testBackendConnection: 'Test Backend Connection',
       testErrorModal: 'Test ErrorModal',
     },
@@ -43,8 +45,12 @@ const messages = {
       loading: 'Loading...',
     },
     errors: {
+      anonymousRequestAccepted:
+        'Security check failed: the endpoint accepted an anonymous request.',
+      anonymousRequestFailed: 'Anonymous endpoint security check failed.',
       backendRequestFailed: 'Backend request failed',
       backendUnavailable: 'Backend connection failed. Is the API running?',
+      authenticationFailed: 'Sign-in or authenticated request failed.',
       unexpectedBackendStatus: 'Backend responded with an unexpected status.',
     },
     language: {
@@ -60,12 +66,20 @@ const messages = {
       toggle: 'Toggle',
     },
     status: {
+      anonymousRequestRejected:
+        'Security check passed: anonymous access was rejected with HTTP 401.',
       backendCached: 'Backend response cached.',
       backendSuccess: 'Backend connection successful.',
       cacheCleared: 'Backend cache cleared.',
       cacheHit: 'Cache hit: no network request was made.',
       cacheMiss: 'Cache miss: fetch the backend first.',
+      checkingAnonymousAccess: 'Checking anonymous access...',
       checkingBackend: 'Checking backend...',
+      authenticatedRequestSuccess: 'Authenticated endpoint succeeded.',
+      authenticating: 'Signing in...',
+      authenticationCancelled: 'Sign-in was cancelled.',
+      loadingAuthenticatedRequest: 'Preparing authenticated request...',
+      preparingAuthentication: 'Preparing sign-in...',
     },
     theme: {
       dark: 'Dark',
@@ -83,6 +97,8 @@ const messages = {
       clearBackendCache: 'Limpiar caché del backend',
       readBackendCache: 'Leer salud en caché',
       saveSettings: 'Guardar configuración',
+      testAnonymousEndpoint: 'Verificar rechazo del acceso anónimo',
+      testAuthenticatedEndpoint: 'Llamar al endpoint autenticado',
       testBackendConnection: 'Probar conexión con el backend',
       testErrorModal: 'Probar ErrorModal',
     },
@@ -103,9 +119,14 @@ const messages = {
       loading: 'Cargando...',
     },
     errors: {
+      anonymousRequestAccepted:
+        'Comprobación de seguridad fallida: el endpoint aceptó una solicitud anónima.',
+      anonymousRequestFailed:
+        'Falló la comprobación de seguridad del endpoint anónimo.',
       backendRequestFailed: 'La solicitud al backend falló',
       backendUnavailable:
         'La conexión con el backend falló. ¿Está ejecutándose la API?',
+      authenticationFailed: 'El inicio de sesión o la solicitud autenticada falló.',
       unexpectedBackendStatus: 'El backend respondió con un estado inesperado.',
     },
     language: {
@@ -121,12 +142,20 @@ const messages = {
       toggle: 'Cambiar',
     },
     status: {
+      anonymousRequestRejected:
+        'Comprobación correcta: el acceso anónimo fue rechazado con HTTP 401.',
       backendCached: 'Respuesta del backend guardada en caché.',
       backendSuccess: 'Conexión con el backend exitosa.',
       cacheCleared: 'Caché del backend limpiada.',
       cacheHit: 'Caché encontrada: no se realizó ninguna solicitud de red.',
       cacheMiss: 'Caché vacía: primero consulta el backend.',
+      checkingAnonymousAccess: 'Comprobando el acceso anónimo...',
       checkingBackend: 'Comprobando el backend...',
+      authenticatedRequestSuccess: 'El endpoint autenticado respondió correctamente.',
+      authenticating: 'Iniciando sesión...',
+      authenticationCancelled: 'El inicio de sesión fue cancelado.',
+      loadingAuthenticatedRequest: 'Preparando la solicitud autenticada...',
+      preparingAuthentication: 'Preparando el inicio de sesión...',
     },
     theme: {
       dark: 'Oscuro',

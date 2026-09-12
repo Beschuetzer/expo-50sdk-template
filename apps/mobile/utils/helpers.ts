@@ -4,6 +4,7 @@ export {
   delay,
   displayAlert,
   getBackendUrl,
+  getIdentityProviderUrl,
   measureExecutionTime,
   wait,
 } from './platform';

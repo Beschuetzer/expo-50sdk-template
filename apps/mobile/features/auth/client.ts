@@ -1,0 +1,115 @@
+import type { DiscoveryDocument } from 'expo-auth-session';
+
+import { getBackendUrl } from '@/utils/helpers';
+import { getIdentityProviderUrl } from '@/utils/platform';
+
+import type { StoredAccessToken } from './storage';
+
+export const MOBILE_OAUTH_CLIENT_ID = 'mobile-development-client';
+export const MOBILE_OAUTH_SCOPES = ['openid', 'profile', 'api:read'];
+
+export type AuthenticatedUser = {
+  claims: Record<string, unknown>;
+  subject: string | null;
+};
+
+type TokenResponse = {
+  access_token?: unknown;
+  expires_in?: unknown;
+  scope?: unknown;
+  token_type?: unknown;
+  error?: unknown;
+  error_description?: unknown;
+};
+
+function getDiscoveryBaseUrl() {
+  return getIdentityProviderUrl();
+}
+
+export function createIdentityProviderDiscovery(): DiscoveryDocument {
+  const baseUrl = getDiscoveryBaseUrl();
+  return {
+    authorizationEndpoint: `${baseUrl}/authorize`,
+    tokenEndpoint: `${baseUrl}/token`,
+  };
+}
+
+export async function exchangeAuthorizationCode({
+  code,
+  codeVerifier,
+  discovery,
+  redirectUri,
+}: {
+  code: string;
+  codeVerifier: string;
+  discovery: DiscoveryDocument;
+  redirectUri: string;
+}): Promise<StoredAccessToken> {
+  if (!discovery.tokenEndpoint) {
+    throw new Error('The identity provider does not publish a token endpoint.');
+  }
+
+  const response = await fetch(discovery.tokenEndpoint, {
+    body: new URLSearchParams({
+      client_id: MOBILE_OAUTH_CLIENT_ID,
+      code,
+      code_verifier: codeVerifier,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri,
+    }).toString(),
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    method: 'POST',
+  });
+  const result = (await response.json()) as TokenResponse;
+
+  if (
+    !response.ok ||
+    typeof result.access_token !== 'string' ||
+    typeof result.expires_in !== 'number'
+  ) {
+    const description =
+      typeof result.error_description === 'string'
+        ? result.error_description
+        : `Token exchange failed with HTTP ${response.status}`;
+    throw new Error(description);
+  }
+
+  return {
+    accessToken: result.access_token,
+    expiresAt: Date.now() + result.expires_in * 1000,
+    scope: typeof result.scope === 'string' ? result.scope : '',
+    tokenType: 'Bearer',
+  };
+}
+
+export async function getAuthenticatedUser(accessToken: string) {
+  const response = await fetch(`${getBackendUrl()}/api/v1/me`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const result = (await response.json()) as Partial<AuthenticatedUser> & {
+    message?: string;
+  };
+
+  if (!response.ok) {
+    throw new Error(
+      result.message ?? `Authenticated request failed with HTTP ${response.status}`,
+    );
+  }
+
+  return {
+    claims: result.claims ?? {},
+    subject: result.subject ?? null,
+  } satisfies AuthenticatedUser;
+}
+
+export async function verifyAuthenticatedEndpointRejectsAnonymousRequest() {
+  const response = await fetch(`${getBackendUrl()}/api/v1/me`);
+
+  if (response.status !== 401) {
+    throw new Error(
+      `Anonymous authenticated-endpoint request returned HTTP ${response.status}`,
+    );
+  }
+
+  return response.status;
+}

@@ -18,8 +18,11 @@ export async function exchangeBffCode(
     return;
   }
 
-  const { code, code_verifier: codeVerifier, redirect_uri: redirectUri } =
-    request.body as Record<string, unknown>;
+  const {
+    code,
+    code_verifier: codeVerifier,
+    redirect_uri: redirectUri,
+  } = request.body as Record<string, unknown>;
   if (
     typeof code !== 'string' ||
     typeof codeVerifier !== 'string' ||

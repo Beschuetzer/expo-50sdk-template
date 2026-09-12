@@ -1,10 +1,10 @@
 import type { DiscoveryDocument } from 'expo-auth-session';
 import { Platform } from 'react-native';
 
+import type { StoredAccessToken } from './storage';
+
 import { getBackendUrl } from '@/utils/helpers';
 import { getIdentityProviderUrl } from '@/utils/platform';
-
-import type { StoredAccessToken } from './storage';
 
 export const MOBILE_OAUTH_CLIENT_ID = 'mobile-development-client';
 export const MOBILE_OAUTH_SCOPES = ['openid', 'profile', 'api:read'];
@@ -132,7 +132,8 @@ export async function getAuthenticatedUser(accessToken: string) {
 
   if (!response.ok) {
     throw new Error(
-      result.message ?? `Authenticated request failed with HTTP ${response.status}`,
+      result.message ??
+        `Authenticated request failed with HTTP ${response.status}`,
     );
   }
 

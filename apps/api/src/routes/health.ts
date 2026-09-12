@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 
 import type { ApiConfig } from '../config/env';
 import { prisma } from '../lib/prisma';
+import { logError } from '../logging';
 
 export type DatabaseHealth = {
   $runCommandRaw(command: { ping: number }): Promise<unknown>;
@@ -32,11 +33,13 @@ export function createHealthRoute(
       };
       response.status(200).json(healthResponse);
     } catch (error) {
+      logError('database_health_check_failed', {
+        error: error instanceof Error ? error.stack : String(error),
+      });
       response.status(503).json({
         service: 'api',
         status: 'degraded',
         timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Database unavailable',
       });
     }
   };

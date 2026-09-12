@@ -34,9 +34,11 @@ describe('auth client', () => {
   });
 
   it('sends the bearer token to the authenticated endpoint', async () => {
-    jest.spyOn(global, 'fetch').mockResolvedValue(
-      makeResponse({ claims: { sub: 'user-1' }, subject: 'user-1' }, 200),
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        makeResponse({ claims: { sub: 'user-1' }, subject: 'user-1' }, 200),
+      );
 
     await expect(getAuthenticatedUser('access-token')).resolves.toEqual({
       claims: { sub: 'user-1' },
@@ -57,9 +59,11 @@ describe('auth client', () => {
   });
 
   it('rejects authenticated endpoint errors', async () => {
-    jest.spyOn(global, 'fetch').mockResolvedValue(
-      makeResponse({ message: 'Authentication is required.' }, 401),
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        makeResponse({ message: 'Authentication is required.' }, 401),
+      );
 
     await expect(getAuthenticatedUser('expired-token')).rejects.toThrow(
       'Authentication is required.',
@@ -82,7 +86,10 @@ describe('auth client', () => {
       exchangeAuthorizationCode({
         code: 'auth-code',
         codeVerifier: 'challenge',
-        discovery: { authorizationEndpoint: 'http://localhost:4300/authorize', tokenEndpoint: 'http://localhost:4300/token' },
+        discovery: {
+          authorizationEndpoint: 'http://localhost:4300/authorize',
+          tokenEndpoint: 'http://localhost:4300/token',
+        },
         redirectUri: 'exp://localhost:19000',
       }),
     ).resolves.toEqual({
@@ -114,7 +121,10 @@ describe('auth client', () => {
       exchangeAuthorizationCode({
         code: 'expired-code',
         codeVerifier: 'challenge',
-        discovery: { authorizationEndpoint: 'http://localhost:4300/authorize', tokenEndpoint: 'http://localhost:4300/token' },
+        discovery: {
+          authorizationEndpoint: 'http://localhost:4300/authorize',
+          tokenEndpoint: 'http://localhost:4300/token',
+        },
         redirectUri: 'exp://localhost:19000',
       }),
     ).rejects.toThrow('The code is expired.');
@@ -134,9 +144,9 @@ describe('auth client', () => {
   });
 
   it('verifies anonymous requests are rejected with HTTP 401', async () => {
-    jest.spyOn(global, 'fetch').mockResolvedValue(
-      makeResponse({ status: 'unauthorized' }, 401),
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(makeResponse({ status: 'unauthorized' }, 401));
 
     await expect(
       verifyAuthenticatedEndpointRejectsAnonymousRequest(),
@@ -145,9 +155,9 @@ describe('auth client', () => {
   });
 
   it('fails the security check when an anonymous request is accepted', async () => {
-    jest.spyOn(global, 'fetch').mockResolvedValue(
-      makeResponse({ status: 'ok' }, 200),
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(makeResponse({ status: 'ok' }, 200));
 
     await expect(
       verifyAuthenticatedEndpointRejectsAnonymousRequest(),

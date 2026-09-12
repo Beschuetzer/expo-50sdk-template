@@ -99,7 +99,10 @@ describe('theme', () => {
 
     expect(current?.mode).toBe('dark');
     expect(current?.colorScheme).toBe('dark');
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('@mobile/theme-mode', 'dark');
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      '@mobile/theme-mode',
+      'dark',
+    );
   });
 
   it('provides the system fallback when no provider is present', () => {
@@ -194,7 +197,7 @@ describe('theme', () => {
   });
 
   it('accepts system and dark persisted values and keeps the fallback setter safe without a provider', async () => {
-    const persistedModes: Array<'system' | 'dark'> = ['system', 'dark'];
+    const persistedModes: ('system' | 'dark')[] = ['system', 'dark'];
 
     for (const persistedMode of persistedModes) {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue(persistedMode);
@@ -268,8 +271,12 @@ describe('theme', () => {
   });
 
   it('ignores storage failures while updating the theme mode', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockRejectedValue(new Error('read failed'));
-    (AsyncStorage.setItem as jest.Mock).mockRejectedValue(new Error('set failed'));
+    (AsyncStorage.getItem as jest.Mock).mockRejectedValue(
+      new Error('read failed'),
+    );
+    (AsyncStorage.setItem as jest.Mock).mockRejectedValue(
+      new Error('set failed'),
+    );
 
     let current: ReturnType<typeof useThemeMode> | undefined;
 
@@ -300,6 +307,9 @@ describe('theme', () => {
 
     expect(current?.mode).toBe('dark');
     expect(current?.colorScheme).toBe('dark');
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('@mobile/theme-mode', 'dark');
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      '@mobile/theme-mode',
+      'dark',
+    );
   });
 });

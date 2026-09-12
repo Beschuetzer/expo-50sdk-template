@@ -37,9 +37,9 @@ describe('access-token storage', () => {
   });
 
   it('saves and loads a valid native token', async () => {
-    jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
-      JSON.stringify(token),
-    );
+    jest
+      .mocked(SecureStore.getItemAsync)
+      .mockResolvedValue(JSON.stringify(token));
 
     await saveAccessToken(token);
     await expect(loadAccessToken()).resolves.toEqual(token);
@@ -51,9 +51,11 @@ describe('access-token storage', () => {
   });
 
   it('clears expired tokens', async () => {
-    jest.mocked(SecureStore.getItemAsync).mockResolvedValue(
-      JSON.stringify({ ...token, expiresAt: Date.now() - 1 }),
-    );
+    jest
+      .mocked(SecureStore.getItemAsync)
+      .mockResolvedValue(
+        JSON.stringify({ ...token, expiresAt: Date.now() - 1 }),
+      );
 
     await expect(loadAccessToken()).resolves.toBeNull();
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(
@@ -86,7 +88,8 @@ describe('access-token storage', () => {
       value: { OS: 'web' },
     });
 
-    jest.spyOn(global, 'fetch')
+    jest
+      .spyOn(global, 'fetch')
       .mockResolvedValueOnce({ ok: true } as Response)
       .mockResolvedValueOnce({ ok: true } as Response)
       .mockResolvedValueOnce({ ok: false } as Response);

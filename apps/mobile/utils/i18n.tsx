@@ -126,7 +126,8 @@ const messages = {
       backendRequestFailed: 'La solicitud al backend falló',
       backendUnavailable:
         'La conexión con el backend falló. ¿Está ejecutándose la API?',
-      authenticationFailed: 'El inicio de sesión o la solicitud autenticada falló.',
+      authenticationFailed:
+        'El inicio de sesión o la solicitud autenticada falló.',
       unexpectedBackendStatus: 'El backend respondió con un estado inesperado.',
     },
     language: {
@@ -151,7 +152,8 @@ const messages = {
       cacheMiss: 'Caché vacía: primero consulta el backend.',
       checkingAnonymousAccess: 'Comprobando el acceso anónimo...',
       checkingBackend: 'Comprobando el backend...',
-      authenticatedRequestSuccess: 'El endpoint autenticado respondió correctamente.',
+      authenticatedRequestSuccess:
+        'El endpoint autenticado respondió correctamente.',
       authenticating: 'Iniciando sesión...',
       authenticationCancelled: 'El inicio de sesión fue cancelado.',
       loadingAuthenticatedRequest: 'Preparando la solicitud autenticada...',

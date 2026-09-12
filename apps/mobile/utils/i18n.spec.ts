@@ -142,8 +142,12 @@ describe('i18n', () => {
   });
 
   it('ignores locale storage failures when hydrating and updating locale', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockRejectedValue(new Error('read failed'));
-    (AsyncStorage.setItem as jest.Mock).mockRejectedValue(new Error('write failed'));
+    (AsyncStorage.getItem as jest.Mock).mockRejectedValue(
+      new Error('read failed'),
+    );
+    (AsyncStorage.setItem as jest.Mock).mockRejectedValue(
+      new Error('write failed'),
+    );
 
     let current: ReturnType<typeof useI18n> | undefined;
 

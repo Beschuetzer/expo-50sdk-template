@@ -52,7 +52,10 @@ export function getEnvironmentOrDefault(
     return getRequiredEnvironment(envVars);
   } catch (error) {
     const configuredEnvironment = envVars.EXPO_PUBLIC_ENV?.trim();
-    if (configuredEnvironment && !/dev|development/i.test(configuredEnvironment)) {
+    if (
+      configuredEnvironment &&
+      !/dev|development/i.test(configuredEnvironment)
+    ) {
       throw error;
     }
 
@@ -63,4 +66,3 @@ export function getEnvironmentOrDefault(
     } satisfies EnvironmentConfig;
   }
 }
-

@@ -1,7 +1,9 @@
 import express, { type ErrorRequestHandler, type Express } from 'express';
+import { randomUUID } from 'node:crypto';
 
 import { createOAuth2Middleware, type AuthMiddleware } from './auth/middleware';
 import { loadConfig, type ApiConfig } from './config/env';
+import { logError, logInfo } from './logging';
 import { clearBffSession, exchangeBffCode } from './routes/bffAuth';
 import { createHealthRoute, type DatabaseHealth } from './routes/health';
 import { meRoute } from './routes/me';
@@ -20,6 +22,27 @@ export function createApp(
     options.authMiddleware ?? createOAuth2Middleware(config);
 
   app.disable('x-powered-by');
+  app.use((request, response, next) => {
+    const incomingRequestId = request.header('x-request-id');
+    const requestId =
+      incomingRequestId && /^[A-Za-z0-9._-]{1,128}$/.test(incomingRequestId)
+        ? incomingRequestId
+        : randomUUID();
+    const startedAt = Date.now();
+
+    response.locals.requestId = requestId;
+    response.setHeader('X-Request-ID', requestId);
+    response.on('finish', () => {
+      logInfo('http_request', {
+        durationMs: Date.now() - startedAt,
+        method: request.method,
+        path: request.path,
+        requestId,
+        statusCode: response.statusCode,
+      });
+    });
+    next();
+  });
   app.use((request, response, next) => {
     const origin = request.headers.origin;
     if (origin && origin === config.corsOrigin) {
@@ -52,12 +75,13 @@ export function createApp(
     response.status(404).json({
       message: 'Try GET /health',
       status: 'not_found',
+      requestId: response.locals.requestId,
     });
   });
 
   const errorHandler: ErrorRequestHandler = (
     error,
-    _request,
+    request,
     response,
     _next,
   ) => {
@@ -67,11 +91,22 @@ export function createApp(
         : typeof error?.status === 'number'
           ? error.status
           : 500;
+    logError('http_request_error', {
+      error: error instanceof Error ? error.stack : String(error),
+      method: request.method,
+      path: request.path,
+      requestId: response.locals.requestId,
+      statusCode,
+    });
     response.status(statusCode).json({
       message:
-        statusCode >= 500
-          ? 'Internal server error'
-          : error.message ?? 'Request failed.',
+        statusCode === 401
+          ? 'Authentication is required.'
+          : statusCode === 403
+            ? 'Forbidden.'
+            : statusCode >= 500
+              ? 'Internal server error.'
+              : 'Request failed.',
       status:
         statusCode === 401
           ? 'unauthorized'
@@ -80,6 +115,7 @@ export function createApp(
             : statusCode >= 500
               ? 'internal_error'
               : 'bad_request',
+      requestId: response.locals.requestId,
     });
   };
   app.use(errorHandler);

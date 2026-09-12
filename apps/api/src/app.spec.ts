@@ -12,34 +12,45 @@ const listen = promisify(
     server.listen(0, '127.0.0.1', callback),
 );
 
-function get(server: ReturnType<typeof createServer>, path: string) {
+function get(
+  server: ReturnType<typeof createServer>,
+  path: string,
+  headers: Record<string, string> = {},
+) {
   const address = server.address();
   assert(address && typeof address !== 'string');
 
-  return new Promise<{ body: Record<string, string>; statusCode: number }>(
-    (resolve, reject) => {
-      const response = request(
-        {
-          hostname: '127.0.0.1',
-          path,
-          port: address.port,
-        },
-        (incomingResponse) => {
-          let body = '';
-          incomingResponse.setEncoding('utf8');
-          incomingResponse.on('data', (chunk) => (body += chunk));
-          incomingResponse.on('end', () => {
-            resolve({
-              body: JSON.parse(body) as Record<string, string>,
-              statusCode: incomingResponse.statusCode ?? 0,
-            });
+  return new Promise<{
+    body: Record<string, string>;
+    requestId?: string;
+    statusCode: number;
+  }>((resolve, reject) => {
+    const response = request(
+      {
+        headers,
+        hostname: '127.0.0.1',
+        path,
+        port: address.port,
+      },
+      (incomingResponse) => {
+        let body = '';
+        incomingResponse.setEncoding('utf8');
+        incomingResponse.on('data', (chunk) => (body += chunk));
+        incomingResponse.on('end', () => {
+          resolve({
+            body: JSON.parse(body) as Record<string, string>,
+            requestId:
+              typeof incomingResponse.headers['x-request-id'] === 'string'
+                ? incomingResponse.headers['x-request-id']
+                : undefined,
+            statusCode: incomingResponse.statusCode ?? 0,
           });
-        },
-      );
-      response.on('error', reject);
-      response.end();
-    },
-  );
+        });
+      },
+    );
+    response.on('error', reject);
+    response.end();
+  });
 }
 
 function postRaw(
@@ -86,9 +97,23 @@ test('GET /health returns an API health response', async (t) => {
   const response = await get(server, '/health?verbose=true');
 
   assert.equal(response.statusCode, 200);
+  assert.ok(response.requestId);
   assert.equal(response.body.status, 'ok');
   assert.equal(response.body.service, 'api');
   assert.ok(response.body.timestamp);
+});
+
+test('requests propagate an existing request ID', async (t) => {
+  const server = createServer(createApp(loadConfig({})));
+  await listen(server);
+  t.after(() => server.close());
+
+  const response = await get(server, '/health', {
+    'x-request-id': 'request-123',
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.requestId, 'request-123');
 });
 
 test('GET /health reports database degradation', async (t) => {
@@ -108,7 +133,7 @@ test('GET /health reports database degradation', async (t) => {
 
   assert.equal(response.statusCode, 503);
   assert.equal(response.body.status, 'degraded');
-  assert.equal(response.body.error, 'database unavailable');
+  assert.equal(response.body.error, undefined);
 });
 
 test('unknown routes return a not found response', async (t) => {
@@ -170,7 +195,7 @@ for (const [name, errorMessage] of [
 
     assert.equal(response.statusCode, 401);
     assert.equal(response.body.status, 'unauthorized');
-    assert.equal(response.body.message, errorMessage);
+    assert.equal(response.body.message, 'Authentication is required.');
   });
 }
 
@@ -188,6 +213,7 @@ test('protected routes reject requests missing required scopes', async (t) => {
 
   assert.equal(response.statusCode, 403);
   assert.equal(response.body.status, 'forbidden');
+  assert.equal(response.body.message, 'Forbidden.');
 });
 
 test('malformed JSON returns a bad request response', async (t) => {

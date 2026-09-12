@@ -57,9 +57,10 @@ suite.
 	`process.env.DATABASE_URL` directly.
 - **Resolved:** API tests now cover invalid and expired JWT-shaped failures,
 	missing scopes, malformed JSON, database degradation, and response contracts.
-- Add request IDs and structured logs before operating the API in production.
-- Keep generic error responses for clients while logging detailed errors only
-	on the server.
+- **Resolved:** The API now generates or preserves safe request IDs, returns
+	them in `X-Request-ID`, and emits structured request/error logs.
+- **Resolved:** API error responses are generic and include a correlation ID;
+	detailed authentication, parsing, and database failures remain server-side.
 
 ## Mobile recommendations
 

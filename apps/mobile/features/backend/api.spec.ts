@@ -18,9 +18,9 @@ describe('backend API', () => {
   });
 
   it('returns the health response', async () => {
-    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue(
-      makeResponse({ status: 'ok', service: 'api' }, 200),
-    );
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(makeResponse({ status: 'ok', service: 'api' }, 200));
 
     await expect(getBackendHealth()).resolves.toEqual({
       service: 'api',

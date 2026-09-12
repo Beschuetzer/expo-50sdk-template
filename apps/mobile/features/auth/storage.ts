@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
+import { clearPersistedQueryCache } from '@/state/queryClient';
 import { getBackendUrl } from '@/utils/helpers';
 
 export type StoredAccessToken = {
@@ -92,4 +93,9 @@ export async function clearAccessToken() {
   }
 
   await SecureStore.deleteItemAsync(ACCESS_TOKEN_STORAGE_KEY);
+}
+
+export async function clearAuthenticatedSession() {
+  await clearAccessToken();
+  await clearPersistedQueryCache();
 }

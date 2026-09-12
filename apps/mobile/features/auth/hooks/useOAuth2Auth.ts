@@ -10,7 +10,11 @@ import {
   MOBILE_OAUTH_SCOPES,
   type AuthenticatedUser,
 } from '../client';
-import { clearAccessToken, loadAccessToken, saveAccessToken } from '../storage';
+import {
+  clearAuthenticatedSession,
+  loadAccessToken,
+  saveAccessToken,
+} from '../storage';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -106,7 +110,7 @@ export function useOAuth2Auth() {
         setUser(authenticatedUser);
         setState('success');
       } catch (error) {
-        await clearAccessToken();
+        await clearAuthenticatedSession();
         throw error;
       }
     } catch {

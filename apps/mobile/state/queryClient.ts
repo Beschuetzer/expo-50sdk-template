@@ -22,6 +22,21 @@ export const queryPersister = createAsyncStoragePersister({
 
 export const queryPersistOptions = {
   buster: 'mobile-query-cache-v1',
+  dehydrateOptions: {
+    shouldDehydrateQuery: (query: {
+      queryKey: readonly unknown[];
+      state: { status: string };
+    }) =>
+      query.state.status === 'success' &&
+      query.queryKey.length === 2 &&
+      query.queryKey[0] === 'backend' &&
+      query.queryKey[1] === 'health',
+  },
   maxAge: 1000 * 60 * 60 * 24,
   persister: queryPersister,
 };
+
+export async function clearPersistedQueryCache() {
+  queryClient.clear();
+  await queryPersister.removeClient();
+}

@@ -64,8 +64,9 @@ suite.
 
 ## Mobile recommendations
 
-- Define which TanStack Query data may be persisted in AsyncStorage and purge
-	account-specific cache data on logout.
+- **Resolved:** TanStack Query persistence now allowlists successful backend
+	health data, and authentication invalidation clears in-memory and persisted
+	query cache data.
 - Verify that `app.json` does not force light-only native behavior while the
 	runtime supports system, light, and dark modes.
 - Add crash reporting and production diagnostics around error boundaries and

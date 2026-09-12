@@ -51,8 +51,8 @@ OAuth2/OIDC provider issues access tokens; the API validates those tokens using
 issuer discovery, audience validation, and cached JWKS keys through
 `express-oauth2-jwt-bearer`. It does not store client secrets or passwords.
 
-Protected routes are mounted under `/api/v1` and receive the validated claims
-on `request.auth`. Keep provider-specific behavior inside
+Protected routes opt into authentication at route registration and receive the
+validated claims on `request.auth`. Keep provider-specific behavior inside
 `src/auth/middleware.ts`; route handlers should consume claims and remain
 independent of Auth0, Entra, Okta, or another provider. Tests can inject an
 `AuthMiddleware` through `createApp` without contacting a real identity

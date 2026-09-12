@@ -20,8 +20,7 @@ export function createApp(
   app.disable('x-powered-by');
   app.use(express.json());
   app.get('/health', healthRoute);
-  app.use('/api/v1', authMiddleware);
-  app.get('/api/v1/me', meRoute);
+  app.get('/api/v1/me', authMiddleware, meRoute);
 
   app.use((_request, response) => {
     response.status(404).json({

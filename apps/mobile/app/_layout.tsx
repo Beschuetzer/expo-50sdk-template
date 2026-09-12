@@ -21,6 +21,7 @@ import { Text } from '@/components/Themed';
 import { useAppState } from '@/components/hooks/tanstack/useAppState';
 import { useOnlineManager } from '@/components/hooks/tanstack/useOnlineManager';
 import { ErrorModal } from '@/components/modals/ErrorModal';
+import { ErrorBoundary as DiagnosticErrorBoundary } from '@/app/ErrorBoundary';
 import { queryClient, queryPersistOptions } from '@/state/queryClient';
 import { persistor, store } from '@/state/store';
 import { I18nProvider, useI18n } from '@/utils/i18n';
@@ -71,42 +72,44 @@ function RootLayoutNav() {
   useAppState();
 
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={queryPersistOptions}
-    >
-      <ThemeProvider
-        value={resolvedColorScheme === 'dark' ? DarkTheme : DefaultTheme}
+    <DiagnosticErrorBoundary>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={queryPersistOptions}
       >
-        <Provider store={store}>
-          <PersistGate
-            loading={<Text>{t('common.loading')}</Text>}
-            persistor={persistor}
-          >
-            <GluestackUIProvider
-              config={config}
-              colorMode={resolvedColorScheme}
+        <ThemeProvider
+          value={resolvedColorScheme === 'dark' ? DarkTheme : DefaultTheme}
+        >
+          <Provider store={store}>
+            <PersistGate
+              loading={<Text>{t('common.loading')}</Text>}
+              persistor={persistor}
             >
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <MenuProvider>
-                  <BottomSheetModalProvider>
-                    <Stack>
-                      <Stack.Screen
-                        name="(tabs)"
-                        options={{
-                          headerShown: false,
-                          headerTitleAlign: 'center',
-                        }}
-                      />
-                    </Stack>
-                    <ErrorModal />
-                  </BottomSheetModalProvider>
-                </MenuProvider>
-              </GestureHandlerRootView>
-            </GluestackUIProvider>
-          </PersistGate>
-        </Provider>
-      </ThemeProvider>
-    </PersistQueryClientProvider>
+              <GluestackUIProvider
+                config={config}
+                colorMode={resolvedColorScheme}
+              >
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                  <MenuProvider>
+                    <BottomSheetModalProvider>
+                      <Stack>
+                        <Stack.Screen
+                          name="(tabs)"
+                          options={{
+                            headerShown: false,
+                            headerTitleAlign: 'center',
+                          }}
+                        />
+                      </Stack>
+                      <ErrorModal />
+                    </BottomSheetModalProvider>
+                  </MenuProvider>
+                </GestureHandlerRootView>
+              </GluestackUIProvider>
+            </PersistGate>
+          </Provider>
+        </ThemeProvider>
+      </PersistQueryClientProvider>
+    </DiagnosticErrorBoundary>
   );
 }

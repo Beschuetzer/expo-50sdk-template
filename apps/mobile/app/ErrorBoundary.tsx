@@ -1,6 +1,8 @@
 import React, { ErrorInfo, PropsWithChildren } from 'react';
 import { ScrollView, Text, View, StyleSheet } from 'react-native';
 
+import { reportDiagnostic } from '@/utils/diagnostics';
+
 type ErrorBoundaryProps = PropsWithChildren;
 
 type ErrorBoundaryState = {
@@ -22,7 +24,10 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    reportDiagnostic(error, {
+      componentStack: errorInfo.componentStack,
+      source: 'ErrorBoundary',
+    });
   }
 
   render(): React.ReactNode {

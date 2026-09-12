@@ -109,10 +109,17 @@ describe('i18n', () => {
       useI18n();
       return null;
     };
+    const consoleError = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
 
-    expect(() => {
-      renderer.create(React.createElement(TestConsumer));
-    }).toThrow('useI18n must be used within an I18nProvider');
+    try {
+      expect(() => {
+        renderer.create(React.createElement(TestConsumer));
+      }).toThrow('useI18n must be used within an I18nProvider');
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   it('falls back to the device locale when a stored locale is invalid', async () => {

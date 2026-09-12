@@ -70,8 +70,9 @@ suite.
 - **Resolved:** `apps/mobile/app.json` now uses automatic native interface
 	style selection, preserving system theme support alongside the runtime's
 	light and dark mode settings.
-- Add crash reporting and production diagnostics around error boundaries and
-	persistence failures.
+- **Resolved:** Mobile error boundaries and TanStack Query persistence now
+	report structured diagnostics through an injectable crash reporter hook, with
+	development and production-safe console diagnostics as the default.
 - Continue routing all visible text through `apps/mobile/utils/i18n.tsx` and
 	all new styling through theme-aware values.
 

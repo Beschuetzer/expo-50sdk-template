@@ -130,6 +130,35 @@ the tab bar, and legacy themed components. Use `useColorScheme()` or
 `useThemeMode()` for theme-aware behavior, and avoid fixed light-only colors in
 new screens.
 
+## VS Code Debugging
+
+The repository includes checked-in launch profiles under `.vscode`. They run
+the Node services from TypeScript with source maps, so breakpoints can be set
+directly in `apps/api/src` and `apps/identity-provider/src`.
+
+1. Open the Run and Debug view.
+2. Choose `Debug API and identity provider` to start both backend processes.
+3. Set breakpoints in a route, authentication middleware, provider endpoint,
+   or token service and exercise that code from the mobile app or an HTTP
+   client.
+4. Run mobile app via `npm run mobile`
+
+The compound profile uses `http://localhost:4300` as the identity-provider
+issuer and `api` as the API audience. It is intended for an emulator, web
+browser, or HTTP client running on the same machine. Physical-device flows
+should continue to use `npm run dev`, which computes a LAN issuer and opens
+the services in separate terminals.
+
+`Debug Expo web` starts the Expo web target and launches it in the VS Code
+JavaScript debugger. Use it when you want to place breakpoints in mobile
+screens, hooks, and API clients. For native Expo Go debugging, use Expo's
+development menu and browser debugger for the running device; the native
+runtime and the web runtime do not share identical platform behavior.
+
+The profiles intentionally launch services directly rather than through
+`npm run dev`: the latter opens detached Windows terminals, which prevents VS
+Code from owning the Node debugger session.
+
 ## Nx Commands
 
 ```bash

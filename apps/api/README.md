@@ -17,9 +17,22 @@ Node.js HTTP API for local development and production-oriented extension.
 - `HOST`: bind address, default `0.0.0.0`.
 - `PORT`: TCP port from `1` to `65535`, default `4200`.
 - `NODE_ENV`: runtime environment label, default `development`.
+- `DATABASE_URL`: MongoDB connection string for Prisma. Required for database access.
 - `AUTH_ISSUER_BASE_URL`: OAuth2/OIDC issuer base URL. Required for protected routes.
 - `AUTH_AUDIENCE`: expected OAuth2 access-token audience. Required for protected routes.
 - `AUTH_REQUIRED_SCOPES`: optional space- or comma-separated scopes required by all protected routes.
+
+## Prisma + MongoDB
+
+This API is preconfigured for Prisma with a MongoDB datasource so you can attach a document-backed database without custom driver glue.
+
+1. Copy the sample values from `apps/api/.env.example`.
+2. Set `DATABASE_URL` to your MongoDB connection string.
+3. Define your application models in `apps/api/prisma/schema.prisma`.
+4. Run `npx prisma generate --schema=apps/api/prisma/schema.prisma` after changing the schema.
+5. For local database migrations in a MongoDB project, use `npx prisma db push --schema=apps/api/prisma/schema.prisma` or `npx prisma migrate dev` if you are using a relational provider.
+
+For MongoDB, Prisma uses the native `mongodb` provider and document IDs are represented as `ObjectId` strings.
 
 For the local identity-provider app, use:
 

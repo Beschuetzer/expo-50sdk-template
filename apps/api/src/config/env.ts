@@ -2,6 +2,7 @@ export interface ApiConfig {
   environment: string;
   host: string;
   port: number;
+  databaseUrl?: string;
   oauth2: {
     issuerBaseUrl?: string;
     audience?: string;
@@ -37,6 +38,7 @@ export function loadConfig(
     environment: environment.NODE_ENV ?? 'development',
     host: environment.HOST?.trim() || DEFAULT_HOST,
     port: parsePort(environment.PORT),
+    databaseUrl: environment.DATABASE_URL?.trim() || undefined,
     oauth2: {
       issuerBaseUrl: environment.AUTH_ISSUER_BASE_URL?.trim() || undefined,
       audience: environment.AUTH_AUDIENCE?.trim() || undefined,

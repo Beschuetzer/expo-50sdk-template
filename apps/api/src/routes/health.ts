@@ -1,6 +1,5 @@
-import type { Request, Response } from 'express';
-
 import type { HealthResponse } from '@expo-50sdk-template/shared-types';
+import type { Request, Response } from 'express';
 
 export function healthRoute(_request: Request, response: Response) {
   console.log('Health check requested');

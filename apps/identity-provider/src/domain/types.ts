@@ -6,7 +6,7 @@ export type OAuthClient = {
   clientType: ClientType;
   redirectUris: string[];
   allowedScopes: string[];
-  allowedGrantTypes: Array<'authorization_code' | 'client_credentials'>;
+  allowedGrantTypes: ('authorization_code' | 'client_credentials')[];
 };
 
 export type User = {

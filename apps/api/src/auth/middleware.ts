@@ -1,5 +1,5 @@
-import { auth, requiredScopes } from 'express-oauth2-jwt-bearer';
 import type { RequestHandler } from 'express';
+import { auth, requiredScopes } from 'express-oauth2-jwt-bearer';
 
 import type { ApiConfig } from '../config/env';
 

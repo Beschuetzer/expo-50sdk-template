@@ -1,14 +1,15 @@
+import type { RequestHandler } from 'express';
 import assert from 'node:assert/strict';
 import { createServer, request } from 'node:http';
 import { test } from 'node:test';
 import { promisify } from 'node:util';
-import type { RequestHandler } from 'express';
 
 import { createApp } from './app';
 import { loadConfig } from './config/env';
 
-const listen = promisify((server: ReturnType<typeof createServer>, callback: () => void) =>
-  server.listen(0, '127.0.0.1', callback),
+const listen = promisify(
+  (server: ReturnType<typeof createServer>, callback: () => void) =>
+    server.listen(0, '127.0.0.1', callback),
 );
 
 function get(server: ReturnType<typeof createServer>, path: string) {

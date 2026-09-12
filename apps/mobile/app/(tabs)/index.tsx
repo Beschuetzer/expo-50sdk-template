@@ -1,3 +1,4 @@
+import type { HealthResponse } from '@expo-50sdk-template/shared-types';
 import { VStack } from '@gluestack-ui/themed';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -9,7 +10,6 @@ import {
   ThemeAwareHeading,
   ThemeAwareText,
 } from '@/components/ui/ThemeAwareText';
-import type { HealthResponse } from '@expo-50sdk-template/shared-types';
 import {
   backendHealthQueryKey,
   useBackendHealthQuery,

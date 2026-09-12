@@ -1,12 +1,18 @@
 import { createServer, type Server } from 'node:http';
 
-import type { IdentityProviderConfig } from './config/env';
 import { createApp } from './app';
+import type { IdentityProviderConfig } from './config/env';
 import { createDevelopmentStores } from './infrastructure/memory';
 import { TokenService } from './security/tokens';
 
-export async function createIdentityProviderServer(config: IdentityProviderConfig) {
-  const app = createApp(config, createDevelopmentStores(), new TokenService(config));
+export async function createIdentityProviderServer(
+  config: IdentityProviderConfig,
+) {
+  const app = createApp(
+    config,
+    createDevelopmentStores(),
+    new TokenService(config),
+  );
   return createServer(app);
 }
 

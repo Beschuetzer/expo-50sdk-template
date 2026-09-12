@@ -1,6 +1,11 @@
 import { HStack } from '@gluestack-ui/themed';
 import { BlurView } from 'expo-blur';
-import React, { PropsWithChildren, ReactNode, useCallback, useMemo } from 'react';
+import React, {
+  PropsWithChildren,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from 'react';
 import { Modal } from 'react-native';
 
 import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';

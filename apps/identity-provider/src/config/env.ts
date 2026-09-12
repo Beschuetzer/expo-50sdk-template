@@ -23,7 +23,11 @@ function parsePort(value: string | undefined) {
   return port;
 }
 
-function parsePositiveInteger(value: string | undefined, name: string, fallback: number) {
+function parsePositiveInteger(
+  value: string | undefined,
+  name: string,
+  fallback: number,
+) {
   if (!value?.trim()) return fallback;
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 1) {
@@ -32,14 +36,18 @@ function parsePositiveInteger(value: string | undefined, name: string, fallback:
   return parsed;
 }
 
-export function loadConfig(environment: NodeJS.ProcessEnv = process.env): IdentityProviderConfig {
+export function loadConfig(
+  environment: NodeJS.ProcessEnv = process.env,
+): IdentityProviderConfig {
   const issuer = environment.IDP_ISSUER?.trim() || DEFAULT_ISSUER;
   return {
     environment: environment.NODE_ENV ?? 'development',
     host: environment.IDP_HOST?.trim() || DEFAULT_HOST,
     port: parsePort(environment.IDP_PORT),
     issuer: issuer.replace(/\/$/, ''),
-    signingKeySecret: environment.IDP_SIGNING_KEY_SECRET?.trim() || 'local-development-signing-secret-change-me',
+    signingKeySecret:
+      environment.IDP_SIGNING_KEY_SECRET?.trim() ||
+      'local-development-signing-secret-change-me',
     accessTokenLifetimeSeconds: parsePositiveInteger(
       environment.IDP_ACCESS_TOKEN_LIFETIME,
       'IDP_ACCESS_TOKEN_LIFETIME',

@@ -2,12 +2,13 @@ import express, { type ErrorRequestHandler, type Express } from 'express';
 
 import { createOAuth2Middleware, type AuthMiddleware } from './auth/middleware';
 import { loadConfig, type ApiConfig } from './config/env';
-import { healthRoute } from './routes/health';
-import { meRoute } from './routes/me';
 import { clearBffSession, exchangeBffCode } from './routes/bffAuth';
+import { createHealthRoute, type DatabaseHealth } from './routes/health';
+import { meRoute } from './routes/me';
 
 export type CreateAppOptions = {
   authMiddleware?: AuthMiddleware;
+  databaseHealth?: DatabaseHealth;
 };
 
 export function createApp(
@@ -35,7 +36,7 @@ export function createApp(
     next();
   });
   app.use(express.json());
-  app.get('/health', healthRoute);
+  app.get('/health', createHealthRoute(config, options.databaseHealth));
   app.post('/auth/token', (request, response, next) => {
     exchangeBffCode(request, response, config).catch(next);
   });
@@ -61,10 +62,24 @@ export function createApp(
     _next,
   ) => {
     const statusCode =
-      typeof error?.statusCode === 'number' ? error.statusCode : 500;
+      typeof error?.statusCode === 'number'
+        ? error.statusCode
+        : typeof error?.status === 'number'
+          ? error.status
+          : 500;
     response.status(statusCode).json({
-      message: statusCode === 500 ? 'Internal server error' : error.message,
-      status: statusCode === 500 ? 'internal_error' : 'unauthorized',
+      message:
+        statusCode >= 500
+          ? 'Internal server error'
+          : error.message ?? 'Request failed.',
+      status:
+        statusCode === 401
+          ? 'unauthorized'
+          : statusCode === 403
+            ? 'forbidden'
+            : statusCode >= 500
+              ? 'internal_error'
+              : 'bad_request',
     });
   };
   app.use(errorHandler);

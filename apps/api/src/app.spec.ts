@@ -42,8 +42,44 @@ function get(server: ReturnType<typeof createServer>, path: string) {
   );
 }
 
+function postRaw(
+  server: ReturnType<typeof createServer>,
+  path: string,
+  body: string,
+) {
+  const address = server.address();
+  assert(address && typeof address !== 'string');
+
+  return new Promise<{ body: Record<string, string>; statusCode: number }>(
+    (resolve, reject) => {
+      const response = request(
+        {
+          headers: { 'content-type': 'application/json' },
+          hostname: '127.0.0.1',
+          method: 'POST',
+          path,
+          port: address.port,
+        },
+        (incomingResponse) => {
+          let responseBody = '';
+          incomingResponse.setEncoding('utf8');
+          incomingResponse.on('data', (chunk) => (responseBody += chunk));
+          incomingResponse.on('end', () => {
+            resolve({
+              body: JSON.parse(responseBody) as Record<string, string>,
+              statusCode: incomingResponse.statusCode ?? 0,
+            });
+          });
+        },
+      );
+      response.on('error', reject);
+      response.end(body);
+    },
+  );
+}
+
 test('GET /health returns an API health response', async (t) => {
-  const server = createServer(createApp());
+  const server = createServer(createApp(loadConfig({})));
   await listen(server);
   t.after(() => server.close());
 
@@ -53,6 +89,26 @@ test('GET /health returns an API health response', async (t) => {
   assert.equal(response.body.status, 'ok');
   assert.equal(response.body.service, 'api');
   assert.ok(response.body.timestamp);
+});
+
+test('GET /health reports database degradation', async (t) => {
+  const server = createServer(
+    createApp(loadConfig({ DATABASE_URL: 'mongodb://database' }), {
+      databaseHealth: {
+        $runCommandRaw: async () => {
+          throw new Error('database unavailable');
+        },
+      },
+    }),
+  );
+  await listen(server);
+  t.after(() => server.close());
+
+  const response = await get(server, '/health');
+
+  assert.equal(response.statusCode, 503);
+  assert.equal(response.body.status, 'degraded');
+  assert.equal(response.body.error, 'database unavailable');
 });
 
 test('unknown routes return a not found response', async (t) => {
@@ -93,6 +149,56 @@ test('protected routes reject an anonymous request with HTTP 401', async (t) => 
 
   assert.equal(response.statusCode, 401);
   assert.equal(response.body.status, 'unauthorized');
+});
+
+for (const [name, errorMessage] of [
+  ['invalid JWTs', 'Invalid token'],
+  ['expired JWTs', 'Token expired'],
+] as const) {
+  test(`protected routes reject ${name}`, async (t) => {
+    const rejected: RequestHandler = (_request, _response, next) => {
+      const error = Object.assign(new Error(errorMessage), { statusCode: 401 });
+      next(error);
+    };
+    const server = createServer(
+      createApp(loadConfig({}), { authMiddleware: rejected }),
+    );
+    await listen(server);
+    t.after(() => server.close());
+
+    const response = await get(server, '/api/v1/me');
+
+    assert.equal(response.statusCode, 401);
+    assert.equal(response.body.status, 'unauthorized');
+    assert.equal(response.body.message, errorMessage);
+  });
+}
+
+test('protected routes reject requests missing required scopes', async (t) => {
+  const rejected: RequestHandler = (_request, _response, next) => {
+    next(Object.assign(new Error('Insufficient scope'), { statusCode: 403 }));
+  };
+  const server = createServer(
+    createApp(loadConfig({}), { authMiddleware: rejected }),
+  );
+  await listen(server);
+  t.after(() => server.close());
+
+  const response = await get(server, '/api/v1/me');
+
+  assert.equal(response.statusCode, 403);
+  assert.equal(response.body.status, 'forbidden');
+});
+
+test('malformed JSON returns a bad request response', async (t) => {
+  const server = createServer(createApp(loadConfig({})));
+  await listen(server);
+  t.after(() => server.close());
+
+  const response = await postRaw(server, '/auth/token', '{malformed');
+
+  assert.equal(response.statusCode, 400);
+  assert.equal(response.body.status, 'bad_request');
 });
 
 test('protected routes can use an injected authentication adapter', async (t) => {

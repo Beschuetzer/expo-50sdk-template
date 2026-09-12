@@ -52,10 +52,11 @@ suite.
 
 ## API recommendations
 
-- Make the health route consume the loaded `ApiConfig` or an injected database
-	health dependency instead of reading `process.env.DATABASE_URL` directly.
-- Add tests for invalid and expired JWTs, missing scopes, malformed JSON,
-	database degradation, and response contracts.
+- **Resolved:** The health route now uses the loaded `ApiConfig` and an
+	injectable database health dependency instead of reading
+	`process.env.DATABASE_URL` directly.
+- **Resolved:** API tests now cover invalid and expired JWT-shaped failures,
+	missing scopes, malformed JSON, database degradation, and response contracts.
 - Add request IDs and structured logs before operating the API in production.
 - Keep generic error responses for clients while logging detailed errors only
 	on the server.

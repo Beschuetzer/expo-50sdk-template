@@ -113,7 +113,7 @@ test('supports authorization code with PKCE S256', async (t) => {
     path: '/authorize',
     body: form({
       ...Object.fromEntries(query),
-      username: 'test',
+      username: 'test@test.com',
       password: 'test',
     }),
     headers: { 'content-type': 'application/x-www-form-urlencoded' },

@@ -105,7 +105,10 @@ describe('i18n', () => {
   });
 
   it('throws when useI18n is called outside a provider', () => {
-    const TestConsumer = () => useI18n();
+    const TestConsumer = () => {
+      useI18n();
+      return null;
+    };
 
     expect(() => {
       renderer.create(React.createElement(TestConsumer));

@@ -14,10 +14,9 @@ suite.
 
 ## High priority
 
-1. Fix the mobile typecheck failure in `apps/mobile/utils/i18n.spec.ts`.
-	 The test component returns the `I18nContextValue` object instead of a valid
-	 React node. Call `useI18n()` and return `null` while asserting the expected
-	 error.
+1. **Resolved:** Fixed the mobile typecheck failure in
+   `apps/mobile/utils/i18n.spec.ts`. The test consumer now invokes `useI18n()`
+   and returns `null` while asserting the expected error.
 
 2. Replace the identity provider's ephemeral signing keys. The provider
 	 generates a new RSA key pair on every startup in

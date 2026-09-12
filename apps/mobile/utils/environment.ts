@@ -10,10 +10,12 @@ export type EnvironmentConfig = {
   portNumber: string;
 };
 
-export function getRequiredEnvironment(): EnvironmentConfig {
-  const env = process.env.EXPO_PUBLIC_ENV?.trim();
-  const ipAddress = process.env.EXPO_PUBLIC_IP_ADDRESS?.trim();
-  const portNumber = process.env.EXPO_PUBLIC_PORT_NUMBER?.trim();
+export function getRequiredEnvironment(
+  envVars: NodeJS.ProcessEnv = process.env,
+): EnvironmentConfig {
+  const env = envVars.EXPO_PUBLIC_ENV?.trim();
+  const ipAddress = envVars.EXPO_PUBLIC_IP_ADDRESS?.trim();
+  const portNumber = envVars.EXPO_PUBLIC_PORT_NUMBER?.trim();
 
   const missingKeys = REQUIRED_ENV_KEYS.filter((key) => {
     const value =
@@ -39,18 +41,20 @@ export function getRequiredEnvironment(): EnvironmentConfig {
   } as EnvironmentConfig;
 }
 
-export function getIsDevelopmentMode() {
-  return !!process.env.EXPO_PUBLIC_ENV?.match(/dev|development/i);
+export function getIsDevelopmentMode(envVars: NodeJS.ProcessEnv = process.env) {
+  return !!envVars.EXPO_PUBLIC_ENV?.match(/dev|development/i);
 }
 
-export function getEnvironmentOrDefault() {
+export function getEnvironmentOrDefault(
+  envVars: NodeJS.ProcessEnv = process.env,
+) {
   try {
-    return getRequiredEnvironment();
+    return getRequiredEnvironment(envVars);
   } catch {
     return {
-      env: process.env.EXPO_PUBLIC_ENV || 'development',
-      ipAddress: process.env.EXPO_PUBLIC_IP_ADDRESS || '127.0.0.1',
-      portNumber: process.env.EXPO_PUBLIC_PORT_NUMBER || '4200',
+      env: envVars.EXPO_PUBLIC_ENV || 'development',
+      ipAddress: envVars.EXPO_PUBLIC_IP_ADDRESS || '127.0.0.1',
+      portNumber: envVars.EXPO_PUBLIC_PORT_NUMBER || '4200',
     } satisfies EnvironmentConfig;
   }
 }

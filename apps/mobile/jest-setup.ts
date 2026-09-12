@@ -1,12 +1,31 @@
 global.alert = jest.fn();
 
+const resetExpoEnv = () => {
+  const nextEnv = { ...process.env };
+  for (const key of [
+    'EXPO_PUBLIC_ENV',
+    'EXPO_PUBLIC_IP_ADDRESS',
+    'EXPO_PUBLIC_PORT_NUMBER',
+  ]) {
+    delete nextEnv[key];
+  }
+
+  Object.defineProperty(process, 'env', {
+    value: nextEnv,
+    configurable: true,
+    writable: true,
+  });
+};
+
+resetExpoEnv();
+
+if (typeof global.fetch !== 'function') {
+  global.fetch = jest.fn();
+}
+
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
-
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mocked-uuid'), // Return a mock UUID string
-}));
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),

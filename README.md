@@ -187,6 +187,12 @@ npm test
 npm run test:coverage
 ```
 
+`npm run test:coverage` runs Jest once, prints the coverage statement, and
+writes reports to `apps/mobile/coverage`. The HTML report is available at
+`apps/mobile/coverage/lcov-report/index.html`; the machine-readable summary is
+at `apps/mobile/coverage/coverage-summary.json`. The command fails when global
+statements, branches, functions, or lines coverage falls below 90%.
+
 ## Production API Configuration
 
 The local API defaults to `HOST=0.0.0.0` and `PORT=4200`. Override either value when serving the API directly:

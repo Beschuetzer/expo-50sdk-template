@@ -38,7 +38,39 @@ jobs:
         run: npx nx run identity-provider:test --outputStyle=static
 
       - name: Run mobile tests with coverage
-        run: npx nx run mobile:test-coverage --outputStyle=static
+        run: npm run test:coverage
+
+      - name: Enforce mobile coverage threshold
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const summary = JSON.parse(
+            fs.readFileSync('apps/mobile/coverage/coverage-summary.json', 'utf8'),
+          ).total;
+          const required = 90;
+          const metrics = ['branches', 'functions', 'lines', 'statements'];
+          const failures = metrics.filter((metric) => {
+            const percentage = Number(summary[metric].pct);
+            return !Number.isFinite(percentage) || percentage < required;
+          });
+          for (const metric of metrics) {
+            console.log(`${metric}: ${summary[metric].pct}%`);
+          }
+          if (failures.length > 0) {
+            console.error(`Coverage is below ${required}% for: ${failures.join(', ')}`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Publish coverage statement
+        run: |
+          cat apps/mobile/coverage/coverage-summary.json
+          {
+            echo '## Mobile Jest coverage'
+            echo '```json'
+            cat apps/mobile/coverage/coverage-summary.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload mobile coverage
         uses: actions/upload-artifact@v4

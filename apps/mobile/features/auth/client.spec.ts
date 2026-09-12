@@ -12,6 +12,14 @@ jest.mock('@/utils/platform', () => ({
   getIdentityProviderUrl: jest.fn(() => 'http://localhost:4300'),
 }));
 
+function makeResponse(body: unknown, status: number): Response {
+  return {
+    json: async () => body,
+    ok: status >= 200 && status < 300,
+    status,
+  } as Response;
+}
+
 describe('auth client', () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -26,9 +34,7 @@ describe('auth client', () => {
 
   it('sends the bearer token to the authenticated endpoint', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ claims: { sub: 'user-1' }, subject: 'user-1' }), {
-        status: 200,
-      }),
+      makeResponse({ claims: { sub: 'user-1' }, subject: 'user-1' }, 200),
     );
 
     await expect(getAuthenticatedUser('access-token')).resolves.toEqual({
@@ -42,9 +48,7 @@ describe('auth client', () => {
 
   it('rejects authenticated endpoint errors', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ message: 'Authentication is required.' }), {
-        status: 401,
-      }),
+      makeResponse({ message: 'Authentication is required.' }, 401),
     );
 
     await expect(getAuthenticatedUser('expired-token')).rejects.toThrow(
@@ -54,7 +58,7 @@ describe('auth client', () => {
 
   it('verifies anonymous requests are rejected with HTTP 401', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ status: 'unauthorized' }), { status: 401 }),
+      makeResponse({ status: 'unauthorized' }, 401),
     );
 
     await expect(
@@ -65,7 +69,7 @@ describe('auth client', () => {
 
   it('fails the security check when an anonymous request is accepted', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ status: 'ok' }), { status: 200 }),
+      makeResponse({ status: 'ok' }, 200),
     );
 
     await expect(

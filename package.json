@@ -23,6 +23,7 @@
     "mobile": "npm --prefix apps/mobile run dev",
     "start": "nx run-many --target=dev --projects=mobile,api,identity-provider --parallel",
     "test:coverage": "nx run mobile:test-coverage",
+    "test:all": "nx run-many --target=test --projects=api,identity-provider,mobile --parallel=1",
     "test": "nx run mobile:test",
     "typecheck": "nx run-many --target=typecheck --projects=shared-types,mobile,api,identity-provider --parallel",
     "validate:startup": "node ./scripts/startup-validate.mjs",

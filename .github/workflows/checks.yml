@@ -1,0 +1,55 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'refactor/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Tests, typechecks, and builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run API tests
+        run: npx nx run api:test --outputStyle=static
+
+      - name: Run identity-provider tests
+        run: npx nx run identity-provider:test --outputStyle=static
+
+      - name: Run mobile tests with coverage
+        run: npx nx run mobile:test-coverage --outputStyle=static
+
+      - name: Upload mobile coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-coverage
+          path: apps/mobile/coverage
+          if-no-files-found: error
+
+      - name: Run typechecks
+        run: npm run typecheck -- --outputStyle=static
+
+      - name: Build Node services
+        run: npm run build -- --outputStyle=static

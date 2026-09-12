@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import devToolsEnhancer from 'redux-devtools-expo-dev-plugin';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import devToolsEnhancer from 'redux-devtools-expo-dev-plugin';
 import { persistStore, persistReducer } from 'redux-persist';
 
 import generalReducer, { generalSlice } from '@/state/slices/generalSlice';

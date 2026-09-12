@@ -34,15 +34,6 @@ suite.
 	 persistent clients/users, durable or distributed authorization-code storage,
 	 expiration cleanup, and audit logging.
 
-4. Move `@prisma/client` from root `devDependencies` to runtime dependencies.
-	 The API imports it at runtime, so a production install using
-	 `npm ci --omit=dev` can otherwise omit a required package.
-
-5. Correct the MongoDB Prisma script. `apps/api/package.json` uses
-	 `prisma migrate dev`, which is a relational migration workflow. MongoDB
-	 should use `prisma db push` or a documented, controlled schema-deployment
-	 process.
-
 ## Security recommendations
 
 - Add rate limiting, request-size limits, security headers, structured logging,

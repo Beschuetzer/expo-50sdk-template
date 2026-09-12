@@ -24,10 +24,19 @@ export function createOAuth2Middleware(config: ApiConfig): AuthMiddleware {
     : undefined;
 
   return (request, response, next) => {
+    const cookieToken = request.headers.cookie
+      ?.split(';')
+      .map((cookie) => cookie.trim())
+      .find((cookie) => cookie.startsWith('bff_access_token='))
+      ?.slice('bff_access_token='.length);
     const hasQueryToken = typeof request.query.access_token === 'string';
     const hasBodyToken =
       typeof request.body?.access_token === 'string' &&
       request.is('application/x-www-form-urlencoded');
+
+    if (!request.headers.authorization && cookieToken) {
+      request.headers.authorization = `Bearer ${decodeURIComponent(cookieToken)}`;
+    }
 
     if (!request.headers.authorization && !hasQueryToken && !hasBodyToken) {
       response.status(401).json({

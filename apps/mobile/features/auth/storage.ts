@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
+import { getBackendUrl } from '@/utils/helpers';
+
 export type StoredAccessToken = {
   accessToken: string;
   expiresAt: number;
@@ -11,7 +13,12 @@ export type StoredAccessToken = {
 const ACCESS_TOKEN_STORAGE_KEY = 'expo50sdktemplate.oauth.access-token';
 const EXPIRY_SAFETY_WINDOW_MS = 30_000;
 
-let webAccessToken: StoredAccessToken | null = null;
+const webSessionToken: StoredAccessToken = {
+  accessToken: '',
+  expiresAt: Number.MAX_SAFE_INTEGER,
+  scope: '',
+  tokenType: 'Bearer',
+};
 
 function isStoredAccessToken(value: unknown): value is StoredAccessToken {
   if (!value || typeof value !== 'object') return false;
@@ -31,10 +38,10 @@ function isExpired(token: StoredAccessToken) {
 
 export async function loadAccessToken() {
   if (Platform.OS === 'web') {
-    if (webAccessToken && isExpired(webAccessToken)) {
-      webAccessToken = null;
-    }
-    return webAccessToken;
+    const response = await fetch(`${getBackendUrl()}/auth/session`, {
+      credentials: 'include',
+    });
+    return response.ok ? webSessionToken : null;
   }
 
   if (!(await SecureStore.isAvailableAsync())) {
@@ -61,7 +68,6 @@ export async function loadAccessToken() {
 
 export async function saveAccessToken(token: StoredAccessToken) {
   if (Platform.OS === 'web') {
-    webAccessToken = token;
     return;
   }
 
@@ -77,8 +83,13 @@ export async function saveAccessToken(token: StoredAccessToken) {
 }
 
 export async function clearAccessToken() {
-  webAccessToken = null;
-  if (Platform.OS !== 'web') {
-    await SecureStore.deleteItemAsync(ACCESS_TOKEN_STORAGE_KEY);
+  if (Platform.OS === 'web') {
+    await fetch(`${getBackendUrl()}/auth/logout`, {
+      credentials: 'include',
+      method: 'POST',
+    });
+    return;
   }
+
+  await SecureStore.deleteItemAsync(ACCESS_TOKEN_STORAGE_KEY);
 }

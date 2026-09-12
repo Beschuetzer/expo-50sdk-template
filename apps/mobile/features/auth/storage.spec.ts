@@ -15,6 +15,10 @@ jest.mock('expo-secure-store', () => ({
   setItemAsync: jest.fn(),
 }));
 
+jest.mock('@/utils/helpers', () => ({
+  getBackendUrl: jest.fn(() => 'http://localhost:4200'),
+}));
+
 describe('access-token storage', () => {
   const token: StoredAccessToken = {
     accessToken: 'access-token',
@@ -70,24 +74,30 @@ describe('access-token storage', () => {
       value: { OS: 'web' },
     });
 
-    const expiredToken: StoredAccessToken = {
-      ...token,
-      expiresAt: Date.now() - 1,
-    };
+    jest.spyOn(global, 'fetch').mockResolvedValue({ ok: false } as Response);
 
-    await saveAccessToken(expiredToken);
     await expect(loadAccessToken()).resolves.toBeNull();
     await expect(clearAccessToken()).resolves.toBeUndefined();
   });
 
-  it('stores and clears web access tokens without secure storage', async () => {
+  it('uses and clears the BFF web session without secure storage', async () => {
     Object.defineProperty(require('react-native'), 'Platform', {
       configurable: true,
       value: { OS: 'web' },
     });
 
+    jest.spyOn(global, 'fetch')
+      .mockResolvedValueOnce({ ok: true } as Response)
+      .mockResolvedValueOnce({ ok: true } as Response)
+      .mockResolvedValueOnce({ ok: false } as Response);
+
     await saveAccessToken(token);
-    await expect(loadAccessToken()).resolves.toEqual(token);
+    await expect(loadAccessToken()).resolves.toEqual({
+      accessToken: '',
+      expiresAt: Number.MAX_SAFE_INTEGER,
+      scope: '',
+      tokenType: 'Bearer',
+    });
     await clearAccessToken();
     await expect(loadAccessToken()).resolves.toBeNull();
     expect(SecureStore.setItemAsync).not.toHaveBeenCalled();

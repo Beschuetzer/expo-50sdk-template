@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import {
   createIdentityProviderDiscovery,
-  exchangeAuthorizationCode,
+  exchangeAuthorizationCodeForCurrentPlatform,
   getAuthenticatedUser,
   MOBILE_OAUTH_CLIENT_ID,
   MOBILE_OAUTH_SCOPES,
@@ -62,7 +62,7 @@ export function useOAuth2Auth() {
 
     let isCurrent = true;
     setState('loading');
-    exchangeAuthorizationCode({
+    exchangeAuthorizationCodeForCurrentPlatform({
       code,
       codeVerifier: request.codeVerifier,
       discovery,

@@ -71,7 +71,7 @@ export function createDevelopmentStores() {
     userStore: new InMemoryUserStore([
       {
         id: 'development-user',
-        username: 'test',
+        username: 'test@test.com',
         password: 'test',
         claims: { email: 'demo@example.com' },
       },

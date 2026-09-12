@@ -1,4 +1,5 @@
 import type { DiscoveryDocument } from 'expo-auth-session';
+import { Platform } from 'react-native';
 
 import { getBackendUrl } from '@/utils/helpers';
 import { getIdentityProviderUrl } from '@/utils/platform';
@@ -82,9 +83,48 @@ export async function exchangeAuthorizationCode({
   };
 }
 
+export async function exchangeAuthorizationCodeForCurrentPlatform(input: {
+  code: string;
+  codeVerifier: string;
+  discovery: DiscoveryDocument;
+  redirectUri: string;
+}): Promise<StoredAccessToken> {
+  if (Platform.OS !== 'web') {
+    return exchangeAuthorizationCode(input);
+  }
+
+  const response = await fetch(`${getBackendUrl()}/auth/token`, {
+    body: new URLSearchParams({
+      code: input.code,
+      code_verifier: input.codeVerifier,
+      redirect_uri: input.redirectUri,
+    }),
+    credentials: 'include',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    method: 'POST',
+  });
+  const result = (await response.json()) as TokenResponse;
+  if (!response.ok || typeof result.expires_in !== 'number') {
+    throw new Error(
+      typeof result.error_description === 'string'
+        ? result.error_description
+        : `Token exchange failed with HTTP ${response.status}`,
+    );
+  }
+
+  return {
+    accessToken: '',
+    expiresAt: Date.now() + result.expires_in * 1000,
+    scope: typeof result.scope === 'string' ? result.scope : '',
+    tokenType: 'Bearer',
+  };
+}
+
 export async function getAuthenticatedUser(accessToken: string) {
   const response = await fetch(`${getBackendUrl()}/api/v1/me`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    ...(Platform.OS === 'web'
+      ? { credentials: 'include' as const }
+      : { headers: { Authorization: `Bearer ${accessToken}` } }),
   });
   const result = (await response.json()) as Partial<AuthenticatedUser> & {
     message?: string;

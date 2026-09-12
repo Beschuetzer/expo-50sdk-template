@@ -122,6 +122,8 @@ test('configuration uses defaults and validates the port', () => {
     host: '0.0.0.0',
     port: 4200,
     databaseUrl: undefined,
+    oauthClientId: 'mobile-development-client',
+    corsOrigin: 'http://localhost:8081',
     oauth2: {
       issuerBaseUrl: undefined,
       audience: undefined,

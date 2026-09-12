@@ -41,10 +41,6 @@ suite.
 	parameters before rendering them.
 - Preserve the existing exact redirect URI matching, S256 PKCE, single-use
 	authorization codes, and scope checks.
-- Use a production web authentication design based on an HttpOnly, Secure,
-	SameSite cookie or a backend-for-frontend. The current web token storage in
-	`apps/mobile/features/auth/storage.ts` is in-memory and is not suitable for a
-	production web client.
 - Make production mobile environment configuration fail fast instead of
 	silently falling back to `127.0.0.1:4200`.
 - Minimize the permissions in `app.json`; request camera, microphone, location,

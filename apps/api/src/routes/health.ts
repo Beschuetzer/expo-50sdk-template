@@ -6,6 +6,16 @@ import { prisma } from '../lib/prisma';
 export async function healthRoute(_request: Request, response: Response) {
   console.log('Health check requested');
 
+  if (!process.env.DATABASE_URL) {
+    const healthResponse: HealthResponse = {
+      service: 'api',
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+    };
+    response.status(200).json(healthResponse);
+    return;
+  }
+
   try {
     await prisma.$runCommandRaw({ ping: 1 });
     const healthResponse: HealthResponse = {

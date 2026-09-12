@@ -121,6 +121,7 @@ test('configuration uses defaults and validates the port', () => {
     environment: 'development',
     host: '0.0.0.0',
     port: 4200,
+    databaseUrl: undefined,
     oauth2: {
       issuerBaseUrl: undefined,
       audience: undefined,

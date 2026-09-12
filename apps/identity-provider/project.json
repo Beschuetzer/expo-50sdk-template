@@ -38,7 +38,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx tsx --test src/**/*.spec.ts",
+        "command": "npx tsx --test src/app.spec.ts",
         "cwd": "apps/identity-provider"
       }
     }

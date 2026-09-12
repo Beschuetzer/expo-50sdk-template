@@ -3,9 +3,11 @@
   "compilerOptions": {
     "strict": true,
     "types": ["jest", "node"],
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
+      "@/*": ["./*"],
+      "@expo-50sdk-template/shared-types": [
+        "../../libs/shared-types/src/index.ts"
       ]
     }
   },

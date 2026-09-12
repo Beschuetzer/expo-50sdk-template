@@ -9,7 +9,7 @@ import {
   ThemeAwareHeading,
   ThemeAwareText,
 } from '@/components/ui/ThemeAwareText';
-import type { BackendHealth } from '@/features/backend/api';
+import type { HealthResponse } from '@expo-50sdk-template/shared-types';
 import {
   backendHealthQueryKey,
   useBackendHealthQuery,
@@ -78,7 +78,7 @@ export default function HomeScreen() {
   };
 
   const onPressReadBackendCache = () => {
-    const cachedHealth = queryClient.getQueryData<BackendHealth>(
+    const cachedHealth = queryClient.getQueryData<HealthResponse>(
       backendHealthQueryKey,
     );
     setCacheStatus(cachedHealth ? 'status.cacheHit' : 'status.cacheMiss');

@@ -2,7 +2,8 @@
   "name": "expo-50sdk-template",
   "version": "1.0.0",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "libs/*"
   ],
   "scripts": {
     "android": "npm --prefix apps/mobile run android",
@@ -20,7 +21,7 @@
     "start": "nx run-many --target=dev --projects=mobile,api --parallel",
     "test:coverage": "nx run mobile:test-coverage",
     "test": "nx run mobile:test",
-    "typecheck": "nx run-many --target=typecheck --projects=mobile,api --parallel",
+    "typecheck": "nx run-many --target=typecheck --projects=shared-types,mobile,api --parallel",
     "validate:startup": "node ./scripts/startup-validate.mjs",
     "web": "npm --prefix apps/mobile run web"
   },

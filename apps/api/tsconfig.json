@@ -2,10 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../../dist/apps/api",
-    "rootDir": "./src",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@expo-50sdk-template/shared-types": [
+        "../../libs/shared-types/src/index.ts"
+      ]
+    }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "../../libs/shared-types/src/**/*.ts"]
 }

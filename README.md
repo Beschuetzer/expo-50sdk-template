@@ -6,8 +6,24 @@ A neutral Expo SDK 50 starter shell managed by Nx, with a minimal Node.js backen
 
 - `mobile`: Expo Router app in `apps/mobile`, preserving the existing Expo SDK 50 and gluestack UI v1 setup.
 - `api`: dependency-free Node HTTP service in `apps/api`.
+- `shared-types`: source-only TypeScript contracts in `libs/shared-types`, consumed by both apps.
 
 The API currently exposes `GET /health` on port `4200` and returns a JSON health response.
+
+## Shared Types
+
+Cross-application request and response contracts belong in
+`libs/shared-types/src`. Export them from `libs/shared-types/src/index.ts` and
+import them with `@expo-50sdk-template/shared-types` from either the API or
+mobile app. Keep this library limited to platform-independent TypeScript types:
+it must not import React Native, Expo, Node runtime modules, or application
+implementation code.
+
+The development typechecks resolve the library source directly. Production API
+builds first emit declaration files for the library and then consume those
+declarations through the Nx project dependency. Add a new contract under a
+focused folder such as `src/lib/api`, export it from the library entry point,
+and run `npx nx run shared-types:typecheck` plus the affected app typechecks.
 
 ## Mobile Architecture
 
@@ -106,6 +122,7 @@ new screens.
 
 ```bash
 npx nx show projects
+npx nx run shared-types:typecheck
 npx nx run mobile:typecheck
 npx nx run api:typecheck
 npx nx build api

@@ -7,6 +7,7 @@ const rootDir = path.resolve(path.dirname(currentFilePath), '..');
 const commands = [
   { title: 'Expo mobile', script: 'mobile' },
   { title: 'Node API', script: 'api' },
+  { title: 'OAuth2 identity provider', script: 'idp' },
 ];
 
 function startWindowsTerminal({ title, script }) {
@@ -54,7 +55,7 @@ function startSharedTerminal({ script }) {
 if (process.platform === 'win32') {
   commands.forEach(startWindowsTerminal);
   console.log(
-    'Started Expo mobile and Node API in separate PowerShell windows.',
+    'Started Expo mobile, Node API, and OAuth2 identity provider in separate PowerShell windows.',
   );
 } else {
   const children = commands.map(startSharedTerminal);

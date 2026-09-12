@@ -21,6 +21,16 @@ Node.js HTTP API for local development and production-oriented extension.
 - `AUTH_AUDIENCE`: expected OAuth2 access-token audience. Required for protected routes.
 - `AUTH_REQUIRED_SCOPES`: optional space- or comma-separated scopes required by all protected routes.
 
+For the local identity-provider app, use:
+
+```powershell
+$env:AUTH_ISSUER_BASE_URL='http://localhost:4300'; $env:AUTH_AUDIENCE='api'; npm run api
+```
+
+Start the provider separately with `npm run idp`. Its development client
+credentials and demo user are documented in
+`apps/identity-provider/README.md`.
+
 ## Commands
 
 - `GET /health` returns a public JSON health response for deployment probes.
@@ -29,7 +39,7 @@ Node.js HTTP API for local development and production-oriented extension.
 - `npx nx run api:test` runs the API contract tests.
 - `npx nx run api:typecheck` validates TypeScript without emitting files.
 - `npx nx run api:build` emits the compiled API to `dist/apps/api`.
-- `npm run dev` starts the mobile app and API together.
+- `npm run dev` starts the mobile app, API, and identity provider together.
 
 ### OAuth2 architecture
 

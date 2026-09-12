@@ -6,10 +6,16 @@ A neutral Expo SDK 50 starter shell managed by Nx, with a minimal Node.js backen
 
 - `mobile`: Expo Router app in `apps/mobile`, preserving the existing Expo SDK 50 and gluestack UI v1 setup.
 - `api`: Express-based OAuth2 resource server in `apps/api`.
+- `identity-provider`: development OAuth2/OIDC provider in `apps/identity-provider`, supporting Authorization Code + PKCE and Client Credentials.
 - `shared-types`: source-only TypeScript contracts in `libs/shared-types`, consumed by both apps.
 
 The API currently exposes public `GET /health` and protected `GET /api/v1/me`
 on port `4200`.
+
+The local identity provider runs on port `4300`. It publishes discovery and
+JWKS metadata, issues RSA-signed access tokens, and keeps development clients,
+users, and authorization codes in memory. Replace those stores before using it
+for production; it is a provider scaffold, not a production account system.
 
 ## Shared Types
 
@@ -129,6 +135,7 @@ npx nx run api:typecheck
 npx nx build api
 npm run typecheck
 npm run validate:startup
+npm run idp
 ```
 
 ## Mobile Testing

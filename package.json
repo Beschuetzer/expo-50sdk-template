@@ -20,6 +20,7 @@
     "heroku:setup": "node scripts/setup-heroku.mjs",
     "ios": "npm --prefix apps/mobile run ios",
     "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "mobile": "npm --prefix apps/mobile run dev",
     "start": "nx run-many --target=dev --projects=mobile,api,identity-provider --parallel",
     "test:coverage": "nx run mobile:test-coverage",
@@ -27,6 +28,7 @@
     "test": "nx run mobile:test",
     "typecheck": "nx run-many --target=typecheck --projects=shared-types,mobile,api,identity-provider --parallel",
     "validate:startup": "node ./scripts/startup-validate.mjs",
+    "validate:mobile": "nx run mobile:validate",
     "web": "npm --prefix apps/mobile run web"
   },
   "jest": {

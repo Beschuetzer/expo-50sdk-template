@@ -67,10 +67,24 @@
         "cwd": "apps/mobile"
       }
     },
+    "lint-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx eslint .",
+        "cwd": "apps/mobile"
+      }
+    },
     "doctor": {
       "executor": "nx:run-commands",
       "options": {
         "command": "npx expo-doctor",
+        "cwd": "apps/mobile"
+      }
+    },
+    "validate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx expo config --type public --json && npx expo-doctor",
         "cwd": "apps/mobile"
       }
     },

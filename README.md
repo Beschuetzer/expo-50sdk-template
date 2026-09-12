@@ -156,6 +156,14 @@ the tab bar, and legacy themed components. Use `useColorScheme()` or
 `useThemeMode()` for theme-aware behavior, and avoid fixed light-only colors in
 new screens.
 
+### Mobile releases
+
+Pull requests run check-only ESLint plus `expo config` and `expo-doctor`.
+Production mobile builds are started manually from the GitHub Actions `Mobile
+release` workflow. Configure the real EAS project ID in `apps/mobile/app.json`
+and add an `EXPO_TOKEN` repository secret before starting a build; the workflow
+offers Android, iOS, and combined production builds.
+
 ## VS Code Debugging
 
 The repository includes checked-in launch profiles under `.vscode`. They run

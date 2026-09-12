@@ -31,6 +31,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run check-only lint
+        run: npm run lint:check
+
+      - name: Validate Expo configuration
+        run: npm run validate:mobile
+
       - name: Generate Prisma client
         run: npx prisma generate --schema=apps/api/prisma/schema.prisma
 

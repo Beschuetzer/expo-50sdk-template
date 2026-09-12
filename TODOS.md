@@ -52,10 +52,12 @@ suite.
 
 ## CI and maintainability recommendations
 
-- Add check-only linting and Expo validation to CI. The current lint command
-	uses `--fix`, which should not be used as a CI validation command.
-- Add a lightweight Expo config/doctor check and a separate release workflow
-	for mobile builds.
+- **Resolved:** CI uses a check-only lint command and validates the Expo config
+	with `expo config` and `expo-doctor`; the developer lint command may still use
+	`--fix` locally.
+- **Resolved:** Added a manually triggered EAS production mobile release
+	workflow. It requires the repository `EXPO_TOKEN` secret and a configured EAS
+	project ID before a build can be published.
 - Expand identity-provider tests for malformed PKCE, replayed codes, invalid
 	redirects, invalid scopes, bad client authentication, and expiration.
 - **Resolved:** API and identity-provider tests use real local HTTP flows and

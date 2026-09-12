@@ -1,5 +1,6 @@
 import {
   createIdentityProviderDiscovery,
+  exchangeAuthorizationCode,
   getAuthenticatedUser,
   verifyAuthenticatedEndpointRejectsAnonymousRequest,
 } from './client';
@@ -46,6 +47,15 @@ describe('auth client', () => {
     });
   });
 
+  it('uses default claims and subject values when the response omits them', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(makeResponse({}, 200));
+
+    await expect(getAuthenticatedUser('access-token')).resolves.toEqual({
+      claims: {},
+      subject: null,
+    });
+  });
+
   it('rejects authenticated endpoint errors', async () => {
     jest.spyOn(global, 'fetch').mockResolvedValue(
       makeResponse({ message: 'Authentication is required.' }, 401),
@@ -53,6 +63,73 @@ describe('auth client', () => {
 
     await expect(getAuthenticatedUser('expired-token')).rejects.toThrow(
       'Authentication is required.',
+    );
+  });
+
+  it('exchanges an authorization code for a bearer token', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      makeResponse(
+        {
+          access_token: 'new-access-token',
+          expires_in: 3600,
+          scope: 'openid profile',
+        },
+        200,
+      ),
+    );
+
+    await expect(
+      exchangeAuthorizationCode({
+        code: 'auth-code',
+        codeVerifier: 'challenge',
+        discovery: { authorizationEndpoint: 'http://localhost:4300/authorize', tokenEndpoint: 'http://localhost:4300/token' },
+        redirectUri: 'exp://localhost:19000',
+      }),
+    ).resolves.toEqual({
+      accessToken: 'new-access-token',
+      expiresAt: expect.any(Number),
+      scope: 'openid profile',
+      tokenType: 'Bearer',
+    });
+
+    expect(fetch).toHaveBeenCalledWith('http://localhost:4300/token', {
+      body: expect.stringContaining('code=auth-code'),
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      method: 'POST',
+    });
+  });
+
+  it('rejects token exchange failures with the identity-provider error message', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      makeResponse(
+        {
+          error: 'invalid_grant',
+          error_description: 'The code is expired.',
+        },
+        400,
+      ),
+    );
+
+    await expect(
+      exchangeAuthorizationCode({
+        code: 'expired-code',
+        codeVerifier: 'challenge',
+        discovery: { authorizationEndpoint: 'http://localhost:4300/authorize', tokenEndpoint: 'http://localhost:4300/token' },
+        redirectUri: 'exp://localhost:19000',
+      }),
+    ).rejects.toThrow('The code is expired.');
+  });
+
+  it('requires a token endpoint before exchanging codes', async () => {
+    await expect(
+      exchangeAuthorizationCode({
+        code: 'auth-code',
+        codeVerifier: 'challenge',
+        discovery: { authorizationEndpoint: 'http://localhost:4300/authorize' },
+        redirectUri: 'exp://localhost:19000',
+      }),
+    ).rejects.toThrow(
+      'The identity provider does not publish a token endpoint.',
     );
   });
 

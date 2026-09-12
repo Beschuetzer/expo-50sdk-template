@@ -64,6 +64,36 @@ describe('access-token storage', () => {
     expect(SecureStore.deleteItemAsync).toHaveBeenCalled();
   });
 
+  it('returns null for expired web tokens and clears them', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+
+    const expiredToken: StoredAccessToken = {
+      ...token,
+      expiresAt: Date.now() - 1,
+    };
+
+    await saveAccessToken(expiredToken);
+    await expect(loadAccessToken()).resolves.toBeNull();
+    await expect(clearAccessToken()).resolves.toBeUndefined();
+  });
+
+  it('stores and clears web access tokens without secure storage', async () => {
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'web' },
+    });
+
+    await saveAccessToken(token);
+    await expect(loadAccessToken()).resolves.toEqual(token);
+    await clearAccessToken();
+    await expect(loadAccessToken()).resolves.toBeNull();
+    expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
+  });
+
   it('fails when secure storage is unavailable', async () => {
     jest.mocked(SecureStore.isAvailableAsync).mockResolvedValue(false);
 

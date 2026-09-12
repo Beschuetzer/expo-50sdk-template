@@ -41,11 +41,12 @@ suite.
 	parameters before rendering them.
 - Preserve the existing exact redirect URI matching, S256 PKCE, single-use
 	authorization codes, and scope checks.
-- Make production mobile environment configuration fail fast instead of
-	silently falling back to `127.0.0.1:4200`.
-- Minimize the permissions in `app.json`; request camera, microphone, location,
-	foreground-service, and storage permissions only when required by an enabled
-	feature.
+- **Resolved:** Production-like mobile environments now fail fast when required
+	Expo environment values are missing; localhost fallback remains development-only.
+- **Resolved:** Removed the broad Android permission list from `apps/mobile/app.json`.
+	Active Expo plugins now declare feature-specific camera, location, image-picker,
+	and media-library permissions; microphone, foreground-service, and legacy
+	external-storage permissions are no longer requested.
 - Add dependency review, Dependabot, and an explicit vulnerability triage
 	policy to CI.
 

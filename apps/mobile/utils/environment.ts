@@ -50,7 +50,12 @@ export function getEnvironmentOrDefault(
 ) {
   try {
     return getRequiredEnvironment(envVars);
-  } catch {
+  } catch (error) {
+    const configuredEnvironment = envVars.EXPO_PUBLIC_ENV?.trim();
+    if (configuredEnvironment && !/dev|development/i.test(configuredEnvironment)) {
+      throw error;
+    }
+
     return {
       env: envVars.EXPO_PUBLIC_ENV || 'development',
       ipAddress: envVars.EXPO_PUBLIC_IP_ADDRESS || '127.0.0.1',

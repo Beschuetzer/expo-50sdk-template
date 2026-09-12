@@ -33,4 +33,10 @@ describe('environment helpers', () => {
       portNumber: '4200',
     });
   });
+
+  it('fails fast for incomplete non-development configuration', () => {
+    expect(() =>
+      getEnvironmentOrDefault({ EXPO_PUBLIC_ENV: 'production' }),
+    ).toThrow('Missing required Expo env values');
+  });
 });

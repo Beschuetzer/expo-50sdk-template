@@ -74,6 +74,12 @@ Health` to inspect that response without a network request, and `Clear Backend
 Cache` to remove it. Reading the cache after clearing should report a cache
 miss.
 
+Redux DevTools are enabled in development through
+`redux-devtools-expo-dev-plugin@0.2.1`, the newest release compatible with this
+Expo SDK 50 template. After starting the mobile app, press `Shift+M` in the
+Expo CLI and choose `Open devtools plugin - redux-devtools-expo-dev-plugin`.
+The enhancer is disabled in production builds.
+
 ### Lists
 
 `@shopify/flash-list` is already installed and used by the home screen. Use it

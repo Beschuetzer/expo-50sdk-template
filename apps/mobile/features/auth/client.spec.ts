@@ -99,6 +99,7 @@ describe('auth client', () => {
           access_token: 'new-access-token',
           expires_in: 3600,
           scope: 'openid profile',
+          token_type: 'Bearer',
         },
         200,
       ),
@@ -139,6 +140,7 @@ describe('auth client', () => {
           access_token: 'native-access-token',
           expires_in: 900,
           refresh_token: 'native-refresh-token',
+          token_type: 'Bearer',
         },
         200,
       ),
@@ -193,7 +195,10 @@ describe('auth client', () => {
     jest
       .spyOn(global, 'fetch')
       .mockResolvedValue(
-        makeResponse({ expires_in: 3600, scope: 'openid api:read' }, 200),
+        makeResponse(
+          { expires_in: 3600, scope: 'openid api:read', token_type: 'Bearer' },
+          200,
+        ),
       );
 
     await expect(
@@ -287,7 +292,9 @@ describe('auth client', () => {
     });
     jest
       .spyOn(global, 'fetch')
-      .mockResolvedValue(makeResponse({ expires_in: 900 }, 200));
+      .mockResolvedValue(
+        makeResponse({ expires_in: 900, token_type: 'Bearer' }, 200),
+      );
 
     await expect(
       refreshAccessToken(
@@ -318,7 +325,9 @@ describe('auth client', () => {
     });
     jest
       .spyOn(global, 'fetch')
-      .mockResolvedValue(makeResponse({ expires_in: 900 }, 200));
+      .mockResolvedValue(
+        makeResponse({ expires_in: 900, token_type: 'Bearer' }, 200),
+      );
 
     await expect(
       refreshAccessToken(
@@ -391,6 +400,52 @@ describe('auth client', () => {
         { tokenEndpoint: 'http://localhost:4300/token' },
       ),
     ).rejects.toThrow('Token refresh failed with HTTP 200');
+  });
+
+  it.each([
+    ['NaN', Number.NaN],
+    ['infinity', Number.POSITIVE_INFINITY],
+    ['zero', 0],
+  ])('rejects token exchange with %s expires_in', async (_label, expiresIn) => {
+    jest.spyOn(global, 'fetch').mockResolvedValue(
+      makeResponse(
+        {
+          access_token: 'access-token',
+          expires_in: expiresIn,
+          token_type: 'Bearer',
+        },
+        200,
+      ),
+    );
+
+    await expect(
+      exchangeAuthorizationCode({
+        code: 'auth-code',
+        codeVerifier: 'challenge',
+        discovery: { tokenEndpoint: 'http://localhost:4300/token' },
+        redirectUri: 'exp://localhost:19000',
+      }),
+    ).rejects.toThrow('Token exchange failed with HTTP 200');
+  });
+
+  it('rejects a token exchange with a non-bearer token type', async () => {
+    jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValue(
+        makeResponse(
+          { access_token: 'access-token', expires_in: 3600, token_type: 'MAC' },
+          200,
+        ),
+      );
+
+    await expect(
+      exchangeAuthorizationCode({
+        code: 'auth-code',
+        codeVerifier: 'challenge',
+        discovery: { tokenEndpoint: 'http://localhost:4300/token' },
+        redirectUri: 'exp://localhost:19000',
+      }),
+    ).rejects.toThrow('Token exchange failed with HTTP 200');
   });
 
   it('requires a token endpoint before exchanging codes', async () => {

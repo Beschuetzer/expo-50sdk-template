@@ -24,6 +24,18 @@ type TokenResponse = {
   error_description?: unknown;
 };
 
+function hasValidTokenMetadata(
+  result: TokenResponse,
+): result is TokenResponse & { expires_in: number; token_type: string } {
+  return (
+    typeof result.expires_in === 'number' &&
+    Number.isFinite(result.expires_in) &&
+    result.expires_in > 0 &&
+    typeof result.token_type === 'string' &&
+    result.token_type.toLowerCase() === 'bearer'
+  );
+}
+
 function getDiscoveryBaseUrl() {
   return getIdentityProviderUrl();
 }
@@ -67,7 +79,7 @@ export async function exchangeAuthorizationCode({
   if (
     !response.ok ||
     typeof result.access_token !== 'string' ||
-    typeof result.expires_in !== 'number'
+    !hasValidTokenMetadata(result)
   ) {
     const description =
       typeof result.error_description === 'string'
@@ -109,7 +121,7 @@ export async function exchangeAuthorizationCodeForCurrentPlatform(input: {
     method: 'POST',
   });
   const result = (await response.json()) as TokenResponse;
-  if (!response.ok || typeof result.expires_in !== 'number') {
+  if (!response.ok || !hasValidTokenMetadata(result)) {
     throw new Error(
       typeof result.error_description === 'string'
         ? result.error_description
@@ -136,7 +148,7 @@ export async function refreshAccessToken(
       method: 'POST',
     });
     const result = (await response.json()) as TokenResponse;
-    if (!response.ok || typeof result.expires_in !== 'number') {
+    if (!response.ok || !hasValidTokenMetadata(result)) {
       throw new Error(
         typeof result.error_description === 'string'
           ? result.error_description
@@ -167,7 +179,7 @@ export async function refreshAccessToken(
   if (
     !response.ok ||
     typeof result.access_token !== 'string' ||
-    typeof result.expires_in !== 'number' ||
+    !hasValidTokenMetadata(result) ||
     typeof result.refresh_token !== 'string'
   ) {
     throw new Error(

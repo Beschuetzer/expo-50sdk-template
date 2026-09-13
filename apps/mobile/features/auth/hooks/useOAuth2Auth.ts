@@ -132,9 +132,31 @@ export function useOAuth2Auth() {
     }
   }
 
+  async function refreshAuthenticatedSession() {
+    setState('loading');
+    try {
+      const storedToken = await loadAccessToken();
+      if (!storedToken) {
+        throw new Error('No authenticated session is available to refresh.');
+      }
+
+      const refreshedToken = await refreshAccessToken(storedToken, discovery);
+      await saveAccessToken(refreshedToken);
+      const authenticatedUser = await getAuthenticatedUser(
+        refreshedToken.accessToken,
+      );
+      setUser(authenticatedUser);
+      setState('success');
+    } catch (error) {
+      setState('error');
+      throw error;
+    }
+  }
+
   return {
     callAuthenticatedEndpoint,
     isReady: Boolean(request),
+    refreshAuthenticatedSession,
     redirectUri,
     state,
     user,

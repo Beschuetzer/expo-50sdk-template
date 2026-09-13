@@ -28,6 +28,7 @@ const messages = {
       testAuthenticatedEndpoint: 'Call Authenticated Endpoint',
       testBackendConnection: 'Test Backend Connection',
       testErrorModal: 'Test ErrorModal',
+      testTokenRefresh: 'Test Token Refresh',
     },
     app: {
       description:
@@ -51,6 +52,7 @@ const messages = {
       backendRequestFailed: 'Backend request failed',
       backendUnavailable: 'Backend connection failed. Is the API running?',
       authenticationFailed: 'Sign-in or authenticated request failed.',
+      tokenRefreshFailed: 'Token refresh failed. Sign in again if needed.',
       errorBoundaryMessage: 'Message:',
       errorBoundaryStack: 'Stack:',
       errorBoundaryTitle: 'Error encountered',
@@ -89,6 +91,8 @@ const messages = {
       authenticationCancelled: 'Sign-in was cancelled.',
       loadingAuthenticatedRequest: 'Preparing authenticated request...',
       preparingAuthentication: 'Preparing sign-in...',
+      refreshingToken: 'Refreshing token...',
+      tokenRefreshSuccess: 'Token refresh succeeded.',
     },
     theme: {
       dark: 'Dark',
@@ -110,6 +114,7 @@ const messages = {
       testAuthenticatedEndpoint: 'Llamar al endpoint autenticado',
       testBackendConnection: 'Probar conexión con el backend',
       testErrorModal: 'Probar ErrorModal',
+      testTokenRefresh: 'Probar renovación del token',
     },
     app: {
       description:
@@ -137,6 +142,8 @@ const messages = {
         'La conexión con el backend falló. ¿Está ejecutándose la API?',
       authenticationFailed:
         'El inicio de sesión o la solicitud autenticada falló.',
+      tokenRefreshFailed:
+        'La renovación del token falló. Inicia sesión de nuevo si es necesario.',
       errorBoundaryMessage: 'Mensaje:',
       errorBoundaryStack: 'Pila:',
       errorBoundaryTitle: 'Ocurrió un error',
@@ -177,6 +184,8 @@ const messages = {
       authenticationCancelled: 'El inicio de sesión fue cancelado.',
       loadingAuthenticatedRequest: 'Preparando la solicitud autenticada...',
       preparingAuthentication: 'Preparando el inicio de sesión...',
+      refreshingToken: 'Renovando el token...',
+      tokenRefreshSuccess: 'El token se renovó correctamente.',
     },
     theme: {
       dark: 'Oscuro',

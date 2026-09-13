@@ -33,11 +33,15 @@ export default function HomeScreen() {
   const [securityStatus, setSecurityStatus] = useState<TranslationKey | null>(
     null,
   );
+  const [refreshStatus, setRefreshStatus] = useState<TranslationKey | null>(
+    null,
+  );
   const queryClient = useQueryClient();
   const { refetch: refetchBackendHealth } = useBackendHealthQuery();
   const {
     callAuthenticatedEndpoint,
     isReady: isAuthReady,
+    refreshAuthenticatedSession,
     state: authState,
     user: authenticatedUser,
   } = useOAuth2Auth();
@@ -97,6 +101,25 @@ export default function HomeScreen() {
 
   const onPressTestAuthenticatedEndpoint = async () => {
     await callAuthenticatedEndpoint();
+  };
+
+  const onPressTestTokenRefresh = async () => {
+    setRefreshStatus('status.refreshingToken');
+    try {
+      await refreshAuthenticatedSession();
+      setRefreshStatus('status.tokenRefreshSuccess');
+    } catch (error) {
+      setRefreshStatus('errors.tokenRefreshFailed');
+      dispatch(
+        setError({
+          message:
+            error instanceof Error
+              ? error.message
+              : t('errors.tokenRefreshFailed'),
+          name: 'TokenRefreshError',
+        }),
+      );
+    }
   };
 
   const onPressTestAnonymousEndpoint = async () => {
@@ -173,6 +196,13 @@ export default function HomeScreen() {
           >
             {t('actions.testAuthenticatedEndpoint')}
           </ThemeAwareButton>
+          <ThemeAwareButton
+            disabled={authState === 'authenticating' || authState === 'loading'}
+            onPress={onPressTestTokenRefresh}
+            variant="outline"
+          >
+            {t('actions.testTokenRefresh')}
+          </ThemeAwareButton>
           {!isAuthReady && authState === 'idle' ? (
             <ThemeAwareText>
               {t('status.preparingAuthentication')}
@@ -201,6 +231,9 @@ export default function HomeScreen() {
           ) : null}
           {authenticatedStatus ? (
             <ThemeAwareText>{t(authenticatedStatus)}</ThemeAwareText>
+          ) : null}
+          {refreshStatus ? (
+            <ThemeAwareText>{t(refreshStatus)}</ThemeAwareText>
           ) : null}
           {securityStatus ? (
             <ThemeAwareText>{t(securityStatus)}</ThemeAwareText>

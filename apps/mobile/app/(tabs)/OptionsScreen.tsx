@@ -14,7 +14,16 @@ export default function SettingsScreen() {
   const { mode, modes, setMode } = useThemeMode();
 
   return (
-    <ThemeAwareScreen>
+    <ThemeAwareScreen
+      flashListProps={{
+        data: [],
+        estimatedItemSize: 200,
+        renderItem: () => null,
+      }}
+      absolutelyPositionedJsx={
+        <ThemeAwareButton>{t('actions.saveSettings')}</ThemeAwareButton>
+      }
+    >
       <ThemeAwareHeading size="lg">{t('settings.title')}</ThemeAwareHeading>
 
       <VStack space="md">
@@ -81,8 +90,6 @@ export default function SettingsScreen() {
           </HStack>
         </HStack>
       </VStack>
-
-      <ThemeAwareButton>{t('actions.saveSettings')}</ThemeAwareButton>
     </ThemeAwareScreen>
   );
 }

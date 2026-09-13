@@ -15,17 +15,11 @@ export default function SettingsScreen() {
 
   return (
     <ThemeAwareScreen
-      flashListProps={{
-        data: [],
-        estimatedItemSize: 200,
-        renderItem: () => null,
-      }}
       absolutelyPositionedJsx={
         <ThemeAwareButton>{t('actions.saveSettings')}</ThemeAwareButton>
       }
     >
       <ThemeAwareHeading size="lg">{t('settings.title')}</ThemeAwareHeading>
-
       <VStack space="md">
         <HStack justifyContent="space-between" alignItems="center">
           <ThemeAwareText>{t('theme.label')}</ThemeAwareText>

@@ -42,6 +42,7 @@ export default function HomeScreen() {
     callAuthenticatedEndpoint,
     isReady: isAuthReady,
     refreshAuthenticatedSession,
+    signOut,
     state: authState,
     user: authenticatedUser,
   } = useOAuth2Auth();
@@ -117,6 +118,22 @@ export default function HomeScreen() {
               ? error.message
               : t('errors.tokenRefreshFailed'),
           name: 'TokenRefreshError',
+        }),
+      );
+    }
+  };
+
+  const onPressSignOut = async () => {
+    try {
+      await signOut();
+      setRefreshStatus('status.signedOut');
+    } catch (error) {
+      setRefreshStatus('errors.signOutFailed');
+      dispatch(
+        setError({
+          message:
+            error instanceof Error ? error.message : t('errors.signOutFailed'),
+          name: 'SignOutError',
         }),
       );
     }
@@ -202,6 +219,13 @@ export default function HomeScreen() {
             variant="outline"
           >
             {t('actions.testTokenRefresh')}
+          </ThemeAwareButton>
+          <ThemeAwareButton
+            disabled={authState === 'authenticating' || authState === 'loading'}
+            onPress={onPressSignOut}
+            variant="outline"
+          >
+            {t('actions.signOut')}
           </ThemeAwareButton>
           {!isAuthReady && authState === 'idle' ? (
             <ThemeAwareText>

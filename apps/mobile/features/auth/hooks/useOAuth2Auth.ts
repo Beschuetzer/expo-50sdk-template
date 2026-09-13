@@ -153,11 +153,19 @@ export function useOAuth2Auth() {
     }
   }
 
+  async function signOut() {
+    setState('loading');
+    await clearAuthenticatedSession();
+    setUser(null);
+    setState('idle');
+  }
+
   return {
     callAuthenticatedEndpoint,
     isReady: Boolean(request),
     refreshAuthenticatedSession,
     redirectUri,
+    signOut,
     state,
     user,
   };

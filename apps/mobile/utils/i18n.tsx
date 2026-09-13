@@ -29,6 +29,7 @@ const messages = {
       testBackendConnection: 'Test Backend Connection',
       testErrorModal: 'Test ErrorModal',
       testTokenRefresh: 'Test Token Refresh',
+      signOut: 'Sign Out',
     },
     app: {
       description:
@@ -53,6 +54,7 @@ const messages = {
       backendUnavailable: 'Backend connection failed. Is the API running?',
       authenticationFailed: 'Sign-in or authenticated request failed.',
       tokenRefreshFailed: 'Token refresh failed. Sign in again if needed.',
+      signOutFailed: 'Sign out failed. Please try again.',
       errorBoundaryMessage: 'Message:',
       errorBoundaryStack: 'Stack:',
       errorBoundaryTitle: 'Error encountered',
@@ -93,6 +95,7 @@ const messages = {
       preparingAuthentication: 'Preparing sign-in...',
       refreshingToken: 'Refreshing token...',
       tokenRefreshSuccess: 'Token refresh succeeded.',
+      signedOut: 'Signed out.',
     },
     theme: {
       dark: 'Dark',
@@ -115,6 +118,7 @@ const messages = {
       testBackendConnection: 'Probar conexión con el backend',
       testErrorModal: 'Probar ErrorModal',
       testTokenRefresh: 'Probar renovación del token',
+      signOut: 'Cerrar sesión',
     },
     app: {
       description:
@@ -144,6 +148,7 @@ const messages = {
         'El inicio de sesión o la solicitud autenticada falló.',
       tokenRefreshFailed:
         'La renovación del token falló. Inicia sesión de nuevo si es necesario.',
+      signOutFailed: 'No se pudo cerrar la sesión. Inténtalo de nuevo.',
       errorBoundaryMessage: 'Mensaje:',
       errorBoundaryStack: 'Pila:',
       errorBoundaryTitle: 'Ocurrió un error',
@@ -186,6 +191,7 @@ const messages = {
       preparingAuthentication: 'Preparando el inicio de sesión...',
       refreshingToken: 'Renovando el token...',
       tokenRefreshSuccess: 'El token se renovó correctamente.',
+      signedOut: 'Sesión cerrada.',
     },
     theme: {
       dark: 'Oscuro',

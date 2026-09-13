@@ -1,6 +1,8 @@
 {
     "chat.tools.terminal.autoApprove": {
         "Get-Content": true,
-        "Select-String": true
+        "Select-String": true,
+        "npx nx": true,
+        "Where-Object": true
     }
 }

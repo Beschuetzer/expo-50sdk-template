@@ -1,4 +1,7 @@
 # TODOS
 
-- create a script to init repo called (init.js)
-- add resuable components for GPS, barcode scanning, Capturing images
+- add resuable, theme and font-aware components for:
+	-- GPS (hook)
+	-- ThemeAwareImageSelector for capturing images (both from camera and from photo roll)
+	-- ThemeAwareInput
+- see if it's possible to use gluestack components for some of the 

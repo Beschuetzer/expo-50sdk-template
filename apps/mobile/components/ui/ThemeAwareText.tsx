@@ -8,7 +8,7 @@ type ThemeAwareTextProps = ComponentProps<typeof Text>;
 export function ThemeAwareText(props: ThemeAwareTextProps) {
   const typographyProps = useThemeAwareTypography();
 
-  return <Text {...props} {...typographyProps} />;
+  return <Text {...typographyProps} {...props} />;
 }
 
 export { ThemeAwareHeading } from './ThemeAwareHeading';

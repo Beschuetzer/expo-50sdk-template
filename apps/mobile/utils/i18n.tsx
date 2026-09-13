@@ -26,10 +26,12 @@ const messages = {
       saveSettings: 'Save Settings',
       testAnonymousEndpoint: 'Verify Anonymous Access Is Rejected',
       testAuthenticatedEndpoint: 'Call Authenticated Endpoint',
+      testBarcodeScanner: 'Test Barcode Scanner',
       testBackendConnection: 'Test Backend Connection',
       testErrorModal: 'Test ErrorModal',
       testTokenRefresh: 'Test Token Refresh',
       signOut: 'Sign Out',
+      hideBarcodeScanner: 'Hide Barcode Scanner',
     },
     app: {
       description:
@@ -86,6 +88,16 @@ const messages = {
     language: {
       label: 'Language',
     },
+    scanner: {
+      allowCamera: 'Allow camera',
+      permissionDenied:
+        'Camera access is disabled. Enable it in your device settings.',
+      permissionRequired: 'Camera access is required to scan a barcode.',
+      scanAgain: 'Scan again',
+      scanComplete: 'Barcode captured',
+      resultData: 'Data',
+      resultType: 'Type',
+    },
     settings: {
       darkMode: 'Dark mode',
       manage: 'Manage',
@@ -132,10 +144,12 @@ const messages = {
       saveSettings: 'Guardar configuración',
       testAnonymousEndpoint: 'Verificar rechazo del acceso anónimo',
       testAuthenticatedEndpoint: 'Llamar al endpoint autenticado',
+      testBarcodeScanner: 'Probar escáner de códigos de barras',
       testBackendConnection: 'Probar conexión con el backend',
       testErrorModal: 'Probar ErrorModal',
       testTokenRefresh: 'Probar renovación del token',
       signOut: 'Cerrar sesión',
+      hideBarcodeScanner: 'Ocultar escáner de códigos de barras',
     },
     app: {
       description:
@@ -205,6 +219,17 @@ const messages = {
     language: {
       label: 'Idioma',
     },
+    scanner: {
+      allowCamera: 'Permitir cámara',
+      permissionDenied:
+        'El acceso a la cámara está desactivado. Actívalo en los ajustes del dispositivo.',
+      permissionRequired:
+        'Se necesita acceso a la cámara para escanear un código de barras.',
+      scanAgain: 'Escanear de nuevo',
+      scanComplete: 'Código de barras capturado',
+      resultData: 'Datos',
+      resultType: 'Tipo',
+    },
     settings: {
       darkMode: 'Modo oscuro',
       manage: 'Administrar',
@@ -255,6 +280,7 @@ export type TranslationKey =
   | `errors.${keyof typeof messages.en.errors}`
   | `font.${keyof typeof messages.en.font}`
   | `language.${keyof typeof messages.en.language}`
+  | `scanner.${keyof typeof messages.en.scanner}`
   | `settings.${keyof typeof messages.en.settings}`
   | `status.${keyof typeof messages.en.status}`
   | `theme.${keyof typeof messages.en.theme}`

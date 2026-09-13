@@ -3,6 +3,10 @@ import { VStack } from '@gluestack-ui/themed';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import {
+  BarcodeScanner,
+  type BarCodeScannerResult,
+} from '@/components/reusable/BarcodeScanner';
 import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
 import { ThemeAwareScreen } from '@/components/ui/ThemeAwareScreen';
 import { ThemeAwareSurface } from '@/components/ui/ThemeAwareSurface';
@@ -36,6 +40,9 @@ export default function HomeScreen() {
   const [refreshStatus, setRefreshStatus] = useState<TranslationKey | null>(
     null,
   );
+  const [isBarcodeScannerVisible, setIsBarcodeScannerVisible] = useState(false);
+  const [barcodeResult, setBarcodeResult] =
+    useState<BarCodeScannerResult | null>(null);
   const queryClient = useQueryClient();
   const { refetch: refetchBackendHealth } = useBackendHealthQuery();
   const {
@@ -271,6 +278,37 @@ export default function HomeScreen() {
       }
     >
       <VStack space="lg" p="$4">
+        <ThemeAwareButton
+          onPress={() => {
+            setIsBarcodeScannerVisible((visible) => !visible);
+            setBarcodeResult(null);
+          }}
+          variant="outline"
+        >
+          {t(
+            isBarcodeScannerVisible
+              ? 'actions.hideBarcodeScanner'
+              : 'actions.testBarcodeScanner',
+          )}
+        </ThemeAwareButton>
+        {isBarcodeScannerVisible ? (
+          <BarcodeScanner onScanned={setBarcodeResult} />
+        ) : null}
+        {barcodeResult ? (
+          <ThemeAwareSurface
+            darkBackground="$backgroundDark900"
+            lightBackground="$backgroundLight0"
+            borderRadius="$lg"
+            p="$4"
+          >
+            <ThemeAwareText>
+              {t('scanner.resultType')}: {barcodeResult.type}
+            </ThemeAwareText>
+            <ThemeAwareText>
+              {t('scanner.resultData')}: {barcodeResult.data}
+            </ThemeAwareText>
+          </ThemeAwareSurface>
+        ) : null}
         <ThemeAwareHeading size="2xl">{t('app.title')}</ThemeAwareHeading>
         <ThemeAwareText size="md">{t('app.description')}</ThemeAwareText>
         <ThemeAwareHeading size="sm">{t('checklist.title')}</ThemeAwareHeading>

@@ -66,6 +66,23 @@ const messages = {
       testErrorModalStack: 'Triggered from the starter home screen.',
       unexpectedBackendStatus: 'Backend responded with an unexpected status.',
     },
+    font: {
+      label: 'Font',
+      codex: 'Codex',
+      codexItalic: 'Codex Italic',
+      fallingSkySemibold: 'Falling Sky Semibold',
+      fallingSkyMediumOblique: 'Falling Sky Medium Oblique',
+      fallingSkyLight: 'Falling Sky Light',
+      fallingSkyBlack: 'Falling Sky Black',
+      fashionvictim: 'Fashionvictim',
+      kindred: 'Kindred',
+      kindredItalic: 'Kindred Italic',
+      nesathoberyl: 'Nesathoberyl',
+      timeburnerBold: 'Timeburner Bold',
+      spaceMono: 'Space Mono',
+      typeLightSans: 'Type Light Sans',
+      zomboid: 'Zomboid',
+    },
     language: {
       label: 'Language',
     },
@@ -161,6 +178,30 @@ const messages = {
         'Activado desde la pantalla de inicio de la plantilla.',
       unexpectedBackendStatus: 'El backend respondió con un estado inesperado.',
     },
+    font: {
+      label: 'Fuente',
+      codex: 'Codex',
+      codexItalic: 'Codex cursiva',
+      fallingSkySemibold: 'Falling Sky seminegrita',
+      fallingSkyOutline: 'Falling Sky contorno',
+      fallingSkyMediumOblique: 'Falling Sky oblicua mediana',
+      fallingSkyLight: 'Falling Sky ligera',
+      fallingSkyExtendedOutline: 'Falling Sky contorno extendido',
+      fallingSkyBlack: 'Falling Sky negra',
+      freedom2: 'Freedom 2',
+      freedom: 'Freedom',
+      forque: 'Forque',
+      fashionvictim: 'Fashionvictim',
+      kindred: 'Kindred',
+      kindredItalic: 'Kindred cursiva',
+      nesathoberyl: 'Nesathoberyl',
+      roBlueShellBold: 'Ro Blue Shell negrita',
+      timeburner: 'Timeburner',
+      timeburnerBold: 'Timeburner negrita',
+      spaceMono: 'Space Mono',
+      typeLightSans: 'Type Light Sans',
+      zomboid: 'Zomboid',
+    },
     language: {
       label: 'Idioma',
     },
@@ -212,6 +253,7 @@ export type TranslationKey =
   | `checklist.${keyof typeof messages.en.checklist}`
   | `common.${keyof typeof messages.en.common}`
   | `errors.${keyof typeof messages.en.errors}`
+  | `font.${keyof typeof messages.en.font}`
   | `language.${keyof typeof messages.en.language}`
   | `settings.${keyof typeof messages.en.settings}`
   | `status.${keyof typeof messages.en.status}`

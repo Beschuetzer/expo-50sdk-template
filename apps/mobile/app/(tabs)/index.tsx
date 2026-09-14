@@ -8,6 +8,7 @@ import {
   type BarCodeScannerResult,
 } from '@/components/reusable/BarcodeScanner';
 import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
+import { ThemeAwareImageSelector } from '@/components/ui/ThemeAwareImageSelector';
 import { ThemeAwareInput } from '@/components/ui/ThemeAwareInput';
 import { ThemeAwareScreen } from '@/components/ui/ThemeAwareScreen';
 import { ThemeAwareSurface } from '@/components/ui/ThemeAwareSurface';
@@ -48,6 +49,7 @@ export default function HomeScreen() {
   const [isBarcodeScannerVisible, setIsBarcodeScannerVisible] = useState(false);
   const [barcodeResult, setBarcodeResult] =
     useState<BarCodeScannerResult | null>(null);
+  const [isImageSelectorVisible, setIsImageSelectorVisible] = useState(false);
   const [testErrorCount, setTestErrorCount] = useState('20');
   const queryClient = useQueryClient();
   const { refetch: refetchBackendHealth } = useBackendHealthQuery();
@@ -243,6 +245,38 @@ export default function HomeScreen() {
               {t('scanner.resultData')}: {barcodeResult.data}
             </ThemeAwareText>
           </ThemeAwareSurface>
+        ) : null}
+        <ThemeAwareButton
+          onPress={() => setIsImageSelectorVisible((visible) => !visible)}
+          variant="outline"
+        >
+          {t('actions.testImageSelector')}
+        </ThemeAwareButton>
+        {isImageSelectorVisible ? (
+          <ThemeAwareImageSelector
+            cameraButtonLabel={t('actions.selectImageFromCamera')}
+            clearButtonLabel={t('actions.clearImage')}
+            libraryButtonLabel={t('actions.selectImageFromLibrary')}
+            onError={(error) =>
+              dispatch(
+                setError({
+                  message:
+                    error instanceof Error
+                      ? error.message
+                      : t('errors.imageSelectionFailed'),
+                  name: 'ImageSelectionError',
+                }),
+              )
+            }
+            onPermissionDenied={() =>
+              dispatch(
+                setError({
+                  message: t('errors.imagePermissionDenied'),
+                  name: 'ImagePermissionError',
+                }),
+              )
+            }
+          />
         ) : null}
         <HStack space="sm" alignItems="center">
           <ThemeAwareButton

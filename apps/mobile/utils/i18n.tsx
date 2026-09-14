@@ -22,6 +22,8 @@ const messages = {
   en: {
     actions: {
       clearBackendCache: 'Clear Backend Cache',
+      decreaseErrorCount: 'Decrease error count',
+      increaseErrorCount: 'Increase error count',
       readBackendCache: 'Read Cached Health',
       saveSettings: 'Save Settings',
       testAnonymousEndpoint: 'Verify Anonymous Access Is Rejected',
@@ -141,6 +143,8 @@ const messages = {
   es: {
     actions: {
       clearBackendCache: 'Limpiar caché del backend',
+      decreaseErrorCount: 'Disminuir cantidad de errores',
+      increaseErrorCount: 'Aumentar cantidad de errores',
       readBackendCache: 'Leer salud en caché',
       saveSettings: 'Guardar configuración',
       testAnonymousEndpoint: 'Verificar rechazo del acceso anónimo',

@@ -1,5 +1,5 @@
 import type { HealthResponse } from '@expo-50sdk-template/shared-types';
-import { HStack, Input, InputField, VStack } from '@gluestack-ui/themed';
+import { HStack, VStack } from '@gluestack-ui/themed';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -8,6 +8,7 @@ import {
   type BarCodeScannerResult,
 } from '@/components/reusable/BarcodeScanner';
 import { ThemeAwareButton } from '@/components/ui/ThemeAwareButton';
+import { ThemeAwareInput } from '@/components/ui/ThemeAwareInput';
 import { ThemeAwareScreen } from '@/components/ui/ThemeAwareScreen';
 import { ThemeAwareSurface } from '@/components/ui/ThemeAwareSurface';
 import {
@@ -251,15 +252,17 @@ export default function HomeScreen() {
           >
             {t('actions.testErrorModal')}
           </ThemeAwareButton>
-          <Input flex={1}>
-            <InputField
-              accessibilityLabel={t('actions.testErrorCount')}
-              keyboardType="number-pad"
-              onChangeText={setTestErrorCount}
-              placeholder={t('actions.testErrorCount')}
-              value={testErrorCount}
-            />
-          </Input>
+          <ThemeAwareInput
+            decrementAccessibilityLabel={t('actions.decreaseErrorCount')}
+            incrementAccessibilityLabel={t('actions.increaseErrorCount')}
+            inputFieldProps={{
+              accessibilityLabel: t('actions.testErrorCount'),
+              placeholder: t('actions.testErrorCount'),
+            }}
+            inputType="number"
+            onChangeText={setTestErrorCount}
+            value={testErrorCount}
+          />
         </HStack>
         <ThemeAwareButton
           onPress={onPressTestBackendConnection}

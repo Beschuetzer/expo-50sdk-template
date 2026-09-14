@@ -50,9 +50,10 @@ async function ask(rl, label, defaultValue) {
 async function main() {
   const rl = readline.createInterface({ input, output });
   try {
-    const defaultName = path.basename(root) === 'expo-50sdk-template'
-      ? 'My Expo App'
-      : path.basename(root);
+    const defaultName =
+      path.basename(root) === 'expo-50sdk-template'
+        ? 'My Expo App'
+        : path.basename(root);
     const displayName = await ask(rl, 'Display name', defaultName);
     const slug = await ask(rl, 'Expo slug', slugify(displayName));
     const identifier = compactIdentifier(slug);
@@ -61,11 +62,7 @@ async function main() {
       'iOS bundle identifier',
       `com.${identifier}`,
     );
-    const androidPackage = await ask(
-      rl,
-      'Android package',
-      bundleIdentifier,
-    );
+    const androidPackage = await ask(rl, 'Android package', bundleIdentifier);
     const scheme = await ask(rl, 'Deep-link scheme', identifier);
     const easProjectId = await ask(
       rl,
@@ -123,12 +120,18 @@ async function main() {
     console.log(`- EAS project: ${easProjectId}`);
     if (createdApiEnv) console.log('- Created apps/api/.env from its example.');
     if (createdIdpEnv) {
-      console.log('- Created apps/identity-provider/.env for local development.');
+      console.log(
+        '- Created apps/identity-provider/.env for local development.',
+      );
     }
     if (easProjectId === 'REPLACE_WITH_YOUR_EAS_PROJECT_ID') {
-      console.log('Next: create an EAS project and replace the placeholder ID.');
+      console.log(
+        'Next: create an EAS project and replace the placeholder ID.',
+      );
     }
-    console.log('Secrets and production provider credentials still need to be configured.');
+    console.log(
+      'Secrets and production provider credentials still need to be configured.',
+    );
   } finally {
     rl.close();
   }

@@ -95,6 +95,11 @@ test('publishes OAuth2 discovery and JWKS metadata', async (t) => {
     'client_credentials',
     'refresh_token',
   ]);
+  assert.deepEqual(discovery.body.token_endpoint_auth_methods_supported, [
+    'none',
+    'client_secret_basic',
+    'client_secret_post',
+  ]);
   assert.equal(jwks.statusCode, 200);
   assert.equal(jwks.body.keys[0].alg, 'RS256');
 });

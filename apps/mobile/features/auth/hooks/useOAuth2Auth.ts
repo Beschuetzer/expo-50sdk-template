@@ -60,7 +60,12 @@ export function useOAuth2Auth() {
     }
 
     const code = response.params.code;
-    if (!code || !request?.codeVerifier) {
+    if (
+      !code ||
+      !request?.codeVerifier ||
+      !response.params.state ||
+      response.params.state !== request.state
+    ) {
       setState('error');
       return;
     }

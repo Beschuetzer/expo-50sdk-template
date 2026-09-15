@@ -57,6 +57,10 @@ export class InMemoryRefreshTokenStore implements RefreshTokenStore {
     this.tokens.delete(token);
     return refreshToken;
   }
+
+  revoke(token: string) {
+    this.tokens.delete(token);
+  }
 }
 
 export function createDevelopmentStores() {

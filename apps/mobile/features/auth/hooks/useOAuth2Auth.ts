@@ -8,6 +8,7 @@ import {
   getAuthenticatedUser,
   MOBILE_OAUTH_CLIENT_ID,
   MOBILE_OAUTH_SCOPES,
+  revokeRefreshToken,
   refreshAccessToken,
   type AuthenticatedUser,
 } from '../client';
@@ -160,9 +161,16 @@ export function useOAuth2Auth() {
 
   async function signOut() {
     setState('loading');
-    await clearAuthenticatedSession();
-    setUser(null);
-    setState('idle');
+    try {
+      const storedToken = await loadAccessToken();
+      if (storedToken?.refreshToken) {
+        await revokeRefreshToken(storedToken.refreshToken, discovery);
+      }
+    } finally {
+      await clearAuthenticatedSession();
+      setUser(null);
+      setState('idle');
+    }
   }
 
   return {

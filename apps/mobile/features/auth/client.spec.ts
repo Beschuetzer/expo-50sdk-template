@@ -27,6 +27,10 @@ function makeResponse(body: unknown, status: number): Response {
 describe('auth client', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    Object.defineProperty(require('react-native'), 'Platform', {
+      configurable: true,
+      value: { OS: 'android' },
+    });
   });
 
   it('builds identity-provider discovery endpoints', () => {
